@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pyramid Poker Online</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Animated background -->
+    <div class="bg-particles" id="bgParticles"></div>
+
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+        <span id="toggleIcon">◀</span>
+        <span id="toggleText">Hide</span>
+    </button>
+
+    <div class="container">
+        <div class="header">
+            <h1>🔺 Pyramid Poker Online</h1>
+            <div class="version-tag">Enhanced Edition - v2.0</div>
+        </div>
+
+        <div class="game-controls">
+            <button id="newGame" class="btn btn-primary">New Game</button>
+            <button id="addPlayer" class="btn btn-secondary">+Player</button>
+            <button id="autoArrange" class="btn btn-secondary">Auto</button>
+            <button id="sortByRank" class="btn btn-secondary">Rank</button>
+            <button id="sortBySuit" class="btn btn-secondary">Suit</button>
+            <button id="submitHand" class="btn btn-primary" disabled>Submit</button>
+        </div>
+
+        <div class="status" id="status">
+            Click "New Game" to start playing!
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <div class="main-game">
+                <div class="hand-section">
+                    <div class="hand-label">
+                        <span class="hand-icon">🎴</span>
+                        Your Cards - Staging Area
+                    </div>
+                    <div class="hand-area staging-area" id="playerHand" data-hand="player"></div>
+                </div>
+
+                <div class="hand-section">
+                    <div class="hand-label">
+                        <span class="hand-icon">🏆</span>
+                        Back Hand (5 cards) - Strongest
+                        <span class="hand-strength" id="backStrength"></span>
+                    </div>
+                    <div class="hand-area" id="backHand" data-hand="back"></div>
+                </div>
+
+                <div class="hand-section">
+                    <div class="hand-label">
+                        <span class="hand-icon">🥈</span>
+                        Middle Hand (5 cards) - Medium
+                        <span class="hand-strength" id="middleStrength"></span>
+                    </div>
+                    <div class="hand-area" id="middleHand" data-hand="middle"></div>
+                </div>
+
+                <div class="hand-section">
+                    <div class="hand-label">
+                        <span class="hand-icon">🥉</span>
+                        Front Hand (3 cards) - Weakest
+                        <span class="hand-strength" id="frontStrength"></span>
+                    </div>
+                    <div class="hand-area" id="frontHand" data-hand="front"></div>
+                </div>
+            </div>
+
+            <div class="sidebar" id="sidebar">
+                <h3>Players</h3>
+                <div class="player-list" id="playerList"></div>
+
+                <div class="scoring" id="scoring" style="display: none;">
+                    <h3>Current Scores</h3>
+                    <div id="scoreList"></div>
+                </div>
+
+                <div class="rules">
+                    <h3>Quick Rules</h3>
+                    <p><strong>Goal:</strong> Arrange 13 cards into 3 hands where Back ≥ Middle ≥ Front in strength.</p>
+                    <p><strong>Hands:</strong> Back (5), Middle (5), Front (3)</p>
+                    <p><strong>Wild Card:</strong> 🃏 WILD can be any card you need!</p>
+                    <p><strong>Scoring:</strong> Compare each hand with opponents. Win points for stronger hands.</p>
+                    <p><strong>Bonus Points:</strong> Front trips (+2). Middle full house (+1), 4K (+7), SF (+9). Back 4K (+3), SF (+4).</p>
+                    <p><strong>Fouling:</strong> If hands are out of order, you lose automatically!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scoring Popup -->
+    <div class="scoring-popup" id="scoringPopup">
+        <div class="scoring-content">
+            <button class="close-popup" onclick="game.closeScoringPopup()">×</button>
+            <h2 style="text-align: center; margin-bottom: 30px; color: #ffd700;">🏆 Round Results</h2>
+
+            <div class="player-hands-section">
+                <h3 style="color: #ffd700; margin-bottom: 20px;">All Players' Hands</h3>
+                <div id="allPlayerHands"></div>
+            </div>
+
+            <div class="round-robin-section">
+                <h3 style="color: #ffd700; margin-bottom: 20px;">Round-Robin Scoring</h3>
+                <div id="roundRobinResults"></div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-primary" onclick="game.closeScoringPopup()">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="js/utils.js"></script>
+    <script src="js/card-evaluation.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
