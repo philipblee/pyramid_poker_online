@@ -707,20 +707,27 @@ if (middleEval.hand_rank[0] === 10) { // Five of a Kind
         updateDisplay(this);
     }
 
+   // Replace the compareHands() method with zero-sum scoring:
+
     compareHands(hand1, hand2) {
         let player1Score = 0;
         let player2Score = 0;
         const details = [];
 
+        // BACK HAND COMPARISON
         const back1 = evaluateHand(hand1.back);
         const back2 = evaluateHand(hand2.back);
         const backComparison = compareTuples(back1.hand_rank, back2.hand_rank);
         let backResult = 'tie';
         if (backComparison > 0) {
-            player1Score += 1;
+            const points = this.getHandPoints(back1, hand1.back.length, 'back');
+            player1Score += points;  // Winner gets points
+            player2Score -= points;  // Loser loses same points
             backResult = 'player1';
         } else if (backComparison < 0) {
-            player2Score += 1;
+            const points = this.getHandPoints(back2, hand2.back.length, 'back');
+            player2Score += points;  // Winner gets points
+            player1Score -= points;  // Loser loses same points
             backResult = 'player2';
         }
         details.push({
@@ -730,15 +737,20 @@ if (middleEval.hand_rank[0] === 10) { // Five of a Kind
             winner: backResult
         });
 
+        // MIDDLE HAND COMPARISON
         const middle1 = evaluateHand(hand1.middle);
         const middle2 = evaluateHand(hand2.middle);
         const middleComparison = compareTuples(middle1.hand_rank, middle2.hand_rank);
         let middleResult = 'tie';
         if (middleComparison > 0) {
-            player1Score += 1;
+            const points = this.getHandPoints(middle1, hand1.middle.length, 'middle');
+            player1Score += points;  // Winner gets points
+            player2Score -= points;  // Loser loses same points
             middleResult = 'player1';
         } else if (middleComparison < 0) {
-            player2Score += 1;
+            const points = this.getHandPoints(middle2, hand2.middle.length, 'middle');
+            player2Score += points;  // Winner gets points
+            player1Score -= points;  // Loser loses same points
             middleResult = 'player2';
         }
         details.push({
@@ -748,15 +760,20 @@ if (middleEval.hand_rank[0] === 10) { // Five of a Kind
             winner: middleResult
         });
 
+        // FRONT HAND COMPARISON
         const front1 = evaluateThreeCardHand(hand1.front);
         const front2 = evaluateThreeCardHand(hand2.front);
         const frontComparison = compareTuples(front1.hand_rank, front2.hand_rank);
         let frontResult = 'tie';
         if (frontComparison > 0) {
-            player1Score += 1;
+            const points = this.getHandPoints(front1, hand1.front.length, 'front');
+            player1Score += points;  // Winner gets points
+            player2Score -= points;  // Loser loses same points
             frontResult = 'player1';
         } else if (frontComparison < 0) {
-            player2Score += 1;
+            const points = this.getHandPoints(front2, hand2.front.length, 'front');
+            player2Score += points;  // Winner gets points
+            player1Score -= points;  // Loser loses same points
             frontResult = 'player2';
         }
         details.push({
@@ -766,19 +783,68 @@ if (middleEval.hand_rank[0] === 10) { // Five of a Kind
             winner: frontResult
         });
 
-        let sweepBonus = '';
-        if (player1Score === 3) {
-            player1Score += 3;
-            sweepBonus = 'player1';
-        }
-        if (player2Score === 3) {
-            player2Score += 3;
-            sweepBonus = 'player2';
-        }
-
-        return { player1Score, player2Score, details, sweepBonus };
+        return { player1Score, player2Score, details };
     }
 
+    // Add this helper method to get the correct points for winning hands:
+    getHandPoints(handEval, cardCount, position) {
+        const handRank = handEval.hand_rank[0];
+
+        if (position === 'back') {
+            // Back hand points
+            if (cardCount === 5) {
+                if (handRank === 8) return 4;  // Four of a Kind = 4 points
+                if (handRank === 9) return 5;  // Straight Flush = 5 points
+                if (handRank === 10) return 6; // Five of a Kind = 6 points
+                return 1; // Regular hand = 1 point
+            } else if (cardCount === 6) {
+                if (handRank === 11) return 8;  // 6-card Straight Flush = 8 points
+                if (handRank === 12) return 10; // 6 of a Kind = 10 points
+                return 1;
+            } else if (cardCount === 7) {
+                if (handRank === 13) return 11; // 7-card Straight Flush = 11 points
+                if (handRank === 14) return 14; // 7 of a Kind = 14 points
+                return 1;
+            } else if (cardCount === 8) {
+                if (handRank === 15) return 14; // 8-card Straight Flush = 14 points
+                if (handRank === 16) return 18; // 8 of a Kind = 18 points
+                return 1;
+            }
+        } else if (position === 'middle') {
+            // Middle hand points (doubled from back)
+            if (cardCount === 5) {
+                if (handRank === 7) return 2;  // Full House = 2 points
+                if (handRank === 8) return 8;  // Four of a Kind = 8 points
+                if (handRank === 9) return 10; // Straight Flush = 10 points
+                if (handRank === 10) return 12; // Five of a Kind = 12 points
+                return 1; // Regular hand = 1 point
+            } else if (cardCount === 6) {
+                if (handRank === 11) return 16; // 6-card Straight Flush = 16 points
+                if (handRank === 12) return 20; // 6 of a Kind = 20 points
+                return 1;
+            } else if (cardCount === 7) {
+                if (handRank === 13) return 22; // 7-card Straight Flush = 22 points
+                if (handRank === 14) return 28; // 7 of a Kind = 28 points
+                return 1;
+            }
+        } else if (position === 'front') {
+            // Front hand points
+            if (cardCount === 3) {
+                if (handRank === 4) return 2; // Three of a kind = 2 points
+                return 1; // Regular hand = 1 point
+            } else if (cardCount === 5) {
+                if (handRank === 5) return 4;  // Straight = 4 points
+                if (handRank === 6) return 4;  // Flush = 4 points
+                if (handRank === 7) return 5;  // Full House = 5 points
+                if (handRank === 8) return 12; // Four of a Kind = 12 points
+                if (handRank === 9) return 15; // Straight Flush = 15 points
+                if (handRank === 10) return 18; // Five of a Kind = 18 points
+                return 1; // Regular hand = 1 point
+            }
+        }
+
+        return 1; // Default: regular hand = 1 point
+    }
     closeScoringPopup() {
         closeScoringPopup();
     }
@@ -789,3 +855,5 @@ let game;
 document.addEventListener('DOMContentLoaded', () => {
     game = new ChinesePokerGame();
 });
+
+
