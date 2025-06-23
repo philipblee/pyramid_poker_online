@@ -627,49 +627,50 @@ class ChinesePokerGame {
 
             const frontEval = evaluateThreeCardHand(hand.front);
 
-            // Front hand bonuses - different for 3-card vs 5-card
-            if (hand.front.length === 3) {
-                // 3-card front hand bonuses
-                if (frontEval.hand_rank[0] === 4) { // Three of a kind
-                    playerBonus += 2;
-                }
-            } else if (hand.front.length === 5) {
-                // 5-card front hand bonuses
-                if (frontEval.hand_rank[0] === 10) { // Five of a Kind
-                    playerBonus += 17;
-                } else if (frontEval.hand_rank[0] === 9) { // Straight Flush
-                    playerBonus += 14;
-                } else if (frontEval.hand_rank[0] === 8) { // Four of a Kind
-                    playerBonus += 11;
-                } else if (frontEval.hand_rank[0] === 7) { // Full House
-                    playerBonus += 4;
-                } else if (frontEval.hand_rank[0] === 6) { // Flush
-                    playerBonus += 3;
-                } else if (frontEval.hand_rank[0] === 5) { // Straight
-                    playerBonus += 3;
-                }
-            }
+// FRONT HAND - Replace the entire front hand section:
+// Front hand bonuses - different for 3-card vs 5-card
+if (hand.front.length === 3) {
+    // 3-card front hand bonuses
+    if (frontEval.hand_rank[0] === 4) { // Three of a kind
+        playerBonus += 2;  // Keep at 2 (this wasn't in your table, keeping current)
+    }
+} else if (hand.front.length === 5) {
+    // 5-card front hand bonuses
+    if (frontEval.hand_rank[0] === 10) { // Five of a Kind
+        playerBonus += 18;  // Changed from 17 to 18
+    } else if (frontEval.hand_rank[0] === 9) { // Straight Flush
+        playerBonus += 15;  // Changed from 14 to 15
+    } else if (frontEval.hand_rank[0] === 8) { // Four of a Kind
+        playerBonus += 12;  // Changed from 11 to 12
+    } else if (frontEval.hand_rank[0] === 7) { // Full House
+        playerBonus += 5;   // Changed from 4 to 5
+    } else if (frontEval.hand_rank[0] === 6) { // Flush
+        playerBonus += 4;   // Changed from 3 to 4
+    } else if (frontEval.hand_rank[0] === 5) { // Straight
+        playerBonus += 4;   // Changed from 3 to 4
+    }
+}
 
-            const middleEval = evaluateHand(hand.middle);
-            if (middleEval.hand_rank[0] === 10) { // Five of a Kind
-                playerBonus += 5;
-            } else if (middleEval.hand_rank[0] === 7) { // Full House
-                playerBonus += 1;
-            } else if (middleEval.hand_rank[0] === 8) { // Four of a Kind
-                playerBonus += 7;
-            } else if (middleEval.hand_rank[0] === 9) { // Straight Flush
-                playerBonus += 9;
-            }
+// MIDDLE HAND - Replace the middle hand section:
+const middleEval = evaluateHand(hand.middle);
+if (middleEval.hand_rank[0] === 10) { // Five of a Kind
+    playerBonus += 12;  // Changed from 5 to 12
+} else if (middleEval.hand_rank[0] === 9) { // Straight Flush
+    playerBonus += 10;  // Changed from 9 to 10
+} else if (middleEval.hand_rank[0] === 8) { // Four of a Kind
+    playerBonus += 8;   // Changed from 7 to 8
+} else if (middleEval.hand_rank[0] === 7) { // Full House
+    playerBonus += 2;   // Changed from 1 to 2
+}
 
             const backEval = evaluateHand(hand.back);
             if (backEval.hand_rank[0] === 10) { // Five of a Kind
-                playerBonus += 5;
+                playerBonus += 6;  // Changed from 5 to 6
             } else if (backEval.hand_rank[0] === 8) { // Four of a Kind
-                playerBonus += 3;
+                playerBonus += 4;  // Changed from 3 to 4
             } else if (backEval.hand_rank[0] === 9) { // Straight Flush
-                playerBonus += 4;
-            }
-
+                playerBonus += 5;  // Changed from 4 to 5
+}
             bonusPoints.set(playerName, playerBonus);
             roundScores.set(playerName, playerBonus);
         });

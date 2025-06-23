@@ -215,8 +215,9 @@ function toggleSidebar(game) {
     }
 }
 
-// Show scoring popup with detailed results
-function showScoringPopup(game, detailedResults, roundScores, bonusPoints) {
+// Replace the showScoringPopup function in ui.js with this cleaned up version:
+
+function showScoringPopup(game, detailedResults, roundScores, specialPoints) {
     const popup = document.getElementById('scoringPopup');
     const allPlayerHands = document.getElementById('allPlayerHands');
     const roundRobinResults = document.getElementById('roundRobinResults');
@@ -224,28 +225,26 @@ function showScoringPopup(game, detailedResults, roundScores, bonusPoints) {
     allPlayerHands.innerHTML = '';
     game.players.forEach(player => {
         const hand = game.submittedHands.get(player.name);
-        const bonus = bonusPoints.get(player.name);
-        const headToHead = roundScores.get(player.name) - bonus;
 
         if (hand) {
             const playerDiv = document.createElement('div');
             playerDiv.className = 'player-hand-display';
             playerDiv.innerHTML = `
-                <div class="player-hand-title">${player.name} - Round Score: +${roundScores.get(player.name)} points (Head-to-head: +${headToHead}, Bonus: +${bonus})</div>
+            <div class="player-hand-title">${player.name}</div>
                 <div class="hand-row">
                     <div class="hand-label-popup">Back:</div>
                     <div class="hand-cards">${renderMiniCards(hand.back)}</div>
-                    <div class="hand-strength-popup">${getHandName(evaluateHand(hand.back))} (${evaluateHand(hand.back).hand_rank.join(', ')})${getBackBonus(evaluateHand(hand.back))}</div>
+                    <div class="hand-strength-popup">${getHandName(evaluateHand(hand.back))} (${evaluateHand(hand.back).hand_rank.join(', ')})</div>
                 </div>
                 <div class="hand-row">
                     <div class="hand-label-popup">Middle:</div>
                     <div class="hand-cards">${renderMiniCards(hand.middle)}</div>
-                    <div class="hand-strength-popup">${getHandName(evaluateHand(hand.middle))} (${evaluateHand(hand.middle).hand_rank.join(', ')})${getMiddleBonus(evaluateHand(hand.middle))}</div>
+                    <div class="hand-strength-popup">${getHandName(evaluateHand(hand.middle))} (${evaluateHand(hand.middle).hand_rank.join(', ')})</div>
                 </div>
                 <div class="hand-row">
                     <div class="hand-label-popup">Front:</div>
                     <div class="hand-cards">${renderMiniCards(hand.front)}</div>
-                    <div class="hand-strength-popup">${getThreeCardHandName(evaluateThreeCardHand(hand.front))} (${evaluateThreeCardHand(hand.front).hand_rank.join(', ')})${getFrontBonus(evaluateThreeCardHand(hand.front))}</div>
+                    <div class="hand-strength-popup">${getThreeCardHandName(evaluateThreeCardHand(hand.front))} (${evaluateThreeCardHand(hand.front).hand_rank.join(', ')})</div>
                 </div>
             `;
             allPlayerHands.appendChild(playerDiv);
@@ -288,7 +287,6 @@ function showScoringPopup(game, detailedResults, roundScores, bonusPoints) {
                     ${result.player2}: ${result.player2Score} points
                 </div>
             </div>
-            ${result.sweepBonus ? `<div style="text-align: center; color: #4ecdc4; font-weight: bold; margin-top: 10px;">🎉 ${result.sweepBonus === 'player1' ? result.player1 : result.player2} wins all hands +3 bonus!</div>` : ''}
         `;
 
         matchupDiv.innerHTML = matchupHTML;
