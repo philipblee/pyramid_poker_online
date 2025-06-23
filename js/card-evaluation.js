@@ -2,10 +2,37 @@
 
 // Main 5-card hand evaluation function
 function evaluateHand(cards) {
+
     // Handle large hands (6, 7, 8 cards) - basic evaluation for now
     if (cards.length > 5) {
-        return { rank: 0, hand_rank: [0, cards.length], name: `${cards.length}-Card Hand` };
+    // Quick check: are all cards the same rank?
+    const values = cards.map(c => c.value);
+    const uniqueValues = new Set(values);
+
+    if (uniqueValues.size === 1) {
+        // All same rank
+        const rank = values[0];
+        return { rank: 9, hand_rank: [10, rank], name: `${cards.length} of a Kind` };
     }
+
+    // Quick check: are all cards same suit and sequential?
+    const suits = cards.map(c => c.suit);
+    const uniqueSuits = new Set(suits);
+
+    if (uniqueSuits.size === 1) {
+        // All same suit - check if sequential
+        const sortedValues = [...uniqueValues].sort((a, b) => a - b);
+        const isSequential = sortedValues.every((val, i) => i === 0 || val === sortedValues[i-1] + 1);
+
+        if (isSequential) {
+            const highCard = Math.max(...sortedValues);
+            return { rank: 8, hand_rank: [9, highCard], name: `${cards.length}-Card Straight Flush` };
+        }
+    }
+
+    // If neither, return generic (this shouldn't happen if validation works)
+    return { rank: 0, hand_rank: [0, cards.length], name: `${cards.length}-Card Hand` };
+}
 
     if (cards.length !== 5) return { rank: 0, hand_rank: [0, 0], name: 'Invalid' };
 
@@ -48,7 +75,9 @@ function evaluateHand(cards) {
     }
 
     if (isStraightHand && isFlush) {
-        return { rank: 8, hand_rank: [9, values[0]], name: 'Straight Flush' };
+        const straightInfo = getStraightInfo(values);
+        const name = straightInfo.high === 14 && straightInfo.low === 10 ? 'Royal Flush' : 'Straight Flush';
+        return { rank: 8, hand_rank: [9, straightInfo.high, straightInfo.low], name: name };
     }
 
     if (counts[0] === 4) {
@@ -71,7 +100,8 @@ function evaluateHand(cards) {
     }
 
     if (isStraightHand) {
-        return { rank: 4, hand_rank: [5, values[0]], name: 'Straight' };
+        const straightInfo = getStraightInfo(values);
+        return { rank: 4, hand_rank: [5, straightInfo.high, straightInfo.low], name: 'Straight' };
     }
 
     if (counts[0] === 3) {
@@ -254,9 +284,9 @@ function tryForStraightFlushWithWilds(normalCards, wildCount) {
             for (const straight of possibleStraights) {
                 const needed = straight.filter(v => !uniqueValues.includes(v)).length;
                 if (needed <= wildCount) {
-                    const highCard = straight[0] === 14 && straight[1] === 5 ? 5 : straight[0]; // Handle wheel
+                    const straightInfo = getStraightInfoFromArray(straight);
                     const name = straight[0] === 14 && straight[1] === 13 ? 'Royal Flush (Wild)' : 'Straight Flush (Wild)';
-                    return { rank: 8, hand_rank: [9, highCard], name: name };
+                    return { rank: 8, hand_rank: [9, straightInfo.high, straightInfo.low], name: name };
                 }
             }
         }
@@ -313,8 +343,8 @@ function tryForStraightWithWilds(normalCards, wildCount) {
     for (const straight of possibleStraights) {
         const needed = straight.filter(v => !values.includes(v)).length;
         if (needed <= wildCount) {
-            const highCard = straight[0] === 14 && straight[1] === 5 ? 5 : straight[0]; // Handle wheel straight
-            return { rank: 4, hand_rank: [5, highCard], name: 'Straight (Wild)' };
+            const straightInfo = getStraightInfoFromArray(straight);
+            return { rank: 4, hand_rank: [5, straightInfo.high, straightInfo.low], name: 'Straight (Wild)' };
         }
     }
     return null;
@@ -388,4 +418,27 @@ function evaluateThreeCardHandWithWilds(normalCards, wildCount) {
     const allValues = [...values];
     while (allValues.length < 3) allValues.push(13 - allValues.length);
     return { rank: 0, hand_rank: [1, ...allValues.slice(0, 3)], name: 'High Card' };
+}
+
+// Get straight info from sorted values (high to low)
+function getStraightInfo(values) {
+    // Check for wheel straight (A-5-4-3-2)
+    if (values.includes(14) && values.includes(5) && values.includes(4) && values.includes(3) && values.includes(2)) {
+        return { high: 14, low: 5 }; // Wheel: ace=14, five=5 (the two key cards)
+    }
+
+    // Regular straight
+    const sorted = [...values].sort((a, b) => b - a);
+    return { high: sorted[0], low: sorted[4] };
+}
+
+// Get straight info from straight array
+function getStraightInfoFromArray(straightArray) {
+    // Handle wheel straight
+    if (straightArray[0] === 14 && straightArray[1] === 5) {
+        return { high: 14, low: 5 };
+    }
+
+    // Regular straight
+    return { high: straightArray[0], low: straightArray[4] };
 }

@@ -11,9 +11,28 @@ class ChinesePokerGame {
         this.submittedHands = new Map();
         this.sidebarVisible = true;
 
+        // Auto-add default players for easier testing
+        this.addDefaultPlayers();
+
         this.initializeEventListeners();
         updateDisplay(this);
         createParticles();
+    }
+
+    // Add this new method to the ChinesePokerGame class:
+    addDefaultPlayers() {
+        const defaultPlayers = ['Alice', 'Bob'];
+
+        defaultPlayers.forEach(playerName => {
+            this.players.push({
+                name: playerName,
+                id: Date.now() + Math.random(),
+                ready: false
+            });
+            this.scores.set(playerName, 0);
+        });
+
+        console.log('Auto-added default players:', defaultPlayers);
     }
 
     initializeEventListeners() {
@@ -44,6 +63,26 @@ class ChinesePokerGame {
     }
 
     startNewGame() {
+        // Auto-add default players if none exist (for easier testing)
+        if (this.players.length === 0) {
+            console.log('No players found - adding default players for testing');
+
+            // Add two default players
+            const defaultPlayers = ['Alice', 'Bob'];
+
+            defaultPlayers.forEach(playerName => {
+                this.players.push({
+                    name: playerName,
+                    id: Date.now() + Math.random(),
+                    ready: false
+                });
+                this.scores.set(playerName, 0);
+            });
+
+            updateDisplay(this);
+            console.log('Added default players:', defaultPlayers);
+        }
+
         if (this.players.length < 2) {
             alert('Need at least 2 players to start!');
             return;
@@ -126,13 +165,6 @@ class ChinesePokerGame {
             return;
         }
 
-        // Allow going from 3 to 4 cards, but warn user they need 5
-        if (targetKey === 'front' && targetArray.length === 3) {
-            setTimeout(() => {
-                alert('Front hand now has 4 cards. You must add 1 more card to make it a valid 5-card hand!');
-            }, 100);
-        }
-
         sourceArray.splice(cardIndex, 1);
         targetArray.push(card);
 
@@ -169,6 +201,10 @@ class ChinesePokerGame {
         const isValidBackSize = [5, 6, 7, 8].includes(backCount) || backCount === 0; // 0 for incomplete
         const isValidMiddleSize = [5, 6, 7].includes(middleCount) || middleCount === 0; // 0 for incomplete
 
+        // NEW: Validate 6+ card hands follow special rules
+        const isValidBackHand = backCount < 6 || this.validateLargeHand(playerData.back);
+        const isValidMiddleHand = middleCount < 6 || this.validateLargeHand(playerData.middle);
+
         // Calculate expected total based on hand sizes
         let expectedTotal = 0;
         if (frontCount === 3 || frontCount === 5) expectedTotal += frontCount;
@@ -176,27 +212,36 @@ class ChinesePokerGame {
         if (isValidMiddleSize && middleCount > 0) expectedTotal += middleCount;
 
         const isComplete = (backCount > 0 && middleCount > 0 && frontCount > 0) &&
-                          isValidFrontSize && isValidBackSize && isValidMiddleSize;
+                          isValidFrontSize && isValidBackSize && isValidMiddleSize &&
+                          isValidBackHand && isValidMiddleHand;
 
-        if (!isValidCounts || !isValidFrontSize || !isValidBackSize || !isValidMiddleSize) {
+        if (!isValidCounts || !isValidFrontSize || !isValidBackSize || !isValidMiddleSize || !isValidBackHand || !isValidMiddleHand) {
             // Mark oversized hands as invalid
             if (backCount > 8) backHand.classList.add('invalid');
             if (middleCount > 7) middleHand.classList.add('invalid');
             if (frontCount > 5 || frontCount === 4) frontHand.classList.add('invalid');
+            if (!isValidBackHand) backHand.classList.add('invalid');
+            if (!isValidMiddleHand) middleHand.classList.add('invalid');
 
             submitBtn.disabled = true;
 
             let backError = '';
             if (backCount > 8) backError = ' (TOO MANY!)';
             else if (backCount > 0 && !isValidBackSize) backError = ' (INVALID SIZE!)';
+            else if (!isValidBackHand) backError = ' (MUST BE STRAIGHT FLUSH OR SAME RANK!)';
 
             let middleError = '';
             if (middleCount > 7) middleError = ' (TOO MANY!)';
             else if (middleCount > 0 && !isValidMiddleSize) middleError = ' (INVALID SIZE!)';
+            else if (!isValidMiddleHand) middleError = ' (MUST BE STRAIGHT FLUSH OR SAME RANK!)';
 
             let frontError = '';
             if (frontCount > 5) frontError = ' (TOO MANY!)';
             else if (frontCount === 4) frontError = ' (4 CARDS NOT ALLOWED!)';
+
+            document.getElementById('backStrength').textContent = `${backCount}/5-8 cards${backError}`;
+            document.getElementById('middleStrength').textContent = `${middleCount}/5-7 cards${middleError}`;
+            document.getElementById('frontStrength').textContent = `${frontCount}/3 or 5 cards${frontError}`;
 
             document.getElementById('backStrength').textContent = `${backCount}/5-8 cards${backError}`;
             document.getElementById('middleStrength').textContent = `${middleCount}/5-7 cards${middleError}`;
@@ -285,6 +330,117 @@ class ChinesePokerGame {
 
             statusDiv.innerHTML = `${currentPlayer.name}'s turn - <span style="color: #ffd700; font-weight: bold;">⚠ INCOMPLETE</span> - Need ${expectedCards} cards in play (${totalPlaced}/${expectedCards} placed, ${cardsRemaining} in staging) - Front: ${frontCount}/${frontExpected} (${readyCount}/${this.players.length} players ready)`;
         }
+    }
+
+// Validate that 6+ card hands follow the special rules
+    validateLargeHand(cards) {
+        if (cards.length < 6) return true; // Only apply to 6+ card hands
+
+        // Separate wild cards from normal cards
+        const wildCards = cards.filter(c => c.isWild);
+        const normalCards = cards.filter(c => !c.isWild);
+
+        // Check for same rank (all cards same value)
+        if (this.isAllSameRank(normalCards, wildCards.length)) {
+            return true;
+        }
+
+        // Check for straight flush (sequential cards, same suit)
+        if (this.isStraightFlush(normalCards, wildCards.length)) {
+            return true;
+        }
+
+        return false; // Neither same rank nor straight flush
+    }
+
+    // Check if cards (+ wilds) can form all same rank
+    isAllSameRank(normalCards, wildCount) {
+        if (normalCards.length === 0) return true; // All wilds - valid
+
+        // Count each rank
+        const rankCounts = {};
+        normalCards.forEach(card => {
+            rankCounts[card.value] = (rankCounts[card.value] || 0) + 1;
+        });
+
+        // Find the most common rank
+        const ranks = Object.keys(rankCounts);
+        if (ranks.length === 1) {
+            // All normal cards are same rank - valid
+            return true;
+        }
+
+        if (ranks.length === 2) {
+            // Two different ranks - check if wilds can make them all the same
+            const counts = Object.values(rankCounts);
+            const maxCount = Math.max(...counts);
+            const minCount = Math.min(...counts);
+
+            // Can we use wilds to make all cards the same rank as the majority?
+            if (wildCount >= minCount) {
+                return true;
+            }
+        }
+
+        return false; // Too many different ranks
+    }
+
+    // Check if cards (+ wilds) can form a straight flush
+    isStraightFlush(normalCards, wildCount) {
+        if (normalCards.length === 0) return wildCount >= 6; // All wilds can form straight flush
+
+        // Group by suit
+        const suitGroups = {};
+        normalCards.forEach(card => {
+            if (!suitGroups[card.suit]) suitGroups[card.suit] = [];
+            suitGroups[card.suit].push(card.value);
+        });
+
+        // Check each suit to see if we can make a straight flush
+        for (const [suit, values] of Object.entries(suitGroups)) {
+            const uniqueValues = [...new Set(values)].sort((a, b) => a - b);
+
+            if (this.canMakeStraightFlush(uniqueValues, wildCount, normalCards.length + wildCount)) {
+                return true;
+            }
+        }
+
+        // Check if all wilds can form a straight flush in any suit
+        if (normalCards.length === 0 && wildCount >= 6) {
+            return true;
+        }
+
+        return false;
+    }
+
+    // Helper: Check if values + wilds can form a straight flush of target length
+    canMakeStraightFlush(values, wildCount, targetLength) {
+        // Try all possible straights that could include these values
+        const minValue = Math.min(...values);
+        const maxValue = Math.max(...values);
+
+        // Try straights starting from (minValue - wildCount) to maxValue
+        for (let start = Math.max(2, minValue - wildCount); start <= maxValue; start++) {
+            const straightValues = [];
+            for (let i = 0; i < targetLength; i++) {
+                straightValues.push(start + i);
+            }
+
+            // Check if this straight can be made with our cards + wilds
+            const needed = straightValues.filter(v => !values.includes(v)).length;
+            if (needed <= wildCount) {
+                return true;
+            }
+        }
+
+        // Check for wheel straights (A-2-3-4-5-6...)
+        const wheelStraight = [14, 2, 3, 4, 5, 6].slice(0, targetLength);
+        const wheelNeeded = wheelStraight.filter(v => !values.includes(v)).length;
+        if (wheelNeeded <= wildCount) {
+            return true;
+        }
+
+        return false;
     }
 
     resetCards() {
