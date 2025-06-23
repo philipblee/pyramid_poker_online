@@ -21,7 +21,7 @@ class ChinesePokerGame {
 
     // Add this new method to the ChinesePokerGame class:
     addDefaultPlayers() {
-        const defaultPlayers = ['Alice', 'Bob'];
+        const defaultPlayers = ['Player 1', 'Player 2'];
 
         defaultPlayers.forEach(playerName => {
             this.players.push({
@@ -68,7 +68,7 @@ class ChinesePokerGame {
             console.log('No players found - adding default players for testing');
 
             // Add two default players
-            const defaultPlayers = ['Alice', 'Bob'];
+            const defaultPlayers = ['Player 1', 'Player 2'];
 
             defaultPlayers.forEach(playerName => {
                 this.players.push({
