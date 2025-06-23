@@ -12,7 +12,8 @@ function evaluateHand(cards) {
     if (uniqueValues.size === 1) {
         // All same rank
         const rank = values[0];
-        return { rank: 9, hand_rank: [10, rank], name: `${cards.length} of a Kind` };
+    const sameRankRating = 10 + (cards.length - 5) * 2; // 6→12, 7→14, 8→16
+    return { rank: sameRankRating - 1, hand_rank: [sameRankRating, rank], name: `${cards.length} of a Kind` };
     }
 
     // Quick check: are all cards same suit and sequential?
@@ -26,7 +27,8 @@ function evaluateHand(cards) {
 
         if (isSequential) {
             const highCard = Math.max(...sortedValues);
-            return { rank: 8, hand_rank: [9, highCard], name: `${cards.length}-Card Straight Flush` };
+            const straightFlushRating = 9 + (cards.length - 5) * 2; // 6→11, 7→13, 8→15
+            return { rank: straightFlushRating - 1, hand_rank: [straightFlushRating, highCard], name: `${cards.length}-Card Straight Flush` };
         }
     }
 

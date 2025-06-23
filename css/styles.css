@@ -620,7 +620,7 @@ body {
 /* Card width is 68px + 8px gap = 76px per card space */
 
 #backHand {
-    margin-left: 152px; /* 2 cards worth: 76px * 2 = 152px */
+    margin-left: 190px; /* 2 cards worth: 76px * 2 = 152px */
     justify-content: flex-start !important;
     max-width: 684px; /* 9 cards worth of space: 76px * 9 = 684px */
 }
