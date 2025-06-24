@@ -824,13 +824,13 @@ if (middleEval.hand_rank[0] === 10) { // Five of a Kind
                 return 1;
             } else if (cardCount === 7) {
                 if (handRank === 13) return 22; // 7-card Straight Flush = 22 points
-                if (handRank === 14) return 28; // 7 of a Kind = 28 points
+                if (handRank === 14) return 28; // 7 of a Kind = 28 pointsgit ad
                 return 1;
             }
         } else if (position === 'front') {
             // Front hand points
             if (cardCount === 3) {
-                if (handRank === 4) return 2; // Three of a kind = 2 points
+                if (handRank === 4) return 3; // Three of a kind = 2 points
                 return 1; // Regular hand = 1 point
             } else if (cardCount === 5) {
                 if (handRank === 5) return 4;  // Straight = 4 points
