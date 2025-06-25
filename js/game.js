@@ -468,7 +468,14 @@ class ChinesePokerGame {
         const allCards = [...playerData.cards, ...playerData.back, ...playerData.middle, ...playerData.front];
 
         if (allCards.length !== 17) {
-            alert(`Card count error: Found ${allCards.length} cards instead of 17!`);
+            console.error('Card count debug:', {
+                totalCards: allCards.length,
+                inStaging: playerData.cards.length,
+                inBack: playerData.back.length,
+                inMiddle: playerData.middle.length,
+                inFront: playerData.front.length
+            });
+            alert(`Card count error: Found ${allCards.length} cards instead of 17! Check console for details.`);
             return;
         }
 
@@ -627,41 +634,41 @@ class ChinesePokerGame {
 
             const frontEval = evaluateThreeCardHand(hand.front);
 
-// FRONT HAND - Replace the entire front hand section:
-// Front hand bonuses - different for 3-card vs 5-card
-if (hand.front.length === 3) {
-    // 3-card front hand bonuses
-    if (frontEval.hand_rank[0] === 4) { // Three of a kind
-        playerBonus += 2;  // Keep at 2 (this wasn't in your table, keeping current)
-    }
-} else if (hand.front.length === 5) {
-    // 5-card front hand bonuses
-    if (frontEval.hand_rank[0] === 10) { // Five of a Kind
-        playerBonus += 18;  // Changed from 17 to 18
-    } else if (frontEval.hand_rank[0] === 9) { // Straight Flush
-        playerBonus += 15;  // Changed from 14 to 15
-    } else if (frontEval.hand_rank[0] === 8) { // Four of a Kind
-        playerBonus += 12;  // Changed from 11 to 12
-    } else if (frontEval.hand_rank[0] === 7) { // Full House
-        playerBonus += 5;   // Changed from 4 to 5
-    } else if (frontEval.hand_rank[0] === 6) { // Flush
-        playerBonus += 4;   // Changed from 3 to 4
-    } else if (frontEval.hand_rank[0] === 5) { // Straight
-        playerBonus += 4;   // Changed from 3 to 4
-    }
-}
+        // FRONT HAND - Replace the entire front hand section:
+        // Front hand bonuses - different for 3-card vs 5-card
+        if (hand.front.length === 3) {
+            // 3-card front hand bonuses
+            if (frontEval.hand_rank[0] === 4) { // Three of a kind
+                playerBonus += 3;  // Keep at 2 (this wasn't in your table, keeping current)
+            }
+        } else if (hand.front.length === 5) {
+            // 5-card front hand bonuses
+            if (frontEval.hand_rank[0] === 10) { // Five of a Kind
+                playerBonus += 18;  // Changed from 17 to 18
+            } else if (frontEval.hand_rank[0] === 9) { // Straight Flush
+                playerBonus += 15;  // Changed from 14 to 15
+            } else if (frontEval.hand_rank[0] === 8) { // Four of a Kind
+                playerBonus += 12;  // Changed from 11 to 12
+            } else if (frontEval.hand_rank[0] === 7) { // Full House
+                playerBonus += 5;   // Changed from 4 to 5
+            } else if (frontEval.hand_rank[0] === 6) { // Flush
+                playerBonus += 4;   // Changed from 3 to 4
+            } else if (frontEval.hand_rank[0] === 5) { // Straight
+                playerBonus += 4;   // Changed from 3 to 4
+            }
+        }
 
-// MIDDLE HAND - Replace the middle hand section:
-const middleEval = evaluateHand(hand.middle);
-if (middleEval.hand_rank[0] === 10) { // Five of a Kind
-    playerBonus += 12;  // Changed from 5 to 12
-} else if (middleEval.hand_rank[0] === 9) { // Straight Flush
-    playerBonus += 10;  // Changed from 9 to 10
-} else if (middleEval.hand_rank[0] === 8) { // Four of a Kind
-    playerBonus += 8;   // Changed from 7 to 8
-} else if (middleEval.hand_rank[0] === 7) { // Full House
-    playerBonus += 2;   // Changed from 1 to 2
-}
+        // MIDDLE HAND - Replace the middle hand section:
+        const middleEval = evaluateHand(hand.middle);
+        if (middleEval.hand_rank[0] === 10) { // Five of a Kind
+            playerBonus += 12;  // Changed from 5 to 12
+        } else if (middleEval.hand_rank[0] === 9) { // Straight Flush
+            playerBonus += 10;  // Changed from 9 to 10
+        } else if (middleEval.hand_rank[0] === 8) { // Four of a Kind
+            playerBonus += 8;   // Changed from 7 to 8
+        } else if (middleEval.hand_rank[0] === 7) { // Full House
+            playerBonus += 2;   // Changed from 1 to 2
+        }
 
             const backEval = evaluateHand(hand.back);
             if (backEval.hand_rank[0] === 10) { // Five of a Kind
@@ -824,13 +831,13 @@ if (middleEval.hand_rank[0] === 10) { // Five of a Kind
                 return 1;
             } else if (cardCount === 7) {
                 if (handRank === 13) return 22; // 7-card Straight Flush = 22 points
-                if (handRank === 14) return 28; // 7 of a Kind = 28 pointsgit ad
+                if (handRank === 14) return 28; // 7 of a Kind = 28 points
                 return 1;
             }
         } else if (position === 'front') {
             // Front hand points
             if (cardCount === 3) {
-                if (handRank === 4) return 3; // Three of a kind = 2 points
+                if (handRank === 4) return 3; // Three of a kind = 3 points
                 return 1; // Regular hand = 1 point
             } else if (cardCount === 5) {
                 if (handRank === 5) return 4;  // Straight = 4 points
@@ -850,10 +857,55 @@ if (middleEval.hand_rank[0] === 10) { // Five of a Kind
     }
 }
 
+async function loadVersionInfo() {
+    try {
+        const response = await fetch('./version.json');
+        const versionInfo = await response.json();
+
+        // Update the existing version-tag element
+        const versionElement = document.getElementById('version-info');
+        if (versionElement) {
+            versionElement.textContent = `Enhanced Edition - v${versionInfo.version}`;
+            versionElement.title = `Build Details:
+Branch: ${versionInfo.branch}
+Commit: ${versionInfo.commit}
+Built: ${new Date(versionInfo.buildDate).toLocaleString()}
+Last Commit: ${new Date(versionInfo.lastCommit).toLocaleString()}
+
+Click to copy version info`;
+
+            // Add click handler to copy version info
+            versionElement.style.cursor = 'pointer';
+            versionElement.addEventListener('click', () => {
+                const versionText = `Pyramid Poker Online v${versionInfo.version}\nCommit: ${versionInfo.commit}\nBranch: ${versionInfo.branch}\nBuilt: ${versionInfo.buildDate}`;
+                navigator.clipboard.writeText(versionText).then(() => {
+                    const originalText = versionElement.textContent;
+                    versionElement.textContent = 'Copied to clipboard!';
+                    setTimeout(() => {
+                        versionElement.textContent = originalText;
+                    }, 2000);
+                });
+            });
+        }
+
+        // Log for debugging
+        console.log('🎮 Pyramid Poker Online Version Info:', versionInfo);
+
+    } catch (error) {
+        console.warn('Could not load version info:', error);
+        // Fallback to static version
+        const versionElement = document.getElementById('version-info');
+        if (versionElement) {
+            versionElement.textContent = 'Enhanced Edition - v2.0';
+        }
+    }
+}
+
+
 // Initialize the game when the page loads
 let game;
 document.addEventListener('DOMContentLoaded', () => {
     game = new ChinesePokerGame();
+    loadVersionInfo(); // Add this line
 });
-
 

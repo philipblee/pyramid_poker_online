@@ -1,0 +1,22 @@
+{
+  "name": "pyramid-poker-online",
+  "version": "1.0.0",
+  "description": "Chinese Poker variant game",
+  "main": "game.js",
+  "scripts": {
+    "prebuild": "node build-version.js",
+    "build": "echo 'Build complete with version info'",
+    "start": "npm run prebuild && python -m http.server 8000",
+    "dev": "npm run prebuild && echo 'Development server ready'",
+    "version:tag": "git tag v$npm_package_version",
+    "version:show": "git describe --tags --always"
+  },
+  "keywords": ["poker", "chinese-poker", "card-game"],
+  "author": "philipblee",
+  "license": "MIT",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/philipblee/pyramid_poker_online.git"
+  }
+}
