@@ -902,8 +902,7 @@ Click to copy version info`;
 }
 
 
-// Initialize the game when the page loads
-let game;
+// Update your existing DOMContentLoaded listener
 document.addEventListener('DOMContentLoaded', () => {
     game = new ChinesePokerGame();
     loadVersionInfo(); // Add this line
