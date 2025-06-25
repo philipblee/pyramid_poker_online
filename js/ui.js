@@ -267,11 +267,23 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints) {
             matchupHTML += `
                 <div class="comparison-row">
                     <div class="player-result ${p1Class}">
-                        ${detail.player1Hand.name} (${detail.player1Hand.hand_rank.join(', ')})
+
+                        ${detail.player1Hand.name} (${detail.player1Hand.hand_rank.join(', ')}) ${(() => {
+                               if (detail.winner === 'tie') return '(0)';
+                               const points = getPointsForHand(detail.winner === 'player1' ? detail.player1Hand : detail.player2Hand, detail.hand);
+                               return detail.winner === 'player1' ? `(+${points})` : `(-${points})`;
+                        })()}
+
                     </div>
                     <div style="color: #ffd700; font-weight: bold;">${detail.hand}</div>
                     <div class="player-result ${p2Class}">
-                        ${detail.player2Hand.name} (${detail.player2Hand.hand_rank.join(', ')})
+
+                        ${detail.player2Hand.name} (${detail.player2Hand.hand_rank.join(', ')}) ${(() => {
+                            if (detail.winner === 'tie') return '(0)';
+                            const points = getPointsForHand(detail.winner === 'player1' ? detail.player1Hand : detail.player2Hand, detail.hand);
+                            return detail.winner === 'player2' ? `(+${points})` : `(-${points})`;
+                        })()}
+
                     </div>
                 </div>
             `;
@@ -307,4 +319,33 @@ function updateDisplay(game) {
     updatePlayerList(game);
     updateScoring(game);
     updateButtonStates(game);
+}
+
+
+// Calculate points for a winning hand
+function getPointsForHand(hand, position) {
+    const handName = hand.name.toLowerCase();
+
+    if (position === 'Front') {
+        if (handName.includes('three of a kind')) return 3;
+        if (handName.includes('flush')) return 4;
+        if (handName.includes('straight')) return 4;
+        if (handName.includes('full house')) return 5;
+        if (handName.includes('four of a kind')) return 12;
+        if (handName.includes('straight flush')) return 15;
+        if (handName.includes('five of a kind')) return 18;
+        return 1;
+    } else if (position === 'Middle') {
+        if (handName.includes('full house')) return 2;
+        if (handName.includes('four of a kind')) return 8;
+        if (handName.includes('straight flush')) return 10;
+        if (handName.includes('five of a kind')) return 12;
+        return 1;
+    } else if (position === 'Back') {
+        if (handName.includes('four of a kind')) return 4;
+        if (handName.includes('straight flush')) return 5;
+        if (handName.includes('five of a kind')) return 6;
+        return 1;
+    }
+    return 1;
 }
