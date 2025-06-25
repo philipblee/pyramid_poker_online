@@ -865,7 +865,7 @@ async function loadVersionInfo() {
         // Update the existing version-tag element
         const versionElement = document.getElementById('version-info');
         if (versionElement) {
-            versionElement.textContent = `Enhanced Edition - v${versionInfo.version}`;
+            versionElement.textContent = `Enhanced Edition - ${versionInfo.version}`;
             versionElement.title = `Build Details:
 Branch: ${versionInfo.branch}
 Commit: ${versionInfo.commit}
