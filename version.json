@@ -1,7 +1,7 @@
 {
-  "version": "v2.0.0-6-g1174295-dirty",
-  "commit": "1174295",
-  "branch": "feature/game-configuration",
-  "buildDate": "2025-06-26T14:25:21.366Z",
-  "lastCommit": "2025-06-26 10:12:24 -0400"
+  "version": "v2.0.0-8-g7ac84c5-dirty",
+  "commit": "7ac84c5",
+  "branch": "feature/single-player-mode",
+  "buildDate": "2025-06-26T15:27:58.991Z",
+  "lastCommit": "2025-06-26 10:55:48 -0400"
 }

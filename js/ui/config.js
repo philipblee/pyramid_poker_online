@@ -47,17 +47,24 @@ class ConfigUI {
         document.body.appendChild(tooltip);
     }
 
+    // Update the showTooltip method to show more info
     showTooltip() {
         const tooltip = document.getElementById('configTooltip');
         const config = window.gameConfig.getConfig();
 
+        const modeText = config.gameMode === 'singleplayer' ?
+            `Single Player vs ${config.computerPlayers} AI` : 'Multiplayer';
+
         tooltip.innerHTML = `
             <div style="color: #ffd700; font-weight: bold; margin-bottom: 4px;">⚙️ Current Configuration</div>
+            <div style="color: #4ecdc4;">🎮 Mode: ${modeText}</div>
             <div style="color: #4ecdc4;">🃏 Wild Cards: ${config.wildCardCount}</div>
+            <div style="color: #4ecdc4;">🎴 Decks: ${config.deckCount}</div>
             <div style="color: #95a5a6; font-size: 10px; margin-top: 4px; font-style: italic;">Click to change settings</div>
         `;
         tooltip.style.display = 'block';
     }
+
 
     hideTooltip() {
         const tooltip = document.getElementById('configTooltip');
@@ -87,61 +94,117 @@ class ConfigUI {
     }
 
     updateButtonText() {
-        const configButton = document.getElementById('gameConfig');
+    const configButton = document.getElementById('gameConfig');
+    const config = window.gameConfig.getConfig();
+
+    if (configButton) {
+        // Update button to show mode and wild card count
+        const modeIcon = config.gameMode === 'singleplayer' ? '🤖' : '👥';
+        const wildCount = config.wildCardCount;
+        configButton.innerHTML = `⚙️ Config ${modeIcon}${wildCount > 0 ? ` (${wildCount}🃏)` : ''}`;
+    }
+}
+
+    // Update the showTooltip method to show more info
+    showTooltip() {
+        const tooltip = document.getElementById('configTooltip');
         const config = window.gameConfig.getConfig();
 
-        if (configButton) {
-            // Update button to show wild card count
-            const wildCount = config.wildCardCount;
-            configButton.innerHTML = `⚙️ Config${wildCount > 0 ? ` (${wildCount}🃏)` : ''}`;
-        }
+        const modeText = config.gameMode === 'singleplayer' ?
+            `Single Player vs ${config.computerPlayers} AI` : 'Multiplayer';
+
+        tooltip.innerHTML = `
+            <div style="color: #ffd700; font-weight: bold; margin-bottom: 4px;">⚙️ Current Configuration</div>
+            <div style="color: #4ecdc4;">🎮 Mode: ${modeText}</div>
+            <div style="color: #4ecdc4;">🃏 Wild Cards: ${config.wildCardCount}</div>
+            <div style="color: #4ecdc4;">🎴 Decks: ${config.deckCount}</div>
+            <div style="color: #95a5a6; font-size: 10px; margin-top: 4px; font-style: italic;">Click to change settings</div>
+        `;
+        tooltip.style.display = 'block';
     }
 
+
+
+    // just replaced
     createConfigModal() {
-        // Create modal HTML if it doesn't exist
-        if (document.getElementById('configModal')) return;
+    // Create modal HTML if it doesn't exist
+    if (document.getElementById('configModal')) return;
 
-        const modalHTML = `
-            <div id="configModal" class="config-modal" style="display: none;">
-                <div class="config-content">
-                    <div class="config-header">
-                        <h2>⚙️ Game Configuration</h2>
-                        <button class="config-close" id="configClose">×</button>
-                    </div>
-                    <div class="config-body">
-                        <div class="config-section">
-                            <h3>Wild Cards</h3>
-                            <div class="config-option">
-                                <label for="wildCardCount">Number of Wild Cards:</label>
-                                <select id="wildCardCount">
-                                    <option value="0">0 - No Wild Cards</option>
-                                    <option value="1">1 - Minimal Wilds</option>
-                                    <option value="2">2 - Standard (Default)</option>
-                                    <option value="3">3 - Extra Wilds</option>
-                                    <option value="4">4 - Maximum Wilds</option>
-                                </select>
-                                <div class="config-description">
-                                    Wild cards can be used as any card you need to complete hands.
-                                </div>
-                            </div>
+    const modalHTML = `
+        <div id="configModal" class="config-modal" style="display: none;">
+            <div class="config-content">
+                <div class="config-header">
+                    <h2>⚙️ Game Configuration</h2>
+                    <button class="config-close" id="configClose">×</button>
+                </div>
+                <div class="config-body">
+                    <!-- Game Mode Settings -->
+                    <div class="config-section">
+                        <h3>🎮 Game Mode</h3>
+                        <div class="config-option">
+                            <label for="gameMode">Game Mode:</label>
+                            <select id="gameMode">
+                                <option value="multiplayer">Multiplayer - Play with friends</option>
+                                <option value="singleplayer">Single Player - vs Computer</option>
+                            </select>
+                            <div class="config-description">Choose between multiplayer or single player vs AI opponents.</div>
                         </div>
+                        <div class="config-option" id="computerPlayersOption" style="display: none;">
+                            <label for="computerPlayers">Number of Computer Opponents:</label>
+                            <select id="computerPlayers">
+                                <option value="1">1 Computer Player</option>
+                                <option value="2">2 Computer Players</option>
+                                <option value="3">3 Computer Players (Default)</option>
+                                <option value="4">4 Computer Players</option>
+                                <option value="5">5 Computer Players</option>
+                            </select>
+                            <div class="config-description">How many AI opponents you'll play against.</div>
+                        </div>
+                    </div>
 
-                        <div class="config-preview">
-                            <h4>Current Settings:</h4>
-                            <div id="configPreview"></div>
+                    <!-- Card Settings -->
+                    <div class="config-section">
+                        <h3>🃏 Card Settings</h3>
+                        <div class="config-option">
+                            <label for="wildCardCount">Number of Wild Cards:</label>
+                            <select id="wildCardCount">
+                                <option value="0">0 - No Wild Cards</option>
+                                <option value="1">1 - Minimal Wilds</option>
+                                <option value="2">2 - Standard (Default)</option>
+                                <option value="3">3 - Extra Wilds</option>
+                                <option value="4">4 - Maximum Wilds</option>
+                            </select>
+                            <div class="config-description">Wild cards can be used as any card you need to complete hands.</div>
+                        </div>
+                        <div class="config-option">
+                            <label for="deckCount">Number of Decks:</label>
+                            <select id="deckCount">
+                                <option value="1">1 - Single Deck</option>
+                                <option value="2">2 - Standard (Default)</option>
+                                <option value="3">3 - Triple Deck</option>
+                            </select>
+                            <div class="config-description">More decks allow for larger games and more duplicate cards.</div>
                         </div>
                     </div>
-                    <div class="config-footer">
-                        <button id="configReset" class="btn btn-secondary">Reset to Defaults</button>
-                        <button id="configSave" class="btn btn-primary">Save & Close</button>
+
+                    <!-- Configuration Preview -->
+                    <div class="config-preview">
+                        <h4>Current Settings:</h4>
+                        <div id="configPreview"></div>
+                        <div id="configWarnings" class="config-warnings"></div>
                     </div>
                 </div>
+                <div class="config-footer">
+                    <button id="configReset" class="btn btn-secondary">Reset to Defaults</button>
+                    <button id="configSave" class="btn btn-primary">Save & Close</button>
+                </div>
             </div>
-        `;
+        </div>
+    `;
 
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-        this.addConfigStyles();
-    }
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    this.addConfigStyles();
+}
 
     addConfigStyles() {
         if (document.getElementById('configStyles')) return;
@@ -305,6 +368,7 @@ class ConfigUI {
         document.head.insertAdjacentHTML('beforeend', styles);
     }
 
+    // Update the setupEventListeners method to handle game mode changes
     setupEventListeners() {
         document.addEventListener('click', (e) => {
             if (e.target.id === 'configClose') {
@@ -317,7 +381,16 @@ class ConfigUI {
         });
 
         document.addEventListener('change', (e) => {
-            if (e.target.id === 'wildCardCount') {
+            if (e.target.id === 'wildCardCount' ||
+                e.target.id === 'deckCount' ||
+                e.target.id === 'gameMode' ||
+                e.target.id === 'computerPlayers') {
+
+                // Show/hide computer players option based on game mode
+                if (e.target.id === 'gameMode') {
+                    this.toggleComputerPlayersOption();
+                }
+
                 this.updatePreview();
             }
         });
@@ -329,6 +402,19 @@ class ConfigUI {
             }
         });
     }
+
+    // Add method to toggle computer players option visibility
+    toggleComputerPlayersOption() {
+        const gameMode = document.getElementById('gameMode').value;
+        const computerPlayersOption = document.getElementById('computerPlayersOption');
+
+        if (gameMode === 'singleplayer') {
+            computerPlayersOption.style.display = 'block';
+        } else {
+            computerPlayersOption.style.display = 'none';
+        }
+    }
+
 
     show() {
         this.isOpen = true;
@@ -345,26 +431,64 @@ class ConfigUI {
         document.getElementById('configModal').style.display = 'none';
     }
 
+    // Update the loadCurrentConfig method
     loadCurrentConfig() {
         const config = window.gameConfig.getConfig();
+        document.getElementById('gameMode').value = config.gameMode;
+        document.getElementById('computerPlayers').value = config.computerPlayers;
         document.getElementById('wildCardCount').value = config.wildCardCount;
+        document.getElementById('deckCount').value = config.deckCount;
+
+        // Show/hide computer players option
+        this.toggleComputerPlayersOption();
     }
 
+    // Update the updatePreview method
     updatePreview() {
+        const gameMode = document.getElementById('gameMode').value;
+        const computerPlayers = document.getElementById('computerPlayers').value;
         const wildCardCount = document.getElementById('wildCardCount').value;
+        const deckCount = document.getElementById('deckCount').value;
         const preview = document.getElementById('configPreview');
+        const warnings = document.getElementById('configWarnings');
 
-        preview.innerHTML = `
+        let previewHTML = `
+            <div>🎮 Mode: ${gameMode === 'singleplayer' ? `Single Player vs ${computerPlayers} AI` : 'Multiplayer'}</div>
             <div>🃏 Wild Cards: ${wildCardCount}</div>
+            <div>🎴 Decks: ${deckCount}</div>
         `;
+
+        // Check if configuration is valid
+        const totalPlayers = gameMode === 'singleplayer' ? (1 + parseInt(computerPlayers)) : 4;
+        const totalCards = (parseInt(deckCount) * 52) + parseInt(wildCardCount);
+        const cardsNeeded = totalPlayers * 17;
+
+        if (totalCards < cardsNeeded) {
+            const shortage = cardsNeeded - totalCards;
+            warnings.innerHTML = `⚠️ Warning: Not enough cards! Need ${cardsNeeded} cards but only have ${totalCards}. Short by ${shortage} cards.`;
+            warnings.classList.add('show');
+        } else {
+            warnings.classList.remove('show');
+        }
+
+        preview.innerHTML = previewHTML;
     }
 
+
+    // Update the save method
     save() {
+        const gameMode = document.getElementById('gameMode').value;
+        const computerPlayers = parseInt(document.getElementById('computerPlayers').value);
         const wildCardCount = parseInt(document.getElementById('wildCardCount').value);
+        const deckCount = parseInt(document.getElementById('deckCount').value);
 
         try {
+            window.gameConfig.setGameMode(gameMode);
+            window.gameConfig.setComputerPlayers(computerPlayers);
             window.gameConfig.setWildCardCount(wildCardCount);
-            this.updateButtonText(); // ADD THIS LINE
+            window.gameConfig.setDeckCount(deckCount);
+
+            this.updateButtonText();
             this.close();
 
             // Show confirmation
@@ -419,14 +543,13 @@ function openGameConfig() {
     window.configUI.show();
 }
 
-// Add this to the end of your js/ui/config.js file
-
 // Initialize the config UI when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     // Wait a moment for all elements to be ready
     setTimeout(() => {
         if (window.configUI) {
             window.configUI.setupConfigButton();
+            window.configUI.updateButtonText(); // Add this line
         }
     }, 100);
 });
