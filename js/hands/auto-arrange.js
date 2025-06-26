@@ -22,6 +22,25 @@ class AutoArrangeManager {
 
         console.log('🧠 Smart Auto-Arrange starting...');
 
+        // First check for 6-8 card special hands (straight flushes and of-a-kind)
+        const largeHandArrangement = this.findLargeHandArrangement(allCards);
+        if (largeHandArrangement) {
+            console.log('🎯 Found large hand arrangement!');
+            console.log('Back:', largeHandArrangement.back.map(c => c.rank + c.suit).join(', '));
+            console.log('Middle:', largeHandArrangement.middle.map(c => c.rank + c.suit).join(', '));
+            console.log('Front:', largeHandArrangement.front.map(c => c.rank + c.suit).join(', '));
+            console.log('Staging:', largeHandArrangement.staging.map(c => c.rank + c.suit).join(', '));
+
+            // Apply the arrangement
+            playerData.back = largeHandArrangement.back;
+            playerData.middle = largeHandArrangement.middle;
+            playerData.front = largeHandArrangement.front;
+            playerData.cards = largeHandArrangement.staging;
+
+            this.game.loadCurrentPlayerHand();
+            return;
+        }
+
         // Analyze all possible hands
         const analyzer = new HandAnalyzer(allCards);
         const allPossibleHands = analyzer.findAllPossibleHands();
@@ -261,5 +280,205 @@ class AutoArrangeManager {
         playerData.front = frontHand;
 
         this.game.loadCurrentPlayerHand();
+    }
+
+    findLargeHandArrangement(allCards) {
+        // Look for 6-8 card straight flushes and 6-8 of a kind
+        const largeStraightFlush = this.findLargeStraightFlush(allCards);
+        const largeOfAKind = this.findLargeOfAKind(allCards);
+
+        // Prioritize the best large hand found
+        let bestLargeHand = null;
+        let bestScore = 0;
+
+        if (largeStraightFlush) {
+            const score = this.scoreLargeHand(largeStraightFlush, 'straight_flush');
+            if (score > bestScore) {
+                bestScore = score;
+                bestLargeHand = largeStraightFlush;
+            }
+        }
+
+        if (largeOfAKind) {
+            const score = this.scoreLargeHand(largeOfAKind, 'of_a_kind');
+            if (score > bestScore) {
+                bestScore = score;
+                bestLargeHand = largeOfAKind;
+            }
+        }
+
+        if (bestLargeHand) {
+            return this.createLargeHandArrangement(allCards, bestLargeHand);
+        }
+
+        return null;
+    }
+
+    findLargeStraightFlush(allCards) {
+        // Group cards by suit
+        const suitGroups = {};
+        allCards.forEach(card => {
+            if (!suitGroups[card.suit]) {
+                suitGroups[card.suit] = [];
+            }
+            suitGroups[card.suit].push(card);
+        });
+
+        let bestStraightFlush = null;
+        let bestLength = 0;
+
+        // Check each suit for straight flushes
+        for (const suit in suitGroups) {
+            const suitCards = suitGroups[suit];
+            if (suitCards.length >= 6) {
+                // Sort by value (descending)
+                suitCards.sort((a, b) => b.value - a.value);
+                
+                // Find longest straight flush
+                const straightFlush = this.findLongestStraightFlush(suitCards);
+                if (straightFlush && straightFlush.length >= 6 && straightFlush.length > bestLength) {
+                    bestLength = straightFlush.length;
+                    bestStraightFlush = {
+                        cards: straightFlush,
+                        type: 'straight_flush',
+                        length: straightFlush.length
+                    };
+                }
+            }
+        }
+
+        return bestStraightFlush;
+    }
+
+    findLongestStraightFlush(suitCards) {
+        if (suitCards.length < 5) return null;
+
+        let longestStraight = [];
+        let currentStraight = [suitCards[0]];
+
+        for (let i = 1; i < suitCards.length; i++) {
+            const current = suitCards[i];
+            const previous = suitCards[i - 1];
+
+            // Check if consecutive (accounting for duplicates from multiple decks)
+            if (current.value === previous.value - 1) {
+                currentStraight.push(current);
+            } else if (current.value === previous.value) {
+                // Skip duplicates
+                continue;
+            } else {
+                // Break in sequence
+                if (currentStraight.length >= 5 && currentStraight.length > longestStraight.length) {
+                    longestStraight = [...currentStraight];
+                }
+                currentStraight = [current];
+            }
+        }
+
+        // Check final sequence
+        if (currentStraight.length >= 5 && currentStraight.length > longestStraight.length) {
+            longestStraight = [...currentStraight];
+        }
+
+        return longestStraight.length >= 5 ? longestStraight : null;
+    }
+
+    findLargeOfAKind(allCards) {
+        // Group cards by rank
+        const rankGroups = {};
+        allCards.forEach(card => {
+            if (!rankGroups[card.rank]) {
+                rankGroups[card.rank] = [];
+            }
+            rankGroups[card.rank].push(card);
+        });
+
+        // Find the largest group of same rank (6+ cards)
+        let bestOfAKind = null;
+        let bestLength = 0;
+
+        for (const rank in rankGroups) {
+            const rankCards = rankGroups[rank];
+            if (rankCards.length >= 6 && rankCards.length > bestLength) {
+                bestLength = rankCards.length;
+                bestOfAKind = {
+                    cards: rankCards,
+                    type: 'of_a_kind',
+                    length: rankCards.length,
+                    rank: rank
+                };
+            }
+        }
+
+        return bestOfAKind;
+    }
+
+    scoreLargeHand(largeHand, type) {
+        // Score based on type and length
+        const length = largeHand.length;
+        
+        if (type === 'straight_flush') {
+            // Straight flush scoring: exponential growth for longer hands
+            if (length === 8) return 1000;
+            if (length === 7) return 500;
+            if (length === 6) return 250;
+        } else if (type === 'of_a_kind') {
+            // Of a kind scoring: also exponential
+            if (length === 8) return 800;
+            if (length === 7) return 400;
+            if (length === 6) return 200;
+        }
+
+        return 0;
+    }
+
+    createLargeHandArrangement(allCards, largeHand) {
+        const usedCards = new Set(largeHand.cards.map(c => c.id));
+        const remainingCards = allCards.filter(c => !usedCards.has(c.id));
+
+        // Put the large hand in the back
+        const backHand = largeHand.cards;
+
+        // Arrange remaining cards optimally
+        const analyzer = new HandAnalyzer(remainingCards);
+        
+        // Try to make a good middle hand (5 cards)
+        const possibleMiddleHands = analyzer.findAllPossibleHands().slice(0, 10);
+        let bestMiddleHand = null;
+        let bestMiddleScore = -1;
+
+        for (const middleHand of possibleMiddleHands) {
+            const middleScore = middleHand.strength.hand_rank[0];
+            if (middleScore > bestMiddleScore) {
+                bestMiddleScore = middleScore;
+                bestMiddleHand = middleHand;
+            }
+        }
+
+        let middleCards = [];
+        let cardsAfterMiddle = remainingCards;
+
+        if (bestMiddleHand) {
+            middleCards = bestMiddleHand.cards;
+            const usedMiddleIds = new Set(middleCards.map(c => c.id));
+            cardsAfterMiddle = remainingCards.filter(c => !usedMiddleIds.has(c.id));
+        } else {
+            // Fallback: take 5 best remaining cards
+            const sortedRemaining = [...remainingCards].sort((a, b) => b.value - a.value);
+            middleCards = sortedRemaining.slice(0, 5);
+            cardsAfterMiddle = sortedRemaining.slice(5);
+        }
+
+        // Front hand: take 3 best remaining cards
+        const sortedAfterMiddle = [...cardsAfterMiddle].sort((a, b) => b.value - a.value);
+        const frontCards = sortedAfterMiddle.slice(0, 3);
+        const stagingCards = sortedAfterMiddle.slice(3);
+
+        return {
+            back: backHand,
+            middle: middleCards,
+            front: frontCards,
+            staging: stagingCards
+        };
     }
 }
