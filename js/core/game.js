@@ -6,6 +6,7 @@ class ChinesePokerGame {
         // Initialize managers
         this.playerManager = new PlayerManager();
         this.deckManager = new DeckManager();
+        this.autoArrangeManager = new AutoArrangeManager(this);
 
         // Game state
         this.gameState = 'waiting';
@@ -30,7 +31,7 @@ class ChinesePokerGame {
     initializeEventListeners() {
         document.getElementById('newGame').addEventListener('click', () => this.startNewGame());
         document.getElementById('addPlayer').addEventListener('click', () => this.addPlayer());
-        document.getElementById('autoArrange').addEventListener('click', () => this.smartAutoArrangeHand());
+        document.getElementById('autoArrange').addEventListener('click', () => this.autoArrangeManager.smartAutoArrangeHand());
         document.getElementById('sortByRank').addEventListener('click', () => this.resetAndSortByRank());
         document.getElementById('sortBySuit').addEventListener('click', () => this.resetAndSortBySuit());
         document.getElementById('submitHand').addEventListener('click', () => this.submitCurrentHand());
@@ -695,5 +696,5 @@ class ChinesePokerGame {
 // Keep the existing DOMContentLoaded listener
 document.addEventListener('DOMContentLoaded', () => {
     game = new ChinesePokerGame();
-    // loadVersionInfo();
+    loadVersionInfo(); // Add this line back
 });
