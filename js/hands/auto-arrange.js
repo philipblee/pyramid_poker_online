@@ -41,6 +41,16 @@ class AutoArrangeManager {
             return;
         }
 
+        // Check if we have wild card optimization for 4K/5K
+        const wildCards = allCards.filter(card => card.isWild);
+        if (wildCards.length === 1) {
+            const optimizedCards = this.optimizeWildForSmallHands(allCards, wildCards[0]);
+            if (optimizedCards) {
+                console.log('🃏 Using wild-optimized cards for normal arrangement');
+                allCards = optimizedCards;
+            }
+        }
+
         // Analyze all possible hands
         const analyzer = new HandAnalyzer(allCards);
         const allPossibleHands = analyzer.findAllPossibleHands();
@@ -283,6 +293,18 @@ class AutoArrangeManager {
     }
 
     findLargeHandArrangement(allCards) {
+        // Check if we have exactly one wild card
+        const wildCards = allCards.filter(card => card.isWild);
+        
+        if (wildCards.length === 1) {
+            return this.findLargeHandWithOneWild(allCards, wildCards[0]);
+        } else {
+            // No wilds or multiple wilds - use original algorithm
+            return this.findLargeHandWithoutWilds(allCards);
+        }
+    }
+
+    findLargeHandWithoutWilds(allCards) {
         // Look for 6-8 card straight flushes and 6-8 of a kind
         const largeStraightFlush = this.findLargeStraightFlush(allCards);
         const largeOfAKind = this.findLargeOfAKind(allCards);
@@ -312,6 +334,186 @@ class AutoArrangeManager {
         }
 
         return null;
+    }
+
+    findLargeHandWithOneWild(allCards, wildCard) {
+        const nonWildCards = allCards.filter(card => !card.isWild);
+        let bestArrangement = null;
+        let bestScore = 0;
+
+        console.log('🃏 Optimizing with one wild card...');
+
+        // Try wild as each possible rank for of-a-kind (including 4K, 5K, 6K+)
+        const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        for (const rank of ranks) {
+            const testCards = [...nonWildCards, this.createTestCard(wildCard, rank, '♠')];
+            const ofAKind = this.findAnyOfAKind(testCards);
+            
+            if (ofAKind && ofAKind.length >= 4) {
+                const score = this.scoreOfAKindHand(ofAKind);
+                if (score > bestScore) {
+                    bestScore = score;
+                    // Convert wild card to the optimal rank
+                    const optimalWild = this.createOptimalWild(wildCard, rank, ofAKind.cards[0].suit);
+                    const finalCards = [...nonWildCards, optimalWild];
+                    
+                    if (ofAKind.length >= 6) {
+                        // Large hand - use special arrangement
+                        bestArrangement = this.createLargeHandArrangement(finalCards, {
+                            ...ofAKind,
+                            cards: ofAKind.cards.map(c => c.id === wildCard.id ? optimalWild : c)
+                        });
+                    } else {
+                        // Regular 4K/5K - let normal algorithm handle it but flag the wild optimization
+                        bestArrangement = {
+                            optimizedWild: optimalWild,
+                            useNormalArrangement: true
+                        };
+                    }
+                }
+            }
+        }
+
+        // Try wild for straight flush completion
+        const suits = ['♠', '♥', '♦', '♣'];
+        for (const suit of suits) {
+            const suitCards = nonWildCards.filter(card => card.suit === suit);
+            if (suitCards.length >= 5) {
+                // Try wild as different ranks to complete straight flush
+                for (const rank of ranks) {
+                    const testCards = [...nonWildCards, this.createTestCard(wildCard, rank, suit)];
+                    const largeStraightFlush = this.findLargeStraightFlush(testCards);
+                    
+                    if (largeStraightFlush && largeStraightFlush.length >= 6) {
+                        const score = this.scoreLargeHand(largeStraightFlush, 'straight_flush');
+                        if (score > bestScore) {
+                            bestScore = score;
+                            const optimalWild = this.createOptimalWild(wildCard, rank, suit);
+                            const finalCards = [...nonWildCards, optimalWild];
+                            bestArrangement = this.createLargeHandArrangement(finalCards, {
+                                ...largeStraightFlush,
+                                cards: largeStraightFlush.cards.map(c => c.id === wildCard.id ? optimalWild : c)
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        if (bestArrangement) {
+            console.log(`🎯 Wild card optimized for score: ${bestScore}`);
+        }
+
+        // Handle case where we optimized wild for 4K/5K but need normal arrangement
+        if (bestArrangement && bestArrangement.useNormalArrangement) {
+            console.log(`🎯 Wild card optimized for 4K/5K, using normal arrangement`);
+            // Replace the wild card in original cards and fall back to normal algorithm
+            const optimizedCards = allCards.map(c => c.id === wildCard.id ? bestArrangement.optimizedWild : c);
+            return null; // Let normal algorithm handle with optimized wild
+        }
+
+        return bestArrangement;
+    }
+
+    findAnyOfAKind(allCards) {
+        // Find the largest group of same rank (4+ cards)
+        const rankGroups = {};
+        allCards.forEach(card => {
+            if (!rankGroups[card.rank]) {
+                rankGroups[card.rank] = [];
+            }
+            rankGroups[card.rank].push(card);
+        });
+
+        let bestOfAKind = null;
+        let bestLength = 0;
+
+        for (const rank in rankGroups) {
+            const rankCards = rankGroups[rank];
+            if (rankCards.length >= 4 && rankCards.length > bestLength) {
+                bestLength = rankCards.length;
+                bestOfAKind = {
+                    cards: rankCards,
+                    type: 'of_a_kind',
+                    length: rankCards.length,
+                    rank: rank
+                };
+            }
+        }
+
+        return bestOfAKind;
+    }
+
+    scoreOfAKindHand(ofAKind) {
+        // Score based on length - exponential growth
+        const length = ofAKind.length;
+        if (length === 8) return 800;
+        if (length === 7) return 400;
+        if (length === 6) return 200;
+        if (length === 5) return 100;
+        if (length === 4) return 50;
+        return 0;
+    }
+
+    optimizeWildForSmallHands(allCards, wildCard) {
+        const nonWildCards = allCards.filter(card => !card.isWild);
+        let bestOptimizedCards = null;
+        let bestScore = 0;
+
+        console.log('🃏 Checking wild optimization for 4K/5K...');
+
+        // Try wild as each possible rank for 4K/5K
+        const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        for (const rank of ranks) {
+            const testCards = [...nonWildCards, this.createTestCard(wildCard, rank, '♠')];
+            const ofAKind = this.findAnyOfAKind(testCards);
+            
+            if (ofAKind && ofAKind.length >= 4 && ofAKind.length < 6) {
+                const score = this.scoreOfAKindHand(ofAKind);
+                if (score > bestScore) {
+                    bestScore = score;
+                    const optimalWild = this.createOptimalWild(wildCard, rank, ofAKind.cards[0].suit);
+                    bestOptimizedCards = [...nonWildCards, optimalWild];
+                }
+            }
+        }
+
+        if (bestOptimizedCards) {
+            console.log(`🎯 Wild optimized for ${bestScore === 100 ? '5K' : '4K'}`);
+        }
+
+        return bestOptimizedCards;
+    }
+
+    createTestCard(wildCard, rank, suit) {
+        const values = {
+            '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+            'J': 11, 'Q': 12, 'K': 13, 'A': 14
+        };
+        
+        return {
+            suit: suit,
+            rank: rank,
+            value: values[rank],
+            id: wildCard.id, // Keep same ID so we can find it later
+            isWild: false // Temporarily treat as normal card
+        };
+    }
+
+    createOptimalWild(originalWild, rank, suit) {
+        const values = {
+            '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+            'J': 11, 'Q': 12, 'K': 13, 'A': 14
+        };
+        
+        return {
+            suit: suit,
+            rank: rank,
+            value: values[rank],
+            id: originalWild.id,
+            isWild: true, // Keep wild flag for display purposes
+            originalWild: true // Mark as optimized wild
+        };
     }
 
     findLargeStraightFlush(allCards) {
