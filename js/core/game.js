@@ -693,8 +693,13 @@ class ChinesePokerGame {
 
 }
 
-// Keep the existing DOMContentLoaded listener
 document.addEventListener('DOMContentLoaded', () => {
     game = new ChinesePokerGame();
-    loadVersionInfo(); // Add this line back
+
+    // Add safety check for loadVersionInfo
+    if (typeof loadVersionInfo === 'function') {
+        loadVersionInfo();
+    } else {
+        console.warn('loadVersionInfo function not available');
+    }
 });
