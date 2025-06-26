@@ -1,7 +1,7 @@
 {
-  "version": "v2.0.0-5-g2d39254-dirty",
-  "commit": "2d39254",
-  "branch": "main",
-  "buildDate": "2025-06-26T13:55:43.233Z",
-  "lastCommit": "2025-06-26 07:47:47 -0400"
+  "version": "v2.0.0-6-g1174295-dirty",
+  "commit": "1174295",
+  "branch": "feature/game-configuration",
+  "buildDate": "2025-06-26T14:25:21.366Z",
+  "lastCommit": "2025-06-26 10:12:24 -0400"
 }

@@ -34,7 +34,7 @@ function shuffleDeck(deck) {
     return deck;
 }
 
-// Create a complete deck with two standard decks plus jokers
+// Create a complete deck with two standard decks plus configurable wild cards
 function createDeck() {
     const suits = ['♠', '♥', '♦', '♣'];
     const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
@@ -55,22 +55,20 @@ function createDeck() {
         }
     }
 
-    // Add two wild cards (Jokers)
-    deck.push({
-        suit: '🃏',
-        rank: 'WILD',
-        value: 15,
-        id: 'WILD_JOKER_1',
-        isWild: true
-    });
+    // Add configurable number of wild cards
+    const wildCardCount = window.gameConfig ? window.gameConfig.getWildCardCount() : 2; // Default to 2 if config not loaded
 
-    deck.push({
-        suit: '🃏',
-        rank: 'WILD',
-        value: 15,
-        id: 'WILD_JOKER_2',
-        isWild: true
-    });
+    console.log(`🃏 Creating deck with ${wildCardCount} wild cards`);
+
+    for (let i = 1; i <= wildCardCount; i++) {
+        deck.push({
+            suit: '🃏',
+            rank: 'WILD',
+            value: 15,
+            id: `WILD_JOKER_${i}`,
+            isWild: true
+        });
+    }
 
     return shuffleDeck(deck);
 }

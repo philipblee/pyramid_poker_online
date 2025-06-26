@@ -1,0 +1,5 @@
+Fix version loading order issue
+
+- Move loadVersionInfo() call to proper location
+- Add safety check to prevent undefined function errors
+- Version display now works correctly after modular refactoring"
