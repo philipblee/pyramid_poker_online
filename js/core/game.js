@@ -113,6 +113,27 @@ class ChinesePokerGame {
         displayCards(playerData.front, 'frontHand');
 
         this.validateHands();
+
+        // Handle AI player turn
+        if (currentPlayer.type === 'ai') {
+            this.handleAITurn();
+        }
+    }
+
+    handleAITurn() {
+        const currentPlayer = this.playerManager.getCurrentPlayer();
+        console.log(`AI ${currentPlayer.name} is taking their turn...`);
+
+        // Add a small delay to make AI actions feel more natural
+        setTimeout(() => {
+            // Auto-arrange the AI player's hand
+            this.autoArrangeManager.smartAutoArrangeHand();
+            
+            // Add another delay before submitting
+            setTimeout(() => {
+                this.submitCurrentHand();
+            }, 1000);
+        }, 500);
     }
 
 
@@ -311,6 +332,7 @@ class ChinesePokerGame {
     }
 
     isStraightFlush(normalCards, wildCount) {
+        const totalLength = normalCards.length + wildCount;
         if (normalCards.length === 0) return wildCount >= 6;
 
         const suitGroups = {};
@@ -321,7 +343,7 @@ class ChinesePokerGame {
 
         for (const [suit, values] of Object.entries(suitGroups)) {
             const uniqueValues = [...new Set(values)].sort((a, b) => a - b);
-            if (this.canMakeStraightFlush(uniqueValues, wildCount, normalCards.length + wildCount)) {
+            if (this.canMakeStraightFlush(uniqueValues, wildCount, totalLength)) {
                 return true;
             }
         }
@@ -330,10 +352,13 @@ class ChinesePokerGame {
     }
 
     canMakeStraightFlush(values, wildCount, targetLength) {
+        if (values.length === 0) return wildCount >= targetLength;
+        
         const minValue = Math.min(...values);
         const maxValue = Math.max(...values);
 
-        for (let start = Math.max(2, minValue - wildCount); start <= maxValue; start++) {
+        // Check all possible consecutive straights
+        for (let start = Math.max(2, minValue - wildCount); start <= Math.min(14 - targetLength + 1, maxValue + wildCount); start++) {
             const straightValues = [];
             for (let i = 0; i < targetLength; i++) {
                 straightValues.push(start + i);
@@ -343,10 +368,14 @@ class ChinesePokerGame {
             if (needed <= wildCount) return true;
         }
 
-        // Check wheel straights
-        const wheelStraight = [14, 2, 3, 4, 5, 6].slice(0, targetLength);
-        const wheelNeeded = wheelStraight.filter(v => !values.includes(v)).length;
-        return wheelNeeded <= wildCount;
+        // Check wheel straights (A-2-3-4-5-6 for 6-card, A-2-3-4-5 for 5-card, etc.)
+        if (targetLength <= 6) {
+            const wheelStraight = [14, 2, 3, 4, 5, 6].slice(0, targetLength);
+            const wheelNeeded = wheelStraight.filter(v => !values.includes(v)).length;
+            if (wheelNeeded <= wildCount) return true;
+        }
+
+        return false;
     }
 
     resetCards() {

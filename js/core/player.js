@@ -9,18 +9,47 @@ class PlayerManager {
     }
 
     addDefaultPlayers() {
-        const defaultPlayers = ['Player 1', 'Player 2'];
-
-        defaultPlayers.forEach(playerName => {
+        const config = window.gameConfig.getConfig();
+        
+        if (config.gameMode === 'singleplayer') {
+            // Create 1 human player + configured number of AI players
             this.players.push({
-                name: playerName,
+                name: 'Player 1',
                 id: Date.now() + Math.random(),
-                ready: false
+                ready: false,
+                type: 'human'
             });
-            this.scores.set(playerName, 0);
-        });
+            this.scores.set('Player 1', 0);
 
-        console.log('Auto-added default players:', defaultPlayers);
+            // Add AI players
+            for (let i = 1; i <= config.computerPlayers; i++) {
+                const aiName = `AI Player ${i}`;
+                this.players.push({
+                    name: aiName,
+                    id: Date.now() + Math.random() + i,
+                    ready: false,
+                    type: 'ai'
+                });
+                this.scores.set(aiName, 0);
+            }
+
+            console.log(`Auto-added single player mode: 1 human + ${config.computerPlayers} AI players (${this.players.length} total)`);
+        } else {
+            // Multiplayer mode - create default human players
+            const defaultPlayers = ['Player 1', 'Player 2'];
+
+            defaultPlayers.forEach(playerName => {
+                this.players.push({
+                    name: playerName,
+                    id: Date.now() + Math.random(),
+                    ready: false,
+                    type: 'human'
+                });
+                this.scores.set(playerName, 0);
+            });
+
+            console.log('Auto-added default players:', defaultPlayers);
+        }
     }
 
     addPlayer(playerName) {
@@ -31,7 +60,8 @@ class PlayerManager {
         this.players.push({
             name: playerName,
             id: Date.now() + Math.random(),
-            ready: false
+            ready: false,
+            type: 'human'
         });
         this.scores.set(playerName, 0);
         
