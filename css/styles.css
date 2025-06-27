@@ -177,7 +177,7 @@ body {
 
 .game-area {
     display: grid;
-    grid-template-columns: 1fr 320px;
+    grid-template-columns: 1fr 250px;
     gap: 20px;
     margin-bottom: 15px;
     transition: all 0.3s ease;
@@ -380,19 +380,6 @@ body {
     color: #ccc;
     margin-top: 4px;
     opacity: 0.8;
-}
-
-.rules {
-    margin-top: 20px;
-    font-size: 14px;
-    line-height: 1.7;
-    opacity: 0.85;
-}
-
-.rules h3 {
-    color: #ffd700;
-    margin-bottom: 10px;
-    font-size: 16px;
 }
 
 .scoring-popup {
@@ -632,7 +619,7 @@ body {
 }
 
 #frontHand {
-    margin-left: 266px; /* 3.5 cards worth: 76px * 3.5 = 266px */
+    margin-left: 190px; /* Aligned with middle and back hands */
     justify-content: flex-start !important;
     max-width: 456px; /* 6 cards worth of space: 76px * 6 = 456px */
 }

@@ -22,11 +22,17 @@ class AutoArrangeManager {
         const allCards = this.getAllCards(playerData);
         if (!this.validateCardCount(allCards)) return false;
 
-        // Handle wild cards with specialized optimizer
+        // Handle wild cards with specialized optimizer (with fallback)
         const { wildCards } = CardUtilities.separateWildCards(allCards);
         if (wildCards.length > 0) {
             console.log('🃏 Wild cards detected - using specialized optimizer');
-            return this.wildCardOptimizer.optimizeWildArrangement(allCards, playerData);
+            try {
+                return this.wildCardOptimizer.optimizeWildArrangement(allCards, playerData);
+            } catch (error) {
+                console.warn('🃏 Wild card optimizer failed, falling back to standard arrangement:', error.message);
+                console.log('🔄 Proceeding with normal arrangement logic...');
+                // Continue to normal arrangement logic below
+            }
         }
 
         console.log('🧠 Smart Auto-Arrange starting...');
