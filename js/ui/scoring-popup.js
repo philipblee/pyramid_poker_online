@@ -169,12 +169,18 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints) {
     playerNames.forEach(player => {
         tableHTML += `<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; min-width: 80px;">${player}</th>`;
     });
+
+    // Add Total column header
+    tableHTML += `<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #4ecdc4; font-weight: bold; min-width: 80px; background: rgba(78,205,196,0.2);">Total</th>`;
+
     tableHTML += `</tr></thead><tbody>`;
 
     // Data rows
     playerNames.forEach(player => {
         tableHTML += `<tr>`;
         tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; background: rgba(255,215,0,0.1);">${player}</td>`;
+
+        let rowTotal = 0;
 
         playerNames.forEach(opponent => {
             const score = matrix[player][opponent];
@@ -187,13 +193,21 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints) {
             } else if (score > 0) {
                 cellClass = 'positive';
                 cellColor = '#4ecdc4';
+                rowTotal += parseInt(score);
             } else if (score < 0) {
                 cellClass = 'negative';
                 cellColor = '#ff6b6b';
+                rowTotal += parseInt(score);
             }
 
             tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; color: ${cellColor}; font-weight: bold;">${score}</td>`;
         });
+
+        // Add total cell with special styling
+        const totalColor = rowTotal > 0 ? '#4ecdc4' : rowTotal < 0 ? '#ff6b6b' : '#ffd700';
+        const totalSign = rowTotal > 0 ? '+' : '';
+        tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; color: ${totalColor}; font-weight: bold; font-size: 16px; background: rgba(78,205,196,0.1);">${totalSign}${rowTotal}</td>`;
+
         tableHTML += `</tr>`;
     });
 
