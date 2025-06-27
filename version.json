@@ -1,7 +1,7 @@
 {
-  "version": "v2.0.1-2-ge4b9dda-dirty",
-  "commit": "e4b9dda",
-  "branch": "debug/valid-hand-rejection",
-  "buildDate": "2025-06-27T00:08:53.341Z",
-  "lastCommit": "2025-06-26 18:59:44 -0400"
+  "version": "v2.0.1-4-g9ce3607-dirty",
+  "commit": "9ce3607",
+  "branch": "refactor/phase2-scoring-extraction",
+  "buildDate": "2025-06-27T12:01:09.339Z",
+  "lastCommit": "2025-06-27 07:52:44 -0400"
 }

@@ -101,7 +101,7 @@ class AutoArrangeManager {
             const arrangements = this.generateValidArrangements(allCards, allPossibleHands, frontSize);
 
             for (const arrangement of arrangements) {
-                const score = this.scoreArrangement(arrangement);
+                const score = ArrangementScorer.scoreArrangement(arrangement);
 
                 if (score > bestScore) {
                     bestScore = score;
@@ -314,7 +314,7 @@ class AutoArrangeManager {
         let bestScore = 0;
 
         if (largeStraightFlush) {
-            const score = this.scoreLargeHand(largeStraightFlush, 'straight_flush');
+            const score = ArrangementScorer.scoreLargeHand(largeStraightFlush, 'straight_flush');
             if (score > bestScore) {
                 bestScore = score;
                 bestLargeHand = largeStraightFlush;
@@ -322,7 +322,7 @@ class AutoArrangeManager {
         }
 
         if (largeOfAKind) {
-            const score = this.scoreLargeHand(largeOfAKind, 'of_a_kind');
+            const score = ArrangementScorer.scoreLargeHand(largeOfAKind, 'of_a_kind');
             if (score > bestScore) {
                 bestScore = score;
                 bestLargeHand = largeOfAKind;
@@ -362,7 +362,7 @@ class AutoArrangeManager {
             const ofAKind = this.findAnyOfAKind(testCards);
 
             if (ofAKind && ofAKind.length >= 6) {
-                const score = this.scoreOfAKindHand(ofAKind);
+                const score = ArrangementScorer.scoreOfAKindHand(ofAKind);
                 if (score > bestScore) {
                     bestScore = score;
                     const optimalWild = CardUtilities.createOptimalWild(wildCard, rank, ofAKind.cards[0].suit);
@@ -385,7 +385,7 @@ class AutoArrangeManager {
                     const largeStraightFlush = this.findLargeStraightFlush(testCards);
 
                     if (largeStraightFlush && largeStraightFlush.length >= 6) {
-                        const score = this.scoreLargeHand(largeStraightFlush, 'straight_flush');
+                        const score = ArrangementScorer.scoreLargeHand(largeStraightFlush, 'straight_flush');
                         if (score > bestScore) {
                             bestScore = score;
                             const optimalWild = CardUtilities.createOptimalWild(wildCard, rank, suit);
@@ -628,125 +628,12 @@ class AutoArrangeManager {
 
             if (usesWild) {
                 // Give bonus for utilizing the wild card
-                const baseScore = this.getHandTypeScore(hand.strength.hand_rank[0]);
+                const baseScore = ArrangementScorer.getHandTypeScore(hand.strength.hand_rank[0]);
                 const wildBonus = 10; // Bonus for using wild
                 maxScore = Math.max(maxScore, baseScore + wildBonus);
             }
         }
 
         return maxScore;
-    }
-
-    // =============================================================================
-    // SCORING METHODS
-    // TODO: PHASE 2 - Move to arrangement-scorer.js
-    // =============================================================================
-
-    scoreArrangement(arrangement) {
-        let score = 0;
-
-        // Base points for winning hands (assuming average opponents)
-        score += this.getBaseHandScore(arrangement.backStrength, 'back');
-        score += this.getBaseHandScore(arrangement.middleStrength, 'middle');
-        score += this.getBaseHandScore(arrangement.frontStrength, 'front');
-
-        // Bonus points
-        score += this.getBonusPoints(arrangement.backStrength, arrangement.back.length, 'back');
-        score += this.getBonusPoints(arrangement.middleStrength, arrangement.middle.length, 'middle');
-        score += this.getBonusPoints(arrangement.frontStrength, arrangement.front.length, 'front');
-
-        return score;
-    }
-
-    getBaseHandScore(handStrength, position) {
-        // Estimate points for winning with this hand strength
-        const rank = handStrength.hand_rank[0];
-
-        if (position === 'back') {
-            if (rank >= 8) return 3; // Strong hands likely to win
-            if (rank >= 6) return 2; // Medium hands
-            return 1; // Weak hands
-        } else if (position === 'middle') {
-            if (rank >= 7) return 3;
-            if (rank >= 5) return 2;
-            return 1;
-        } else { // front
-            if (rank >= 4) return 2;
-            return 1;
-        }
-    }
-
-    getBonusPoints(handStrength, cardCount, position) {
-        const rank = handStrength.hand_rank[0];
-
-        if (position === 'front') {
-            if (cardCount === 3 && rank === 4) return 3; // Three of a kind
-            if (cardCount === 5) {
-                if (rank === 10) return 18; // Five of a kind
-                if (rank === 9) return 15;  // Straight flush
-                if (rank === 8) return 12;  // Four of a kind
-                if (rank === 7) return 5;   // Full house
-                if (rank >= 5) return 4;    // Straight/Flush
-            }
-        } else if (position === 'middle') {
-            if (rank === 10) return 12; // Five of a kind
-            if (rank === 9) return 10;  // Straight flush
-            if (rank === 8) return 8;   // Four of a kind
-            if (rank === 7) return 2;   // Full house
-        } else if (position === 'back') {
-            if (rank === 10) return 6;  // Five of a kind
-            if (rank === 9) return 5;   // Straight flush
-            if (rank === 8) return 4;   // Four of a kind
-        }
-
-        return 0;
-    }
-
-    scoreLargeHand(largeHand, type) {
-        // Score based on actual game point values for back hand
-        const length = largeHand.length;
-
-        if (type === 'straight_flush') {
-            // Back hand straight flush scores
-            if (length === 8) return 14; // 8-card Straight Flush
-            if (length === 7) return 11; // 7-card Straight Flush
-            if (length === 6) return 8;  // 6-card Straight Flush
-        } else if (type === 'of_a_kind') {
-            // Back hand of-a-kind scores
-            if (length === 8) return 18; // 8 of a Kind
-            if (length === 7) return 14; // 7 of a Kind
-            if (length === 6) return 10; // 6 of a Kind
-        }
-
-        return 0;
-    }
-
-    scoreOfAKindHand(ofAKind) {
-        // Score based on actual game point values
-        const length = ofAKind.length;
-        if (length === 8) return 18; // 8 of a Kind (back hand)
-        if (length === 7) return 14; // 7 of a Kind (back hand)
-        if (length === 6) return 10; // 6 of a Kind (back hand)
-        if (length === 5) return 6;  // 5 of a Kind (back hand)
-        if (length === 4) return 4;  // 4 of a Kind (back hand)
-        return 0;
-    }
-
-    getHandTypeScore(handRank) {
-        // Score based on hand type (0-10 scale from card evaluation)
-        const scores = {
-            10: 1000, // Five of a kind
-            9: 900,   // Straight flush
-            8: 800,   // Four of a kind
-            7: 700,   // Full house
-            6: 600,   // Flush
-            5: 500,   // Straight
-            4: 400,   // Three of a kind
-            3: 300,   // Two pair
-            2: 200,   // One pair
-            1: 100,   // High card
-            0: 50     // High card (alternative)
-        };
-        return scores[handRank] || 0;
     }
 }
