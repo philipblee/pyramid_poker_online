@@ -203,7 +203,33 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints) {
     popup.style.display = 'block';
 }
 
-// Close scoring popup
+// Close scoring popup and clear all hands for next round
 function closeScoringPopup() {
     document.getElementById('scoringPopup').style.display = 'none';
+
+    // Clear all hand areas for next round
+    clearAllHandAreas();
+}
+
+// Clear all hand areas (back, middle, front, staging)
+function clearAllHandAreas() {
+    const handAreas = ['playerHand', 'backHand', 'middleHand', 'frontHand'];
+
+    handAreas.forEach(handId => {
+        const handElement = document.getElementById(handId);
+        if (handElement) {
+            handElement.innerHTML = '';
+        }
+    });
+
+    // Clear hand strength displays
+    const strengthDisplays = ['backStrength', 'middleStrength', 'frontStrength'];
+    strengthDisplays.forEach(strengthId => {
+        const strengthElement = document.getElementById(strengthId);
+        if (strengthElement) {
+            strengthElement.textContent = '';
+        }
+    });
+
+    console.log('🧹 Cleared all hand areas for next round');
 }
