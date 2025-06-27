@@ -93,6 +93,7 @@ class ConfigUI {
         tooltip.style.top = y + 'px';
     }
 
+
     updateButtonText() {
     const configButton = document.getElementById('gameConfig');
     const config = window.gameConfig.getConfig();

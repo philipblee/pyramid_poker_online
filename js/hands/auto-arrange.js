@@ -43,22 +43,23 @@ class AutoArrangeManager {
 
         // Check if we have wild card optimization for 4K/5K
         const wildCards = allCards.filter(card => card.isWild);
+        let cardsToAnalyze = allCards;
         if (wildCards.length === 1) {
             const optimizedCards = this.optimizeWildForSmallHands(allCards, wildCards[0]);
             if (optimizedCards) {
                 console.log('🃏 Using wild-optimized cards for normal arrangement');
-                allCards = optimizedCards;
+                cardsToAnalyze = optimizedCards;
             }
         }
 
         // Analyze all possible hands
-        const analyzer = new HandAnalyzer(allCards);
+        const analyzer = new HandAnalyzer(cardsToAnalyze);
         const allPossibleHands = analyzer.findAllPossibleHands();
 
         console.log(`Found ${allPossibleHands.length} possible 5-card hands`);
 
         // Find the best valid arrangement
-        const bestArrangement = this.findBestArrangement(allCards, allPossibleHands);
+        const bestArrangement = this.findBestArrangement(cardsToAnalyze, allPossibleHands);
 
         if (bestArrangement) {
             console.log('✨ Best arrangement found!');
@@ -337,49 +338,49 @@ class AutoArrangeManager {
     }
 
     findLargeHandWithOneWild(allCards, wildCard) {
+        // Try large hands first (6+ cards)
+        const largeHandResult = this.tryLargeHandsWithWild(allCards, wildCard);
+        if (largeHandResult) {
+            return largeHandResult;
+        }
+
+        // If no large hands possible, optimize wild for best regular hands
+        console.log('🃏 No large hands possible, optimizing wild for regular hands...');
+        return null; // Let the enhanced normal algorithm handle it
+    }
+
+    tryLargeHandsWithWild(allCards, wildCard) {
         const nonWildCards = allCards.filter(card => !card.isWild);
         let bestArrangement = null;
         let bestScore = 0;
 
-        console.log('🃏 Optimizing with one wild card...');
+        console.log('🃏 Checking for large hands with wild card...');
 
-        // Try wild as each possible rank for of-a-kind (including 4K, 5K, 6K+)
+        // Try wild as each possible rank for of-a-kind (6K+)
         const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
         for (const rank of ranks) {
             const testCards = [...nonWildCards, this.createTestCard(wildCard, rank, '♠')];
             const ofAKind = this.findAnyOfAKind(testCards);
             
-            if (ofAKind && ofAKind.length >= 4) {
+            if (ofAKind && ofAKind.length >= 6) {
                 const score = this.scoreOfAKindHand(ofAKind);
                 if (score > bestScore) {
                     bestScore = score;
-                    // Convert wild card to the optimal rank
                     const optimalWild = this.createOptimalWild(wildCard, rank, ofAKind.cards[0].suit);
                     const finalCards = [...nonWildCards, optimalWild];
-                    
-                    if (ofAKind.length >= 6) {
-                        // Large hand - use special arrangement
-                        bestArrangement = this.createLargeHandArrangement(finalCards, {
-                            ...ofAKind,
-                            cards: ofAKind.cards.map(c => c.id === wildCard.id ? optimalWild : c)
-                        });
-                    } else {
-                        // Regular 4K/5K - let normal algorithm handle it but flag the wild optimization
-                        bestArrangement = {
-                            optimizedWild: optimalWild,
-                            useNormalArrangement: true
-                        };
-                    }
+                    bestArrangement = this.createLargeHandArrangement(finalCards, {
+                        ...ofAKind,
+                        cards: ofAKind.cards.map(c => c.id === wildCard.id ? optimalWild : c)
+                    });
                 }
             }
         }
 
-        // Try wild for straight flush completion
+        // Try wild for straight flush completion (6+ cards)
         const suits = ['♠', '♥', '♦', '♣'];
         for (const suit of suits) {
             const suitCards = nonWildCards.filter(card => card.suit === suit);
             if (suitCards.length >= 5) {
-                // Try wild as different ranks to complete straight flush
                 for (const rank of ranks) {
                     const testCards = [...nonWildCards, this.createTestCard(wildCard, rank, suit)];
                     const largeStraightFlush = this.findLargeStraightFlush(testCards);
@@ -401,15 +402,7 @@ class AutoArrangeManager {
         }
 
         if (bestArrangement) {
-            console.log(`🎯 Wild card optimized for score: ${bestScore}`);
-        }
-
-        // Handle case where we optimized wild for 4K/5K but need normal arrangement
-        if (bestArrangement && bestArrangement.useNormalArrangement) {
-            console.log(`🎯 Wild card optimized for 4K/5K, using normal arrangement`);
-            // Replace the wild card in original cards and fall back to normal algorithm
-            const optimizedCards = allCards.map(c => c.id === wildCard.id ? bestArrangement.optimizedWild : c);
-            return null; // Let normal algorithm handle with optimized wild
+            console.log(`🎯 Found large hand with wild, score: ${bestScore}`);
         }
 
         return bestArrangement;
@@ -459,30 +452,77 @@ class AutoArrangeManager {
         const nonWildCards = allCards.filter(card => !card.isWild);
         let bestOptimizedCards = null;
         let bestScore = 0;
+        let bestDescription = '';
 
-        console.log('🃏 Checking wild optimization for 4K/5K...');
+        console.log('🃏 Optimizing wild for regular hands...');
 
-        // Try wild as each possible rank for 4K/5K
         const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        const suits = ['♠', '♥', '♦', '♣'];
+
+        // Try wild as each possible card
         for (const rank of ranks) {
-            const testCards = [...nonWildCards, this.createTestCard(wildCard, rank, '♠')];
-            const ofAKind = this.findAnyOfAKind(testCards);
-            
-            if (ofAKind && ofAKind.length >= 4 && ofAKind.length < 6) {
-                const score = this.scoreOfAKindHand(ofAKind);
+            for (const suit of suits) {
+                const testCards = [...nonWildCards, this.createTestCard(wildCard, rank, suit)];
+                const score = this.evaluateWildOptimization(testCards, wildCard.id);
+                
                 if (score > bestScore) {
                     bestScore = score;
-                    const optimalWild = this.createOptimalWild(wildCard, rank, ofAKind.cards[0].suit);
-                    bestOptimizedCards = [...nonWildCards, optimalWild];
+                    bestOptimizedCards = [...nonWildCards, this.createOptimalWild(wildCard, rank, suit)];
+                    bestDescription = `${rank}${suit}`;
                 }
             }
         }
 
         if (bestOptimizedCards) {
-            console.log(`🎯 Wild optimized for ${bestScore === 100 ? '5K' : '4K'}`);
+            console.log(`🎯 Wild optimized as ${bestDescription} (score: ${bestScore})`);
+        } else {
+            console.log('🃏 No significant improvement found, wild will be used as high card');
+            // Default: make wild the highest missing card
+            bestOptimizedCards = [...nonWildCards, this.createOptimalWild(wildCard, 'A', '♠')];
         }
 
         return bestOptimizedCards;
+    }
+
+    evaluateWildOptimization(testCards, wildId) {
+        // Create a temporary hand analyzer to evaluate the potential
+        const analyzer = new HandAnalyzer(testCards);
+        const allPossibleHands = analyzer.findAllPossibleHands();
+        
+        let maxScore = 0;
+        
+        // Score the best possible hands this wild arrangement could create
+        for (const hand of allPossibleHands.slice(0, 20)) { // Check top 20 hands
+            const handCards = hand.cards;
+            const usesWild = handCards.some(c => c.id === wildId);
+            
+            if (usesWild) {
+                // Give bonus for utilizing the wild card
+                const baseScore = this.getHandTypeScore(hand.strength.hand_rank[0]);
+                const wildBonus = 10; // Bonus for using wild
+                maxScore = Math.max(maxScore, baseScore + wildBonus);
+            }
+        }
+        
+        return maxScore;
+    }
+
+    getHandTypeScore(handRank) {
+        // Score based on hand type (0-10 scale from card evaluation)
+        const scores = {
+            10: 1000, // Five of a kind
+            9: 900,   // Straight flush  
+            8: 800,   // Four of a kind
+            7: 700,   // Full house
+            6: 600,   // Flush
+            5: 500,   // Straight
+            4: 400,   // Three of a kind
+            3: 300,   // Two pair
+            2: 200,   // One pair
+            1: 100,   // High card
+            0: 50     // High card (alternative)
+        };
+        return scores[handRank] || 0;
     }
 
     createTestCard(wildCard, rank, suit) {

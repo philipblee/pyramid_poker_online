@@ -1,7 +1,7 @@
 {
-  "version": "v2.0.0-9-g5f4fcc1",
-  "commit": "5f4fcc1",
-  "branch": "single-player-mode",
-  "buildDate": "2025-06-26T18:54:58.454Z",
-  "lastCommit": "2025-06-26 12:00:33 -0400"
+  "version": "v2.0.1-2-ge4b9dda-dirty",
+  "commit": "e4b9dda",
+  "branch": "debug/valid-hand-rejection",
+  "buildDate": "2025-06-27T00:08:53.341Z",
+  "lastCommit": "2025-06-26 18:59:44 -0400"
 }

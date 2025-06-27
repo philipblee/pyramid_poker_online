@@ -447,13 +447,38 @@ class ChinesePokerGame {
 
         if (!playerData) return;
 
-        const totalPlaced = playerData.back.length + playerData.middle.length + playerData.front.length;
+        const backCount = playerData.back.length;
+        const middleCount = playerData.middle.length;
         const frontCount = playerData.front.length;
-        const expectedTotal = frontCount === 3 ? 13 : 15;
+        const totalPlaced = backCount + middleCount + frontCount;
 
-        if (totalPlaced !== expectedTotal || playerData.back.length !== 5 ||
-            playerData.middle.length !== 5 || (frontCount !== 3 && frontCount !== 5)) {
-            alert(`Please arrange exactly ${expectedTotal} cards: 5 in back, 5 in middle, ${frontCount === 3 ? '3' : '5'} in front! You can leave ${17 - expectedTotal} cards in staging area.`);
+        // Validate hand sizes (allow variable sizes)
+        const isValidBackSize = [5, 6, 7, 8].includes(backCount);
+        const isValidMiddleSize = [5, 6, 7].includes(middleCount);
+        const isValidFrontSize = frontCount === 3 || frontCount === 5;
+
+        // Validate 6+ card hands follow special rules
+        const isValidBackHand = backCount < 6 || this.validateLargeHand(playerData.back);
+        const isValidMiddleHand = middleCount < 6 || this.validateLargeHand(playerData.middle);
+
+        if (!isValidBackSize || !isValidMiddleSize || !isValidFrontSize || !isValidBackHand || !isValidMiddleHand) {
+            let errorMsg = 'Invalid hand configuration:\n';
+            if (!isValidBackSize) errorMsg += `- Back hand must have 5-8 cards (has ${backCount})\n`;
+            if (!isValidMiddleSize) errorMsg += `- Middle hand must have 5-7 cards (has ${middleCount})\n`;
+            if (!isValidFrontSize) errorMsg += `- Front hand must have 3 or 5 cards (has ${frontCount})\n`;
+            if (!isValidBackHand) errorMsg += `- Back hand with 6+ cards must be all same rank or straight flush\n`;
+            if (!isValidMiddleHand) errorMsg += `- Middle hand with 6+ cards must be all same rank or straight flush\n`;
+            
+            alert(errorMsg);
+            return;
+        }
+
+        // Calculate expected total based on actual hand sizes
+        const minExpected = 5 + 5 + 3; // 13 cards minimum
+        const maxExpected = 8 + 7 + 5; // 20 cards maximum
+        
+        if (totalPlaced < minExpected || totalPlaced > maxExpected) {
+            alert(`Invalid total cards placed: ${totalPlaced}. Must be between ${minExpected} and ${maxExpected} cards.`);
             return;
         }
 
