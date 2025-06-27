@@ -31,7 +31,7 @@ class ChinesePokerGame {
     initializeEventListeners() {
         document.getElementById('newGame').addEventListener('click', () => this.startNewGame());
         document.getElementById('addPlayer').addEventListener('click', () => this.addPlayer());
-        document.getElementById('autoArrange').addEventListener('click', () => this.autoArrangeManager.smartAutoArrangeHand());
+        document.getElementById('autoArrange').addEventListener('click', () => this.autoArrangeManager.autoArrangeHand());
         document.getElementById('sortByRank').addEventListener('click', () => this.resetAndSortByRank());
         document.getElementById('sortBySuit').addEventListener('click', () => this.resetAndSortBySuit());
         document.getElementById('submitHand').addEventListener('click', () => this.submitCurrentHand());
@@ -126,8 +126,8 @@ class ChinesePokerGame {
 
         // Add a small delay to make AI actions feel more natural
         setTimeout(() => {
-            // Auto-arrange the AI player's hand
-            this.autoArrangeManager.smartAutoArrangeHand();
+
+            this.autoArrangeManager.autoArrangeHand();
             
             // Add another delay before submitting
             setTimeout(() => {
