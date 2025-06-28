@@ -1,7 +1,7 @@
 {
-  "version": "v2.0.1-4-g9ce3607-dirty",
-  "commit": "9ce3607",
-  "branch": "refactor/phase2-scoring-extraction",
-  "buildDate": "2025-06-27T12:01:09.339Z",
-  "lastCommit": "2025-06-27 07:52:44 -0400"
+  "version": "v2.0.1-18-g2fec5a0",
+  "commit": "2fec5a0",
+  "branch": "fix/improve-hand-detector-tests",
+  "buildDate": "2025-06-28T22:59:30.520Z",
+  "lastCommit": "2025-06-28 18:54:20 -0400"
 }

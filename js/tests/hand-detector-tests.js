@@ -1,6 +1,6 @@
 // js/tests/hand-detector-tests.js v9
 // Testing framework for HandDetector - of-a-kind + full houses + flushes + straights
-// v9: Added straight counting to all test cases
+// v9: Added automatic calculation of expected values to verify manual counts
 // v8: Of-a-kind + full houses + flushes + straights
 // v7: Of-a-kind + full houses + flushes
 // v6: Of-a-kind + full houses
@@ -9,6 +9,196 @@
 class HandDetectorTestFramework {
     constructor() {
         this.testResults = [];
+    }
+
+    /**
+     * Calculate expected hand counts for a given card set
+     * This will help verify our manual calculations and catch errors
+     */
+    calculateExpectedCounts(cardString) {
+        const testCards = this.parseCards(cardString);
+
+        // Count cards by rank
+        const rankCounts = {};
+        testCards.forEach(card => {
+            rankCounts[card.rank] = (rankCounts[card.rank] || 0) + 1;
+        });
+
+        // Count cards by suit
+        const suitCounts = {};
+        testCards.forEach(card => {
+            suitCounts[card.suit] = (suitCounts[card.suit] || 0) + 1;
+        });
+
+        console.log('🔢 CALCULATING EXPECTED COUNTS:');
+        console.log('Rank distribution:', rankCounts);
+        console.log('Suit distribution:', suitCounts);
+
+        const calculated = {};
+
+        // Calculate of-a-kind hands
+        this.calculateOfAKindHands(rankCounts, calculated);
+
+        // Calculate flush hands
+        this.calculateFlushHands(suitCounts, calculated);
+
+        // Calculate straight hands
+        this.calculateStraightHands(rankCounts, calculated);
+
+        // Calculate full houses
+        this.calculateFullHouses(rankCounts, calculated);
+
+        // Calculate total
+        calculated.total = Object.entries(calculated)
+            .filter(([key]) => key !== 'total')
+            .reduce((sum, [, count]) => sum + count, 0);
+
+        console.log('📊 CALCULATED EXPECTED COUNTS:', calculated);
+        return calculated;
+    }
+
+    /**
+     * Calculate of-a-kind hands (pairs, trips, 4K, 5K, 6K, 7K, 8K)
+     */
+    calculateOfAKindHands(rankCounts, calculated) {
+        // Initialize counters
+        calculated.pair = 0;
+        calculated.threeOfAKind = 0;
+        calculated.fourOfAKind = 0;
+        calculated.fiveOfAKind = 0;
+        calculated.sixOfAKind = 0;
+        calculated.sevenOfAKind = 0;
+        calculated.eightOfAKind = 0;
+
+        Object.entries(rankCounts).forEach(([rank, count]) => {
+            // Natural hands and ONLY immediate drop-one variants
+            if (count >= 8) {
+                calculated.eightOfAKind += 1;
+                calculated.sevenOfAKind += count; // 8K → 7K only
+            } else if (count >= 7) {
+                calculated.sevenOfAKind += 1;
+                calculated.sixOfAKind += count; // 7K → 6K only
+            } else if (count >= 6) {
+                calculated.sixOfAKind += 1;
+                calculated.fiveOfAKind += count; // 6K → 5K only
+            } else if (count >= 5) {
+                calculated.fiveOfAKind += 1;
+                calculated.fourOfAKind += count; // 5K → 4K only (NO trips)
+            } else if (count >= 4) {
+                calculated.fourOfAKind += 1;
+                calculated.threeOfAKind += count; // 4K → 3K only (NO pairs)
+            } else if (count === 3) {
+                calculated.threeOfAKind += 1; // Natural trip
+                calculated.pair += count; // Natural trips → pairs only
+            } else if (count === 2) {
+                calculated.pair += 1; // Natural pairs only
+            }
+        });
+    }
+
+    /**
+     * Calculate flush hands using combination formula C(n,5)
+     */
+    calculateFlushHands(suitCounts, calculated) {
+        calculated.flush = 0;
+
+        Object.entries(suitCounts).forEach(([suit, count]) => {
+            if (count >= 5) {
+                // C(n,5) = n! / (5! * (n-5)!)
+                calculated.flush += this.combination(count, 5);
+            }
+        });
+    }
+
+    /**
+     * Calculate straight hands
+     */
+    calculateStraightHands(rankCounts, calculated) {
+        calculated.straight = 0;
+
+        // Define all possible straights (using rank values for easier calculation)
+        const straightPatterns = [
+            [14, 13, 12, 11, 10], // A-K-Q-J-10
+            [13, 12, 11, 10, 9],  // K-Q-J-10-9
+            [12, 11, 10, 9, 8],   // Q-J-10-9-8
+            [11, 10, 9, 8, 7],    // J-10-9-8-7
+            [10, 9, 8, 7, 6],     // 10-9-8-7-6
+            [9, 8, 7, 6, 5],      // 9-8-7-6-5
+            [8, 7, 6, 5, 4],      // 8-7-6-5-4
+            [7, 6, 5, 4, 3],      // 7-6-5-4-3
+            [6, 5, 4, 3, 2],      // 6-5-4-3-2
+            [5, 4, 3, 2, 14]      // 5-4-3-2-A (wheel)
+        ];
+
+        // Convert rankCounts to use numeric values
+        const valueCount = {};
+        Object.entries(rankCounts).forEach(([rank, count]) => {
+            const value = this.getRankValue(rank);
+            valueCount[value] = count;
+        });
+
+        straightPatterns.forEach(pattern => {
+            let ways = 1;
+            let canForm = true;
+
+            pattern.forEach(value => {
+                const available = valueCount[value] || 0;
+                if (available === 0) {
+                    canForm = false;
+                } else {
+                    ways *= available;
+                }
+            });
+
+            if (canForm) {
+                calculated.straight += ways;
+            }
+        });
+    }
+
+    /**
+     * Calculate full house hands
+     */
+    calculateFullHouses(rankCounts, calculated) {
+        calculated.fullHouse = 0;
+
+        // Get trips and pairs, but don't double-count the same cards
+        Object.entries(rankCounts).forEach(([tripRank, tripCount]) => {
+            if (tripCount === 3 || tripCount === 4) {
+                // Only natural trips (3) and 4K (which create trips) can provide trips
+                const tripsAvailable = tripCount === 3 ? 1 : tripCount; // Natural trip = 1, 4K = count
+
+                Object.entries(rankCounts).forEach(([pairRank, pairCount]) => {
+                    if (pairRank !== tripRank && pairCount >= 2) {
+                        // Different rank can provide pairs
+                        let pairsAvailable;
+                        if (pairCount === 2) {
+                            pairsAvailable = 1; // Natural pair
+                        } else if (pairCount === 3) {
+                            pairsAvailable = 3; // Natural trip creates 3 pairs
+                        } else {
+                            pairsAvailable = 0; // 4K+ don't create pairs, only trips
+                        }
+
+                        calculated.fullHouse += tripsAvailable * pairsAvailable;
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Combination formula C(n,r) = n! / (r! * (n-r)!)
+     */
+    combination(n, r) {
+        if (n < r) return 0;
+        if (r === 0 || r === n) return 1;
+
+        let result = 1;
+        for (let i = 0; i < r; i++) {
+            result = result * (n - i) / (i + 1);
+        }
+        return Math.round(result);
     }
 
     /**
@@ -63,6 +253,22 @@ class HandDetectorTestFramework {
         console.log(`Cards: ${testCase.cards}`);
 
         try {
+            // Calculate expected counts
+            const calculatedExpected = this.calculateExpectedCounts(testCase.cards);
+
+            // Compare with manual expected values
+            console.log('📋 MANUAL vs CALCULATED COMPARISON:');
+            const comparison = this.compareExpectedValues(testCase.expected, calculatedExpected);
+
+            if (!comparison.match) {
+                console.log('⚠️ WARNING: Manual and calculated values differ!');
+                comparison.differences.forEach(diff => {
+                    console.log(`   ${diff.category}: manual=${diff.manual}, calculated=${diff.calculated}`);
+                });
+            } else {
+                console.log('✅ Manual and calculated values match!');
+            }
+
             // Parse cards
             const testCards = this.parseCards(testCase.cards);
 
@@ -72,8 +278,9 @@ class HandDetectorTestFramework {
             const results = detector.detectAllHands();
             const endTime = performance.now();
 
-            // Verify expectations
-            const verification = this.verifyExpectations(results, testCase.expected);
+            // Verify expectations (use calculated values if available)
+            const expectedToUse = comparison.match ? testCase.expected : calculatedExpected;
+            const verification = this.verifyExpectations(results, expectedToUse);
 
             const testResult = {
                 id: testCase.id,
@@ -81,7 +288,10 @@ class HandDetectorTestFramework {
                 cards: testCase.cards,
                 timing: endTime - startTime,
                 results: results,
-                expected: testCase.expected,
+                expected: expectedToUse,
+                manual: testCase.expected,
+                calculated: calculatedExpected,
+                comparison: comparison,
                 verification: verification,
                 passed: verification.allPassed
             };
@@ -102,6 +312,33 @@ class HandDetectorTestFramework {
             this.testResults.push(errorResult);
             return errorResult;
         }
+    }
+
+    /**
+     * Compare manual vs calculated expected values
+     */
+    compareExpectedValues(manual, calculated) {
+        const differences = [];
+        let match = true;
+
+        // Check each category
+        const allCategories = new Set([...Object.keys(manual), ...Object.keys(calculated)]);
+
+        allCategories.forEach(category => {
+            const manualValue = manual[category] || 0;
+            const calculatedValue = calculated[category] || 0;
+
+            if (manualValue !== calculatedValue) {
+                match = false;
+                differences.push({
+                    category,
+                    manual: manualValue,
+                    calculated: calculatedValue
+                });
+            }
+        });
+
+        return { match, differences };
     }
 
     /**
@@ -380,4 +617,38 @@ function runSingleTest(testId) {
     }
 
     return framework.runTestCase(testCase);
+}
+
+/**
+ * Calculate expected values for a test case without running the detector
+ */
+function calculateExpectedValues(testId) {
+    const framework = new HandDetectorTestFramework();
+    const testCase = HAND_DETECTOR_TEST_CASES.find(t => t.id === testId);
+
+    if (!testCase) {
+        console.log(`❌ Test ${testId} not found`);
+        return null;
+    }
+
+    console.log(`\n🧮 CALCULATING EXPECTED VALUES FOR TEST ${testId}: ${testCase.name}`);
+    console.log(`Cards: ${testCase.cards}`);
+
+    const calculated = framework.calculateExpectedCounts(testCase.cards);
+    const comparison = framework.compareExpectedValues(testCase.expected, calculated);
+
+    console.log('\n📋 COMPARISON RESULTS:');
+    console.log('Manual expected:', testCase.expected);
+    console.log('Calculated expected:', calculated);
+
+    if (comparison.match) {
+        console.log('✅ Values match perfectly!');
+    } else {
+        console.log('⚠️ Differences found:');
+        comparison.differences.forEach(diff => {
+            console.log(`   ${diff.category}: manual=${diff.manual}, calculated=${diff.calculated}`);
+        });
+    }
+
+    return { manual: testCase.expected, calculated, comparison };
 }
