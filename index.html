@@ -110,26 +110,38 @@
     </div>
 
     <!-- JavaScript Files -->
+
+    <!-- Core dependencies first -->
     <script src="js/utils.js"></script>
     <script src="js/card-evaluation.js"></script>
-    <script src="js/hand-analyzer.js"></script>
+    <script src="js/hands/scoring-utilities.js"></script>
     <script src="js/core/player.js"></script>
     <script src="js/core/deck.js"></script>
     <script src="js/utils/version.js"></script>
     <script src="js/core/game.js"></script>
-    <script src="js/hands/scoring-utilities.js"></script>
+
+    <!-- Hand detection and analysis -->
+    <script src="js/hand-analyzer.js"></script>
+    <script src="js/hands/hand-detector.js"></script>
     <script src="js/hands/card-utilities.js"></script>
     <script src="js/hands/arrangement-scorer.js"></script>
     <script src="js/hands/wild-card-optimizer.js"></script>
     <script src="js/hands/arrangement-validator.js"></script>
     <script src="js/hands/large-hand-detector.js"></script>
     <script src="js/hands/arrangement-generator.js"></script>
+
+    <!-- Other game components -->
     <script src="js/hands/auto-arrange.js"></script>
     <script src="js/ui/scoring-popup.js"></script>
     <script src="js/ui/display.js"></script>
     <script src="js/core/game-config.js"></script>
     <script src="js/ui/config.js"></script>
     <script src="js/test-functions.js"></script>
+
+    <!-- TEST SUITE LAST -->
+    <!-- Only load tests in development -->
+    <!-- <script src="js/tests/auto-arrange-tests.js"></script> -->
+    <script src="js/tests/auto-arrange-tests.js"></script>
 
 </body>
 </html>

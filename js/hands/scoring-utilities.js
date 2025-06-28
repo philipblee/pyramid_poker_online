@@ -7,76 +7,68 @@ class ScoringUtilities {
     // CORE SCORING: Official Pyramid Poker point values
     // =============================================================================
 
-    static getPointsForHand(hand, position, cardCount = null) {
-        const handName = hand.name ? hand.name.toLowerCase() : '';
+static getPointsForHand(hand, position, cardCount = null) {
+    const handName = hand.name ? hand.name.toLowerCase() : '';
+    const numCards = cardCount || (hand.cards ? hand.cards.length : 5);
+    const pos = position.toLowerCase();
 
-        // Get card count from hand object or parameter
-        const numCards = cardCount || (hand.cards ? hand.cards.length : 5);
+    if (pos === 'front') {
+        // Front hand scoring (3-5 cards)
+        if (handName.includes('three of a kind')) return 3;
+        if (handName.includes('flush')) return 4;
+        if (handName.includes('straight') && !handName.includes('straight flush')) return 4;
+        if (handName.includes('full house')) return 5;
+        if (handName.includes('four of a kind')) return 12;
+        if (handName.includes('straight flush')) return 15;
+        if (handName.includes('five of a kind')) return 18;
+        return 1; // High card, pair, two pair
 
-        // Normalize position to lowercase
-        const pos = position.toLowerCase();
-
-        if (pos === 'front') {
-            // Front hand scoring (3-5 cards)
-            if (handName.includes('three of a kind')) return 3;
-            if (handName.includes('flush')) return 4;
-            if (handName.includes('straight') && !handName.includes('straight flush')) return 4;
-            if (handName.includes('full house')) return 5;
-            if (handName.includes('four of a kind')) return 12;
-            if (handName.includes('straight flush')) return 15;
-            if (handName.includes('five of a kind')) return 18;
-            return 1; // High card, pair, two pair
-
-        } else if (pos === 'middle') {
-            // Middle hand scoring (5-7 cards)
-
-            // Standard 5-card hands
-            if (handName.includes('full house')) return 2;
-            if (handName.includes('four of a kind')) return 8;
-            if (handName.includes('straight flush')) return 10;
-            if (handName.includes('five of a kind')) return 12;
-
-            // Large hand bonuses (6-7 cards) - Double the back hand values
-            if (numCards >= 6) {
-                if (handName.includes('straight flush')) {
-                    if (numCards === 6) return 16; // 2x back 6-card SF (8pts)
-                    if (numCards === 7) return 22; // 2x back 7-card SF (11pts)
-                }
-                if (handName.includes('of a kind')) {
-                    if (numCards === 6) return 20; // 2x back 6-of-a-kind (10pts)
-                    if (numCards === 7) return 28; // 2x back 7-of-a-kind (14pts)
-                }
+    } else if (pos === 'middle') {
+        // Check LARGE HANDS FIRST (6-7 cards)
+        if (numCards >= 6) {
+            if (handName.includes('straight flush')) {
+                if (numCards === 6) return 16; // 2x back 6-card SF (8pts)
+                if (numCards === 7) return 22; // 2x back 7-card SF (11pts)
             }
-
-            return 1; // Weaker hands (straight, flush, etc.)
-
-        } else if (pos === 'back') {
-            // Back hand scoring (5-8 cards)
-
-            // Standard 5-card hands
-            if (handName.includes('four of a kind')) return 4;
-            if (handName.includes('straight flush')) return 5;
-            if (handName.includes('five of a kind')) return 6;
-
-            // Large hand bonuses (6-8 cards)
-            if (numCards >= 6) {
-                if (handName.includes('straight flush')) {
-                    if (numCards === 6) return 8;  // 6-card Straight Flush
-                    if (numCards === 7) return 11; // 7-card Straight Flush
-                    if (numCards === 8) return 14; // 8-card Straight Flush
-                }
-                if (handName.includes('of a kind')) {
-                    if (numCards === 6) return 10; // 6 of a Kind
-                    if (numCards === 7) return 14; // 7 of a Kind
-                    if (numCards === 8) return 18; // 8 of a Kind
-                }
+            if (handName.includes('of a kind')) {
+                if (numCards === 6) return 20; // 2x back 6-of-a-kind (10pts)
+                if (numCards === 7) return 28; // 2x back 7-of-a-kind (14pts)
             }
-
-            return 1; // Weaker hands (full house, flush, straight, etc.)
         }
 
-        return 1; // Default fallback
+        // THEN check standard 5-card hands
+        if (handName.includes('full house')) return 2;
+        if (handName.includes('four of a kind')) return 8;
+        if (handName.includes('straight flush')) return 10;
+        if (handName.includes('five of a kind')) return 12;
+
+        return 1; // Weaker hands (straight, flush, etc.)
+
+    } else if (pos === 'back') {
+        // Check LARGE HANDS FIRST (6-8 cards)
+        if (numCards >= 6) {
+            if (handName.includes('straight flush')) {
+                if (numCards === 6) return 8;  // 6-card Straight Flush
+                if (numCards === 7) return 11; // 7-card Straight Flush
+                if (numCards === 8) return 14; // 8-card Straight Flush
+            }
+            if (handName.includes('of a kind')) {
+                if (numCards === 6) return 10; // 6 of a Kind
+                if (numCards === 7) return 14; // 7 of a Kind
+                if (numCards === 8) return 18; // 8 of a Kind
+            }
+        }
+
+        // THEN check standard 5-card hands
+        if (handName.includes('four of a kind')) return 4;
+        if (handName.includes('straight flush')) return 5;  // 5-card SF
+        if (handName.includes('five of a kind')) return 6;
+
+        return 1; // Weaker hands (full house, flush, straight, etc.)
     }
+
+    return 1; // Default fallback
+}
 
     // =============================================================================
     // PROBABILITY ESTIMATION
