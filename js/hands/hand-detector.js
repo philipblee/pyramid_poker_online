@@ -1,721 +1,294 @@
-// File: js/hands/hand-detector.js
-// Hand Detection Engine - Integrated with existing evaluation system
-// Efficiently detects all possible hands from 17 cards using counting optimization
-// Produces hands compatible with existing evaluateHand() and ScoringUtilities
+// js/hands/hand-detector.js v8
+// Added straight detection using consecutive rank counts
+// v7: Added flush detection using combinations from each suit
+// v6: Added full house detection using all trips and pairs combinations
+// v5: Drop-one-card pattern for of-a-kind hands
 
 class HandDetector {
-    constructor(wildsInHand = 0) {
-        this.wildsInHand = wildsInHand;
-        this.detectedHands = null; // Cache for efficiency
+    constructor(cards) {
+        this.cards = cards.filter(c => !c.isWild); // No wilds for now
+        this.allHands = [];
     }
 
     /**
-     * Main detection method - finds all possible hands from 17 cards
-     * @param {Array} cards - Array of card objects {rank, suit, value, etc.}
-     * @returns {Object} - Object containing arrays of detected hands by type
+     * Main entry point - detect of-a-kind hands, full houses, flushes, and straights
+     * @returns {Object} Structured results
      */
-    detectAllHands(cards) {
-        // Use cached results if available
-        if (this.detectedHands) {
-            return this.detectedHands;
-        }
+    detectAllHands() {
+        console.log(`🔍 HandDetector analyzing ${this.cards.length} cards...`);
 
-        console.log(`🔍 Detecting hands from ${cards.length} cards...`);
+        // Count ranks and suits
+        const { rankCounts, suitCounts } = this.countRanksAndSuits();
 
-        // Step 1: Count ranks and suits for efficient detection
-        const counts = this.countCards(cards);
+        // Detect of-a-kind hands with drop-one-card pattern
+        this.detectOfAKind(rankCounts);
 
-        // Step 2: Initialize result structure
-        this.detectedHands = {
-            // Large hands (6-8 cards) - premium scoring
-            '8K': [], '8SF': [], '7K': [], '7SF': [], '6K': [], '6SF': [],
+        // Detect full houses using all trips and pairs
+        this.detectFullHouses();
 
-            // Standard premium hands (5 cards)
-            '5K': [], '5SF': [], '4K': [], 'FH': [], '5F': [], '5S': [],
+        // Detect flushes using combinations from each suit
+        this.detectFlushes(suitCounts);
 
-            // Large flushes and straights (6-8 cards)
-            '8F': [], '7F': [], '6F': [], '8S': [], '7S': [], '6S': [],
+        // Detect straights using consecutive rank counts
+        this.detectStraights(rankCounts);
 
-            // Standard hands
-            '3K': [], 'PAIR': [], 'HIGH': []
-        };
-
-        // Step 3: Detect hands in hierarchical order (highest value first)
-        this.detectLargeOfAKind(cards, counts.rankCounts);
-        this.detectLargeStraightFlushes(cards, counts.suitRankCounts);
-        this.detectStandardPremiumHands(cards, counts);
-        this.detectLargeFlushesAndStraights(cards, counts);
-        this.detectStandardHands(cards, counts.rankCounts);
-
-        console.log(`✅ Hand detection complete. Found:`, this.getDetectionSummary());
-        return this.detectedHands;
+        return this.formatResults();
     }
 
     /**
-     * Count cards by rank and suit for efficient detection
+     * Count how many cards we have of each rank and suit
      */
-    countCards(cards) {
+    countRanksAndSuits() {
         const rankCounts = {};
         const suitCounts = {};
-        const suitRankCounts = {};
 
-        // Initialize counting structures
-        const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-        const suits = ['H', 'D', 'C', 'S'];
+        this.cards.forEach(card => {
+            // Count ranks
+            rankCounts[card.rank] = (rankCounts[card.rank] || 0) + 1;
 
-        ranks.forEach(rank => rankCounts[rank] = 0);
-        suits.forEach(suit => {
-            suitCounts[suit] = 0;
-            suitRankCounts[suit] = {};
-            ranks.forEach(rank => suitRankCounts[suit][rank] = 0);
+            // Count suits
+            suitCounts[card.suit] = (suitCounts[card.suit] || 0) + 1;
         });
 
-        // Count each card (skip wilds for now)
-        cards.forEach(card => {
-            if (!card.isWild && card.rank && card.suit) {
-                rankCounts[card.rank]++;
-                suitCounts[card.suit]++;
-                suitRankCounts[card.suit][card.rank]++;
-            }
-        });
+        console.log('📊 Rank counts:', rankCounts);
+        console.log('📊 Suit counts:', suitCounts);
 
-        return { rankCounts, suitCounts, suitRankCounts };
+        return { rankCounts, suitCounts };
     }
 
     /**
-     * Detect large same-rank hands (6K, 7K, 8K) - highest priority
+     * Detect of-a-kind hands with drop-one-card pattern
+     * For each rank with N cards (N >= 2):
+     * - Natural pairs (count = 2): just the pair
+     * - 3+ cards: 1 natural N-of-a-kind + N different (N-1)-of-a-kinds
+     * NO CASCADING - just one level down
      */
-    detectLargeOfAKind(cards, rankCounts) {
-        Object.entries(rankCounts).forEach(([rank, count]) => {
-            if (count >= 8) {
-                const hand = this.buildSameRankHand(cards, rank, 8);
-                if (hand) this.detectedHands['8K'].push(hand);
-            }
-            if (count >= 7) {
-                const hand = this.buildSameRankHand(cards, rank, 7);
-                if (hand) this.detectedHands['7K'].push(hand);
-            }
-            if (count >= 6) {
-                const hand = this.buildSameRankHand(cards, rank, 6);
-                if (hand) this.detectedHands['6K'].push(hand);
-            }
-        });
-    }
-
-    /**
-     * Detect large straight flushes (6SF, 7SF, 8SF)
-     */
-    detectLargeStraightFlushes(cards, suitRankCounts) {
-        Object.entries(suitRankCounts).forEach(([suit, rankCounts]) => {
-            const suitCardCount = Object.values(rankCounts).reduce((sum, count) => sum + count, 0);
-
-            if (suitCardCount >= 6) {
-                // Get all cards of this suit
-                const suitCards = cards.filter(c => c.suit === suit && !c.isWild);
-
-                // Find all straight flushes in this suit
-                const allSFs = this.findAllStraightFlushesInSuit(suitCards);
-
-                // Categorize by length
-                allSFs.forEach(sf => {
-                    if (sf.length === 8) {
-                        this.detectedHands['8SF'].push(sf);
-                    } else if (sf.length === 7) {
-                        this.detectedHands['7SF'].push(sf);
-                    } else if (sf.length === 6) {
-                        this.detectedHands['6SF'].push(sf);
-                    }
-                });
-            }
-        });
-    }
-
-    /**
-     * Detect standard premium hands (5K, 5SF, 4K, FH, 5F, 5S)
-     */
-    detectStandardPremiumHands(cards, counts) {
-        // 5 of a kind and 4 of a kind
-        Object.entries(counts.rankCounts).forEach(([rank, count]) => {
-            if (count >= 5) {
-                const hand = this.buildSameRankHand(cards, rank, 5);
-                if (hand) this.detectedHands['5K'].push(hand);
-            }
-            if (count >= 4) {
-                const hand = this.buildSameRankHand(cards, rank, 4);
-                if (hand) this.detectedHands['4K'].push(hand);
-            }
-        });
-
-        // 5-card straight flushes
-        Object.entries(counts.suitRankCounts).forEach(([suit, rankCounts]) => {
-            const suitCardCount = Object.values(rankCounts).reduce((sum, count) => sum + count, 0);
-
-            if (suitCardCount >= 5) {
-                const suitCards = cards.filter(c => c.suit === suit && !c.isWild);
-                const allSFs = this.findAllStraightFlushesInSuit(suitCards);
-
-                // Add 5-card straight flushes
-                allSFs.forEach(sf => {
-                    if (sf.length === 5) {
-                        this.detectedHands['5SF'].push(sf);
-                    }
-                });
-            }
-        });
-
-        // Full houses
-        this.detectFullHouses(cards, counts.rankCounts);
-
-        // 5-card flushes and straights
-        this.detect5CardFlushesAndStraights(cards, counts);
-    }
-
-    /**
-     * Detect full houses (trips + different rank pair)
-     */
-    detectFullHouses(cards, rankCounts) {
-        const tripsRanks = Object.entries(rankCounts)
-            .filter(([rank, count]) => count >= 3)
-            .map(([rank]) => rank);
-
-        const pairRanks = Object.entries(rankCounts)
-            .filter(([rank, count]) => count >= 2)
-            .map(([rank]) => rank);
-
-        // Find all valid trips + pair combinations (different ranks)
-        tripsRanks.forEach(tripsRank => {
-            pairRanks.forEach(pairRank => {
-                if (tripsRank !== pairRank) {
-                    const hand = this.buildFullHouse(cards, tripsRank, pairRank);
-                    if (hand) {
-                        this.detectedHands['FH'].push(hand);
-                    }
-                }
-            });
-        });
-    }
-
-    /**
-     * Detect 5-card flushes and straights
-     */
-    detect5CardFlushesAndStraights(cards, counts) {
-        // 5-card flushes
-        Object.entries(counts.suitCounts).forEach(([suit, count]) => {
-            if (count >= 5) {
-                const hand = this.buildFlush(cards, suit, 5);
-                if (hand) this.detectedHands['5F'].push(hand);
-            }
-        });
-
-        // 5-card straights
-        const straights = this.findAllStraights(cards, 5);
-        this.detectedHands['5S'] = straights;
-    }
-
-    /**
-     * Detect large flushes and straights (6-8 cards)
-     */
-    detectLargeFlushesAndStraights(cards, counts) {
-        // Large flushes
-        Object.entries(counts.suitCounts).forEach(([suit, count]) => {
-            if (count >= 8) {
-                const hand = this.buildFlush(cards, suit, 8);
-                if (hand) this.detectedHands['8F'].push(hand);
-            }
-            if (count >= 7) {
-                const hand = this.buildFlush(cards, suit, 7);
-                if (hand) this.detectedHands['7F'].push(hand);
-            }
-            if (count >= 6) {
-                const hand = this.buildFlush(cards, suit, 6);
-                if (hand) this.detectedHands['6F'].push(hand);
-            }
-        });
-
-        // Large straights
-        [8, 7, 6].forEach(size => {
-            const straights = this.findAllStraights(cards, size);
-            this.detectedHands[`${size}S`] = straights;
-        });
-    }
-
-    /**
-     * Detect standard hands (3K, pairs, high card)
-     */
-    detectStandardHands(cards, rankCounts) {
-        // 3 of a kind
-        Object.entries(rankCounts).forEach(([rank, count]) => {
-            if (count >= 3) {
-                const hand = this.buildSameRankHand(cards, rank, 3);
-                if (hand) this.detectedHands['3K'].push(hand);
-            }
-        });
-
-        // Pairs (for completeness, though less important for arrangement)
+    detectOfAKind(rankCounts) {
         Object.entries(rankCounts).forEach(([rank, count]) => {
             if (count >= 2) {
-                const hand = this.buildSameRankHand(cards, rank, 2);
-                if (hand) this.detectedHands['PAIR'].push(hand);
-            }
-        });
-    }
+                const allCardsOfRank = this.cards.filter(c => c.rank === rank);
 
-    // =============================================================================
-    // STRAIGHT FLUSH DETECTION METHODS
-    // =============================================================================
+                // Handle natural pairs (exactly 2 cards)
+                if (count === 2) {
+                    const naturalPair = allCardsOfRank.slice(0, 2);
+                    this.addHand(naturalPair, 'Pair');
+                }
 
-    /**
-     * Find all straight flushes in a suit (5+ cards)
-     * @param {Array} suitCards - Cards of same suit
-     * @returns {Array} - All straight flushes found (all lengths)
-     */
-    findAllStraightFlushes(suitCards) {
-        return this.findAllStraightFlushesInSuit(suitCards);
-    }
+                // Handle 3+ cards: natural + drop-one variants
+                else if (count >= 3) {
+                    // 1. Create natural N-of-a-kind
+                    const naturalHand = allCardsOfRank.slice(0, count);
+                    const naturalHandType = count >= 4 ? `${count} of a Kind` : 'Three of a Kind';
+                    this.addHand(naturalHand, naturalHandType);
 
-    /**
-     * Find all straight flushes of specific length
-     * @param {Array} suitCards - Cards of same suit
-     * @param {number} size - Target size (5, 6, 7, or 8)
-     * @returns {Array} - All straight flushes of target length
-     */
-    findStraightFlushesOfLength(suitCards, size) {
-        const allSFs = this.findAllStraightFlushesInSuit(suitCards);
-        return allSFs.filter(sf => sf.length === size);
-    }
+                    // 2. Create count different (count-1)-of-a-kinds by dropping one card each
+                    const targetSize = count - 1;
+                    const targetHandType = targetSize >= 4 ? `${targetSize} of a Kind` :
+                                         targetSize === 3 ? 'Three of a Kind' : 'Pair';
 
-    /**
-     * Find ALL possible straight flushes in a suit (the main method)
-     * @param {Array} suitCards - All cards of same suit
-     * @returns {Array} - Array of all possible straight flush hands
-     */
-    findAllStraightFlushesInSuit(suitCards) {
-        if (suitCards.length < 5) return [];
+                    for (let dropIndex = 0; dropIndex < count; dropIndex++) {
+                        const variantHand = allCardsOfRank.slice(0, count)
+                            .filter((card, index) => index !== dropIndex);
 
-        const allSFs = [];
-
-        // Count available ranks in this suit
-        const rankCounts = {};
-        suitCards.forEach(card => {
-            if (!card.isWild) {
-                rankCounts[card.value] = (rankCounts[card.value] || 0) + 1;
-            }
-        });
-
-        // Find all possible straight flushes for each length (8 down to 5)
-        for (let length = 8; length >= 5; length--) {
-            const sfsOfLength = this.findAllStraightFlushesOfLength(suitCards, rankCounts, length);
-            allSFs.push(...sfsOfLength);
-        }
-
-        return allSFs;
-    }
-
-    /**
-     * Find all straight flushes of specific length
-     * @param {Array} suitCards - Cards of same suit
-     * @param {Object} rankCounts - Count of each rank
-     * @param {number} length - Target length
-     * @returns {Array} - All SFs of this length
-     */
-    findAllStraightFlushesOfLength(suitCards, rankCounts, length) {
-        const sfs = [];
-
-        // Try all possible starting positions (high card values)
-        for (let high = 14; high >= length + 1; high--) {
-            if (this.canMakeStraightFlush(rankCounts, high, length)) {
-                const sf = this.buildStraightFlushHand(suitCards, high, length);
-                if (sf) {
-                    const evaluation = evaluateHand(sf);
-                    sfs.push({
-                        cards: sf,
-                        evaluation: evaluation,
-                        type: `${length}SF`,
-                        strength: evaluation.hand_rank[0],
-                        requiredCards: sf.map(c => c.id || `${c.rank}${c.suit}`),
-                        length: length,
-                        high: high,
-                        low: high - length + 1
-                    });
+                        this.addHand(variantHand, targetHandType);
+                    }
                 }
             }
+        });
+    }
+
+    /**
+     * Detect straights using consecutive rank counts
+     * 5 consecutive ranks with count >= 1 each
+     * Number of straights = product of the 5 consecutive counts
+     * Include A-2-3-4-5 wheel straight
+     */
+    detectStraights(rankCounts) {
+        // Convert ranks to values for easier consecutive checking
+        const rankValues = {
+            '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+            'J': 11, 'Q': 12, 'K': 13, 'A': 14
+        };
+
+        // Create value-to-count mapping
+        const valueCounts = {};
+        Object.entries(rankCounts).forEach(([rank, count]) => {
+            const value = rankValues[rank];
+            valueCounts[value] = count;
+        });
+
+        console.log(`🔢 Straight detection - value counts:`, valueCounts);
+
+        // Check regular straights (5-6-7-8-9 through 10-J-Q-K-A)
+        for (let startValue = 2; startValue <= 10; startValue++) {
+            const consecutive = [startValue, startValue+1, startValue+2, startValue+3, startValue+4];
+
+            // Check if all 5 consecutive values exist
+            if (consecutive.every(val => valueCounts[val] > 0)) {
+                const straightCount = consecutive.reduce((product, val) => product * valueCounts[val], 1);
+                console.log(`🔢 Found straight ${startValue}-${startValue+4}: ${straightCount} combinations`);
+
+                // Generate all combinations for this straight
+                this.generateStraightCombinations(consecutive, valueCounts, rankValues);
+            }
         }
 
-        // Special case: Check for wheel straight (A-5-4-3-2) for 5-card only
-        if (length === 5 && this.canMakeWheelStraightFlush(rankCounts)) {
-            const wheelSF = this.buildWheelStraightFlush(suitCards);
-            if (wheelSF) {
-                const evaluation = evaluateHand(wheelSF);
-                sfs.push({
-                    cards: wheelSF,
-                    evaluation: evaluation,
-                    type: `${length}SF`,
-                    strength: evaluation.hand_rank[0],
-                    requiredCards: wheelSF.map(c => c.id || `${c.rank}${c.suit}`),
-                    length: length,
-                    high: 14,
-                    low: 5,
-                    isWheel: true
+        // Check wheel straight (A-2-3-4-5)
+        const wheelValues = [14, 2, 3, 4, 5]; // A=14, but acts as 1 in wheel
+        if (wheelValues.every(val => valueCounts[val] > 0)) {
+            const wheelCount = wheelValues.reduce((product, val) => product * valueCounts[val], 1);
+            console.log(`🔢 Found wheel straight A-2-3-4-5: ${wheelCount} combinations`);
+
+            // Generate wheel straight combinations
+            this.generateStraightCombinations(wheelValues, valueCounts, rankValues);
+        }
+    }
+
+    /**
+     * Generate all combinations for a specific straight
+     */
+    generateStraightCombinations(values, valueCounts, rankValues) {
+        // Get all cards for each value in the straight
+        const cardsByValue = {};
+        values.forEach(value => {
+            cardsByValue[value] = this.cards.filter(card => {
+                const cardValue = rankValues[card.rank];
+                return cardValue === value;
+            });
+        });
+
+        // Generate all combinations (one card from each value)
+        const generateCombos = (valueIndex, currentCombo) => {
+            if (valueIndex >= values.length) {
+                // Complete combination - add as straight
+                this.addHand([...currentCombo], 'Straight');
+                return;
+            }
+
+            const value = values[valueIndex];
+            const availableCards = cardsByValue[value];
+
+            availableCards.forEach(card => {
+                currentCombo.push(card);
+                generateCombos(valueIndex + 1, currentCombo);
+                currentCombo.pop();
+            });
+        };
+
+        generateCombos(0, []);
+    }
+
+    /**
+     * Detect flushes using combinations from each suit
+     * Any suit with 5+ cards generates C(n,5) different 5-card flushes
+     */
+    detectFlushes(suitCounts) {
+        Object.entries(suitCounts).forEach(([suit, count]) => {
+            if (count >= 5) {
+                // Get all cards of this suit
+                const suitCards = this.cards.filter(c => c.suit === suit);
+
+                // Generate all 5-card combinations from this suit
+                const flushCombinations = this.generateCombinations(suitCards, 5);
+
+                console.log(`♠️ Suit ${suit}: ${count} cards → ${flushCombinations.length} flushes`);
+
+                flushCombinations.forEach(combo => {
+                    this.addHand(combo, 'Flush');
                 });
             }
-        }
-
-        return sfs;
-    }
-
-    /**
-     * Check if we can make a straight flush of given length starting from high card
-     * @param {Object} rankCounts - Available rank counts
-     * @param {number} high - Highest card value
-     * @param {number} length - Length needed
-     * @returns {boolean} - True if possible
-     */
-    canMakeStraightFlush(rankCounts, high, length) {
-        for (let i = 0; i < length; i++) {
-            const rank = high - i;
-            if (!rankCounts[rank] || rankCounts[rank] === 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Check if we can make wheel straight flush (A-5-4-3-2)
-     * @param {Object} rankCounts - Available rank counts
-     * @returns {boolean} - True if wheel is possible
-     */
-    canMakeWheelStraightFlush(rankCounts) {
-        return rankCounts[14] && rankCounts[5] && rankCounts[4] && rankCounts[3] && rankCounts[2];
-    }
-
-    /**
-     * Build straight flush hand from available cards
-     * @param {Array} suitCards - All cards in suit
-     * @param {number} high - Highest card value
-     * @param {number} length - Length of straight
-     * @returns {Array|null} - Cards forming the straight flush
-     */
-    buildStraightFlushHand(suitCards, high, length) {
-        const handCards = [];
-
-        for (let i = 0; i < length; i++) {
-            const rank = high - i;
-            const card = suitCards.find(c => c.value === rank && !c.isWild);
-            if (card) {
-                handCards.push(card);
-            } else {
-                return null; // Shouldn't happen if canMakeStraightFlush returned true
-            }
-        }
-
-        return handCards;
-    }
-
-    /**
-     * Build wheel straight flush (A-5-4-3-2)
-     * @param {Array} suitCards - All cards in suit
-     * @returns {Array|null} - Cards forming wheel straight flush
-     */
-    buildWheelStraightFlush(suitCards) {
-        const wheelRanks = [14, 5, 4, 3, 2]; // A-5-4-3-2
-        const handCards = [];
-
-        wheelRanks.forEach(rank => {
-            const card = suitCards.find(c => c.value === rank && !c.isWild);
-            if (card) {
-                handCards.push(card);
-            }
         });
-
-        return handCards.length === 5 ? handCards : null;
     }
 
-    // =============================================================================
-    // STRAIGHT DETECTION METHODS
-    // =============================================================================
+    /**
+     * Generate all combinations of r cards from the given array
+     */
+    generateCombinations(cards, r) {
+        if (r > cards.length) return [];
+        if (r === 1) return cards.map(card => [card]);
+        if (r === cards.length) return [cards];
+
+        const combinations = [];
+
+        function combine(start, current) {
+            if (current.length === r) {
+                combinations.push([...current]);
+                return;
+            }
+
+            for (let i = start; i < cards.length; i++) {
+                current.push(cards[i]);
+                combine(i + 1, current);
+                current.pop();
+            }
+        }
+
+        combine(0, []);
+        return combinations;
+    }
 
     /**
-     * Find all possible straights of given size (mixed suits)
-     * @param {Array} cards - All cards to search
-     * @param {number} size - Target straight size
-     * @returns {Array} - Array of straight hands found
+     * Detect full houses using all available trips and pairs
+     * Full house = 3 cards of one rank + 2 cards of different rank
      */
-    findAllStraights(cards, size) {
-        const straights = [];
+    detectFullHouses() {
+        // Get all trips and pairs from our existing hands
+        const trips = this.allHands.filter(h => h.handType === 'Three of a Kind');
+        const pairs = this.allHands.filter(h => h.handType === 'Pair');
 
-        // Count all ranks across all suits
-        const rankCounts = {};
-        cards.forEach(card => {
-            if (!card.isWild) {
-                rankCounts[card.value] = (rankCounts[card.value] || 0) + 1;
-            }
+        console.log(`🏠 Full house detection: ${trips.length} trips, ${pairs.length} pairs`);
+
+        // Debug: show rank breakdown
+        const tripsByRank = {};
+        const pairsByRank = {};
+        trips.forEach(t => {
+            tripsByRank[t.rank] = (tripsByRank[t.rank] || 0) + 1;
         });
-
-        // Find all possible straights
-        for (let high = 14; high >= size + 1; high--) {
-            if (this.canMakeStraight(rankCounts, high, size)) {
-                const handCards = this.buildBestStraightHand(cards, high, size);
-                if (handCards) {
-                    const evaluation = evaluateHand(handCards);
-                    straights.push({
-                        cards: handCards,
-                        evaluation: evaluation,
-                        type: `${size}S`,
-                        strength: evaluation.hand_rank[0],
-                        requiredCards: handCards.map(c => c.id || `${c.rank}${c.suit}`),
-                        high: high,
-                        low: high - size + 1
-                    });
-                }
-            }
-        }
-
-        // Check for wheel straight (A-5-4-3-2) for 5-card
-        if (size === 5 && this.canMakeWheelStraightFlush(rankCounts)) {
-            const wheelCards = this.buildWheelStraight(cards);
-            if (wheelCards) {
-                const evaluation = evaluateHand(wheelCards);
-                straights.push({
-                    cards: wheelCards,
-                    evaluation: evaluation,
-                    type: `${size}S`,
-                    strength: evaluation.hand_rank[0],
-                    requiredCards: wheelCards.map(c => c.id || `${c.rank}${c.suit}`),
-                    high: 14,
-                    low: 5,
-                    isWheel: true
-                });
-            }
-        }
-
-        return straights;
-    }
-
-    /**
-     * Check if we can make a straight (mixed suits)
-     * @param {Object} rankCounts - Available rank counts
-     * @param {number} high - Highest card value
-     * @param {number} length - Length needed
-     * @returns {boolean} - True if possible
-     */
-    canMakeStraight(rankCounts, high, length) {
-        for (let i = 0; i < length; i++) {
-            const rank = high - i;
-            if (!rankCounts[rank] || rankCounts[rank] === 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Build best possible straight hand (mixed suits)
-     * @param {Array} cards - All available cards
-     * @param {number} high - Highest card value
-     * @param {number} length - Straight length
-     * @returns {Array|null} - Best straight hand
-     */
-    buildBestStraightHand(cards, high, length) {
-        const handCards = [];
-
-        for (let i = 0; i < length; i++) {
-            const rank = high - i;
-            const availableCards = cards.filter(c => c.value === rank && !c.isWild);
-            if (availableCards.length > 0) {
-                // Take first available (could be enhanced to pick best suit, etc.)
-                handCards.push(availableCards[0]);
-            } else {
-                return null;
-            }
-        }
-
-        return handCards;
-    }
-
-    /**
-     * Build wheel straight (A-5-4-3-2) with mixed suits
-     * @param {Array} cards - All available cards
-     * @returns {Array|null} - Cards forming wheel straight
-     */
-    buildWheelStraight(cards) {
-        const wheelRanks = [14, 5, 4, 3, 2];
-        const handCards = [];
-
-        wheelRanks.forEach(rank => {
-            const availableCards = cards.filter(c => c.value === rank && !c.isWild);
-            if (availableCards.length > 0) {
-                handCards.push(availableCards[0]);
-            }
+        pairs.forEach(p => {
+            pairsByRank[p.rank] = (pairsByRank[p.rank] || 0) + 1;
         });
+        console.log(`🏠 Trips by rank:`, tripsByRank);
+        console.log(`🏠 Pairs by rank:`, pairsByRank);
 
-        return handCards.length === 5 ? handCards : null;
-    }
-
-    // =============================================================================
-    // HAND BUILDING METHODS
-    // =============================================================================
-
-    /**
-     * Build a same-rank hand using existing evaluation system
-     */
-    buildSameRankHand(cards, rank, count) {
-        const sameRankCards = cards.filter(c => c.rank === rank && !c.isWild);
-
-        if (sameRankCards.length < count) return null;
-
-        const handCards = sameRankCards.slice(0, count);
-
-        // Use existing evaluation system to get proper hand object
-        const evaluation = evaluateHand(handCards);
-
-        return {
-            cards: handCards,
-            evaluation: evaluation,
-            type: `${count}K`,
-            strength: evaluation.hand_rank[0],
-            requiredCards: handCards.map(c => c.id || `${c.rank}${c.suit}`) // For conflict detection
-        };
-    }
-
-    /**
-     * Build a full house using existing evaluation system
-     */
-    buildFullHouse(cards, tripsRank, pairRank) {
-        const tripsCards = cards.filter(c => c.rank === tripsRank && !c.isWild).slice(0, 3);
-        const pairCards = cards.filter(c => c.rank === pairRank && !c.isWild).slice(0, 2);
-
-        if (tripsCards.length < 3 || pairCards.length < 2) return null;
-
-        const handCards = [...tripsCards, ...pairCards];
-        const evaluation = evaluateHand(handCards);
-
-        return {
-            cards: handCards,
-            evaluation: evaluation,
-            type: 'FH',
-            strength: evaluation.hand_rank[0],
-            requiredCards: handCards.map(c => c.id || `${c.rank}${c.suit}`)
-        };
-    }
-
-    /**
-     * Build a flush using existing evaluation system
-     */
-    buildFlush(cards, suit, size) {
-        const suitCards = cards.filter(c => c.suit === suit && !c.isWild)
-            .sort((a, b) => b.value - a.value) // Highest cards first
-            .slice(0, size);
-
-        if (suitCards.length < size) return null;
-
-        const evaluation = evaluateHand(suitCards);
-
-        return {
-            cards: suitCards,
-            evaluation: evaluation,
-            type: `${size}F`,
-            strength: evaluation.hand_rank[0],
-            requiredCards: suitCards.map(c => c.id || `${c.rank}${c.suit}`)
-        };
-    }
-
-    // =============================================================================
-    // UTILITY METHODS
-    // =============================================================================
-
-    /**
-     * Get detection summary for debugging
-     */
-    getDetectionSummary() {
-        if (!this.detectedHands) return {};
-
-        const summary = {};
-        Object.entries(this.detectedHands).forEach(([type, hands]) => {
-            if (hands.length > 0) {
-                summary[type] = hands.length;
-            }
-        });
-        return summary;
-    }
-
-    /**
-     * Check if two hands conflict (share cards)
-     */
-    static handsConflict(hand1, hand2) {
-        const cards1 = new Set(hand1.requiredCards);
-        const cards2 = new Set(hand2.requiredCards);
-
-        // Check for any shared cards
-        for (const card of cards1) {
-            if (cards2.has(card)) return true;
-        }
-        return false;
-    }
-
-    /**
-     * Get hands that can be placed in specific positions
-     */
-    getHandsForPosition(position) {
-        if (!this.detectedHands) return [];
-
-        const pos = position.toLowerCase();
-        const allHands = [];
-
-        if (pos === 'back') {
-            // Back can hold any hand type, any size (5-8 cards)
-            Object.entries(this.detectedHands).forEach(([type, hands]) => {
-                allHands.push(...hands);
-            });
-        } else if (pos === 'middle') {
-            // Middle can hold 5-7 card hands
-            ['5K', '5SF', '4K', 'FH', '5F', '5S', '6K', '6SF', '6F', '6S', '7K', '7SF', '7F', '7S', '3K'].forEach(type => {
-                if (this.detectedHands[type]) {
-                    allHands.push(...this.detectedHands[type]);
+        // Create full house from each trip + each pair (different ranks only)
+        let fullHouseCount = 0;
+        trips.forEach(trip => {
+            pairs.forEach(pair => {
+                if (trip.rank !== pair.rank) {
+                    const fullHouse = [...trip.cards, ...pair.cards];
+                    this.addHand(fullHouse, 'Full House');
+                    fullHouseCount++;
                 }
             });
-        } else if (pos === 'front') {
-            // Front typically holds 3-card hands, but can hold 5-card if strong enough
-            ['3K', 'PAIR', 'HIGH'].forEach(type => {
-                if (this.detectedHands[type]) {
-                    allHands.push(...this.detectedHands[type]);
-                }
-            });
-        }
+        });
 
-        return allHands;
+        console.log(`🏠 Created ${fullHouseCount} full houses`);
     }
 
     /**
-     * Debug helper - get summary of all straight flushes found
-     * @param {Array} suitCards - Cards in suit to analyze
-     * @returns {Object} - Summary of findings
+     * Add a hand to our results
      */
-    getStraightFlushSummary(suitCards) {
-        const allSFs = this.findAllStraightFlushesInSuit(suitCards);
-
-        const summary = {
-            total: allSFs.length,
-            by_length: {}
-        };
-
-        allSFs.forEach(sf => {
-            const length = sf.length;
-            if (!summary.by_length[length]) {
-                summary.by_length[length] = [];
-            }
-            summary.by_length[length].push({
-                high: sf.high,
-                low: sf.low,
-                cards: sf.cards.map(c => c.rank).join('-')
-            });
+    addHand(cards, handType) {
+        this.allHands.push({
+            cards: [...cards],
+            handType,
+            cardCount: cards.length,
+            rank: cards[0].rank  // All cards same rank for of-a-kind
         });
 
-        return summary;
+        console.log(`🎯 Found: ${handType} of ${cards[0].rank}s (${cards.length} cards)`);
     }
-}
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = HandDetector;
+    /**
+     * Format results
+     */
+    formatResults() {
+        const results = {
+            total: this.allHands.length,
+            hands: this.allHands
+        };
+
+        console.log(`✅ HandDetector found ${results.total} hands (of-a-kind + full houses + flushes + straights)`);
+        return results;
+    }
 }
