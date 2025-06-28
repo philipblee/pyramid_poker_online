@@ -1,149 +1,142 @@
 // js/hands/arrangement-scorer.js
+// CLEAN VERSION: Uses ScoringUtilities as single source of truth
 
 class ArrangementScorer {
+
+    // =============================================================================
+    // ARRANGEMENT EVALUATION: Uses ScoringUtilities for all calculations
+    // =============================================================================
+
     static scoreArrangement(arrangement) {
-        let score = 0;
+        // Calculate EXPECTED POINTS based on hand strengths and win probabilities
+        let expectedPoints = 0;
 
-        // Base points for winning hands (assuming average opponents)
-        score += this.getBaseHandScore(arrangement.backStrength, 'back');
-        score += this.getBaseHandScore(arrangement.middleStrength, 'middle');
-        score += this.getBaseHandScore(arrangement.frontStrength, 'front');
+        // Get expected points for each position using ScoringUtilities
+        expectedPoints += ScoringUtilities.getExpectedPoints(
+            arrangement.backStrength,
+            arrangement.back,
+            'back'
+        );
 
-        // Bonus points
-        score += this.getBonusPoints(arrangement.backStrength, arrangement.back.length, 'back');
-        score += this.getBonusPoints(arrangement.middleStrength, arrangement.middle.length, 'middle');
-        score += this.getBonusPoints(arrangement.frontStrength, arrangement.front.length, 'front');
+        expectedPoints += ScoringUtilities.getExpectedPoints(
+            arrangement.middleStrength,
+            arrangement.middle,
+            'middle'
+        );
 
-        return score;
+        expectedPoints += ScoringUtilities.getExpectedPoints(
+            arrangement.frontStrength,
+            arrangement.front,
+            'front'
+        );
+
+        // Add strategic bonuses
+        expectedPoints += this.getStrategicBonuses(arrangement);
+
+        return Math.round(expectedPoints * 100) / 100; // Round to 2 decimals
     }
 
-    static getBaseHandScore(handStrength, position) {
-        // Estimate points for winning with this hand strength
-        const rank = handStrength.hand_rank[0];
+    static getStrategicBonuses(arrangement) {
+        let bonus = 0;
 
-        if (position === 'back') {
-            if (rank >= 8) return 3; // Strong hands likely to win
-            if (rank >= 6) return 2; // Medium hands
-            return 1; // Weak hands
-        } else if (position === 'middle') {
-            if (rank >= 7) return 3;
-            if (rank >= 5) return 2;
-            return 1;
-        } else { // front
-            if (rank >= 4) return 2;
-            return 1;
-        }
-    }
-
-    static getBonusPoints(handStrength, cardCount, position) {
-        const rank = handStrength.hand_rank[0];
-
-        if (position === 'front') {
-            if (cardCount === 3 && rank === 4) return 3; // Three of a kind
-            if (cardCount === 5) {
-                if (rank === 10) return 18; // Five of a kind
-                if (rank === 9) return 15;  // Straight flush
-                if (rank === 8) return 12;  // Four of a kind
-                if (rank === 7) return 5;   // Full house
-                if (rank >= 5) return 4;    // Straight/Flush
-            }
-        } else if (position === 'middle') {
-            if (rank === 10) return 12; // Five of a kind
-            if (rank === 9) return 10;  // Straight flush
-            if (rank === 8) return 8;   // Four of a kind
-            if (rank === 7) return 2;   // Full house
-        } else if (position === 'back') {
-            if (rank === 10) return 6;  // Five of a kind
-            if (rank === 9) return 5;   // Straight flush
-            if (rank === 8) return 4;   // Four of a kind
+        // Bonus for valid arrangement (meets ordering requirements)
+        if (ScoringUtilities.isValidArrangement(
+            arrangement.backStrength,
+            arrangement.middleStrength,
+            arrangement.frontStrength
+        )) {
+            bonus += 0.5;
         }
 
-        return 0;
-    }
-
-    static scoreLargeHand(largeHand, type) {
-        // Score based on actual game point values for back hand
-        const length = largeHand.length;
-
-        if (type === 'straight_flush') {
-            // Back hand straight flush scores
-            if (length === 8) return 14; // 8-card Straight Flush
-            if (length === 7) return 11; // 7-card Straight Flush
-            if (length === 6) return 8;  // 6-card Straight Flush
-        } else if (type === 'of_a_kind') {
-            // Back hand of-a-kind scores
-            if (length === 8) return 18; // 8 of a Kind
-            if (length === 7) return 14; // 7 of a Kind
-            if (length === 6) return 10; // 6 of a Kind
+        // Bonus for efficient card usage (no waste)
+        const totalCards = arrangement.back.length + arrangement.middle.length + arrangement.front.length;
+        if (totalCards === 17) {
+            bonus += 0.3;
         }
 
-        return 0;
-    }
+        // Bonus for front hand optimization (4+ point potential)
+        const frontPoints = ScoringUtilities.getPointsForHand(
+            arrangement.frontStrength,
+            'front',
+            arrangement.front.length
+        );
+        if (frontPoints >= 4 && arrangement.front.length >= 4) {
+            bonus += 0.5; // Good front hand strategy
+        }
 
-    static scoreOfAKindHand(ofAKind) {
-        // Score based on actual game point values
-        const length = ofAKind.length;
-        if (length === 8) return 18; // 8 of a Kind (back hand)
-        if (length === 7) return 14; // 7 of a Kind (back hand)
-        if (length === 6) return 10; // 6 of a Kind (back hand)
-        if (length === 5) return 6;  // 5 of a Kind (back hand)
-        if (length === 4) return 4;  // 4 of a Kind (back hand)
-        return 0;
-    }
+        // Bonus for large hand utilization
+        if (arrangement.back.length >= 6 || arrangement.middle.length >= 6) {
+            bonus += 0.3; // Reward for using large hands effectively
+        }
 
-    static getHandTypeScore(handRank) {
-        // Score based on hand type (0-10 scale from card evaluation)
-        const scores = {
-            10: 1000, // Five of a kind
-            9: 900,   // Straight flush
-            8: 800,   // Four of a kind
-            7: 700,   // Full house
-            6: 600,   // Flush
-            5: 500,   // Straight
-            4: 400,   // Three of a kind
-            3: 300,   // Two pair
-            2: 200,   // One pair
-            1: 100,   // High card
-            0: 50     // High card (alternative)
-        };
-        return scores[handRank] || 0;
+        return bonus;
     }
 
     // =============================================================================
-    // SCORING ANALYSIS UTILITIES
+    // ANALYSIS AND COMPARISON
     // =============================================================================
 
     static analyzeArrangementValue(arrangement) {
-        // Provides detailed breakdown of arrangement scoring
-        const analysis = {
-            totalScore: this.scoreArrangement(arrangement),
+        const totalScore = this.scoreArrangement(arrangement);
+
+        return {
+            totalScore: totalScore,
             breakdown: {
                 back: {
-                    base: this.getBaseHandScore(arrangement.backStrength, 'back'),
-                    bonus: this.getBonusPoints(arrangement.backStrength, arrangement.back.length, 'back'),
+                    expectedPoints: ScoringUtilities.getExpectedPoints(
+                        arrangement.backStrength, arrangement.back, 'back'
+                    ),
+                    winProbability: ScoringUtilities.estimateWinProbability(
+                        arrangement.backStrength, 'back'
+                    ),
+                    pointsIfWin: ScoringUtilities.getPointsForHand(
+                        arrangement.backStrength, 'back', arrangement.back.length
+                    ),
                     handType: arrangement.backStrength.name,
                     cardCount: arrangement.back.length
                 },
                 middle: {
-                    base: this.getBaseHandScore(arrangement.middleStrength, 'middle'),
-                    bonus: this.getBonusPoints(arrangement.middleStrength, arrangement.middle.length, 'middle'),
+                    expectedPoints: ScoringUtilities.getExpectedPoints(
+                        arrangement.middleStrength, arrangement.middle, 'middle'
+                    ),
+                    winProbability: ScoringUtilities.estimateWinProbability(
+                        arrangement.middleStrength, 'middle'
+                    ),
+                    pointsIfWin: ScoringUtilities.getPointsForHand(
+                        arrangement.middleStrength, 'middle', arrangement.middle.length
+                    ),
                     handType: arrangement.middleStrength.name,
                     cardCount: arrangement.middle.length
                 },
                 front: {
-                    base: this.getBaseHandScore(arrangement.frontStrength, 'front'),
-                    bonus: this.getBonusPoints(arrangement.frontStrength, arrangement.front.length, 'front'),
+                    expectedPoints: ScoringUtilities.getExpectedPoints(
+                        arrangement.frontStrength, arrangement.front, 'front'
+                    ),
+                    winProbability: ScoringUtilities.estimateWinProbability(
+                        arrangement.frontStrength, 'front'
+                    ),
+                    pointsIfWin: ScoringUtilities.getPointsForHand(
+                        arrangement.frontStrength, 'front', arrangement.front.length
+                    ),
                     handType: arrangement.frontStrength.name,
                     cardCount: arrangement.front.length
                 }
-            }
+            },
+            strategicBonuses: this.getStrategicBonuses(arrangement),
+            isValid: ScoringUtilities.isValidArrangement(
+                arrangement.backStrength,
+                arrangement.middleStrength,
+                arrangement.frontStrength
+            ),
+            validationMessage: ScoringUtilities.getArrangementValidationMessage(
+                arrangement.backStrength,
+                arrangement.middleStrength,
+                arrangement.frontStrength
+            )
         };
-
-        return analysis;
     }
 
     static compareArrangements(arrangement1, arrangement2) {
-        // Compare two arrangements and return which is better
         const score1 = this.scoreArrangement(arrangement1);
         const score2 = this.scoreArrangement(arrangement2);
 
@@ -151,27 +144,112 @@ class ArrangementScorer {
             better: score1 > score2 ? 'arrangement1' : score2 > score1 ? 'arrangement2' : 'tie',
             scoreDifference: Math.abs(score1 - score2),
             arrangement1Score: score1,
-            arrangement2Score: score2
+            arrangement2Score: score2,
+            arrangement1Analysis: this.analyzeArrangementValue(arrangement1),
+            arrangement2Analysis: this.analyzeArrangementValue(arrangement2)
         };
     }
 
-    static getExpectedWinRate(handStrength, position) {
-        // Estimate win rate based on hand strength and position
-        const rank = handStrength.hand_rank[0];
+    // =============================================================================
+    // STRATEGIC ANALYSIS HELPERS
+    // =============================================================================
 
-        // These are rough estimates for typical 4-player games
-        const winRates = {
-            back: {
-                10: 0.95, 9: 0.90, 8: 0.85, 7: 0.75, 6: 0.65, 5: 0.55, 4: 0.45, 3: 0.35, 2: 0.25, 1: 0.15, 0: 0.10
-            },
-            middle: {
-                10: 0.95, 9: 0.90, 8: 0.85, 7: 0.75, 6: 0.65, 5: 0.55, 4: 0.45, 3: 0.35, 2: 0.25, 1: 0.15, 0: 0.10
-            },
-            front: {
-                10: 0.95, 9: 0.90, 8: 0.85, 7: 0.75, 6: 0.65, 5: 0.55, 4: 0.45, 3: 0.35, 2: 0.25, 1: 0.15, 0: 0.10
-            }
+    static getArrangementStrategicValue(arrangement) {
+        // Beyond expected points, what strategic value does this arrangement have?
+        const analysis = this.analyzeArrangementValue(arrangement);
+
+        return {
+            riskLevel: this.assessRiskLevel(arrangement),
+            flexibilityScore: this.assessFlexibility(arrangement),
+            competitiveAdvantage: this.assessCompetitiveAdvantage(arrangement),
+            overallRating: this.getOverallRating(analysis)
         };
+    }
 
-        return winRates[position][rank] || 0.10;
+    static assessRiskLevel(arrangement) {
+        // How risky is this arrangement? (high variance vs safe)
+        const frontWinProb = ScoringUtilities.estimateWinProbability(arrangement.frontStrength, 'front');
+        const middleWinProb = ScoringUtilities.estimateWinProbability(arrangement.middleStrength, 'middle');
+        const backWinProb = ScoringUtilities.estimateWinProbability(arrangement.backStrength, 'back');
+
+        const avgWinProb = (frontWinProb + middleWinProb + backWinProb) / 3;
+
+        if (avgWinProb > 0.7) return "Low Risk";
+        if (avgWinProb > 0.4) return "Medium Risk";
+        return "High Risk";
+    }
+
+    static assessFlexibility(arrangement) {
+        // How much flexibility was maintained? (based on large hands usage)
+        const largeHandCount = [arrangement.back, arrangement.middle, arrangement.front]
+            .filter(hand => hand.length > 5).length;
+
+        if (largeHandCount >= 2) return "High Flexibility";
+        if (largeHandCount === 1) return "Medium Flexibility";
+        return "Low Flexibility";
+    }
+
+    static assessCompetitiveAdvantage(arrangement) {
+        // How likely is this to beat typical opponents?
+        const totalExpected = this.scoreArrangement(arrangement);
+
+        if (totalExpected > 8) return "Strong Advantage";
+        if (totalExpected > 5) return "Moderate Advantage";
+        if (totalExpected > 3) return "Slight Advantage";
+        return "Weak Position";
+    }
+
+    static getOverallRating(analysis) {
+        // A-F rating based on multiple factors
+        const score = analysis.totalScore;
+        const valid = analysis.isValid;
+
+        if (!valid) return "F - Invalid";
+        if (score > 10) return "A - Excellent";
+        if (score > 8) return "B - Very Good";
+        if (score > 6) return "C - Good";
+        if (score > 4) return "D - Fair";
+        return "F - Poor";
+    }
+
+    // =============================================================================
+    // DEBUGGING AND LOGGING
+    // =============================================================================
+
+    static debugArrangement(arrangement, label = "Arrangement") {
+        const analysis = this.analyzeArrangementValue(arrangement);
+        const strategic = this.getArrangementStrategicValue(arrangement);
+
+        console.log(`\n🎯 ${label} Analysis:`);
+        console.log(`${analysis.validationMessage}`);
+        console.log(`Total Expected Points: ${analysis.totalScore}`);
+        console.log(`Overall Rating: ${strategic.overallRating}`);
+        console.log(`Risk Level: ${strategic.riskLevel}`);
+        console.log(`Competitive Advantage: ${strategic.competitiveAdvantage}`);
+
+        console.log(`\nDetailed Breakdown:`);
+        ['back', 'middle', 'front'].forEach(position => {
+            const pos = analysis.breakdown[position];
+            console.log(`  ${position.toUpperCase()}: ${pos.handType} (${pos.cardCount} cards)`);
+            console.log(`    Win Probability: ${ScoringUtilities.formatWinProbability(pos.winProbability)}`);
+            console.log(`    Points if Win: ${pos.pointsIfWin}`);
+            console.log(`    Expected Points: ${ScoringUtilities.formatExpectedPoints(pos.expectedPoints)}`);
+        });
+
+        console.log(`\nStrategic Bonuses: +${analysis.strategicBonuses}`);
+
+        return analysis;
+    }
+
+    static debugComparison(arrangement1, arrangement2, label1 = "Option 1", label2 = "Option 2") {
+        const comparison = this.compareArrangements(arrangement1, arrangement2);
+
+        console.log(`\n⚖️ Comparing ${label1} vs ${label2}:`);
+        console.log(`${label1}: ${comparison.arrangement1Score} expected points`);
+        console.log(`${label2}: ${comparison.arrangement2Score} expected points`);
+        console.log(`Winner: ${comparison.better === 'arrangement1' ? label1 : comparison.better === 'arrangement2' ? label2 : 'Tie'}`);
+        console.log(`Score Difference: ${comparison.scoreDifference.toFixed(2)} points`);
+
+        return comparison;
     }
 }
