@@ -1,8 +1,7 @@
-/**
- * Hand Detection Engine - Integrated with existing evaluation system
- * Efficiently detects all possible hands from 17 cards using counting optimization
- * Produces hands compatible with existing evaluateHand() and ScoringUtilities
- */
+// File: js/hands/hand-detector.js
+// Hand Detection Engine - Integrated with existing evaluation system
+// Efficiently detects all possible hands from 17 cards using counting optimization
+// Produces hands compatible with existing evaluateHand() and ScoringUtilities
 
 class HandDetector {
     constructor(wildsInHand = 0) {
@@ -111,24 +110,22 @@ class HandDetector {
             const suitCardCount = Object.values(rankCounts).reduce((sum, count) => sum + count, 0);
 
             if (suitCardCount >= 6) {
-                // Get all cards of this suit, sorted by value
-                const suitCards = cards.filter(c => c.suit === suit && !c.isWild)
-                    .sort((a, b) => b.value - a.value);
+                // Get all cards of this suit
+                const suitCards = cards.filter(c => c.suit === suit && !c.isWild);
 
-                // Find longest straight flush
-                const straightFlush = this.findLongestStraightFlush(suitCards);
+                // Find all straight flushes in this suit
+                const allSFs = this.findAllStraightFlushesInSuit(suitCards);
 
-                if (straightFlush) {
-                    if (straightFlush.length >= 8) {
-                        this.detectedHands['8SF'].push(straightFlush);
+                // Categorize by length
+                allSFs.forEach(sf => {
+                    if (sf.length === 8) {
+                        this.detectedHands['8SF'].push(sf);
+                    } else if (sf.length === 7) {
+                        this.detectedHands['7SF'].push(sf);
+                    } else if (sf.length === 6) {
+                        this.detectedHands['6SF'].push(sf);
                     }
-                    if (straightFlush.length >= 7) {
-                        this.detectedHands['7SF'].push(straightFlush);
-                    }
-                    if (straightFlush.length >= 6) {
-                        this.detectedHands['6SF'].push(straightFlush);
-                    }
-                }
+                });
             }
         });
     }
@@ -137,7 +134,7 @@ class HandDetector {
      * Detect standard premium hands (5K, 5SF, 4K, FH, 5F, 5S)
      */
     detectStandardPremiumHands(cards, counts) {
-        // 5 of a kind
+        // 5 of a kind and 4 of a kind
         Object.entries(counts.rankCounts).forEach(([rank, count]) => {
             if (count >= 5) {
                 const hand = this.buildSameRankHand(cards, rank, 5);
@@ -155,10 +152,14 @@ class HandDetector {
 
             if (suitCardCount >= 5) {
                 const suitCards = cards.filter(c => c.suit === suit && !c.isWild);
-                const straightFlush = this.findStraightFlush(suitCards, 5);
-                if (straightFlush) {
-                    this.detectedHands['5SF'].push(straightFlush);
-                }
+                const allSFs = this.findAllStraightFlushesInSuit(suitCards);
+
+                // Add 5-card straight flushes
+                allSFs.forEach(sf => {
+                    if (sf.length === 5) {
+                        this.detectedHands['5SF'].push(sf);
+                    }
+                });
             }
         });
 
@@ -259,6 +260,302 @@ class HandDetector {
         });
     }
 
+    // =============================================================================
+    // STRAIGHT FLUSH DETECTION METHODS
+    // =============================================================================
+
+    /**
+     * Find all straight flushes in a suit (5+ cards)
+     * @param {Array} suitCards - Cards of same suit
+     * @returns {Array} - All straight flushes found (all lengths)
+     */
+    findAllStraightFlushes(suitCards) {
+        return this.findAllStraightFlushesInSuit(suitCards);
+    }
+
+    /**
+     * Find all straight flushes of specific length
+     * @param {Array} suitCards - Cards of same suit
+     * @param {number} size - Target size (5, 6, 7, or 8)
+     * @returns {Array} - All straight flushes of target length
+     */
+    findStraightFlushesOfLength(suitCards, size) {
+        const allSFs = this.findAllStraightFlushesInSuit(suitCards);
+        return allSFs.filter(sf => sf.length === size);
+    }
+
+    /**
+     * Find ALL possible straight flushes in a suit (the main method)
+     * @param {Array} suitCards - All cards of same suit
+     * @returns {Array} - Array of all possible straight flush hands
+     */
+    findAllStraightFlushesInSuit(suitCards) {
+        if (suitCards.length < 5) return [];
+
+        const allSFs = [];
+
+        // Count available ranks in this suit
+        const rankCounts = {};
+        suitCards.forEach(card => {
+            if (!card.isWild) {
+                rankCounts[card.value] = (rankCounts[card.value] || 0) + 1;
+            }
+        });
+
+        // Find all possible straight flushes for each length (8 down to 5)
+        for (let length = 8; length >= 5; length--) {
+            const sfsOfLength = this.findAllStraightFlushesOfLength(suitCards, rankCounts, length);
+            allSFs.push(...sfsOfLength);
+        }
+
+        return allSFs;
+    }
+
+    /**
+     * Find all straight flushes of specific length
+     * @param {Array} suitCards - Cards of same suit
+     * @param {Object} rankCounts - Count of each rank
+     * @param {number} length - Target length
+     * @returns {Array} - All SFs of this length
+     */
+    findAllStraightFlushesOfLength(suitCards, rankCounts, length) {
+        const sfs = [];
+
+        // Try all possible starting positions (high card values)
+        for (let high = 14; high >= length + 1; high--) {
+            if (this.canMakeStraightFlush(rankCounts, high, length)) {
+                const sf = this.buildStraightFlushHand(suitCards, high, length);
+                if (sf) {
+                    const evaluation = evaluateHand(sf);
+                    sfs.push({
+                        cards: sf,
+                        evaluation: evaluation,
+                        type: `${length}SF`,
+                        strength: evaluation.hand_rank[0],
+                        requiredCards: sf.map(c => c.id || `${c.rank}${c.suit}`),
+                        length: length,
+                        high: high,
+                        low: high - length + 1
+                    });
+                }
+            }
+        }
+
+        // Special case: Check for wheel straight (A-5-4-3-2) for 5-card only
+        if (length === 5 && this.canMakeWheelStraightFlush(rankCounts)) {
+            const wheelSF = this.buildWheelStraightFlush(suitCards);
+            if (wheelSF) {
+                const evaluation = evaluateHand(wheelSF);
+                sfs.push({
+                    cards: wheelSF,
+                    evaluation: evaluation,
+                    type: `${length}SF`,
+                    strength: evaluation.hand_rank[0],
+                    requiredCards: wheelSF.map(c => c.id || `${c.rank}${c.suit}`),
+                    length: length,
+                    high: 14,
+                    low: 5,
+                    isWheel: true
+                });
+            }
+        }
+
+        return sfs;
+    }
+
+    /**
+     * Check if we can make a straight flush of given length starting from high card
+     * @param {Object} rankCounts - Available rank counts
+     * @param {number} high - Highest card value
+     * @param {number} length - Length needed
+     * @returns {boolean} - True if possible
+     */
+    canMakeStraightFlush(rankCounts, high, length) {
+        for (let i = 0; i < length; i++) {
+            const rank = high - i;
+            if (!rankCounts[rank] || rankCounts[rank] === 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Check if we can make wheel straight flush (A-5-4-3-2)
+     * @param {Object} rankCounts - Available rank counts
+     * @returns {boolean} - True if wheel is possible
+     */
+    canMakeWheelStraightFlush(rankCounts) {
+        return rankCounts[14] && rankCounts[5] && rankCounts[4] && rankCounts[3] && rankCounts[2];
+    }
+
+    /**
+     * Build straight flush hand from available cards
+     * @param {Array} suitCards - All cards in suit
+     * @param {number} high - Highest card value
+     * @param {number} length - Length of straight
+     * @returns {Array|null} - Cards forming the straight flush
+     */
+    buildStraightFlushHand(suitCards, high, length) {
+        const handCards = [];
+
+        for (let i = 0; i < length; i++) {
+            const rank = high - i;
+            const card = suitCards.find(c => c.value === rank && !c.isWild);
+            if (card) {
+                handCards.push(card);
+            } else {
+                return null; // Shouldn't happen if canMakeStraightFlush returned true
+            }
+        }
+
+        return handCards;
+    }
+
+    /**
+     * Build wheel straight flush (A-5-4-3-2)
+     * @param {Array} suitCards - All cards in suit
+     * @returns {Array|null} - Cards forming wheel straight flush
+     */
+    buildWheelStraightFlush(suitCards) {
+        const wheelRanks = [14, 5, 4, 3, 2]; // A-5-4-3-2
+        const handCards = [];
+
+        wheelRanks.forEach(rank => {
+            const card = suitCards.find(c => c.value === rank && !c.isWild);
+            if (card) {
+                handCards.push(card);
+            }
+        });
+
+        return handCards.length === 5 ? handCards : null;
+    }
+
+    // =============================================================================
+    // STRAIGHT DETECTION METHODS
+    // =============================================================================
+
+    /**
+     * Find all possible straights of given size (mixed suits)
+     * @param {Array} cards - All cards to search
+     * @param {number} size - Target straight size
+     * @returns {Array} - Array of straight hands found
+     */
+    findAllStraights(cards, size) {
+        const straights = [];
+
+        // Count all ranks across all suits
+        const rankCounts = {};
+        cards.forEach(card => {
+            if (!card.isWild) {
+                rankCounts[card.value] = (rankCounts[card.value] || 0) + 1;
+            }
+        });
+
+        // Find all possible straights
+        for (let high = 14; high >= size + 1; high--) {
+            if (this.canMakeStraight(rankCounts, high, size)) {
+                const handCards = this.buildBestStraightHand(cards, high, size);
+                if (handCards) {
+                    const evaluation = evaluateHand(handCards);
+                    straights.push({
+                        cards: handCards,
+                        evaluation: evaluation,
+                        type: `${size}S`,
+                        strength: evaluation.hand_rank[0],
+                        requiredCards: handCards.map(c => c.id || `${c.rank}${c.suit}`),
+                        high: high,
+                        low: high - size + 1
+                    });
+                }
+            }
+        }
+
+        // Check for wheel straight (A-5-4-3-2) for 5-card
+        if (size === 5 && this.canMakeWheelStraightFlush(rankCounts)) {
+            const wheelCards = this.buildWheelStraight(cards);
+            if (wheelCards) {
+                const evaluation = evaluateHand(wheelCards);
+                straights.push({
+                    cards: wheelCards,
+                    evaluation: evaluation,
+                    type: `${size}S`,
+                    strength: evaluation.hand_rank[0],
+                    requiredCards: wheelCards.map(c => c.id || `${c.rank}${c.suit}`),
+                    high: 14,
+                    low: 5,
+                    isWheel: true
+                });
+            }
+        }
+
+        return straights;
+    }
+
+    /**
+     * Check if we can make a straight (mixed suits)
+     * @param {Object} rankCounts - Available rank counts
+     * @param {number} high - Highest card value
+     * @param {number} length - Length needed
+     * @returns {boolean} - True if possible
+     */
+    canMakeStraight(rankCounts, high, length) {
+        for (let i = 0; i < length; i++) {
+            const rank = high - i;
+            if (!rankCounts[rank] || rankCounts[rank] === 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Build best possible straight hand (mixed suits)
+     * @param {Array} cards - All available cards
+     * @param {number} high - Highest card value
+     * @param {number} length - Straight length
+     * @returns {Array|null} - Best straight hand
+     */
+    buildBestStraightHand(cards, high, length) {
+        const handCards = [];
+
+        for (let i = 0; i < length; i++) {
+            const rank = high - i;
+            const availableCards = cards.filter(c => c.value === rank && !c.isWild);
+            if (availableCards.length > 0) {
+                // Take first available (could be enhanced to pick best suit, etc.)
+                handCards.push(availableCards[0]);
+            } else {
+                return null;
+            }
+        }
+
+        return handCards;
+    }
+
+    /**
+     * Build wheel straight (A-5-4-3-2) with mixed suits
+     * @param {Array} cards - All available cards
+     * @returns {Array|null} - Cards forming wheel straight
+     */
+    buildWheelStraight(cards) {
+        const wheelRanks = [14, 5, 4, 3, 2];
+        const handCards = [];
+
+        wheelRanks.forEach(rank => {
+            const availableCards = cards.filter(c => c.value === rank && !c.isWild);
+            if (availableCards.length > 0) {
+                handCards.push(availableCards[0]);
+            }
+        });
+
+        return handCards.length === 5 ? handCards : null;
+    }
+
+    // =============================================================================
+    // HAND BUILDING METHODS
+    // =============================================================================
+
     /**
      * Build a same-rank hand using existing evaluation system
      */
@@ -323,30 +620,9 @@ class HandDetector {
         };
     }
 
-    /**
-     * Find longest straight flush in a suit
-     */
-    findLongestStraightFlush(suitCards) {
-        // This is a simplified version - would need full implementation
-        // For now, return null - this can be enhanced later
-        return null;
-    }
-
-    /**
-     * Find 5-card straight flush
-     */
-    findStraightFlush(suitCards, size) {
-        // Simplified version - return null for now
-        return null;
-    }
-
-    /**
-     * Find all possible straights of given size
-     */
-    findAllStraights(cards, size) {
-        // Simplified version - return empty array for now
-        return [];
-    }
+    // =============================================================================
+    // UTILITY METHODS
+    // =============================================================================
 
     /**
      * Get detection summary for debugging
@@ -408,6 +684,34 @@ class HandDetector {
         }
 
         return allHands;
+    }
+
+    /**
+     * Debug helper - get summary of all straight flushes found
+     * @param {Array} suitCards - Cards in suit to analyze
+     * @returns {Object} - Summary of findings
+     */
+    getStraightFlushSummary(suitCards) {
+        const allSFs = this.findAllStraightFlushesInSuit(suitCards);
+
+        const summary = {
+            total: allSFs.length,
+            by_length: {}
+        };
+
+        allSFs.forEach(sf => {
+            const length = sf.length;
+            if (!summary.by_length[length]) {
+                summary.by_length[length] = [];
+            }
+            summary.by_length[length].push({
+                high: sf.high,
+                low: sf.low,
+                cards: sf.cards.map(c => c.rank).join('-')
+            });
+        });
+
+        return summary;
     }
 }
 

@@ -524,7 +524,79 @@ class AutoArrangeTestSuite {
             details: this.testResults
         };
     }
+
+     // =============================================================================
+    // STRAIGHT FLUSH ENUMERATION TESTS
+    // =============================================================================
+
+    testCompleteStraightFlushEnumeration() {
+        console.log('🧪 Testing Complete SF Enumeration: A♠ K♠ Q♠ J♠ T♠ T♠ 9♠ 8♠ 7♠ 6♠\n');
+
+        const testCards = [
+            { rank: 'A', suit: 'S', value: 14, id: 'AS1' },
+            { rank: 'K', suit: 'S', value: 13, id: 'KS1' },
+            { rank: 'Q', suit: 'S', value: 12, id: 'QS1' },
+            { rank: 'J', suit: 'S', value: 11, id: 'JS1' },
+            { rank: '10', suit: 'S', value: 10, id: '10S1' },
+            { rank: '10', suit: 'S', value: 10, id: '10S2' },
+            { rank: '9', suit: 'S', value: 9, id: '9S1' },
+            { rank: '8', suit: 'S', value: 8, id: '8S1' },
+            { rank: '7', suit: 'S', value: 7, id: '7S1' },
+            { rank: '6', suit: 'S', value: 6, id: '6S1' }
+        ];
+
+        const detector = new HandDetector(0);
+        const allSFs = detector.findAllStraightFlushes(testCards);
+
+        console.log(`Found ${allSFs.length} total straight flushes:\n`);
+
+        const byLength = {};
+        allSFs.forEach(sf => {
+            if (!byLength[sf.length]) byLength[sf.length] = [];
+            byLength[sf.length].push(sf);
+        });
+
+        [8, 7, 6, 5].forEach(length => {
+            if (byLength[length]) {
+                console.log(`${length}-Card Straight Flushes (${byLength[length].length} found):`);
+                byLength[length].forEach((sf, i) => {
+                    const cardNames = sf.cards.map(c => c.rank).join('-');
+                    console.log(`  ${i + 1}. ${cardNames}♠`);
+                });
+                console.log('');
+            }
+        });
+
+        const expected = { 8: 2, 7: 3, 6: 4, 5: 5 };
+        let allCorrect = true;
+
+        [8, 7, 6, 5].forEach(length => {
+            const found = byLength[length] ? byLength[length].length : 0;
+            const expectedCount = expected[length];
+            const correct = found === expectedCount;
+            console.log(`${length}-card SFs: Found ${found}, Expected ${expectedCount} ${correct ? '✅' : '❌'}`);
+            if (!correct) allCorrect = false;
+        });
+
+        const totalFound = allSFs.length;
+        const totalExpected = 14;
+        console.log(`\nTotal: Found ${totalFound}, Expected ${totalExpected} ${totalFound === totalExpected ? '✅' : '❌'}`);
+
+        return allCorrect;
+    }
+
+    runAllStraightFlushTests() {
+        console.log('🧪 Running All Straight Flush Tests...\n');
+
+        const enumerationCorrect = this.testCompleteStraightFlushEnumeration();
+
+        console.log('\n🏁 Straight Flush Test Summary:');
+        console.log(`Enumeration: ${enumerationCorrect ? '✅ PASS' : '❌ FAIL'}`);
+
+        return enumerationCorrect;
+    }
 }
+
 
 // =============================================================================
 // EXECUTION
@@ -557,3 +629,5 @@ if (typeof window !== 'undefined') {
         return testSuite.runSmokeTests();
     };
 }
+
+
