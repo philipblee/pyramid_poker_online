@@ -1,7 +1,7 @@
 {
-  "version": "v2.0.1-18-g2fec5a0",
-  "commit": "2fec5a0",
-  "branch": "fix/improve-hand-detector-tests",
-  "buildDate": "2025-06-28T22:59:30.520Z",
-  "lastCommit": "2025-06-28 18:54:20 -0400"
+  "version": "v2.0.1-20-g2e4955e-dirty",
+  "commit": "2e4955e",
+  "branch": "main",
+  "buildDate": "2025-06-29T11:27:47.952Z",
+  "lastCommit": "2025-06-28 21:41:14 -0400"
 }

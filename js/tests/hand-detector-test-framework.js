@@ -44,8 +44,12 @@ class HandDetectorTestFramework {
         // Calculate straight flush hands
         this.calculateStraightFlushHands(suitCounts, testCards, calculated);
 
+
         // Calculate full houses
         this.calculateFullHouses(rankCounts, calculated);
+
+        // NEW: Calculate single card hands
+        this.calculateSingleCardHands(testCards, calculated);
 
         // Calculate total
         calculated.total = Object.entries(calculated)
@@ -155,8 +159,10 @@ class HandDetectorTestFramework {
         });
     }
 
+
     /**
-     * Calculate straight flush hands (5-8 cards)
+     * Calculate straight flush hands (5-8 cards) - FIXED VERSION
+     * Now properly handles duplicate cards within suits
      */
     calculateStraightFlushHands(suitCounts, testCards, calculated) {
         calculated.straightFlush = 0;
@@ -166,23 +172,71 @@ class HandDetectorTestFramework {
 
         Object.entries(suitCounts).forEach(([suit, count]) => {
             if (count >= 5) {
-                // Get cards of this suit and their ranks
+                // Get cards of this suit and count ranks (including duplicates)
                 const suitCards = testCards.filter(c => c.suit === suit);
-                const suitRanks = suitCards.map(c => this.getRankValue(c.rank)).sort((a, b) => a - b);
+                const suitRankCounts = {};
+                suitCards.forEach(card => {
+                    suitRankCounts[this.getRankValue(card.rank)] =
+                        (suitRankCounts[this.getRankValue(card.rank)] || 0) + 1;
+                });
 
-                console.log(`🌈 Suit ${suit} ranks:`, suitRanks);
+                console.log(`🌈 Suit ${suit} rank counts:`, suitRankCounts);
 
                 // Check for consecutive sequences of different lengths
                 for (let length = 5; length <= Math.min(8, count); length++) {
-                    const sequences = this.findConsecutiveSequences(suitRanks, length);
+                    const combinations = this.calculateStraightFlushCombinations(suitRankCounts, length);
 
-                    if (length === 5) calculated.straightFlush += sequences;
-                    else if (length === 6) calculated.sixCardStraightFlush += sequences;
-                    else if (length === 7) calculated.sevenCardStraightFlush += sequences;
-                    else if (length === 8) calculated.eightCardStraightFlush += sequences;
+                    if (length === 5) calculated.straightFlush += combinations;
+                    else if (length === 6) calculated.sixCardStraightFlush += combinations;
+                    else if (length === 7) calculated.sevenCardStraightFlush += combinations;
+                    else if (length === 8) calculated.eightCardStraightFlush += combinations;
                 }
             }
         });
+    }
+
+    /**
+     * Calculate straight flush combinations for a specific length
+     * Properly handles duplicate cards by multiplying counts
+     */
+    calculateStraightFlushCombinations(suitRankCounts, length) {
+        let totalCombinations = 0;
+
+        // Check regular straights (2-3-4-5-6 through 10-J-Q-K-A)
+        for (let startValue = 2; startValue <= (15 - length); startValue++) {
+            const consecutive = [];
+            for (let i = 0; i < length; i++) {
+                consecutive.push(startValue + i);
+            }
+
+            // Check if all consecutive values exist in this suit
+            if (consecutive.every(val => suitRankCounts[val] > 0)) {
+                // Multiply the counts of each rank to get total combinations
+                const combinations = consecutive.reduce((product, val) =>
+                    product * suitRankCounts[val], 1
+                );
+                totalCombinations += combinations;
+                console.log(`🌈 Found ${length}-card SF ${consecutive.join('-')}: ${combinations} combinations`);
+            }
+        }
+
+        // Check wheel straight flush (A-2-3-4-5, A-2-3-4-5-6, etc.) - only up to length 6
+        if (length <= 6) {
+            const wheelValues = [14]; // Start with Ace
+            for (let i = 2; i < 2 + length - 1; i++) {
+                wheelValues.push(i);
+            }
+
+            if (wheelValues.every(val => suitRankCounts[val] > 0)) {
+                const combinations = wheelValues.reduce((product, val) =>
+                    product * suitRankCounts[val], 1
+                );
+                totalCombinations += combinations;
+                console.log(`🌈 Found ${length}-card wheel SF A-${wheelValues.slice(1).join('-')}: ${combinations} combinations`);
+            }
+        }
+
+        return totalCombinations;
     }
 
     /**
@@ -218,6 +272,14 @@ class HandDetectorTestFramework {
         }
 
         return sequences;
+    }
+
+    /**
+     * Calculate single card hands - always equals number of cards (17)
+     */
+    calculateSingleCardHands(testCards, calculated) {
+        calculated.highCard = testCards.length; // Always 17 for our tests
+        console.log(`🃏 Single cards: ${calculated.highCard} (one per card)`);
     }
 
     /**
@@ -409,6 +471,10 @@ class HandDetectorTestFramework {
      * Verify results match expectations
      */
     verifyExpectations(results, expected) {
+
+    // In your existing verifyExpectations method, add this case:
+    // } else if (category === 'highCard') {
+    //     actualCount = results.hands ? results.hands.filter(h => h.handType === 'High Card').length : 0;
         const verification = {
             checks: [],
             allPassed: true
@@ -449,6 +515,8 @@ class HandDetectorTestFramework {
                     actualCount = results.hands ? results.hands.filter(h => h.handType === '7-card Straight Flush').length : 0;
                 } else if (category === 'eightCardStraightFlush') {
                     actualCount = results.hands ? results.hands.filter(h => h.handType === '8-card Straight Flush').length : 0;
+                } else if (category === 'highCard') {
+                    actualCount = results.hands ? results.hands.filter(h => h.handType === 'High Card').length : 0;
                 } else {
                     actualCount = 0; // Unknown category
                 }
@@ -470,6 +538,8 @@ class HandDetectorTestFramework {
 
         return verification;
     }
+
+
 
     /**
      * Display single test result

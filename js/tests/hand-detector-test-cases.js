@@ -1,5 +1,6 @@
-// js/tests/hand-detector-test-cases.js v10
-// Test cases for HandDetector - includes straight flush cases (5-8 card)
+// js/tests/hand-detector-test-cases.js v11
+// Test cases for HandDetector - includes straight flush cases (5-8 card) + single cards
+// UPDATED: Added highCard: 17 to all test cases and updated totals
 
 const HAND_DETECTOR_TEST_CASES = [
     {
@@ -13,7 +14,8 @@ const HAND_DETECTOR_TEST_CASES = [
             fullHouse: 4,        // 4 trips × 1 pair = 4 full houses
             flush: 1287,         // C(13,5) = 1287 spades flushes
             straight: 21,        // 21 straights (A-K-Q-J-10: 8, K-Q-J-10-9: 2, others: 1 each, 5-4-3-2-A: 4)
-            total: 1318
+            highCard: 17,        // NEW: 17 single cards
+            total: 1335          // Updated: 1318 + 17 = 1335
         }
     },
 
@@ -22,13 +24,19 @@ const HAND_DETECTOR_TEST_CASES = [
         name: "Five Kings",
         cards: "K♠ K♥ K♦ K♣ K♠ A♠ Q♠ J♠ 10♠ 9♠ 8♠ 7♠ 6♠ 5♠ 4♠ 3♠ 2♠",
         expected: {
-            fiveOfAKind: 1,      // 1 natural 5K
-            fourOfAKind: 5,      // 5 drop-one variants from 5K
-            flush: 2002,         // C(14,5) = 2002 spades flushes
-            straight: 18,        // 18 straights (A-K-Q-J-10: 5, K-Q-J-10-9: 5, others: 1 each)
-            total: 2026
+            fiveOfAKind: 1,
+            fourOfAKind: 5,
+            flush: 2002,
+            straight: 18,
+            straightFlush: 12,        // ADD THIS
+            sixCardStraightFlush: 11, // ADD THIS
+            sevenCardStraightFlush: 9, // ADD THIS
+            eightCardStraightFlush: 8, // ADD THIS
+            highCard: 17,
+            total: 2083                 // UPDATE TOTAL
         }
     },
+
 
     {
         id: 3,
@@ -39,7 +47,8 @@ const HAND_DETECTOR_TEST_CASES = [
             fiveOfAKind: 6,      // 6 drop-one variants from 6K
             flush: 1287,         // C(13,5) = 1287 spades flushes (13♠, 2♥, 1♦, 1♣)
             straight: 23,        // 23 straights (A-K-Q-J-10: 6, K-Q-J-10-9: 6, Q-J-10-9-8: 6, others: 5×1)
-            total: 1317
+            highCard: 17,        // NEW: 17 single cards
+            total: 1334          // Updated: 1317 + 17 = 1334
         }
     },
 
@@ -52,7 +61,8 @@ const HAND_DETECTOR_TEST_CASES = [
             sixOfAKind: 7,       // 7 drop-one variants from 7K
             flush: 792,          // C(12,5) = 792 spades flushes (12♠, 2♥, 2♦, 1♣)
             straight: 31,        // 31 straights (A-K-Q-J-10: 7, K-Q-J-10-9: 7, Q-J-10-9-8: 7, J-10-9-8-7: 7, others: 3×1)
-            total: 831
+            highCard: 17,        // NEW: 17 single cards
+            total: 848           // Updated: 831 + 17 = 848
         }
     },
 
@@ -65,7 +75,8 @@ const HAND_DETECTOR_TEST_CASES = [
             sevenOfAKind: 8,     // 8 drop-one variants from 8K
             flush: 462,          // C(11,5) = 462 spades flushes (11♠, 2♥, 2♦, 2♣)
             straight: 41,        // 41 straights (A-K-Q-J-10: 8, K-Q-J-10-9: 8, Q-J-10-9-8: 8, J-10-9-8-7: 8, 10-9-8-7-6: 8, 9-8-7-6-5: 1)
-            total: 512
+            highCard: 17,        // NEW: 17 single cards
+            total: 529           // Updated: 512 + 17 = 529
         }
     },
 
@@ -78,7 +89,8 @@ const HAND_DETECTOR_TEST_CASES = [
             threeOfAKind: 16,    // 4×4 = 16 drop-one variants
             flush: 1,            // C(5,5) = 1 spades flush (A,K,Q,J,10)
             straight: 256,       // 256 straights (A-K-Q-J-10: 4×4×4×4×1)
-            total: 277
+            highCard: 17,        // NEW: 17 single cards
+            total: 294           // Updated: 277 + 17 = 294
         }
     },
 
@@ -92,7 +104,8 @@ const HAND_DETECTOR_TEST_CASES = [
             fullHouse: 65,       // 5 trips × 13 eligible pairs = 65 full houses
             flush: 13,           // 6♠ + 6♥ + 1♦ = C(6,5) + C(6,5) + C(5,5) = 6+6+1 = 13 flushes
             straight: 405,       // 405 straights (A-K-Q-J-10: 243, K-Q-J-10-9: 162)
-            total: 504
+            highCard: 17,        // NEW: 17 single cards
+            total: 521           // Updated: 504 + 17 = 521
         }
     },
 
@@ -108,12 +121,13 @@ const HAND_DETECTOR_TEST_CASES = [
             fullHouse: 30,       // 4×6 + 1×3 + 1×3 = 30 full houses
             flush: 21,           // C(7,5) = 21 spades flushes (A♠,A♠,K♠,Q♠,J♠,10♠,9♠)
             straight: 216,       // 216 straights (A-K-Q-J-10: 180, K-Q-J-10-9: 36)
-            total: 286
+            highCard: 17,        // NEW: 17 single cards
+            total: 303           // Updated: 286 + 17 = 303
         }
     },
 
     // =============================================================================
-    // STRAIGHT FLUSH TEST CASES (5-8 card)
+    // STRAIGHT FLUSH TEST CASES (5-8 card) - UPDATED WITH HIGH CARDS
     // =============================================================================
 
     {
@@ -124,7 +138,8 @@ const HAND_DETECTOR_TEST_CASES = [
             straightFlush: 2,    // A-K-Q-J-10♠ and A-K-Q-J-10♥
             flush: 1,            // C(5,5) = 1 diamonds flush
             straight: 8,         // A-K-Q-J-10: 2×2=4, K-Q-J-10-9: 2×1=2, 9-8-7-6-5: 1×1=1, 7-6-5-4-3: 1×1=1
-            total: 11
+            highCard: 17,        // NEW: 17 single cards
+            total: 28            // Updated: 11 + 17 = 28
         }
     },
 
@@ -137,7 +152,8 @@ const HAND_DETECTOR_TEST_CASES = [
             straightFlush: 10,       // Various 5-card SFs from the spades
             flush: 1287,            // C(13,5) = 1287 spades flushes
             straight: 26,           // Multiple straights possible
-            total: 1325
+            highCard: 17,           // NEW: 17 single cards
+            total: 1342             // Updated: 1325 + 17 = 1342
         }
     },
 
@@ -151,7 +167,8 @@ const HAND_DETECTOR_TEST_CASES = [
             straightFlush: 21,         // Various 5-card SFs
             flush: 1287,              // C(13,5) = 1287 spades flushes
             straight: 33,             // Multiple straights
-            total: 1353
+            highCard: 17,             // NEW: 17 single cards
+            total: 1370               // Updated: 1353 + 17 = 1370
         }
     },
 
@@ -166,7 +183,8 @@ const HAND_DETECTOR_TEST_CASES = [
             straightFlush: 36,          // Various 5-card SFs
             flush: 1287,               // C(13,5) = 1287 spades flushes
             straight: 40,              // Multiple straights
-            total: 1403
+            highCard: 17,              // NEW: 17 single cards
+            total: 1420                // Updated: 1403 + 17 = 1420
         }
     },
 
@@ -178,7 +196,8 @@ const HAND_DETECTOR_TEST_CASES = [
             straightFlush: 10,       // 5-4-3-2-A♠ + various others from K-Q-J-10-9 down
             flush: 1287,            // C(13,5) = 1287 spades flushes
             straight: 19,           // Various straights including wheel
-            total: 1316
+            highCard: 17,           // NEW: 17 single cards
+            total: 1333             // Updated: 1316 + 17 = 1333
         }
     },
 
@@ -190,7 +209,8 @@ const HAND_DETECTOR_TEST_CASES = [
             straightFlush: 0,        // No 5+ cards of same suit in sequence
             flush: 0,               // No suit has 5+ cards
             straight: 32,           // A-K-Q-J-10: 16, others: 16
-            total: 32
+            highCard: 17,           // NEW: 17 single cards
+            total: 49               // Updated: 32 + 17 = 49
         }
     },
 
@@ -202,7 +222,8 @@ const HAND_DETECTOR_TEST_CASES = [
             straightFlush: 3,        // A-K-Q-J-10♠, A-K-Q-J-10♥, 9-8-7-6-5♦
             flush: 1,               // C(5,5) = 1 diamonds flush
             straight: 6,            // Various combinations
-            total: 10
+            highCard: 17,           // NEW: 17 single cards
+            total: 27               // Updated: 10 + 17 = 27
         }
     },
 
@@ -215,7 +236,8 @@ const HAND_DETECTOR_TEST_CASES = [
             straightFlush: 9,        // 5-4-3-2-A♠ + others
             flush: 1287,            // C(13,5) = 1287 spades flushes
             straight: 15,           // Various straights
-            total: 1312
+            highCard: 17,           // NEW: 17 single cards
+            total: 1329             // Updated: 1312 + 17 = 1329
         }
     }
 ];

@@ -35,6 +35,9 @@ class HandDetector {
         // Detect straights using consecutive rank counts
         this.detectStraights(rankCounts);
 
+        // Detect single cards
+        this.detectSingleCards();
+
         return this.formatResults();
     }
 
@@ -348,6 +351,40 @@ class HandDetector {
     }
 
     /**
+     * Detect single card hands (high cards)
+     * Each card becomes a 1-card hand eligible for Front or Middle positions
+     */
+    detectSingleCards() {
+        console.log(`🃏 Single card detection starting...`);
+
+        let singleCardCount = 0;
+
+        this.cards.forEach(card => {
+            // Create a 1-card hand for each card
+            this.addSingleCardHand([card], 'High Card');
+            singleCardCount++;
+        });
+
+        console.log(`🃏 Created ${singleCardCount} single card hands`);
+    }
+
+    /**
+     * Add a single card hand to our results (modified version of addHand)
+     */
+    addSingleCardHand(cards, handType) {
+        this.allHands.push({
+            cards: [...cards],
+            handType,
+            cardCount: cards.length,
+            rank: cards[0].rank,
+            eligiblePositions: ['front', 'middle']  // Can be used in Front or Middle
+        });
+
+        console.log(`🃏 Found: ${handType} ${cards[0].rank} of ${cards[0].suit} (${cards.length} card)`);
+    }
+
+
+    /**
      * Detect full houses using all available trips and pairs
      * Full house = 3 cards of one rank + 2 cards of different rank
      */
@@ -381,9 +418,12 @@ class HandDetector {
                 }
             });
         });
-
         console.log(`🏠 Created ${fullHouseCount} full houses`);
     }
+
+
+
+
 
     /**
      * Add a hand to our results
