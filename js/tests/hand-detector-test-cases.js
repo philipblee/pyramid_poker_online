@@ -239,7 +239,14 @@ const HAND_DETECTOR_TEST_CASES = [
             highCard: 17,           // NEW: 17 single cards
             total: 1329             // Updated: 1312 + 17 = 1329
         }
+    },
+
+    {
+        id: 17,
+        name: "Auto-Calculated Test - No Manual Expected",
+        cards: "A♠ A♥ K♠ K♥ Q♠ Q♥ J♠ J♥ 10♠ 10♥ 9♠ 8♠ 7♠ 6♠ 5♠ 4♠ 3♠"
     }
+
 ];
 
 // =============================================================================

@@ -372,40 +372,48 @@ class HandDetectorTestFramework {
     }
 
     /**
-     * Run a single test case
+     * Run a single test case - always uses calculated expected values
      */
     runTestCase(testCase) {
         console.log(`\n🧪 TEST ${testCase.id}: ${testCase.name}`);
         console.log(`Cards: ${testCase.cards}`);
 
         try {
-            // Calculate expected counts
+            let expectedToUse;
+            let useCalculated = false;
+
+            // ALWAYS calculate expected values (our source of truth)
             const calculatedExpected = this.calculateExpectedCounts(testCase.cards);
 
-            // Compare with manual expected values
-            console.log('📋 MANUAL vs CALCULATED COMPARISON:');
-            const comparison = this.compareExpectedValues(testCase.expected, calculatedExpected);
+            // Check if test case has manual expected values to validate
+            if (testCase.expected && Object.keys(testCase.expected).length > 0) {
+                const comparison = this.compareExpectedValues(testCase.expected, calculatedExpected);
 
-            if (!comparison.match) {
-                console.log('⚠️ WARNING: Manual and calculated values differ!');
-                comparison.differences.forEach(diff => {
-                    console.log(`   ${diff.category}: manual=${diff.manual}, calculated=${diff.calculated}`);
-                });
+                if (comparison.match) {
+                    console.log('✅ Manual and calculated values match!');
+                } else {
+                    console.log('⚠️ WARNING: Manual expected values do not match calculated!');
+                    console.log('   This test case needs manual expected values updated.');
+                    comparison.differences.forEach(diff => {
+                        console.log(`   ${diff.category}: manual=${diff.manual}, calculated=${diff.calculated}`);
+                    });
+                }
             } else {
-                console.log('✅ Manual and calculated values match!');
+                console.log('🤖 Using calculated expected values (no manual expected provided)');
             }
 
-            // Parse cards
-            const testCards = this.parseCards(testCase.cards);
+            // ALWAYS use calculated values for testing (they're our source of truth)
+            expectedToUse = calculatedExpected;
+            useCalculated = true;
 
-            // Run HandDetector
+            // Parse cards and run detector
+            const testCards = this.parseCards(testCase.cards);
             const startTime = performance.now();
             const detector = new HandDetector(testCards);
             const results = detector.detectAllHands();
             const endTime = performance.now();
 
-            // Verify expectations (use calculated values if available)
-            const expectedToUse = comparison.match ? testCase.expected : calculatedExpected;
+            // Verify results
             const verification = this.verifyExpectations(results, expectedToUse);
 
             const testResult = {
@@ -415,16 +423,14 @@ class HandDetectorTestFramework {
                 timing: endTime - startTime,
                 results: results,
                 expected: expectedToUse,
-                manual: testCase.expected,
-                calculated: calculatedExpected,
-                comparison: comparison,
+                manual: testCase.expected || null,
+                useCalculated: useCalculated,
                 verification: verification,
                 passed: verification.allPassed
             };
 
             this.testResults.push(testResult);
             this.displayTestResult(testResult);
-
             return testResult;
 
         } catch (error) {
@@ -565,6 +571,85 @@ class HandDetectorTestFramework {
         console.log(`🎯 RESULT: ${testResult.passed ? 'PASSED' : 'FAILED'}`);
     }
 
+
+    // Updated runTestCase method - always calculates expected values, validates manual ones if provided
+
+    runTestCase(testCase) {
+        console.log(`\n🧪 TEST ${testCase.id}: ${testCase.name}`);
+        console.log(`Cards: ${testCase.cards}`);
+
+        try {
+            let expectedToUse;
+            let useCalculated = false;
+
+            // ALWAYS calculate expected values (our source of truth)
+            const calculatedExpected = this.calculateExpectedCounts(testCase.cards);
+
+            // Check if test case has manual expected values to validate
+            if (testCase.expected && Object.keys(testCase.expected).length > 0) {
+                const comparison = this.compareExpectedValues(testCase.expected, calculatedExpected);
+
+                if (comparison.match) {
+                    console.log('✅ Manual and calculated values match!');
+                } else {
+                    console.log('⚠️ WARNING: Manual expected values do not match calculated!');
+                    console.log('   This test case needs manual expected values updated.');
+                    comparison.differences.forEach(diff => {
+                        console.log(`   ${diff.category}: manual=${diff.manual}, calculated=${diff.calculated}`);
+                    });
+                }
+            } else {
+                console.log('🤖 Using calculated expected values (no manual expected provided)');
+            }
+
+            // ALWAYS use calculated values for testing (they're our source of truth)
+            expectedToUse = calculatedExpected;
+            useCalculated = true;
+
+            // Parse cards and run detector
+            const testCards = this.parseCards(testCase.cards);
+            const startTime = performance.now();
+            const detector = new HandDetector(testCards);
+            const results = detector.detectAllHands();
+            const endTime = performance.now();
+
+            // Verify results
+            const verification = this.verifyExpectations(results, expectedToUse);
+
+            const testResult = {
+                id: testCase.id,
+                name: testCase.name,
+                cards: testCase.cards,
+                timing: endTime - startTime,
+                results: results,
+                expected: expectedToUse,
+                manual: testCase.expected || null,
+                useCalculated: useCalculated,
+                verification: verification,
+                passed: verification.allPassed
+            };
+
+            this.testResults.push(testResult);
+            this.displayTestResult(testResult);
+            return testResult;
+
+        } catch (error) {
+            console.log(`❌ TEST FAILED: ${error.message}`);
+            const errorResult = {
+                id: testCase.id,
+                name: testCase.name,
+                error: error.message,
+                passed: false
+            };
+            this.testResults.push(errorResult);
+            return errorResult;
+        }
+    }
+
+    /**
+     * Display test summary
+     */
+
     /**
      * Run all test cases
      */
@@ -581,9 +666,8 @@ class HandDetectorTestFramework {
         return this.testResults;
     }
 
-    /**
-     * Display test summary
-     */
+
+
     displaySummary() {
         console.log('\n📋 ======== TEST SUMMARY ========');
 
