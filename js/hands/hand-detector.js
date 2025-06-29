@@ -20,6 +20,9 @@ class HandDetector {
         // Count ranks and suits
         const { rankCounts, suitCounts } = this.countRanksAndSuits();
 
+        // NEW: Detect straight flushes (5-8 cards)
+        this.detectStraightFlushes(suitCounts);
+
         // Detect of-a-kind hands with drop-one-card pattern
         this.detectOfAKind(rankCounts);
 
@@ -55,6 +58,123 @@ class HandDetector {
 
         return { rankCounts, suitCounts };
     }
+
+    /**
+     * Detect straight flushes (5-8 cards) using consecutive rank counts within each suit
+     * Similar to straight detection but limited to cards of the same suit
+     */
+    detectStraightFlushes(suitCounts) {
+        console.log(`🌈 Straight flush detection starting...`);
+
+        Object.entries(suitCounts).forEach(([suit, count]) => {
+            if (count >= 5) {
+                console.log(`🌈 Checking suit ${suit} with ${count} cards...`);
+
+                // Get only cards of this suit
+                const suitCards = this.cards.filter(c => c.suit === suit);
+
+                // Create rank counts for this suit only
+                const suitRankCounts = {};
+                suitCards.forEach(card => {
+                    suitRankCounts[card.rank] = (suitRankCounts[card.rank] || 0) + 1;
+                });
+
+                console.log(`🌈 Suit ${suit} rank counts:`, suitRankCounts);
+
+                // Detect straights within this suit (5-8 cards)
+                this.detectStraightsInSuit(suitRankCounts, suitCards, suit);
+            }
+        });
+    }
+
+    /**
+     * Detect straights within a specific suit (for straight flushes)
+     */
+    detectStraightsInSuit(suitRankCounts, suitCards, suit) {
+        // Convert ranks to values for easier consecutive checking
+        const rankValues = {
+            '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+            'J': 11, 'Q': 12, 'K': 13, 'A': 14
+        };
+
+        // Create value-to-count mapping for this suit
+        const valueCounts = {};
+        Object.entries(suitRankCounts).forEach(([rank, count]) => {
+            const value = rankValues[rank];
+            valueCounts[value] = count;
+        });
+
+        // Check for 5-8 card straight flushes
+        for (let straightLength = 5; straightLength <= 8; straightLength++) {
+            // Check regular straights (5-6-7-8-9 through sequences ending at Ace)
+            for (let startValue = 2; startValue <= (15 - straightLength); startValue++) {
+                const consecutive = [];
+                for (let i = 0; i < straightLength; i++) {
+                    consecutive.push(startValue + i);
+                }
+
+                // Check if all consecutive values exist in this suit
+                if (consecutive.every(val => valueCounts[val] > 0)) {
+                    console.log(`🌈 Found ${straightLength}-card straight flush in ${suit}: ${consecutive.join('-')}`);
+
+                    // Generate all combinations for this straight flush
+                    this.generateStraightFlushCombinations(consecutive, valueCounts, rankValues, suitCards, suit, straightLength);
+                }
+            }
+
+            // Check wheel straight flush (A-2-3-4-5, A-2-3-4-5-6, etc.)
+            if (straightLength <= 6) { // Wheel can only go up to A-2-3-4-5-6
+                const wheelValues = [14]; // Start with Ace
+                for (let i = 2; i < 2 + straightLength - 1; i++) {
+                    wheelValues.push(i);
+                }
+
+                if (wheelValues.every(val => valueCounts[val] > 0)) {
+                    console.log(`🌈 Found ${straightLength}-card wheel straight flush in ${suit}: A-${wheelValues.slice(1).join('-')}`);
+
+                    // Generate wheel straight flush combinations
+                    this.generateStraightFlushCombinations(wheelValues, valueCounts, rankValues, suitCards, suit, straightLength);
+                }
+            }
+        }
+    }
+
+    /**
+     * Generate all combinations for a specific straight flush
+     */
+    generateStraightFlushCombinations(values, valueCounts, rankValues, suitCards, suit, straightLength) {
+        // Get all cards for each value in the straight flush (from this suit only)
+        const cardsByValue = {};
+        values.forEach(value => {
+            cardsByValue[value] = suitCards.filter(card => {
+                const cardValue = rankValues[card.rank];
+                return cardValue === value;
+            });
+        });
+
+        // Generate all combinations (one card from each value)
+        const generateCombos = (valueIndex, currentCombo) => {
+            if (valueIndex >= values.length) {
+                // Complete combination - add as straight flush with appropriate name
+                const handTypeName = straightLength === 5 ? 'Straight Flush' : `${straightLength}-card Straight Flush`;
+                this.addHand([...currentCombo], handTypeName);
+                return;
+            }
+
+            const value = values[valueIndex];
+            const availableCards = cardsByValue[value];
+
+            availableCards.forEach(card => {
+                currentCombo.push(card);
+                generateCombos(valueIndex + 1, currentCombo);
+                currentCombo.pop();
+            });
+        };
+
+        generateCombos(0, []);
+    }
+
+
 
     /**
      * Detect of-a-kind hands with drop-one-card pattern
