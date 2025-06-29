@@ -1,6 +1,6 @@
 {
   "name": "pyramid-poker-online",
-  "version": "1.0.0",
+  "version": "2.0.2",
   "description": "Chinese Poker variant game",
   "main": "game.js",
   "scripts": {
@@ -11,7 +11,11 @@
     "version:tag": "git tag v$npm_package_version",
     "version:show": "git describe --tags --always"
   },
-  "keywords": ["poker", "chinese-poker", "card-game"],
+  "keywords": [
+    "poker",
+    "chinese-poker",
+    "card-game"
+  ],
   "author": "philipblee",
   "license": "MIT",
   "devDependencies": {},
