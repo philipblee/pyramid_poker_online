@@ -1,8 +1,9 @@
-// js/hands/hand-detector.js v8
-// Added straight detection using consecutive rank counts
-// v7: Added flush detection using combinations from each suit
-// v6: Added full house detection using all trips and pairs combinations
-// v5: Drop-one-card pattern for of-a-kind hands
+// js/hands/hand-detector.js v9
+// Integrated with card-evaluation.js for proper hand rankings
+// Now all detected hands get proper hand_rank tuples!
+
+// Import hand evaluation functions
+// Note: In browser environment, ensure card-evaluation.js is loaded before this file
 
 class HandDetector {
     constructor(cards) {
@@ -11,7 +12,7 @@ class HandDetector {
     }
 
     /**
-     * Main entry point - detect of-a-kind hands, full houses, flushes, and straights
+     * Main entry point - detect of-a-kind hands, two pairs, full houses, flushes, and straights
      * @returns {Object} Structured results
      */
     detectAllHands() {
@@ -20,11 +21,14 @@ class HandDetector {
         // Count ranks and suits
         const { rankCounts, suitCounts } = this.countRanksAndSuits();
 
-        // NEW: Detect straight flushes (5-8 cards)
+        // Detect straight flushes (5-8 cards)
         this.detectStraightFlushes(suitCounts);
 
         // Detect of-a-kind hands with drop-one-card pattern
         this.detectOfAKind(rankCounts);
+
+        // Detect two pairs
+        this.detectTwoPairs();
 
         // Detect full houses using all trips and pairs
         this.detectFullHouses();
@@ -64,7 +68,6 @@ class HandDetector {
 
     /**
      * Detect straight flushes (5-8 cards) using consecutive rank counts within each suit
-     * Similar to straight detection but limited to cards of the same suit
      */
     detectStraightFlushes(suitCounts) {
         console.log(`🌈 Straight flush detection starting...`);
@@ -177,14 +180,8 @@ class HandDetector {
         generateCombos(0, []);
     }
 
-
-
     /**
      * Detect of-a-kind hands with drop-one-card pattern
-     * For each rank with N cards (N >= 2):
-     * - Natural pairs (count = 2): just the pair
-     * - 3+ cards: 1 natural N-of-a-kind + N different (N-1)-of-a-kinds
-     * NO CASCADING - just one level down
      */
     detectOfAKind(rankCounts) {
         Object.entries(rankCounts).forEach(([rank, count]) => {
@@ -221,10 +218,27 @@ class HandDetector {
     }
 
     /**
+     * Detect two pairs using existing pair hands
+     */
+    detectTwoPairs() {
+        const pairs = this.allHands.filter(h => h.handType === 'Pair');
+        console.log(`👥 Two pair detection: ${pairs.length} pairs available`);
+
+        let twoPairCount = 0;
+        if (pairs.length >= 2) {
+            for (let i = 0; i < pairs.length; i++) {
+                for (let j = i + 1; j < pairs.length; j++) {
+                    const twoPair = [...pairs[i].cards, ...pairs[j].cards];
+                    this.addHand(twoPair, 'Two Pair');
+                    twoPairCount++;
+                }
+            }
+        }
+        console.log(`👥 Created ${twoPairCount} two pair hands`);
+    }
+
+    /**
      * Detect straights using consecutive rank counts
-     * 5 consecutive ranks with count >= 1 each
-     * Number of straights = product of the 5 consecutive counts
-     * Include A-2-3-4-5 wheel straight
      */
     detectStraights(rankCounts) {
         // Convert ranks to values for easier consecutive checking
@@ -303,7 +317,6 @@ class HandDetector {
 
     /**
      * Detect flushes using combinations from each suit
-     * Any suit with 5+ cards generates C(n,5) different 5-card flushes
      */
     detectFlushes(suitCounts) {
         Object.entries(suitCounts).forEach(([suit, count]) => {
@@ -352,7 +365,6 @@ class HandDetector {
 
     /**
      * Detect single card hands (high cards)
-     * Each card becomes a 1-card hand eligible for Front or Middle positions
      */
     detectSingleCards() {
         console.log(`🃏 Single card detection starting...`);
@@ -372,21 +384,25 @@ class HandDetector {
      * Add a single card hand to our results (modified version of addHand)
      */
     addSingleCardHand(cards, handType) {
+        // Get proper hand ranking from card-evaluation.js
+        const handStrength = evaluateHand(cards);
+
         this.allHands.push({
             cards: [...cards],
             handType,
             cardCount: cards.length,
-            rank: cards[0].rank,
-            eligiblePositions: ['front', 'middle']  // Can be used in Front or Middle
+            rank: cards[0].rank,                    // Keep for backward compatibility
+            handStrength: handStrength,             // NEW: Full evaluation result
+            hand_rank: handStrength.hand_rank,      // NEW: Proper ranking tuple
+            strength: handStrength.rank,            // NEW: Numeric strength
+            eligiblePositions: ['front', 'middle'] // Can be used in Front or Middle
         });
 
         console.log(`🃏 Found: ${handType} ${cards[0].rank} of ${cards[0].suit} (${cards.length} card)`);
     }
 
-
     /**
      * Detect full houses using all available trips and pairs
-     * Full house = 3 cards of one rank + 2 cards of different rank
      */
     detectFullHouses() {
         // Get all trips and pairs from our existing hands
@@ -394,18 +410,6 @@ class HandDetector {
         const pairs = this.allHands.filter(h => h.handType === 'Pair');
 
         console.log(`🏠 Full house detection: ${trips.length} trips, ${pairs.length} pairs`);
-
-        // Debug: show rank breakdown
-        const tripsByRank = {};
-        const pairsByRank = {};
-        trips.forEach(t => {
-            tripsByRank[t.rank] = (tripsByRank[t.rank] || 0) + 1;
-        });
-        pairs.forEach(p => {
-            pairsByRank[p.rank] = (pairsByRank[p.rank] || 0) + 1;
-        });
-        console.log(`🏠 Trips by rank:`, tripsByRank);
-        console.log(`🏠 Pairs by rank:`, pairsByRank);
 
         // Create full house from each trip + each pair (different ranks only)
         let fullHouseCount = 0;
@@ -421,22 +425,24 @@ class HandDetector {
         console.log(`🏠 Created ${fullHouseCount} full houses`);
     }
 
-
-
-
-
     /**
-     * Add a hand to our results
+     * Add a hand to our results - NOW WITH PROPER RANKING!
      */
     addHand(cards, handType) {
+        // Get proper hand ranking from card-evaluation.js
+        const handStrength = evaluateHand(cards);
+
         this.allHands.push({
             cards: [...cards],
             handType,
             cardCount: cards.length,
-            rank: cards[0].rank  // All cards same rank for of-a-kind
+            rank: cards[0].rank,                // Keep for backward compatibility
+            handStrength: handStrength,         // NEW: Full evaluation result
+            hand_rank: handStrength.hand_rank,  // NEW: Proper ranking tuple
+            strength: handStrength.rank         // NEW: Numeric strength
         });
 
-        console.log(`🎯 Found: ${handType} of ${cards[0].rank}s (${cards.length} cards)`);
+        console.log(`🎯 Found: ${handType} of ${cards[0].rank}s (${cards.length} cards) - Strength: ${handStrength.rank}`);
     }
 
     /**
@@ -448,7 +454,7 @@ class HandDetector {
             hands: this.allHands
         };
 
-        console.log(`✅ HandDetector found ${results.total} hands (of-a-kind + full houses + flushes + straights)`);
+        console.log(`✅ HandDetector found ${results.total} hands with proper rankings!`);
         return results;
     }
 }

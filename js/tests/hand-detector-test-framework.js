@@ -1,6 +1,6 @@
-// js/tests/hand-detector-test-framework.js v10
-// Testing framework class for HandDetector - supports all hand types including straight flushes
-// v10: Added straight flush test support (5-8 card)
+// js/tests/hand-detector-test-framework.js v11
+// Testing framework class for HandDetector - supports all hand types including two pairs
+// v11: Added two pairs test support
 
 class HandDetectorTestFramework {
     constructor() {
@@ -35,6 +35,9 @@ class HandDetectorTestFramework {
         // Calculate of-a-kind hands
         this.calculateOfAKindHands(rankCounts, calculated);
 
+        // NEW: Calculate two pairs (must come AFTER of-a-kind calculation)
+        this.calculateTwoPairs(rankCounts, calculated);
+
         // Calculate flush hands
         this.calculateFlushHands(suitCounts, calculated);
 
@@ -44,11 +47,10 @@ class HandDetectorTestFramework {
         // Calculate straight flush hands
         this.calculateStraightFlushHands(suitCounts, testCards, calculated);
 
-
         // Calculate full houses
         this.calculateFullHouses(rankCounts, calculated);
 
-        // NEW: Calculate single card hands
+        // Calculate single card hands
         this.calculateSingleCardHands(testCards, calculated);
 
         // Calculate total
@@ -97,6 +99,24 @@ class HandDetectorTestFramework {
                 calculated.pair += 1; // Natural pairs only
             }
         });
+    }
+
+    /**
+     * NEW: Calculate two pairs hands
+     * Two pairs are combinations of existing pair hands: C(pairs, 2)
+     * This matches HandDetector logic which filters existing pairs and combines them
+     */
+    calculateTwoPairs(rankCounts, calculated) {
+        // Two pairs = C(total_pairs, 2) where total_pairs was calculated by calculateOfAKindHands
+        const totalPairs = calculated.pair || 0;
+
+        if (totalPairs >= 2) {
+            calculated.twoPair = this.combination(totalPairs, 2);
+        } else {
+            calculated.twoPair = 0;
+        }
+
+        console.log(`👥 Two pairs: C(${totalPairs}, 2) = ${calculated.twoPair}`);
     }
 
     /**
@@ -158,7 +178,6 @@ class HandDetectorTestFramework {
             }
         });
     }
-
 
     /**
      * Calculate straight flush hands (5-8 cards) - FIXED VERSION
@@ -237,41 +256,6 @@ class HandDetectorTestFramework {
         }
 
         return totalCombinations;
-    }
-
-    /**
-     * Find consecutive sequences of specified length in sorted rank array
-     */
-    findConsecutiveSequences(sortedRanks, length) {
-        let sequences = 0;
-
-        // Check regular sequences
-        for (let i = 0; i <= sortedRanks.length - length; i++) {
-            let isConsecutive = true;
-            for (let j = 1; j < length; j++) {
-                if (sortedRanks[i + j] !== sortedRanks[i] + j) {
-                    isConsecutive = false;
-                    break;
-                }
-            }
-            if (isConsecutive) {
-                sequences++;
-            }
-        }
-
-        // Check wheel (A-2-3-4-5, A-2-3-4-5-6, etc.) - only for length 5-6
-        if (length <= 6 && sortedRanks.includes(14) && sortedRanks.includes(2)) {
-            const wheelRanks = [14]; // Ace
-            for (let i = 2; i < 2 + length - 1; i++) {
-                wheelRanks.push(i);
-            }
-
-            if (wheelRanks.every(rank => sortedRanks.includes(rank))) {
-                sequences++;
-            }
-        }
-
-        return sequences;
     }
 
     /**
@@ -413,8 +397,8 @@ class HandDetectorTestFramework {
             const results = detector.detectAllHands();
             const endTime = performance.now();
 
-            // Verify results
-            const verification = this.verifyExpectations(results, expectedToUse);
+            // Verify results using CALCULATED expected values (source of truth)
+            const verification = this.verifyExpectations(results, calculatedExpected);
 
             const testResult = {
                 id: testCase.id,
@@ -422,11 +406,11 @@ class HandDetectorTestFramework {
                 cards: testCase.cards,
                 timing: endTime - startTime,
                 results: results,
-                expected: expectedToUse,
-                manual: testCase.expected || null,
+                expected: calculatedExpected,        // Use calculated as expected
+                manual: testCase.expected || null,   // Keep manual for reference
                 useCalculated: useCalculated,
                 verification: verification,
-                passed: verification.allPassed
+                passed: verification.allPassed       // Pass/fail based on calculated vs detected
             };
 
             this.testResults.push(testResult);
@@ -474,13 +458,9 @@ class HandDetectorTestFramework {
     }
 
     /**
-     * Verify results match expectations
+     * Verify results match expectations - UPDATED with Two Pair support
      */
     verifyExpectations(results, expected) {
-
-    // In your existing verifyExpectations method, add this case:
-    // } else if (category === 'highCard') {
-    //     actualCount = results.hands ? results.hands.filter(h => h.handType === 'High Card').length : 0;
         const verification = {
             checks: [],
             allPassed: true
@@ -507,6 +487,9 @@ class HandDetectorTestFramework {
                     actualCount = results.hands ? results.hands.filter(h => h.handType === 'Three of a Kind').length : 0;
                 } else if (category === 'pair') {
                     actualCount = results.hands ? results.hands.filter(h => h.handType === 'Pair').length : 0;
+                } else if (category === 'twoPair') {
+                    // NEW: Two Pair verification
+                    actualCount = results.hands ? results.hands.filter(h => h.handType === 'Two Pair').length : 0;
                 } else if (category === 'fullHouse') {
                     actualCount = results.hands ? results.hands.filter(h => h.handType === 'Full House').length : 0;
                 } else if (category === 'flush') {
@@ -545,8 +528,6 @@ class HandDetectorTestFramework {
         return verification;
     }
 
-
-
     /**
      * Display single test result
      */
@@ -571,90 +552,11 @@ class HandDetectorTestFramework {
         console.log(`🎯 RESULT: ${testResult.passed ? 'PASSED' : 'FAILED'}`);
     }
 
-
-    // Updated runTestCase method - always calculates expected values, validates manual ones if provided
-
-    runTestCase(testCase) {
-        console.log(`\n🧪 TEST ${testCase.id}: ${testCase.name}`);
-        console.log(`Cards: ${testCase.cards}`);
-
-        try {
-            let expectedToUse;
-            let useCalculated = false;
-
-            // ALWAYS calculate expected values (our source of truth)
-            const calculatedExpected = this.calculateExpectedCounts(testCase.cards);
-
-            // Check if test case has manual expected values to validate
-            if (testCase.expected && Object.keys(testCase.expected).length > 0) {
-                const comparison = this.compareExpectedValues(testCase.expected, calculatedExpected);
-
-                if (comparison.match) {
-                    console.log('✅ Manual and calculated values match!');
-                } else {
-                    console.log('⚠️ WARNING: Manual expected values do not match calculated!');
-                    console.log('   This test case needs manual expected values updated.');
-                    comparison.differences.forEach(diff => {
-                        console.log(`   ${diff.category}: manual=${diff.manual}, calculated=${diff.calculated}`);
-                    });
-                }
-            } else {
-                console.log('🤖 Using calculated expected values (no manual expected provided)');
-            }
-
-            // ALWAYS use calculated values for testing (they're our source of truth)
-            expectedToUse = calculatedExpected;
-            useCalculated = true;
-
-            // Parse cards and run detector
-            const testCards = this.parseCards(testCase.cards);
-            const startTime = performance.now();
-            const detector = new HandDetector(testCards);
-            const results = detector.detectAllHands();
-            const endTime = performance.now();
-
-            // Verify results
-            const verification = this.verifyExpectations(results, expectedToUse);
-
-            const testResult = {
-                id: testCase.id,
-                name: testCase.name,
-                cards: testCase.cards,
-                timing: endTime - startTime,
-                results: results,
-                expected: expectedToUse,
-                manual: testCase.expected || null,
-                useCalculated: useCalculated,
-                verification: verification,
-                passed: verification.allPassed
-            };
-
-            this.testResults.push(testResult);
-            this.displayTestResult(testResult);
-            return testResult;
-
-        } catch (error) {
-            console.log(`❌ TEST FAILED: ${error.message}`);
-            const errorResult = {
-                id: testCase.id,
-                name: testCase.name,
-                error: error.message,
-                passed: false
-            };
-            this.testResults.push(errorResult);
-            return errorResult;
-        }
-    }
-
-    /**
-     * Display test summary
-     */
-
     /**
      * Run all test cases
      */
     runAllTests(testCases) {
-        console.log('🧪 ======== HANDDETECTOR TESTING WITH STRAIGHT FLUSHES ========');
+        console.log('🧪 ======== HANDDETECTOR TESTING WITH TWO PAIRS ========');
 
         this.testResults = [];
 
@@ -666,8 +568,9 @@ class HandDetectorTestFramework {
         return this.testResults;
     }
 
-
-
+    /**
+     * Display test summary
+     */
     displaySummary() {
         console.log('\n📋 ======== TEST SUMMARY ========');
 
