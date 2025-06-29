@@ -1,5 +1,6 @@
-// js/hands/hand-detector.js v12
-// FIXED: 4K and 2-card position logic
+// js/hands/hand-detector.js v13
+// Added incomplete hands flag system
+// FIXED: 4K and 2-card position logic + Two Pair position fix
 // Added validPositions field for Phase 2 combination generator
 // Integrated with card-evaluation.js for proper hand rankings
 
@@ -107,6 +108,43 @@ class HandDetector {
         }
 
         return positions;
+    }
+
+    /**
+     * Check if hand is incomplete and needs kickers
+     * @param {string} handType - Type of hand
+     * @param {number} cardCount - Number of cards in hand
+     * @returns {boolean} - True if hand needs kickers to be legal
+     */
+    isIncompleteHand(handType, cardCount) {
+        return cardCount === 1 ||
+               cardCount === 2 ||
+               (cardCount === 4 && (handType.includes('of a Kind') || handType === 'Two Pair'));
+    }
+
+    /**
+     * Calculate how many kickers needed for each position
+     * @param {string} handType - Type of hand
+     * @param {number} cardCount - Number of cards in hand
+     * @param {Array} validPositions - Where hand can be placed
+     * @returns {Object|null} - Kickers needed for each valid position
+     */
+    calculateKickersNeeded(handType, cardCount, validPositions) {
+        if (!this.isIncompleteHand(handType, cardCount)) {
+            return null; // Complete hands don't need kickers
+        }
+
+        const kickersNeeded = {};
+
+        validPositions.forEach(position => {
+            if (position === 'front') {
+                kickersNeeded.front = 3 - cardCount; // Front needs 3 total cards
+            } else if (position === 'middle' || position === 'back') {
+                kickersNeeded[position] = 5 - cardCount; // Middle/back need 5 total cards
+            }
+        });
+
+        return kickersNeeded;
     }
 
     /**
@@ -472,18 +510,25 @@ class HandDetector {
         // Determine valid positions for this hand
         const validPositions = this.determineValidPositions(handType, cards.length);
 
+        // Check if hand is incomplete and calculate kickers needed
+        const isIncomplete = this.isIncompleteHand(handType, cards.length);
+        const kickersNeeded = this.calculateKickersNeeded(handType, cards.length, validPositions);
+
         this.allHands.push({
             cards: [...cards],
             handType,
             cardCount: cards.length,
             rank: cards[0].rank,                    // Keep for backward compatibility
-            handStrength: handStrength,             // NEW: Full evaluation result
-            hand_rank: handStrength.hand_rank,      // NEW: Proper ranking tuple
-            strength: handStrength.rank,            // NEW: Numeric strength
-            validPositions: validPositions          // NEW: Where this hand can be placed
+            handStrength: handStrength,             // Full evaluation result
+            hand_rank: handStrength.hand_rank,      // Proper ranking tuple
+            strength: handStrength.rank,            // Numeric strength
+            validPositions: validPositions,         // Where this hand can be placed
+            isIncomplete: isIncomplete,             // NEW: Flag for incomplete hands
+            kickersNeeded: kickersNeeded           // NEW: Kickers needed for each position
         });
 
-        console.log(`🃏 Found: ${handType} ${cards[0].rank} of ${cards[0].suit} (${cards.length} card) - Valid: ${validPositions.join(', ')}`);
+        const incompleteStatus = isIncomplete ? `INCOMPLETE - needs ${JSON.stringify(kickersNeeded)}` : 'COMPLETE';
+        console.log(`🃏 Found: ${handType} ${cards[0].rank} of ${cards[0].suit} (${cards.length} card) - Valid: ${validPositions.join(', ')} - ${incompleteStatus}`);
     }
 
     /**
@@ -511,7 +556,7 @@ class HandDetector {
     }
 
     /**
-     * Add a hand to our results - NOW WITH PROPER RANKING AND VALID POSITIONS!
+     * Add a hand to our results - NOW WITH INCOMPLETE HANDS FLAGS!
      */
     addHand(cards, handType) {
         // Get proper hand ranking from card-evaluation.js
@@ -520,18 +565,25 @@ class HandDetector {
         // Determine valid positions for this hand
         const validPositions = this.determineValidPositions(handType, cards.length);
 
+        // Check if hand is incomplete and calculate kickers needed
+        const isIncomplete = this.isIncompleteHand(handType, cards.length);
+        const kickersNeeded = this.calculateKickersNeeded(handType, cards.length, validPositions);
+
         this.allHands.push({
             cards: [...cards],
             handType,
             cardCount: cards.length,
             rank: cards[0].rank,                // Keep for backward compatibility
-            handStrength: handStrength,         // NEW: Full evaluation result
-            hand_rank: handStrength.hand_rank,  // NEW: Proper ranking tuple
-            strength: handStrength.rank,        // NEW: Numeric strength
-            validPositions: validPositions      // NEW: Where this hand can be placed
+            handStrength: handStrength,         // Full evaluation result
+            hand_rank: handStrength.hand_rank,  // Proper ranking tuple
+            strength: handStrength.rank,        // Numeric strength
+            validPositions: validPositions,     // Where this hand can be placed
+            isIncomplete: isIncomplete,         // NEW: Flag for incomplete hands
+            kickersNeeded: kickersNeeded       // NEW: Kickers needed for each position
         });
 
-        console.log(`🎯 Found: ${handType} of ${cards[0].rank}s (${cards.length} cards) - Strength: ${handStrength.rank} - Valid: ${validPositions.join(', ')}`);
+        const incompleteStatus = isIncomplete ? `INCOMPLETE - needs ${JSON.stringify(kickersNeeded)}` : 'COMPLETE';
+        console.log(`🎯 Found: ${handType} of ${cards[0].rank}s (${cards.length} cards) - Strength: ${handStrength.rank} - Valid: ${validPositions.join(', ')} - ${incompleteStatus}`);
     }
 
     /**
@@ -540,10 +592,13 @@ class HandDetector {
     formatResults() {
         const results = {
             total: this.allHands.length,
-            hands: this.allHands
+            hands: this.allHands,
+            // Summary statistics
+            completeHands: this.allHands.filter(h => !h.isIncomplete).length,
+            incompleteHands: this.allHands.filter(h => h.isIncomplete).length
         };
 
-        console.log(`✅ HandDetector found ${results.total} hands with proper rankings and position validation!`);
+        console.log(`✅ HandDetector found ${results.total} hands (${results.completeHands} complete, ${results.incompleteHands} incomplete) with proper rankings, position validation, and completion flags!`);
         return results;
     }
 }
