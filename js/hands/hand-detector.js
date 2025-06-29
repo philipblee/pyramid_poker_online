@@ -1,9 +1,7 @@
-// js/hands/hand-detector.js v9
+// js/hands/hand-detector.js v12
+// FIXED: 4K and 2-card position logic
+// Added validPositions field for Phase 2 combination generator
 // Integrated with card-evaluation.js for proper hand rankings
-// Now all detected hands get proper hand_rank tuples!
-
-// Import hand evaluation functions
-// Note: In browser environment, ensure card-evaluation.js is loaded before this file
 
 class HandDetector {
     constructor(cards) {
@@ -43,6 +41,90 @@ class HandDetector {
         this.detectSingleCards();
 
         return this.formatResults();
+    }
+
+    /**
+     * Determine which positions a hand can legally be placed in
+     * @param {string} handType - Type of hand (e.g., 'Straight', 'Pair')
+     * @param {number} cardCount - Number of cards in hand
+     * @returns {Array} Array of valid positions ['front', 'middle', 'back']
+     */
+    determineValidPositions(handType, cardCount) {
+        const positions = [];
+
+        // 1-card hands - can contribute to front (3 cards) or middle (5 cards)
+        if (cardCount === 1) {
+            positions.push('front', 'middle'); // Essential for big hand scenarios
+        }
+
+        // 2-card hands (pairs that will get kickers)
+        else if (cardCount === 2) {
+            if (handType === 'Pair') {
+                positions.push('front', 'middle', 'back'); // Will become 3-5 cards with kickers
+            }
+        }
+
+        // 3-card hands - ONLY FRONT!
+        else if (cardCount === 3) {
+            if (['High Card', 'Pair', 'Three of a Kind'].includes(handType)) {
+                positions.push('front');
+            }
+            // 3-card hands CANNOT go middle or back (need 5+ cards)
+        }
+
+        // 4-card hands (different rules for different hand types)
+        else if (cardCount === 4) {
+            if (handType === 'Two Pair') {
+                positions.push('middle', 'back'); // Two Pair: below straight, middle/back only
+            } else if (handType.includes('of a Kind')) {
+                positions.push('front', 'middle', 'back'); // 4K: straight or better, all positions
+            }
+        }
+
+        // 5-card hands
+        else if (cardCount === 5) {
+            positions.push('middle', 'back');
+
+            // Front: only if straight or better
+            if (this.isStraightOrBetter(handType)) {
+                positions.push('front');
+            }
+        }
+
+        // 6-7 card hands (ONLY straight flushes or of-a-kind)
+        else if (cardCount >= 6 && cardCount <= 7) {
+            if (this.isStraightFlushOrOfAKind(handType)) {
+                positions.push('middle', 'back');
+            }
+            // Invalid 6-7 card hands get no valid positions
+        }
+
+        // 8 card hands (ONLY straight flushes or of-a-kind)
+        else if (cardCount === 8) {
+            if (this.isStraightFlushOrOfAKind(handType)) {
+                positions.push('back'); // Only back for 8-card hands
+            }
+        }
+
+        return positions;
+    }
+
+    /**
+     * Check if hand type is straight or better (for front 5-card requirement)
+     */
+    isStraightOrBetter(handType) {
+        return ['Straight', 'Flush', 'Full House', 'Four of a Kind',
+                'Straight Flush', 'Five of a Kind',
+                '6 of a Kind', '7 of a Kind', '8 of a Kind',
+                '6-card Straight Flush', '7-card Straight Flush', '8-card Straight Flush'].includes(handType);
+    }
+
+    /**
+     * Check if hand type is valid for 6-8 card hands
+     */
+    isStraightFlushOrOfAKind(handType) {
+        return handType.includes('Straight Flush') ||
+               handType.includes('of a Kind');
     }
 
     /**
@@ -387,6 +469,9 @@ class HandDetector {
         // Get proper hand ranking from card-evaluation.js
         const handStrength = evaluateHand(cards);
 
+        // Determine valid positions for this hand
+        const validPositions = this.determineValidPositions(handType, cards.length);
+
         this.allHands.push({
             cards: [...cards],
             handType,
@@ -395,10 +480,10 @@ class HandDetector {
             handStrength: handStrength,             // NEW: Full evaluation result
             hand_rank: handStrength.hand_rank,      // NEW: Proper ranking tuple
             strength: handStrength.rank,            // NEW: Numeric strength
-            eligiblePositions: ['front', 'middle'] // Can be used in Front or Middle
+            validPositions: validPositions          // NEW: Where this hand can be placed
         });
 
-        console.log(`🃏 Found: ${handType} ${cards[0].rank} of ${cards[0].suit} (${cards.length} card)`);
+        console.log(`🃏 Found: ${handType} ${cards[0].rank} of ${cards[0].suit} (${cards.length} card) - Valid: ${validPositions.join(', ')}`);
     }
 
     /**
@@ -426,11 +511,14 @@ class HandDetector {
     }
 
     /**
-     * Add a hand to our results - NOW WITH PROPER RANKING!
+     * Add a hand to our results - NOW WITH PROPER RANKING AND VALID POSITIONS!
      */
     addHand(cards, handType) {
         // Get proper hand ranking from card-evaluation.js
         const handStrength = evaluateHand(cards);
+
+        // Determine valid positions for this hand
+        const validPositions = this.determineValidPositions(handType, cards.length);
 
         this.allHands.push({
             cards: [...cards],
@@ -439,10 +527,11 @@ class HandDetector {
             rank: cards[0].rank,                // Keep for backward compatibility
             handStrength: handStrength,         // NEW: Full evaluation result
             hand_rank: handStrength.hand_rank,  // NEW: Proper ranking tuple
-            strength: handStrength.rank         // NEW: Numeric strength
+            strength: handStrength.rank,        // NEW: Numeric strength
+            validPositions: validPositions      // NEW: Where this hand can be placed
         });
 
-        console.log(`🎯 Found: ${handType} of ${cards[0].rank}s (${cards.length} cards) - Strength: ${handStrength.rank}`);
+        console.log(`🎯 Found: ${handType} of ${cards[0].rank}s (${cards.length} cards) - Strength: ${handStrength.rank} - Valid: ${validPositions.join(', ')}`);
     }
 
     /**
@@ -454,7 +543,7 @@ class HandDetector {
             hands: this.allHands
         };
 
-        console.log(`✅ HandDetector found ${results.total} hands with proper rankings!`);
+        console.log(`✅ HandDetector found ${results.total} hands with proper rankings and position validation!`);
         return results;
     }
 }
