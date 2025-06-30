@@ -652,8 +652,14 @@ class HandDetector {
      * Add a hand to our results - NOW WITH INCOMPLETE HANDS FLAGS!
      */
     addHand(cards, handType) {
-        // Get proper hand ranking from card-evaluation.js
-        const handStrength = evaluateHand(cards);
+
+        // This change will ONLY affect Three of a Kind hands
+        let handStrength;
+        if (cards.length === 3) {
+            handStrength = evaluateThreeCardHand(cards);  // Safe - only trips
+        } else {
+            handStrength = evaluateHand(cards);
+        }
 
         // Determine valid positions for this hand
         const validPositions = this.determineValidPositions(handType, cards.length);
