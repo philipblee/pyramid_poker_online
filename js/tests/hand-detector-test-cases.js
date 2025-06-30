@@ -3,19 +3,20 @@
 // UPDATED: Added highCard: 17 to all test cases and updated totals
 
 const HAND_DETECTOR_TEST_CASES = [
+
     {
         id: 1,
         name: "Four Aces + Two Kings",
         cards: "A♠ A♥ A♦ A♣ K♠ Q♠ J♠ 10♠ 9♠ 8♠ 7♠ 6♠ 5♠ 4♠ 3♠ 2♠ K♥",
         expected: {
-            fourOfAKind: 1,      // 1 natural 4K
-            threeOfAKind: 4,     // 4 drop-one variants from 4K
-            pair: 1,             // 1 natural pair (Kings)
-            fullHouse: 4,        // 4 trips × 1 pair = 4 full houses
-            flush: 1287,         // C(13,5) = 1287 spades flushes
-            straight: 21,        // 21 straights (A-K-Q-J-10: 8, K-Q-J-10-9: 2, others: 1 each, 5-4-3-2-A: 4)
-            highCard: 17,        // NEW: 17 single cards
-            total: 1335          // Updated: 1318 + 17 = 1335
+            fourOfAKind: 5,      // FIXED: 1 natural + 4 drop-one variants from 4 Aces
+            threeOfAKind: 4,     // 4 drop-one variants from 4K (no change)
+            pair: 1,             // 1 natural pair (Kings) (no change)
+            fullHouse: 4,        // 4 trips × 1 pair = 4 full houses (no change)
+            flush: 1287,         // C(13,5) = 1287 spades flushes (no change)
+            straight: 21,        // 21 straights (no change)
+            highCard: 17,        // 17 single cards (no change)
+            total: 1339          // UPDATED: 1335 + 4 = 1339 (added 4 more 4Ks)
         }
     },
 

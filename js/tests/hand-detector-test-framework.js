@@ -1,6 +1,6 @@
-// js/tests/hand-detector-test-framework.js v11
+// js/tests/hand-detector-test-framework.js v12
 // Testing framework class for HandDetector - supports all hand types including two pairs
-// v11: Added two pairs test support
+// v12: Added automatic 4K expansion calculation
 
 class HandDetectorTestFramework {
     constructor() {
@@ -32,7 +32,7 @@ class HandDetectorTestFramework {
 
         const calculated = {};
 
-        // Calculate of-a-kind hands
+        // Calculate of-a-kind hands (NOW WITH 4K EXPANSION)
         this.calculateOfAKindHands(rankCounts, calculated);
 
         // NEW: Calculate two pairs (must come AFTER of-a-kind calculation)
@@ -64,6 +64,7 @@ class HandDetectorTestFramework {
 
     /**
      * Calculate of-a-kind hands (pairs, trips, 4K, 5K, 6K, 7K, 8K)
+     * NOW WITH 4K EXPANSION LOGIC
      */
     calculateOfAKindHands(rankCounts, calculated) {
         // Initialize counters
@@ -76,33 +77,76 @@ class HandDetectorTestFramework {
         calculated.eightOfAKind = 0;
 
         Object.entries(rankCounts).forEach(([rank, count]) => {
-            // Natural hands and ONLY immediate drop-one variants
-            if (count >= 8) {
-                calculated.eightOfAKind += 1;
-                calculated.sevenOfAKind += count; // 8K → 7K only
-            } else if (count >= 7) {
-                calculated.sevenOfAKind += 1;
-                calculated.sixOfAKind += count; // 7K → 6K only
-            } else if (count >= 6) {
-                calculated.sixOfAKind += 1;
-                calculated.fiveOfAKind += count; // 6K → 5K only
-            } else if (count >= 5) {
-                calculated.fiveOfAKind += 1;
-                calculated.fourOfAKind += count; // 5K → 4K only (NO trips)
-            } else if (count >= 4) {
-                calculated.fourOfAKind += 1;
-                calculated.threeOfAKind += count; // 4K → 3K only (NO pairs)
-            } else if (count === 3) {
+            // Handle natural pairs (exactly 2 cards)
+            if (count === 2) {
+                calculated.pair += 1;
+            }
+
+            // Handle 3 cards: natural trip + drop-one variants
+            else if (count === 3) {
                 calculated.threeOfAKind += 1; // Natural trip
                 calculated.pair += count; // Natural trips → pairs only
-            } else if (count === 2) {
-                calculated.pair += 1; // Natural pairs only
+            }
+
+            // Handle 4K: EXPAND WITH KICKERS
+            else if (count === 4) {
+                // Calculate available kickers for this 4K
+                const availableKickers = this.calculateAvailableKickers(rank, rankCounts);
+                calculated.fourOfAKind += availableKickers; // Expanded 4K hands
+                calculated.threeOfAKind += count; // 4K → 3K drop-one variants
+
+                console.log(`🃏 4K of ${rank}s: ${availableKickers} kickers available → ${availableKickers} complete 4K hands`);
+            }
+
+            // Handle 5+ cards: natural + drop-one variants
+            else if (count >= 5) {
+                // Natural hand
+                if (count >= 8) {
+                    calculated.eightOfAKind += 1;
+                    calculated.sevenOfAKind += count; // 8K → 7K only
+                } else if (count >= 7) {
+                    calculated.sevenOfAKind += 1;
+                    calculated.sixOfAKind += count; // 7K → 6K only
+                } else if (count >= 6) {
+                    calculated.sixOfAKind += 1;
+                    calculated.fiveOfAKind += count; // 6K → 5K only
+                } else if (count >= 5) {
+                    calculated.fiveOfAKind += 1;
+
+                    // 5K → 4K variants need expansion too!
+                    const availableKickers = this.calculateAvailableKickers(rank, rankCounts);
+                    calculated.fourOfAKind += (count * availableKickers); // Each 5K→4K gets expanded
+                }
             }
         });
     }
 
+    // Fixed calculateAvailableKickers method for test framework
+    // The issue was in how we calculated kickers for 4K expansion
+
     /**
-     * NEW: Calculate two pairs hands
+     * FIXED: Calculate available kickers for 4K expansion
+     * Returns number of individual cards available as kickers
+     */
+    calculateAvailableKickers(excludeRank, rankCounts) {
+        let kickers = 0;
+
+        console.log(`🃏 Calculating kickers for 4K of ${excludeRank}s:`);
+
+        Object.entries(rankCounts).forEach(([rank, count]) => {
+            if (rank !== excludeRank) {
+                // Each individual card can be a kicker
+                kickers += count;
+                console.log(`  ${rank}: ${count} cards → ${count} kickers`);
+            }
+        });
+
+        console.log(`🃏 Total kickers available: ${kickers}`);
+        return kickers;
+    }
+
+    /**
+     * Calculate two pairs hands
      * Two pairs are combinations of existing pair hands: C(pairs, 2)
      * This matches HandDetector logic which filters existing pairs and combines them
      */
@@ -474,7 +518,7 @@ class HandDetectorTestFramework {
             } else {
                 // Count hands of specific types
                 if (category === 'fourOfAKind') {
-                    actualCount = results.hands ? results.hands.filter(h => h.handType === '4 of a Kind').length : 0;
+                    actualCount = results.hands ? results.hands.filter(h => h.handType === 'Four of a Kind').length : 0;
                 } else if (category === 'fiveOfAKind') {
                     actualCount = results.hands ? results.hands.filter(h => h.handType === '5 of a Kind').length : 0;
                 } else if (category === 'sixOfAKind') {
@@ -541,11 +585,19 @@ class HandDetectorTestFramework {
             console.log(`${status} ${check.category}: ${check.actual} (expected: ${check.expected})`);
         });
 
-        // Show examples of found hands
+        // Show examples of found hands (limited to avoid spam)
         if (testResult.results.hands && testResult.results.hands.length > 0) {
-            testResult.results.hands.forEach(hand => {
-                const cardStr = hand.cards.map(c => c.rank + c.suit).join(' ');
-                console.log(`   ${hand.handType}: ${cardStr} (${hand.rank}s)`);
+            const handTypes = ['Four of a Kind', 'Full House', 'Straight Flush', 'Flush', 'Straight'];
+            handTypes.forEach(handType => {
+                const handsOfType = testResult.results.hands.filter(h => h.handType === handType);
+                if (handsOfType.length > 0) {
+                    const example = handsOfType[0];
+                    const cardStr = example.cards.map(c => c.rank + c.suit).join(' ');
+                    console.log(`   ${handType}: ${cardStr} (${example.cardCount} cards, complete: ${!example.isIncomplete})`);
+                    if (handsOfType.length > 1) {
+                        console.log(`     ... +${handsOfType.length - 1} more ${handType} hands`);
+                    }
+                }
             });
         }
 
@@ -556,7 +608,7 @@ class HandDetectorTestFramework {
      * Run all test cases
      */
     runAllTests(testCases) {
-        console.log('🧪 ======== HANDDETECTOR TESTING WITH TWO PAIRS ========');
+        console.log('🧪 ======== HANDDETECTOR TESTING WITH 4K EXPANSION ========');
 
         this.testResults = [];
 

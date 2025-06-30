@@ -1,7 +1,7 @@
 {
-  "version": "v2.0.1-20-g2e4955e-dirty",
-  "commit": "2e4955e",
-  "branch": "main",
-  "buildDate": "2025-06-29T11:27:47.952Z",
-  "lastCommit": "2025-06-28 21:41:14 -0400"
+  "version": "v2.0.2-3-g2efbab4-dirty",
+  "commit": "2efbab4",
+  "branch": "phase-3/4k-expansion-plus-metadata-reporting",
+  "buildDate": "2025-06-30T13:34:51.844Z",
+  "lastCommit": "2025-06-29 19:53:30 -0400"
 }

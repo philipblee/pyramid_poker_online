@@ -1,8 +1,9 @@
-// js/hands/hand-detector.js v13
-// Added incomplete hands flag system
+// js/hands/hand-detector.js v14
+// Added 4K expansion with kicker integration
 // FIXED: 4K and 2-card position logic + Two Pair position fix
 // Added validPositions field for Phase 2 combination generator
 // Integrated with card-evaluation.js for proper hand rankings
+// NEW: 4K hands are expanded with kickers during detection (complete hands only)
 
 class HandDetector {
     constructor(cards) {
@@ -23,7 +24,7 @@ class HandDetector {
         // Detect straight flushes (5-8 cards)
         this.detectStraightFlushes(suitCounts);
 
-        // Detect of-a-kind hands with drop-one-card pattern
+        // Detect of-a-kind hands with drop-one-card pattern AND 4K expansion
         this.detectOfAKind(rankCounts);
 
         // Detect two pairs
@@ -42,6 +43,135 @@ class HandDetector {
         this.detectSingleCards();
 
         return this.formatResults();
+    }
+
+    /**
+     * Detect of-a-kind hands with drop-one-card pattern
+     * SPECIAL: 4K hands are expanded with kickers to create complete 5-card hands
+     */
+    detectOfAKind(rankCounts) {
+        Object.entries(rankCounts).forEach(([rank, count]) => {
+            if (count >= 2) {
+                const allCardsOfRank = this.cards.filter(c => c.rank === rank);
+
+                // Handle natural pairs (exactly 2 cards)
+                if (count === 2) {
+                    const naturalPair = allCardsOfRank.slice(0, 2);
+                    this.addHand(naturalPair, 'Pair');
+                }
+
+                // Handle 3 cards: natural trip + drop-one variants
+                else if (count === 3) {
+                    // 1. Create natural three-of-a-kind
+                    const naturalTrip = allCardsOfRank.slice(0, 3);
+                    this.addHand(naturalTrip, 'Three of a Kind');
+
+                    // 2. Create 3 different pairs by dropping one card each
+                    for (let dropIndex = 0; dropIndex < 3; dropIndex++) {
+                        const pairVariant = allCardsOfRank.slice(0, 3)
+                            .filter((card, index) => index !== dropIndex);
+                        this.addHand(pairVariant, 'Pair');
+                    }
+                }
+
+                // Handle 4K: EXPAND with kickers to create complete 5-card hands
+                else if (count === 4) {
+                    console.log(`🃏 Expanding 4K of ${rank}s with kickers...`);
+
+                    // Get the four cards of this rank
+                    const fourOfAKindCards = allCardsOfRank.slice(0, 4);
+
+                    // Find all available kickers (remaining cards not of this rank)
+                    const remainingCards = this.cards.filter(c => c.rank !== rank);
+                    const availableKickers = this.findKickers(remainingCards);
+
+                    console.log(`🃏 Found ${availableKickers.length} kickers for 4K of ${rank}s`);
+
+                    // Generate complete 5-card 4K hands
+                    availableKickers.forEach((kicker, index) => {
+                        const completeHand = [...fourOfAKindCards, ...kicker];
+                        this.addHand(completeHand, 'Four of a Kind');
+                        console.log(`🃏 Created 4K + ${kicker.map(c => c.rank + c.suit).join(',')} (variant ${index + 1})`);
+                    });
+
+                    // Also create 3-of-a-kind variants by dropping one 4K card
+                    for (let dropIndex = 0; dropIndex < 4; dropIndex++) {
+                        const tripVariant = fourOfAKindCards.filter((card, index) => index !== dropIndex);
+                        this.addHand(tripVariant, 'Three of a Kind');
+                    }
+                }
+
+                // Handle 5+ cards: natural + drop-one variants (these are already complete)
+                else if (count >= 5) {
+                    // 1. Create natural N-of-a-kind (already complete)
+                    const naturalHand = allCardsOfRank.slice(0, count);
+                    const naturalHandType = `${count} of a Kind`;
+                    this.addHand(naturalHand, naturalHandType);
+
+                    // 2. Create count different (count-1)-of-a-kinds by dropping one card each
+                    const targetSize = count - 1;
+                    const targetHandType = targetSize >= 5 ? `${targetSize} of a Kind` :
+                                         targetSize === 4 ? 'Four of a Kind' :
+                                         targetSize === 3 ? 'Three of a Kind' : 'Pair';
+
+                    for (let dropIndex = 0; dropIndex < count; dropIndex++) {
+                        const variantHand = allCardsOfRank.slice(0, count)
+                            .filter((card, index) => index !== dropIndex);
+
+                        // If this creates a 4K, expand it with kickers too
+                        if (targetSize === 4) {
+                            console.log(`🃏 Drop-one variant created 4K of ${rank}s - expanding with kickers...`);
+                            const remainingCards = this.cards.filter(c => c.rank !== rank);
+                            const availableKickers = this.findKickers(remainingCards);
+
+                            availableKickers.forEach(kicker => {
+                                const completeHand = [...variantHand, ...kicker];
+                                this.addHand(completeHand, 'Four of a Kind');
+                            });
+                        } else {
+                            this.addHand(variantHand, targetHandType);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Find available kickers: singles and individual cards from pairs
+     * @param {Array} remainingCards - Cards not used in the main hand
+     * @returns {Array} Array of kicker arrays (each kicker is 1-card array)
+     */
+    findKickers(remainingCards) {
+        const kickers = [];
+
+        // Count ranks in remaining cards
+        const remainingRankCounts = {};
+        remainingCards.forEach(card => {
+            remainingRankCounts[card.rank] = (remainingRankCounts[card.rank] || 0) + 1;
+        });
+
+        // Process each rank
+        Object.entries(remainingRankCounts).forEach(([rank, count]) => {
+            const cardsOfRank = remainingCards.filter(c => c.rank === rank);
+
+            if (count === 1) {
+                // Single card - add as kicker
+                kickers.push([cardsOfRank[0]]);
+            } else if (count === 2) {
+                // Pair - add each card individually as separate kickers
+                kickers.push([cardsOfRank[0]]);
+                kickers.push([cardsOfRank[1]]);
+            } else if (count >= 3) {
+                // Trip or higher - add each card individually
+                cardsOfRank.forEach(card => {
+                    kickers.push([card]);
+                });
+            }
+        });
+
+        console.log(`🃏 Found ${kickers.length} total kickers from remaining cards`);
+        return kickers;
     }
 
     /**
@@ -119,7 +249,7 @@ class HandDetector {
     isIncompleteHand(handType, cardCount) {
         return cardCount === 1 ||
                cardCount === 2 ||
-               (cardCount === 4 && (handType.includes('of a Kind') || handType === 'Two Pair'));
+               (cardCount === 4 && handType === 'Two Pair'); // 4K is now always complete due to expansion
     }
 
     /**
@@ -298,43 +428,6 @@ class HandDetector {
         };
 
         generateCombos(0, []);
-    }
-
-    /**
-     * Detect of-a-kind hands with drop-one-card pattern
-     */
-    detectOfAKind(rankCounts) {
-        Object.entries(rankCounts).forEach(([rank, count]) => {
-            if (count >= 2) {
-                const allCardsOfRank = this.cards.filter(c => c.rank === rank);
-
-                // Handle natural pairs (exactly 2 cards)
-                if (count === 2) {
-                    const naturalPair = allCardsOfRank.slice(0, 2);
-                    this.addHand(naturalPair, 'Pair');
-                }
-
-                // Handle 3+ cards: natural + drop-one variants
-                else if (count >= 3) {
-                    // 1. Create natural N-of-a-kind
-                    const naturalHand = allCardsOfRank.slice(0, count);
-                    const naturalHandType = count >= 4 ? `${count} of a Kind` : 'Three of a Kind';
-                    this.addHand(naturalHand, naturalHandType);
-
-                    // 2. Create count different (count-1)-of-a-kinds by dropping one card each
-                    const targetSize = count - 1;
-                    const targetHandType = targetSize >= 4 ? `${targetSize} of a Kind` :
-                                         targetSize === 3 ? 'Three of a Kind' : 'Pair';
-
-                    for (let dropIndex = 0; dropIndex < count; dropIndex++) {
-                        const variantHand = allCardsOfRank.slice(0, count)
-                            .filter((card, index) => index !== dropIndex);
-
-                        this.addHand(variantHand, targetHandType);
-                    }
-                }
-            }
-        });
     }
 
     /**
@@ -599,6 +692,7 @@ class HandDetector {
         };
 
         console.log(`✅ HandDetector found ${results.total} hands (${results.completeHands} complete, ${results.incompleteHands} incomplete) with proper rankings, position validation, and completion flags!`);
+        console.log(`🃏 4K hands have been expanded with kickers and are now complete!`);
         return results;
     }
 }
