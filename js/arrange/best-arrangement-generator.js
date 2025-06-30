@@ -64,11 +64,13 @@ class BestArrangementGenerator {
         console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
 
         // Return completed arrangement with card arrays (ready for game)
+
         return {
-            back: { cards: backCards, isIncomplete: false },
-            middle: { cards: middleCards, isIncomplete: false },
-            front: { cards: frontCards, isIncomplete: false }
+        back: { ...arrangement.back, cards: backCards, isIncomplete: false },
+        middle: { ...arrangement.middle, cards: middleCards, isIncomplete: false },
+        front: { ...arrangement.front, cards: frontCards, isIncomplete: false }
         };
+
     }
 
     /**
