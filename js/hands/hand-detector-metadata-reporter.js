@@ -13,10 +13,10 @@ class HandDetectorMetadataReporter {
             'Flush',
             'Full House',
             'Four of a Kind',
-            'Five of a Kind',
-            'Six of a Kind',
-            'Seven of a Kind',
-            'Eight of a Kind',
+            '5 of a Kind',
+            '6 of a Kind',
+            '7 of a Kind',
+            '8 of a Kind',
             'Straight Flush',
             '6-card Straight Flush',
             '7-card Straight Flush',
@@ -105,16 +105,22 @@ class HandDetectorMetadataReporter {
 
         // Display hand type breakdown
         Object.entries(handTypeCounts).forEach(([type, count]) => {
-            const count = handTypeCounts[type];
-            if (count > 0) {
-                const complete = handTypeByCompletion[type].complete;
-                const incomplete = handTypeByCompletion[type].incomplete;
-                const positions = handTypeByPosition[type];
+
+
+             if (count > 0) {
+                // Add safety checks for undefined objects
+                const completionData = handTypeByCompletion[type] || { complete: 0, incomplete: 0 };
+                const complete = completionData.complete;
+                const incomplete = completionData.incomplete;
+                const positions = handTypeByPosition[type] || { front: 0, middle: 0, back: 0, multiple: 0 };
 
                 console.log(`  ${type}: ${count} total`);
                 console.log(`    Complete: ${complete}, Incomplete: ${incomplete}`);
                 console.log(`    Positions - Front only: ${positions.front}, Middle only: ${positions.middle}, Back only: ${positions.back}, Multiple: ${positions.multiple}`);
             }
+
+
+
         });
     }
 

@@ -56,7 +56,7 @@ function runMetadataTestById(testCaseId) {
         actualCounts.flush = results.hands.filter(h => h.handType === 'Flush').length;
         actualCounts.fullHouse = results.hands.filter(h => h.handType === 'Full House').length;
         actualCounts.fourOfAKind = results.hands.filter(h => h.handType === 'Four of a Kind').length;
-        actualCounts.fiveOfAKind = results.hands.filter(h => h.handType === 'Five of a Kind').length;
+        actualCounts.fiveOfAKind = results.hands.filter(h => h.handType === '5 of a Kind').length;
         actualCounts.sixOfAKind = results.hands.filter(h => h.handType === '6 of a Kind').length;
         actualCounts.sevenOfAKind = results.hands.filter(h => h.handType === '7 of a Kind').length;
         actualCounts.eightOfAKind = results.hands.filter(h => h.handType === '8 of a Kind').length;
