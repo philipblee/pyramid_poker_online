@@ -1,13 +1,13 @@
 // js/hands/auto-arrange.js
-// Phase 6: Final cleanup - Pure orchestrator pattern
+// Phase 7: Integrated with BestArrangementGenerator - simplified and optimized
 
 class AutoArrangeManager {
     constructor(game) {
         this.game = game;
         // Specialized components for different responsibilities
         this.wildCardOptimizer = new WildCardOptimizer(game);
-        this.largeHandDetector = new LargeHandDetector(game);
-        this.arrangementGenerator = new ArrangementGenerator(game);
+        // Removed: largeHandDetector - handled by BestArrangementGenerator
+        // Removed: arrangementGenerator - replaced with BestArrangementGenerator
         this.arrangementValidator = new ArrangementValidator(game);
     }
 
@@ -35,25 +35,17 @@ class AutoArrangeManager {
             }
         }
 
-        console.log('🧠 Smart Auto-Arrange starting...');
+        console.log('🧠 Smart Auto-Arrange starting with BestArrangementGenerator...');
 
-        // 1. Check for large hands first (6-8 cards)
-        const largeHandArrangement = this.largeHandDetector.findLargeHandArrangement(allCards);
-        if (largeHandArrangement) {
-            console.log('🎯 Found large hand arrangement!');
-            this.logArrangement(largeHandArrangement);
-            return this.applyArrangement(playerData, largeHandArrangement);
-        }
-
-        // 2. Generate and find best normal arrangement
-        const bestArrangement = this.findBestNormalArrangement(allCards);
+        // Use our optimized arrangement generator (handles ALL hand types including 6-8 card special hands)
+        const bestArrangement = this.findBestArrangementOptimized(allCards);
         if (bestArrangement) {
-            console.log('✨ Best arrangement found and validated!');
+            console.log('✨ Optimal arrangement found and validated!');
             this.logArrangement(bestArrangement);
             return this.applyArrangement(playerData, bestArrangement);
         }
 
-        // 3. Fallback to simple arrangement
+        // Fallback to simple arrangement
         console.log('❌ No optimal arrangement found, using fallback');
         return this.fallbackAutoArrange(allCards, playerData);
     }
@@ -67,24 +59,74 @@ class AutoArrangeManager {
     }
 
     /**
+     * NEW: Find best arrangement using greedy branch-and-bound algorithm
+     * Handles ALL hand types including 6-8 card special hands optimally
+     */
+    findBestArrangementOptimized(allCards) {
+        console.log('🎯 Using BestArrangementGenerator (handles 5-8 card hands optimally)...');
+
+        try {
+            // Step 1: Detect all possible hands
+            const handDetector = new HandDetector(allCards);
+            const detectionResults = handDetector.detectAllHands();
+            console.log(`🔍 Detected ${detectionResults.total} possible hands`);
+
+            // Step 2: Sort hands by strength
+            const handSorter = new HandSorter();
+            const sortResult = handSorter.sortHandsByStrength(detectionResults.hands);
+            console.log(`🔄 Sorted hands by strength`);
+
+            // Step 3: Find optimal arrangement using greedy algorithm
+            const generator = new BestArrangementGenerator();
+            const result = generator.generateBestArrangement(sortResult.sortedHands, allCards);
+
+            if (result.arrangement) {
+                console.log(`🏆 Optimal arrangement found! Score: ${result.score} (${result.statistics.searchTime.toFixed(1)}ms, ${result.statistics.efficiency * 100}% pruning efficiency)`);
+
+                // Calculate remaining cards for staging
+                const usedCards = [
+                    ...result.arrangement.back.cards,
+                    ...result.arrangement.middle.cards,
+                    ...result.arrangement.front.cards
+                ];
+
+                const stagingCards = allCards.filter(card =>
+                    !usedCards.some(usedCard => usedCard.id === card.id)
+                );
+
+                // Convert to the format expected by existing game code
+                const gameArrangement = {
+                    back: result.arrangement.back.cards,
+                    middle: result.arrangement.middle.cards,
+                    front: result.arrangement.front.cards,
+                    staging: stagingCards
+                };
+
+                // Final validation before returning
+                if (this.arrangementValidator.validateFinalArrangement(gameArrangement)) {
+                    return gameArrangement;
+                } else {
+                    console.warn('⚠️ Generated arrangement failed validation');
+                    return null;
+                }
+            }
+
+            console.warn('⚠️ BestArrangementGenerator could not find valid arrangement');
+            return null;
+
+        } catch (error) {
+            console.error('❌ Error in BestArrangementGenerator:', error);
+            return null;
+        }
+    }
+
+    /**
+     * DEPRECATED: Old method - kept for fallback compatibility
      * Find best arrangement for normal hands (5-card combinations)
      */
     findBestNormalArrangement(allCards) {
-        // Analyze all possible hands
-        const analyzer = new HandAnalyzer(allCards);
-        const allPossibleHands = analyzer.findAllPossibleHands();
-
-        console.log(`Found ${allPossibleHands.length} possible 5-card hands`);
-
-        // Generate and score arrangements
-        const bestArrangement = this.arrangementGenerator.findBestArrangement(allCards, allPossibleHands);
-
-        // Final validation before returning
-        if (bestArrangement && this.arrangementValidator.validateFinalArrangement(bestArrangement)) {
-            return bestArrangement;
-        }
-
-        return null;
+        console.log('⚠️ Using deprecated findBestNormalArrangement - consider updating to findBestArrangementOptimized');
+        return this.findBestArrangementOptimized(allCards);
     }
 
     /**

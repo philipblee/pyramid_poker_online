@@ -11,13 +11,77 @@ class BestArrangementGenerator {
     }
 
     /**
+     * Complete arrangement by adding kickers to incomplete hands
+     * @param {Object} arrangement - {back, middle, front} with hand objects
+     * @returns {Object} - Completed arrangement with card arrays
+     */
+    completeArrangementWithKickers(arrangement) {
+        console.log('🔧 Completing arrangement with kickers...');
+
+        const usedCardIds = new Set([
+            ...arrangement.back.cards.map(c => c.id),
+            ...arrangement.middle.cards.map(c => c.id),
+            ...arrangement.front.cards.map(c => c.id)
+        ]);
+
+        // Get unused cards sorted by strength (highest first)
+        const unusedCards = this.allCards
+            .filter(card => !usedCardIds.has(card.id))
+            .sort((a, b) => (b.value || 0) - (a.value || 0));
+
+        let kickerIndex = 0;
+
+        // Complete back hand to 5 cards if needed
+        const backCards = [...arrangement.back.cards];
+        if (backCards.length < 5) {
+            const needed = 5 - backCards.length;
+            for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
+                backCards.push(unusedCards[kickerIndex++]);
+            }
+            console.log(`🃏 Added ${needed} kickers to back hand`);
+        }
+
+        // Complete middle hand to 5 cards if needed
+        const middleCards = [...arrangement.middle.cards];
+        if (middleCards.length < 5) {
+            const needed = 5 - middleCards.length;
+            for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
+                middleCards.push(unusedCards[kickerIndex++]);
+            }
+            console.log(`🃏 Added ${needed} kickers to middle hand`);
+        }
+
+        // Complete front hand to 3 cards if needed
+        const frontCards = [...arrangement.front.cards];
+        if (frontCards.length < 3) {
+            const needed = 3 - frontCards.length;
+            for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
+                frontCards.push(unusedCards[kickerIndex++]);
+            }
+            console.log(`🃏 Added ${needed} kickers to front hand`);
+        }
+
+        console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
+
+        // Return completed arrangement with card arrays (ready for game)
+        return {
+            back: { cards: backCards, isIncomplete: false },
+            middle: { cards: middleCards, isIncomplete: false },
+            front: { cards: frontCards, isIncomplete: false }
+        };
+    }
+
+    /**
      * Find the best single arrangement using greedy branch-and-bound
      * @param {Array} sortedHands - Hands sorted by strength (strongest first)
+     * @param {Array} allCards - All 17 cards for kicker completion
      * @returns {Object} - Best arrangement with score and statistics
      */
-    generateBestArrangement(sortedHands) {
+    generateBestArrangement(sortedHands, allCards = null) {
         console.log(`🎯 BestArrangementGenerator: Finding optimal arrangement from ${sortedHands.length} hands...`);
 
+        this.allCards = allCards; // Store for kicker completion
+        console.log('🔍 DEBUG: allCards stored:', this.allCards ? this.allCards.length : 'null'); // DEBUG LINE
         this.resetSearch();
         const startTime = performance.now();
 
@@ -35,8 +99,16 @@ class BestArrangementGenerator {
 
         const endTime = performance.now();
 
+        // Complete the best arrangement with kickers if we have cards available
+        let finalArrangement = this.bestArrangement;
+        console.log('🔍 DEBUG: About to complete arrangement, allCards exists:', !!this.allCards); // DEBUG LINE
+        if (finalArrangement && this.allCards) {
+            console.log('🔍 DEBUG: Calling completeArrangementWithKickers'); // DEBUG LINE
+            finalArrangement = this.completeArrangementWithKickers(finalArrangement);
+        }
+
         return {
-            arrangement: this.bestArrangement,
+            arrangement: finalArrangement,
             score: this.bestScore,
             statistics: {
                 exploredNodes: this.exploredNodes,
