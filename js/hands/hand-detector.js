@@ -651,15 +651,49 @@ class HandDetector {
     /**
      * Add a hand to our results - NOW WITH INCOMPLETE HANDS FLAGS!
      */
-    addHand(cards, handType) {
 
-        // This change will ONLY affect Three of a Kind hands
+    addHand(cards, handType) {
+        // Get proper hand ranking - TODO: Move to separate incomplete-hand-evaluator.js later
         let handStrength;
         if (cards.length === 3) {
-            handStrength = evaluateThreeCardHand(cards);  // Safe - only trips
+            handStrength = evaluateThreeCardHand(cards);
+        } else if (cards.length === 1) {
+            // Fix 1-card High Card hands
+            const highCard = cards[0].value;
+            handStrength = {
+                rank: 0,
+                hand_rank: [1, highCard],  // [1=High Card type, card value]
+                name: 'High Card'
+            };
+        } else if (cards.length === 2 && handType === 'Pair') {
+            // Fix 2-card Pair hands
+            const pairRank = cards[0].value;
+            handStrength = {
+                rank: 1,
+                hand_rank: [2, pairRank],  // [2=Pair type, pair rank]
+                name: 'Pair'
+            };
+        } else if (cards.length === 4 && handType === 'Two Pair') {
+            // Fix 4-card Two Pair hands
+            const values = cards.map(c => c.value).sort((a, b) => b - a);
+            const valueCounts = {};
+            values.forEach(val => valueCounts[val] = (valueCounts[val] || 0) + 1);
+            const pairs = Object.entries(valueCounts)
+                .filter(([rank, count]) => count === 2)
+                .map(([rank, count]) => parseInt(rank))
+                .sort((a, b) => b - a);
+
+            handStrength = {
+                rank: 2,
+                hand_rank: [3, pairs[0], pairs[1]],  // [3=Two Pair type, higher pair, lower pair]
+                name: 'Two Pair'
+            };
         } else {
+            // Use standard evaluation for complete hands (5+ cards)
             handStrength = evaluateHand(cards);
         }
+
+        // Rest of method stays the same...
 
         // Determine valid positions for this hand
         const validPositions = this.determineValidPositions(handType, cards.length);
