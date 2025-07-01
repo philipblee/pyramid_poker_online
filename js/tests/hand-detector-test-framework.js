@@ -596,7 +596,9 @@ class HandDetectorTestFramework {
                 if (handsOfType.length > 0) {
                     const example = handsOfType[0];
                     const cardStr = example.cards.map(c => c.rank + c.suit).join(' ');
-                    console.log(`   ${handType}: ${cardStr} (${example.cardCount} cards, complete: ${!example.isIncomplete})`);
+                    const positionScores = example.positionScores ? JSON.stringify(example.positionScores) : 'none';
+                    console.log(`   ${handType}: ${cardStr} (${example.cardCount} cards, complete: ${!example.isIncomplete}, scores: ${positionScores})`);
+
                     if (handsOfType.length > 1) {
                         console.log(`     ... +${handsOfType.length - 1} more ${handType} hands`);
                     }
