@@ -609,6 +609,7 @@ class HandDetector {
         // Check if hand is incomplete and calculate kickers needed
         const isIncomplete = this.isIncompleteHand(handType, cards.length);
         const kickersNeeded = this.calculateKickersNeeded(handType, cards.length, validPositions);
+        const positionScores = this.calculatePositionScores(handStrength, validPositions, cards.length);
 
         this.allHands.push({
             cards: [...cards],
@@ -620,7 +621,8 @@ class HandDetector {
             strength: handStrength.rank,            // Numeric strength
             validPositions: validPositions,         // Where this hand can be placed
             isIncomplete: isIncomplete,             // NEW: Flag for incomplete hands
-            kickersNeeded: kickersNeeded           // NEW: Kickers needed for each position
+            kickersNeeded: kickersNeeded,           // NEW: Kickers needed for each position
+            positionScores: positionScores
         });
 
         const incompleteStatus = isIncomplete ? `INCOMPLETE - needs ${JSON.stringify(kickersNeeded)}` : 'COMPLETE';

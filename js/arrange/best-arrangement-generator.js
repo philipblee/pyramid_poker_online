@@ -255,19 +255,20 @@ class BestArrangementGenerator {
      * @param {string} position - Position ('back', 'middle', 'front')
      * @returns {number} - Hand score for that position
      */
+
     getHandScore(hand, position) {
-        // Placeholder - replace with actual Pyramid Poker position-specific scoring
-        const baseScore = hand.strength || 0;
+        // Use pre-calculated position-specific scores from hand object
+        if (hand.positionScores && hand.positionScores[position]) {
+            return hand.positionScores[position];
+        }
 
-        // Front hands can score higher (temporary multipliers)
-        const positionMultipliers = {
-            'front': 3,   // Front hands worth more
-            'middle': 2,  // Middle hands medium value
-            'back': 1     // Back hands base value
-        };
-
-        return baseScore * (positionMultipliers[position] || 1);
+        // Fallback for hands without position scores (shouldn't happen)
+        console.warn('Hand missing position scores:', hand);
+        return 0;
     }
+
+
+
 
     /**
      * Check if search should terminate early
