@@ -47,6 +47,9 @@ class HandDetectorTestFramework {
         // Calculate straight flush hands
         this.calculateStraightFlushHands(suitCounts, testCards, calculated);
 
+        // Subtract straight flushes from flush count to eliminate duplicates
+        calculated.flush = calculated.flush - calculated.straightFlush;
+
         // Calculate full houses
         this.calculateFullHouses(rankCounts, calculated);
 
