@@ -15,11 +15,11 @@ static getPointsForHand(hand, position, cardCount = null) {
     if (pos === 'front') {
         // Front hand scoring (3-5 cards)
         if (handName.includes('three of a kind')) return 3;
+        if (handName.includes('straight flush')) return 15;
         if (handName.includes('flush')) return 4;
         if (handName.includes('straight') && !handName.includes('straight flush')) return 4;
         if (handName.includes('full house')) return 5;
         if (handName.includes('four of a kind')) return 12;
-        if (handName.includes('straight flush')) return 15;
         if (handName.includes('five of a kind')) return 18;
         return 1; // High card, pair, two pair
 

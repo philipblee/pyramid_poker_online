@@ -543,7 +543,10 @@ class HandDetector {
                 console.log(`♠️ Suit ${suit}: ${count} cards → ${flushCombinations.length} flushes`);
 
                 flushCombinations.forEach(combo => {
-                    this.addHand(combo, 'Flush');
+                    // Check if this combination is actually a straight flush
+                    if (!this.isStraightFlush(combo)) {
+                        this.addHand(combo, 'Flush');
+                    }
                 });
             }
         });
@@ -606,6 +609,7 @@ class HandDetector {
         // Check if hand is incomplete and calculate kickers needed
         const isIncomplete = this.isIncompleteHand(handType, cards.length);
         const kickersNeeded = this.calculateKickersNeeded(handType, cards.length, validPositions);
+        const positionScores = this.calculatePositionScores(handStrength, validPositions, cards.length);
 
         this.allHands.push({
             cards: [...cards],
@@ -617,7 +621,8 @@ class HandDetector {
             strength: handStrength.rank,            // Numeric strength
             validPositions: validPositions,         // Where this hand can be placed
             isIncomplete: isIncomplete,             // NEW: Flag for incomplete hands
-            kickersNeeded: kickersNeeded           // NEW: Kickers needed for each position
+            kickersNeeded: kickersNeeded,           // NEW: Kickers needed for each position
+            positionScores: positionScores
         });
 
         const incompleteStatus = isIncomplete ? `INCOMPLETE - needs ${JSON.stringify(kickersNeeded)}` : 'COMPLETE';
@@ -702,6 +707,9 @@ class HandDetector {
         const isIncomplete = this.isIncompleteHand(handType, cards.length);
         const kickersNeeded = this.calculateKickersNeeded(handType, cards.length, validPositions);
 
+        // Calculate position-specific scores
+        const positionScores = this.calculatePositionScores(handStrength, validPositions, cards.length);
+
         this.allHands.push({
             cards: [...cards],
             handType,
@@ -712,7 +720,8 @@ class HandDetector {
             strength: handStrength.rank,        // Numeric strength
             validPositions: validPositions,     // Where this hand can be placed
             isIncomplete: isIncomplete,         // NEW: Flag for incomplete hands
-            kickersNeeded: kickersNeeded       // NEW: Kickers needed for each position
+            kickersNeeded: kickersNeeded,       // NEW: Kickers needed for each position
+            positionScores: positionScores
         });
 
         const incompleteStatus = isIncomplete ? `INCOMPLETE - needs ${JSON.stringify(kickersNeeded)}` : 'COMPLETE';
@@ -734,5 +743,48 @@ class HandDetector {
         console.log(`✅ HandDetector found ${results.total} hands (${results.completeHands} complete, ${results.incompleteHands} incomplete) with proper rankings, position validation, and completion flags!`);
         console.log(`🃏 4K hands have been expanded with kickers and are now complete!`);
         return results;
+    }
+
+    /**
+     * Check if a 5-card combination is a straight flush
+     */
+    isStraightFlush(cards) {
+        // Get the values and sort them
+        const values = cards.map(card => this.getRankValue(card.rank)).sort((a, b) => a - b);
+
+        // Check for regular straight (consecutive values)
+        const isRegularStraight = values.every((val, i) => i === 0 || val === values[i-1] + 1);
+
+        // Check for wheel straight (A-2-3-4-5)
+        const isWheelStraight = values.length === 5 &&
+                               values[0] === 2 && values[1] === 3 && values[2] === 4 &&
+                               values[3] === 5 && values[4] === 14;
+
+        return isRegularStraight || isWheelStraight;
+    }
+
+    /*
+     * Calculate position-specific scores for a hand
+     */
+    calculatePositionScores(handStrength, validPositions, cardCount) {
+        const scores = {};
+
+        validPositions.forEach(position => {
+            scores[position] = ScoringUtilities.getPointsForHand(handStrength, position, cardCount);
+        });
+
+        return scores;
+    }
+
+
+    /**
+     * Get numeric value for rank
+     */
+    getRankValue(rank) {
+        const values = {
+            '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+            'J': 11, 'Q': 12, 'K': 13, 'A': 14
+        };
+        return values[rank];
     }
 }
