@@ -109,9 +109,12 @@ class BestArrangementGenerator {
             finalArrangement = this.completeArrangementWithKickers(finalArrangement);
         }
 
+        console.log(`🔍 DEBUG: BestArrangementGenerator success = ${finalArrangement !== null}`);
+
         return {
             arrangement: finalArrangement,
             score: this.bestScore,
+            success: finalArrangement !== null,
             statistics: {
                 exploredNodes: this.exploredNodes,
                 prunedNodes: this.prunedNodes,
