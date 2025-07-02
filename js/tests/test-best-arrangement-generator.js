@@ -202,7 +202,7 @@ function compareWithExhaustive(caseId = 1, maxHands = 100) {
  * Run baseline test - same format but with three hands shown
  * @param {number} maxCases - Number of cases to test
  */
-function runBaselineTest(maxCases = 17) {
+function runBaselineTest(maxCases = 101) {
     console.log(`🔍 ======== TESTING ${maxCases} CASES ========`);
 
     const results = [];
