@@ -262,18 +262,9 @@ class BestArrangementGenerator {
      */
 
     getHandScore(hand, position) {
-        // Use pre-calculated position-specific scores from hand object
-        if (hand.positionScores && hand.positionScores[position]) {
-            return hand.positionScores[position];
-        }
-
-        // Fallback for hands without position scores (shouldn't happen)
-        console.warn('Hand missing position scores:', hand);
-        return 0;
-    }
-
-
-
+       // Use expected value (probability × points) for better optimization
+        return ScoringUtilities.getExpectedPoints(hand.handStrength, hand.cards, position);
+}
 
     /**
      * Check if search should terminate early

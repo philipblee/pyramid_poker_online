@@ -12,10 +12,11 @@ class HandDetector {
     }
 
     /**
-     * Main entry point - detect of-a-kind hands, two pairs, full houses, flushes, and straights
-     * @returns {Object} Structured results
+     * Main entry point - detect hands and optionally auto-sort
+     * @param {boolean} autoSort - Whether to automatically sort hands by strength
+     * @returns {Object} Structured results with optionally sorted hands
      */
-    detectAllHands() {
+    detectAllHands(autoSort = true) {
         console.log(`🔍 HandDetector analyzing ${this.cards.length} cards...`);
 
         // Count ranks and suits
@@ -42,7 +43,7 @@ class HandDetector {
         // Detect single cards
         this.detectSingleCards();
 
-        return this.formatResults();
+        return this.formatResults(autoSort);
     }
 
     /**
@@ -729,18 +730,32 @@ class HandDetector {
     }
 
     /**
-     * Format results
+     * Format results with optional auto-sorting
+     * @param {boolean} autoSort - Whether to sort hands by strength
+     * @returns {Object} Results object with optionally sorted hands
      */
-    formatResults() {
+    formatResults(autoSort = true) {
+        let handsToReturn = this.allHands;
+
+        if (autoSort) {
+            console.log('🔄 Auto-sorting hands by strength...');
+            const sorter = new HandSorter();
+            const sortResult = sorter.sortHandsByStrength(this.allHands);
+            handsToReturn = sortResult.sortedHands;
+            console.log(`✅ Auto-sorted ${handsToReturn.length} hands`);
+        }
+
         const results = {
-            total: this.allHands.length,
-            hands: this.allHands,
-            // Summary statistics
-            completeHands: this.allHands.filter(h => !h.isIncomplete).length,
-            incompleteHands: this.allHands.filter(h => h.isIncomplete).length
+            total: handsToReturn.length,
+            hands: handsToReturn,
+            completeHands: handsToReturn.filter(h => !h.isIncomplete).length,
+            incompleteHands: handsToReturn.filter(h => h.isIncomplete).length
         };
 
         console.log(`✅ HandDetector found ${results.total} hands (${results.completeHands} complete, ${results.incompleteHands} incomplete) with proper rankings, position validation, and completion flags!`);
+        if (autoSort) {
+            console.log(`🔄 Hands are pre-sorted by strength (strongest first)`);
+        }
         console.log(`🃏 4K hands have been expanded with kickers and are now complete!`);
         return results;
     }

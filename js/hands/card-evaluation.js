@@ -83,10 +83,15 @@ function evaluateHand(cards) {
     }
 
     if (counts[0] === 4) {
-        // Four of a Kind: [8, quad_rank, kicker]
+        // Four of a Kind: [8, quad_rank, kicker, quad_suits..., kicker_suit]
         const quadRank = valuesByCount[4][0];
         const kicker = valuesByCount[1][0];
-        return { rank: 7, hand_rank: [8, quadRank, kicker], name: 'Four of a Kind' };
+
+        const quadCards = cards.filter(c => c.value === quadRank);
+        const kickerCard = cards.find(c => c.value === kicker);
+        const suitValues = getSuitValues([...quadCards, kickerCard]);
+
+        return { rank: 7, hand_rank: [8, quadRank, kicker, ...suitValues], name: 'Four of a Kind' };
     }
 
     if (counts[0] === 3 && counts[1] === 2) {
@@ -443,4 +448,11 @@ function getStraightInfoFromArray(straightArray) {
 
     // Regular straight
     return { high: straightArray[0], low: straightArray[4] };
+}
+
+// Convert card suits to numeric values for tiebreaking
+// Spades=4, Hearts=3, Diamonds=2, Clubs=1
+function getSuitValues(cards) {
+    const suitRanks = { '♠': 4, '♥': 3, '♦': 2, '♣': 1 };
+    return cards.map(card => suitRanks[card.suit] || 0);
 }

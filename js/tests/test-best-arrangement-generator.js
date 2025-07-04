@@ -132,10 +132,9 @@ function performanceTest(caseId = 1, iterations = 5) {
     console.log(`\n⚡ ======== PERFORMANCE TEST ========`);
     console.log(`Case ${caseId}, ${iterations} iterations`);
 
-    // Get the test data once
+    // NEW way (simplified):
     const testResult = runSingleTest(caseId);
-    const sorter = new HandSorter();
-    const sortResult = sorter.sortHandsByStrength(testResult.results.hands);
+    const sortedHands = testResult.results.hands; // Already sorted!
 
     const times = [];
     const scores = [];

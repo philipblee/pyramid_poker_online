@@ -118,13 +118,24 @@ static getPointsForHand(hand, position, cardCount = null) {
     // EXPECTED VALUE CALCULATION
     // =============================================================================
 
+    //    static getExpectedPoints(handStrength, cards, position, playerCount = 4) {
+    //        // Expected points = (Win Probability) × (Points if Win)
+    //        const winProbability = this.estimateWinProbability(handStrength, position, playerCount);
+    //        const pointsIfWin = this.getPointsForHand(handStrength, position, cards.length);
+    //
+    //        return winProbability * pointsIfWin;
+    //    }
+
     static getExpectedPoints(handStrength, cards, position, playerCount = 4) {
-        // Expected points = (Win Probability) × (Points if Win)
-        const winProbability = this.estimateWinProbability(handStrength, position, playerCount);
+        // Skip broken probability - just use base points for now
         const pointsIfWin = this.getPointsForHand(handStrength, position, cards.length);
 
-        return winProbability * pointsIfWin;
+        // Add universal tiebreaker
+        const strengthBonus = this.calculateTiebreaker(handStrength.hand_rank);
+
+        return pointsIfWin + strengthBonus;
     }
+
 
     // =============================================================================
     // FORMATTING AND DISPLAY HELPERS
@@ -246,6 +257,19 @@ static getPointsForHand(hand, position, cardCount = null) {
             });
         });
     }
+
+    // Add this helper method inside the ScoringUtilities class
+    static calculateTiebreaker(hand_rank) {
+        if (!hand_rank || hand_rank.length < 2) return 0;
+
+        // Combine all ranking elements with decreasing weights
+        let tiebreaker = 0;
+        for (let i = 1; i < hand_rank.length; i++) {
+            tiebreaker += hand_rank[i] * Math.pow(0.01, i);
+        }
+        return tiebreaker;
+    }
+
 }
 
 // Export for use in other modules
