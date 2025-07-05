@@ -1,13 +1,10 @@
 // js/hands/auto-arrange.js
-// Phase 7: Integrated with BestArrangementGenerator - simplified and optimized
+// Phase 8: Integrated single wild optimization - simplified wild card handling
 
 class AutoArrangeManager {
     constructor(game) {
         this.game = game;
-        // Specialized components for different responsibilities
-        this.wildCardOptimizer = new WildCardOptimizer(game);
-        // Removed: largeHandDetector - handled by BestArrangementGenerator
-        // Removed: arrangementGenerator - replaced with BestArrangementGenerator
+        // Removed: wildCardOptimizer - replaced with direct single wild optimization
         this.arrangementValidator = new ArrangementValidator(game);
     }
 
@@ -22,17 +19,14 @@ class AutoArrangeManager {
         const allCards = this.getAllCards(playerData);
         if (!this.validateCardCount(allCards)) return false;
 
-        // Handle wild cards with specialized optimizer (with fallback)
+        // Handle wild cards
         const { wildCards } = CardUtilities.separateWildCards(allCards);
-        if (wildCards.length > 0) {
-            console.log('🃏 Wild cards detected - using specialized optimizer');
-            try {
-                return this.wildCardOptimizer.optimizeWildArrangement(allCards, playerData);
-            } catch (error) {
-                console.warn('🃏 Wild card optimizer failed, falling back to standard arrangement:', error.message);
-                console.log('🔄 Proceeding with normal arrangement logic...');
-                // Continue to normal arrangement logic below
-            }
+        if (wildCards.length === 1) {
+            console.log('🃏 Single wild detected - using smart optimization');
+            return this.optimizeSingleWild(allCards, playerData);
+        } else if (wildCards.length > 1) {
+            console.log('🃏 Multiple wilds detected - using fallback');
+            return this.fallbackAutoArrange(allCards, playerData);
         }
 
         console.log('🧠 Smart Auto-Arrange starting with BestArrangementGenerator...');
@@ -59,7 +53,49 @@ class AutoArrangeManager {
     }
 
     /**
-     * NEW: Find best arrangement using greedy branch-and-bound algorithm
+     * NEW: Single wild optimization using proven smart approach
+     */
+    optimizeSingleWild(allCards, playerData) {
+        try {
+            const result = bestArrangementOneWildBruteForceFromCards(allCards);
+
+            console.log('🔍 Debug result:', result); // ADD THIS LINE
+
+            if (result && result.arrangement) {
+                console.log(`✨ Single wild optimization successful! Score: ${result.score}`);
+
+                // Calculate staging cards
+                const usedCards = [
+                    ...result.arrangement.back.cards,
+                    ...result.arrangement.middle.cards,
+                    ...result.arrangement.front.cards
+                ];
+
+                const stagingCards = allCards.filter(card =>
+                    !usedCards.some(usedCard => usedCard.id === card.id)
+                );
+
+                const arrangement = {
+                    back: result.arrangement.back.cards,
+                    middle: result.arrangement.middle.cards,
+                    front: result.arrangement.front.cards,
+                    staging: stagingCards
+                };
+
+                return this.applyArrangement(playerData, arrangement);
+            }
+
+            console.warn('⚠️ Single wild optimization failed, using fallback');
+            return this.fallbackAutoArrange(allCards, playerData);
+
+        } catch (error) {
+            console.error('❌ Single wild optimization error:', error);
+            return this.fallbackAutoArrange(allCards, playerData);
+        }
+    }
+
+    /**
+     * Find best arrangement using greedy branch-and-bound algorithm
      * Handles ALL hand types including 6-8 card special hands optimally
      */
     findBestArrangementOptimized(allCards) {

@@ -1,7 +1,7 @@
 {
-  "version": "v2.0.2-3-g2efbab4-dirty",
-  "commit": "2efbab4",
-  "branch": "phase-3/4k-expansion-plus-metadata-reporting",
-  "buildDate": "2025-06-30T13:34:51.844Z",
-  "lastCommit": "2025-06-29 19:53:30 -0400"
+  "version": "v2.1-18-g8e42e2b-dirty",
+  "commit": "8e42e2b",
+  "branch": "smart-optimizer-phase-2/step-2-create-subset-generator",
+  "buildDate": "2025-07-04T20:38:57.520Z",
+  "lastCommit": "2025-07-04 15:32:21 -0400"
 }
