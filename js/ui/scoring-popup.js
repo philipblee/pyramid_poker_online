@@ -1,11 +1,15 @@
 // js/ui/scoring-popup.js
 // COMPLETE VERSION: Uses ScoringUtilities for all scoring calculations
 
-// Render mini cards for scoring popup (unchanged from original)
+// Render mini cards for scoring popup
 function renderMiniCards(cards) {
     return cards.map(card => {
         if (card.isWild) {
             return `<div class="card-mini wild">🃏</div>`;
+        } else if (card.wasWild) {
+            // Substituted wild card - show with yellow background
+            const colorClass = ['♥', '♦'].includes(card.suit) ? 'red' : 'black';
+            return `<div class="card-mini ${colorClass}" style="background: linear-gradient(135deg, #ffd700, #ffed4e); border: 1px solid #ff6b6b;"><div>${card.rank}</div><div>${card.suit}</div></div>`;
         } else {
             const colorClass = ['♥', '♦'].includes(card.suit) ? 'red' : 'black';
             return `<div class="card-mini ${colorClass}"><div>${card.rank}</div><div>${card.suit}</div></div>`;

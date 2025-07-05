@@ -5,12 +5,28 @@
 function createCardElement(card) {
     const cardEl = document.createElement('div');
 
+    console.log(`🃏 Creating card element:`, {
+        rank: card.rank,
+        suit: card.suit,
+        isWild: card.isWild,
+        wasWild: card.wasWild
+    });
+
     if (card.isWild) {
         cardEl.className = 'card wild';
         cardEl.innerHTML = `<div style="font-size: 16px;">WILD</div><div style="font-size: 28px;">🃏</div>`;
     } else {
-        cardEl.className = `card ${['♥', '♦'].includes(card.suit) ? 'red' : 'black'}`;
+        const wasWildClass = card.wasWild ? ' was-wild' : '';
+        cardEl.className = `card ${['♥', '♦'].includes(card.suit) ? 'red' : 'black'}${wasWildClass}`;
         cardEl.innerHTML = `<div style="font-size: 20px;">${card.rank}</div><div style="font-size: 28px;">${card.suit}</div>`;
+
+        // Add inline style for wasWild cards to override CSS conflicts
+        if (card.wasWild) {
+            cardEl.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
+            cardEl.style.border = '2px solid #ff6b6b';
+            cardEl.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.6)';
+            // Don't override color - let the suit keep its red/black color
+        }
     }
 
     cardEl.draggable = true;

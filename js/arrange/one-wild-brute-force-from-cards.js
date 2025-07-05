@@ -160,13 +160,16 @@ function createCardFromString(cardString, originalId) {
 
     const [, rank, suit] = match;
 
-    return {
-        id: originalId, // Keep the original wild card's ID
+    const substitutedCard = {
+        id: originalId,
         rank: rank,
         suit: suit,
-        isWild: false, // No longer wild after substitution
+        isWild: false,
+        wasWild: true,
         value: getRankValue(rank)
     };
+
+    return substitutedCard;
 }
 
 /**
