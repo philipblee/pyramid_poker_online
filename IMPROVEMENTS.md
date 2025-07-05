@@ -1,7 +1,5 @@
 # Pyramid Poker - Improvements & Issues
 
-## Issues Found - July 4, 2025
-
 ### Scoring System Needs Enhancement
 - **Date**: July 4, 2025  
 - **Context**: Cases 1-5 testing shows 4 Aces = 4 Eights = same score
@@ -10,12 +8,6 @@
 - **Current Impact**: Multiple "optimal" solutions with identical scores
 - **Example**: 4 Aces should score higher than 4 Eights (higher win probability)
 - **Priority**: HIGH - affects optimization accuracy
-
-#### Interim Solution (Hand Strength Tiebreaker)
-- Use hand ranking tuples to break ties between same hand types
-- Royal Straight Flush > King-high Straight Flush  
-- 4 Aces > 4 Kings > 4 Queens, etc.
-- **File to modify**: `ScoringUtilities.js` or arrangement generators
 
 #### Long-term Solution (Probability Integration)
 - Calculate P(win) for each hand type and strength
@@ -42,3 +34,23 @@
 
 ---
 *Add new issues at the top for easy tracking*
+
+
+### DEFECTS FIXED
+
+### Defect in Scoring is SideBar
+- **Date**: July 5, 2025  
+- **Context**: Dislay popup score are correct but popup closes and I show sidebar, the scores are very different from the popup
+- **Root Problem**: Not sure, but it happens in first game
+- **Proper Formula**: Cumulative scoring, but fails on first game
+- **Current Impact**: Makes scoring not correct - problem exists in online system and in local system
+- **Example**: Just played a game, pop up had P1 +2, P2 -2; sidebar says P1 +5, P2 +3
+- **Priority**: HIGH - Scoring is vital to game integrity
+- **Fixed** July 5, 2025
+
+#### Interim Solution (Hand Strength Tiebreaker)
+- Use hand ranking tuples to break ties between same hand types
+- Royal Straight Flush > King-high Straight Flush  
+- 4 Aces > 4 Kings > 4 Queens, etc.
+- **File to modify**: `ScoringUtilities.js` or arrangement generators
+- **Imlemented July 4, 2025
