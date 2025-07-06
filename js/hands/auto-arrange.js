@@ -65,8 +65,7 @@ class AutoArrangeManager {
                 console.log(`✨ Single wild optimization successful! Score: ${result.score}`);
 
                 // Calculate staging cards
-                const usedCards = [
-                    ...result.arrangement.back.cards,
+qqqq``                    ...result.arrangement.back.cards,
                     ...result.arrangement.middle.cards,
                     ...result.arrangement.front.cards
                 ];
