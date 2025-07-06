@@ -1,6 +1,3 @@
-// js/arrange/wild-candidates-generator.js
-// Generate smart subset of wild card substitution candidates using CardCount class
-
 /**
  * Generate smart wild card candidates for a test case
  * @param {number} caseId - Test case ID from one-wild-test-cases.js
@@ -23,53 +20,15 @@ function generateWildCandidates(caseId) {
     console.log(`📋 Test case: ${testCase.name}`);
     console.log(`🎴 Non-wild cards (${nonWildCards.length}): ${nonWildCardString}`);
 
-    // Step 2: Analyze non-wild cards using CardCount
-    console.log(`\n📊 Step 2: Analyzing cards with CardCount...`);
-    const cardCount = countCardsFromString(nonWildCardString);
-
-    console.log(`🔢 Card distribution:`);
-    console.log(`   Total cards: ${cardCount.totalCards}`);
-    console.log(`   Unique ranks: ${cardCount.rankCounts.size}`);
-    console.log(`   Unique suits: ${cardCount.suitCounts.size}`);
-
-    // Show flush opportunities
-    const flushSuits = cardCount.flushSuits(4);
-    if (flushSuits.length > 0) {
-        console.log(`🌊 Flush opportunities:`, flushSuits);
-    }
-
-    // Show of-a-kind opportunities
-    const pairs = cardCount.ofAKindRanks(2);
-    if (pairs.length > 0) {
-        console.log(`🃏 Of-a-kind opportunities:`, pairs);
-    }
-
-    // Step 3: Generate baseline relevant hands count
+    // Step 2: Generate baseline relevant hands count
     const baselineResult = analyzeCards(nonWildCardString);
     const baselineCount = baselineResult.relevantTotal;
     console.log(`🔢 Baseline relevant hands: ${baselineCount}`);
 
-    // Step 4: Generate smart candidates using CardCount analysis
-    console.log(`\n🎯 Step 4: Generating smart candidates...`);
-    const smartCandidates = new Set();
-    const existingCardSet = new Set(nonWildCards);
-
-    // ADD FLUSH ACE CANDIDATES (NEW LOGIC)
-    console.log(`\n🌊 Adding flush Ace candidates...`);
-    cardCount.flushSuits(4).forEach(({suit, count}) => {
-        const aceOfSuit = `A${suit}`;
-        if (!existingCardSet.has(aceOfSuit)) {
-            smartCandidates.add(aceOfSuit);
-            console.log(`✅ Added ${aceOfSuit} for flush opportunity (${count} cards in ${suit})`);
-        } else {
-            console.log(`⚠️ ${aceOfSuit} already present (${count} cards in ${suit})`);
-        }
-    });
-
-    // Step 5: Test all 52 cards for comparison (brute force validation)
-    console.log(`\n🔄 Step 5: Testing all 52 cards for validation...`);
+    // Step 3: Reviewing all 52 cards to find candidates
+    console.log(`\n🔄 Step 3: Reviewing all 52 cards to find candidates...`);
     const allCards = generateAll52Cards();
-    const validatedCandidates = [];
+    const wildCandidates = [];
     const rejectedCards = [];
 
     allCards.forEach((card, index) => {
@@ -82,19 +41,7 @@ function generateWildCandidates(caseId) {
 
         // Compare to baseline
         if (testCount > baselineCount) {
-            validatedCandidates.push(card);
-
-            // Check if our smart logic caught this
-            const wasSmartCandidate = smartCandidates.has(card);
-            if (wasSmartCandidate) {
-                if (validatedCandidates.length <= 5) {
-                    console.log(`✅ Accept ${card}: ${testCount} hands (was ${baselineCount}) [SMART PREDICTED]`);
-                }
-            } else {
-                if (validatedCandidates.length <= 5) {
-                    console.log(`✅ Accept ${card}: ${testCount} hands (was ${baselineCount}) [MISSED BY SMART]`);
-                }
-            }
+            wildCandidates.push(card);
         } else {
             rejectedCards.push(card);
         }
@@ -105,47 +52,25 @@ function generateWildCandidates(caseId) {
         }
     });
 
-    // Step 6: Compare smart vs brute force results
-    console.log(`\n📊 Step 6: Comparing smart vs brute force results...`);
-    const smartCandidatesArray = Array.from(smartCandidates);
-    const smartMissed = validatedCandidates.filter(card => !smartCandidates.has(card));
-    const smartExtra = smartCandidatesArray.filter(card => !validatedCandidates.includes(card));
-
-    console.log(`🤖 Smart candidates: ${smartCandidatesArray.length}`);
-    console.log(`🔬 Brute force found: ${validatedCandidates.length}`);
-    console.log(`❌ Smart missed: ${smartMissed.length} ${smartMissed.length > 0 ? smartMissed : ''}`);
-    console.log(`➕ Smart extra: ${smartExtra.length} ${smartExtra.length > 0 ? smartExtra : ''}`);
-
-    // Step 7: Results
+    // Step 4: Results
     const results = {
         caseId: caseId,
         testName: testCase.name,
         nonWildCards: nonWildCards,
         baseline: baselineCount,
-        smartCandidates: smartCandidatesArray,
-        smartCount: smartCandidatesArray.length,
-        validatedCandidates: validatedCandidates,
-        validatedCount: validatedCandidates.length,
+        wildCandidates: wildCandidates,
+        wildCandidatesCount: wildCandidates.length,
         rejectedCards: rejectedCards,
         rejectedCount: rejectedCards.length,
-        smartMissed: smartMissed,
-        smartExtra: smartExtra,
-        efficiency: ((52 - validatedCandidates.length) / 52 * 100).toFixed(1),
-        smartEfficiency: ((52 - smartCandidatesArray.length) / 52 * 100).toFixed(1)
+        efficiency: ((52 - wildCandidates.length) / 52 * 100).toFixed(1)
     };
 
     console.log(`\n📋 ======== RESULTS ========`);
-    console.log(`✅ Validated candidates: ${results.validatedCount}/52 (${((results.validatedCount/52)*100).toFixed(1)}%)`);
-    console.log(`🤖 Smart candidates: ${results.smartCount}/52 (${((results.smartCount/52)*100).toFixed(1)}%)`);
+    console.log(`✅ Wild candidates: ${results.wildCandidatesCount}/52 (${((results.wildCandidatesCount/52)*100).toFixed(1)}%)`);
     console.log(`❌ Rejected cards: ${results.rejectedCount}/52 (${results.efficiency}%)`);
-    console.log(`🎯 Brute force efficiency: ${results.efficiency}% reduction`);
-    console.log(`🧠 Smart efficiency: ${results.smartEfficiency}% reduction`);
+    console.log(`🎯 Efficiency: ${results.efficiency}% search space reduction`);
 
-    if (smartCandidatesArray.length <= 20) {
-        console.log(`📝 Smart candidates: ${smartCandidatesArray.join(', ')}`);
-    } else {
-        console.log(`📝 Smart candidates (first 20): ${smartCandidatesArray.slice(0, 20).join(', ')}...`);
-    }
+    console.log(`📝 Wild candidates: ${wildCandidates.join(', ')}`);
 
     return results;
 }
@@ -177,44 +102,4 @@ function generateAll52Cards() {
     });
 
     return allCards;
-}
-
-/**
- * Test multiple cases and compare efficiency
- * @param {Array} caseIds - Array of case IDs to test
- */
-function testMultipleCases(caseIds = [1, 2, 3, 4, 5]) {
-    console.log(`\n🚀 ======== TESTING MULTIPLE CASES ========`);
-
-    const results = [];
-
-    caseIds.forEach(caseId => {
-        const result = generateWildCandidates(caseId);
-        if (result) {
-            results.push(result);
-        }
-    });
-
-    // Summary
-    console.log(`\n📊 ======== SUMMARY ========`);
-    results.forEach(r => {
-        const smartAccuracy = r.smartCount === r.validatedCount ? '✅' : '⚠️';
-        console.log(`Case ${r.caseId}: Smart ${r.smartCount}/52, Validated ${r.validatedCount}/52 ${smartAccuracy}`);
-    });
-
-    const avgEfficiency = results.reduce((sum, r) => sum + parseFloat(r.efficiency), 0) / results.length;
-    const avgSmartEfficiency = results.reduce((sum, r) => sum + parseFloat(r.smartEfficiency), 0) / results.length;
-
-    console.log(`\n🎯 Average brute force efficiency: ${avgEfficiency.toFixed(1)}% search space reduction`);
-    console.log(`🧠 Average smart efficiency: ${avgSmartEfficiency.toFixed(1)}% search space reduction`);
-
-    return results;
-}
-
-/**
- * Quick test function for console
- * @param {number} caseId - Test case ID (default: 1)
- */
-function testWildCandidates(caseId = 1) {
-    return generateWildCandidates(caseId);
 }
