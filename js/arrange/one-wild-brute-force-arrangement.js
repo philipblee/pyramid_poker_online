@@ -7,7 +7,7 @@
  * @param {number} caseId - Test case ID from one-wild-test-cases.js
  * @returns {Array} Array of results, each with wild card used and arrangement found
  */
-function bestArrangementOneWildBruteForce(caseId) {
+function oneWildBruteForceArrangement(caseId) {
     console.log(`\n🔨 ======== ONE WILD BRUTE FORCE ARRANGEMENT - CASE ${caseId} ========`);
 
     // Step 1: Get all 52 possible cards
@@ -144,7 +144,7 @@ function generateAll52Cards() {
  * @param {number} caseId - Test case ID (default: 1)
  */
 function testOneWildBruteForce(caseId = 1) {
-    return bestArrangementOneWildBruteForce(caseId);
+    return oneWildBruteForceArrangement(caseId);
 }
 
 /**
@@ -164,7 +164,7 @@ function compareSmartVsBruteForce(caseId = 1) {
     // Run brute force approach (quietly - capture output without display)
     console.log(`\n🔨 Running brute force approach (quietly)...`);
     const startBrute = performance.now();
-    const bruteResults = bestArrangementOneWildBruteForce(caseId);
+    const bruteResults = oneWildBruteForceArrangement(caseId);
     const endBrute = performance.now();
     const bruteTime = endBrute - startBrute;
 
