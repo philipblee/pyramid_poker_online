@@ -157,7 +157,7 @@ function compareSmartVsBruteForce(caseId = 1) {
     // Run smart approach (quietly - capture output without display)
     console.log(`\n🧠 Running smart approach (quietly)...`);
     const startSmart = performance.now();
-    const smartResults = bestArrangementOneWild(caseId);
+    const smartResults = oneWildBestArrangement(caseId);
     const endSmart = performance.now();
     const smartTime = endSmart - startSmart;
 

@@ -1,13 +1,9 @@
-// js/arrange/one-wild-best-arrangement.js
-// Find best arrangement for hands with exactly one wild card
-// Uses smart candidate selection + best-arrangement-generator
-
 /**
  * Find best arrangement for a hand with one wild card
  * @param {number} caseId - Test case ID from one-wild-test-cases.js
  * @returns {Array} Array of results, each with wild card used and arrangement found
  */
-function bestArrangementOneWild(caseId) {
+function oneWildBestArrangement(caseId) {
     console.log(`\n🎯 ======== ONE WILD BEST ARRANGEMENT - CASE ${caseId} ========`);
 
     // Step 1: Get smart candidates
@@ -19,7 +15,7 @@ function bestArrangementOneWild(caseId) {
         return [];
     }
 
-    const smartCandidates = candidatesResult.validatedCandidates;
+    const smartCandidates = candidatesResult.wildCandidates;
     console.log(`✅ Found ${smartCandidates.length} smart candidates`);
 
     // Get the test case for wild substitution
@@ -130,7 +126,7 @@ function bestArrangementOneWild(caseId) {
  * @param {number} caseId - Test case ID (default: 1)
  */
 function testOneWildBestArrangement(caseId = 1) {
-    return bestArrangementOneWild(caseId);
+    return oneWildBestArrangement(caseId);
 }
 
 /**
@@ -143,7 +139,7 @@ function testMultipleOneWildCases(caseIds = [1, 2, 3]) {
     const summaryResults = [];
 
     caseIds.forEach(caseId => {
-        const results = bestArrangementOneWild(caseId);
+        const results = oneWildBestArrangement(caseId);
         const successful = results.filter(r => r.success);
 
         if (successful.length > 0) {
