@@ -122,3 +122,105 @@ function generateAll52Cards() {
 
     return allCards;
 }
+
+/**
+ * Generate smart wild card candidates from card objects (not test cases)
+ * @param {Array} cardObjects - Array of 17 card objects (including 1 wild)
+ * @returns {Object} Results with smart candidates and statistics
+ */
+function generateWildCandidatesFromCards(cardObjects) {
+    console.log(`\n🎯 ======== GENERATING WILD CANDIDATES FROM CARDS ========`);
+
+    // Step 1: Convert to Card Model format FIRST (same pattern as brute force)
+    const properCardObjects = convertToCardModel(cardObjects);
+
+    // Step 2: Extract wild and non-wild cards from converted objects
+    const wildCard = properCardObjects.find(card => card.isWild);
+    const nonWildCards = properCardObjects.filter(card => !card.isWild);
+
+    if (!wildCard) {
+        console.log(`❌ No wild card found in provided cards`);
+        return null;
+    }
+
+    if (nonWildCards.length !== 16) {
+        console.log(`❌ Expected 16 non-wild cards, found ${nonWildCards.length}`);
+        return null;
+    }
+
+    // Step 3: Convert non-wild cards to string format for existing analysis logic
+    const nonWildCardStrings = nonWildCards.map(card => card.rank + card.suit);
+    const nonWildCardString = nonWildCardStrings.join(' ');
+
+    console.log(`🎴 Non-wild cards (${nonWildCards.length}): ${nonWildCardString}`);
+
+    // Step 4: Use existing candidate generation logic (copied from generateWildCandidates)
+    const baselineResult = analyzeCards(nonWildCardString);
+    const baselineCount = baselineResult.relevantTotal;
+    console.log(`🔢 Baseline relevant hands: ${baselineCount}`);
+
+    console.log(`\n🔄 Reviewing all 52 cards to find candidates...`);
+    const allCards = generateAll52Cards();
+    const wildCandidates = [];
+    const rejectedCards = [];
+
+    allCards.forEach((card, index) => {
+        // Add this card to the 16 non-wilds (making 17 total)
+        const testCardString = nonWildCardString + ' ' + card;
+
+        // Analyze the 17 cards
+        const testResult = analyzeCards(testCardString);
+        const testCount = testResult.relevantTotal;
+
+        // Compare to baseline
+        if (testCount > baselineCount) {
+            wildCandidates.push(card);
+        } else {
+            rejectedCards.push(card);
+        }
+
+        // Progress indicator
+        if ((index + 1) % 13 === 0) {
+            console.log(`   Progress: ${index + 1}/52 cards tested...`);
+        }
+    });
+
+    // Step 5: Add missing flush Aces (copied from existing logic)
+    console.log(`\n🌊 Adding Aces in potential flushes...`);
+    const cardCount = countCardsFromString(nonWildCardString);
+    const suitsWith4Plus = cardCount.flushSuits(4);
+
+    if (suitsWith4Plus.length > 0) {
+        suitsWith4Plus.forEach(({suit, count}) => {
+            const aceOfSuit = `A${suit}`;
+            if (!wildCandidates.includes(aceOfSuit)) {
+                wildCandidates.push(aceOfSuit);
+                console.log(`✅ Added missing flush Ace: ${aceOfSuit} (${count} cards in ${suit})`);
+            } else {
+                console.log(`⚠️ Flush Ace ${aceOfSuit} already found (${count} cards in ${suit})`);
+            }
+        });
+    } else {
+        console.log(`No flush opportunities (4+ cards) found`);
+    }
+
+    // Step 6: Return results (same format as existing function)
+    const results = {
+        testName: "From Card Objects",
+        nonWildCards: nonWildCardStrings,
+        baseline: baselineCount,
+        wildCandidates: wildCandidates,
+        wildCandidatesCount: wildCandidates.length,
+        rejectedCards: rejectedCards,
+        rejectedCount: rejectedCards.length,
+        efficiency: ((52 - wildCandidates.length) / 52 * 100).toFixed(1)
+    };
+
+    console.log(`\n📋 ======== RESULTS ========`);
+    console.log(`✅ Wild candidates: ${results.wildCandidatesCount}/52 (${((results.wildCandidatesCount/52)*100).toFixed(1)}%)`);
+    console.log(`❌ Rejected cards: ${results.rejectedCount}/52 (${results.efficiency}%)`);
+    console.log(`🎯 Efficiency: ${results.efficiency}% search space reduction`);
+    console.log(`📝 Wild candidates: ${wildCandidates.join(', ')}`);
+
+    return results;
+}

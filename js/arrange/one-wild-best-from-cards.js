@@ -1,16 +1,14 @@
-// js/arrange/one-wild-brute-force-from-cards.js
-// Find best arrangement for hands with exactly one wild card using brute force
-// Works directly with card objects from the game (not test cases)
-// MINIMAL CHANGES to existing tested brute force code
+// js/arrange/one-wild-best-from-cards.js
+// Find best arrangement for hands with exactly one wild card using smart candidates
+// Works directly with card objects from the game
 
 /**
- * Find best arrangement for a hand with one wild card using brute force approach
+ * Find best arrangement for a hand with one wild card using smart candidate approach
  * @param {Array} cardObjects - Array of 17 card objects (including 1 wild)
- * @returns {Array} Array of results, each with wild card used and arrangement found
+ * @returns {Object} Best arrangement result (same format as brute force version)
  */
-
- function oneWildBruteForceFromCards(cardObjects) {
-    console.log(`\n🔨 ======== ONE WILD BRUTE FORCE ARRANGEMENT - FROM CARDS ========`);
+function oneWildBestFromCards(cardObjects) {
+    console.log(`\n🧠 ======== ONE WILD SMART ARRANGEMENT - FROM CARDS ========`);
 
     // STEP 1: Convert to Card Model format FIRST
     const properCardObjects = convertToCardModel(cardObjects);
@@ -21,37 +19,62 @@
 
     if (!wildCard) {
         console.log(`❌ No wild card found in provided cards`);
-        return [];
+        return {
+            arrangement: null,
+            score: -Infinity,
+            wildCard: null,
+            success: false,
+            statistics: null
+        };
     }
 
     if (nonWildCards.length !== 16) {
         console.log(`❌ Expected 16 non-wild cards, found ${nonWildCards.length}`);
-        return [];
+        return {
+            arrangement: null,
+            score: -Infinity,
+            wildCard: null,
+            success: false,
+            statistics: null
+        };
     }
 
-    // Step 1: Get all 52 possible cards
-    console.log(`\n📋 Step 1: Generating all 52 possible cards...`);
-    const allCandidates = generateAll52Cards();
-    console.log(`✅ Generated ${allCandidates.length} total candidates`);
+    // STEP 3: Get smart candidates using converted cards
+    console.log(`\n📋 Step 3: Getting smart candidates...`);
+    const candidatesResult = generateWildCandidatesFromCards(properCardObjects);
 
-    // Step 2: Process each candidate (brute force)
-    console.log(`\n🔄 Step 2: Processing ALL ${allCandidates.length} candidates (brute force)...`);
+    if (!candidatesResult) {
+        console.log(`❌ Failed to get smart candidates`);
+        return {
+            arrangement: null,
+            score: -Infinity,
+            wildCard: null,
+            success: false,
+            statistics: null
+        };
+    }
+
+    const allCandidates = candidatesResult.wildCandidates;
+    console.log(`✅ Generated ${allCandidates.length} smart candidates`);
+
+    // STEP 4: Process each smart candidate (same proven logic as brute force)
+    console.log(`\n🔄 Step 4: Processing ${allCandidates.length} candidates (smart subset)...`);
     const results = [];
 
     allCandidates.forEach((candidate, index) => {
-        // Progress indicator every 13 cards (one suit)
-        if ((index + 1) % 13 === 0) {
+        // Progress indicator every 5 cards for smart subset
+        if ((index + 1) % 5 === 0) {
             console.log(`   Progress: ${index + 1}/${allCandidates.length} candidates processed...`);
         }
 
         try {
-            // CHANGE 2: Create substituted cards array instead of using CardParser
+            // Create substituted card (same as brute force)
             const substitutedCard = createCardFromString(candidate, wildCard.id);
             const cards = [...nonWildCards, substitutedCard];
 
             // Run HandDetector (auto-sorted)
             const detector = new HandDetector(cards);
-            const handResults = detector.detectAllHands(); // Pre-sorted hands!
+            const handResults = detector.detectAllHands();
 
             // Run BestArrangementGenerator
             const generator = new BestArrangementGenerator();
@@ -91,29 +114,29 @@
         }
     });
 
-    // Step 3: Sort results by score and summarize
-    console.log(`\n📊 Step 3: Analyzing brute force results...`);
+    // STEP 5: Sort results by score and summarize (same as brute force)
+    console.log(`\n📊 Step 5: Analyzing smart results...`);
     results.sort((a, b) => b.score - a.score);
 
     const successful = results.filter(r => r.success);
     const failed = results.filter(r => !r.success);
 
-    console.log(`\n✅ ======== BRUTE FORCE SUMMARY ========`);
+    console.log(`\n✅ ======== SMART SUMMARY ========`);
     console.log(`Total candidates processed: ${results.length}`);
     console.log(`Successful arrangements: ${successful.length}`);
     console.log(`Failed attempts: ${failed.length}`);
 
     if (successful.length > 0) {
         const best = successful[0];
-        console.log(`\n🏆 Best Result (Brute Force):`);
+        console.log(`\n🏆 Best Result (Smart):`);
         console.log(`   Wild card: ${best.wildCard}`);
         console.log(`   Score: ${best.score}`);
         console.log(`   Back: ${best.arrangement.back.handType}`);
         console.log(`   Middle: ${best.arrangement.middle.handType}`);
         console.log(`   Front: ${best.arrangement.front.handType}`);
 
-        // Show top 5 results for brute force
-        console.log(`\n🥇 Top 5 Results (Brute Force):`);
+        // Show top 5 results for smart approach
+        console.log(`\n🥇 Top 5 Results (Smart):`);
         successful.slice(0, 5).forEach((result, index) => {
             console.log(`   ${index + 1}. ${result.wildCard}: ${result.score} points`);
         });
@@ -126,8 +149,8 @@
         console.log(`   Cards achieving optimal: ${optimalResults.length}/${successful.length}`);
         console.log(`   Optimal wild cards: ${optimalResults.map(r => r.wildCard).join(', ')}`);
 
-        // RETURN RIGHT HERE - no way to miss it!
-        console.log(`🔍 DEBUG: Returning best result from success block`);
+        // Return same format as brute force version
+        console.log(`🔍 DEBUG: Returning best result from smart success block`);
         return {
             arrangement: best.arrangement,
             score: best.score,
@@ -138,7 +161,7 @@
 
     } else {
         console.log(`❌ No successful arrangements found!`);
-        console.log(`🔍 DEBUG: Returning null from failure block`);
+        console.log(`🔍 DEBUG: Returning null from smart failure block`);
         return {
             arrangement: null,
             score: -Infinity,
@@ -150,10 +173,10 @@
 }
 
 /**
- * Create a card object from string representation
+ * Create a card object from string representation (copied from brute force)
  * @param {string} cardString - Card string like "A♠"
  * @param {string} originalId - ID from the original wild card
- * @returns {Object} Card object
+ * @returns {Object} Card object with wasWild flag
  */
 function createCardFromString(cardString, originalId) {
     // Parse rank and suit from string like "A♠"
@@ -169,7 +192,7 @@ function createCardFromString(cardString, originalId) {
         rank: rank,
         suit: suit,
         isWild: false,
-        wasWild: true,
+        wasWild: true,  // Visual indication flag
         value: getRankValue(rank)
     };
 
@@ -177,7 +200,7 @@ function createCardFromString(cardString, originalId) {
 }
 
 /**
- * Get numeric value for rank
+ * Get numeric value for rank (copied from brute force)
  * @param {string} rank - Card rank
  * @returns {number} Numeric value
  */
@@ -190,28 +213,9 @@ function getRankValue(rank) {
 }
 
 /**
- * Generate all 52 possible cards
- * @returns {Array} Array of all possible card strings
- */
-function generateAll52Cards() {
-    const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-    const suits = ['♠', '♥', '♦', '♣'];
-
-    const allCards = [];
-
-    ranks.forEach(rank => {
-        suits.forEach(suit => {
-            allCards.push(rank + suit);
-        });
-    });
-
-    return allCards;
-}
-
-/**
  * Quick test function for console use
  * @param {Array} cardObjects - Array of card objects with 1 wild
  */
-function testOneWildBruteForceFromCards(cardObjects) {
-    return bestArrangementOneWildBruteForceFromCards(cardObjects);
+function testOneWildBestFromCards(cardObjects) {
+    return oneWildBestFromCards(cardObjects);
 }

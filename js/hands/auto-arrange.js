@@ -57,7 +57,7 @@ class AutoArrangeManager {
      */
     optimizeSingleWild(allCards, playerData) {
         try {
-            const result = bestArrangementOneWildBruteForceFromCards(allCards);
+            const result = oneWildBestFromCards(allCards);
 
             console.log('🔍 Debug result:', result); // ADD THIS LINE
 
