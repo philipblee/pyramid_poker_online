@@ -52,7 +52,26 @@ function generateWildCandidates(caseId) {
         }
     });
 
-    // Step 4: Results
+    // Step 4: Add missing flush Aces as potential candidates
+    console.log(`\n🌊 Step 4: Adding Aces in potential flushes...`);
+    const cardCount = countCardsFromString(nonWildCardString);
+    const suitsWith4Plus = cardCount.flushSuits(4);
+
+    if (suitsWith4Plus.length > 0) {
+        suitsWith4Plus.forEach(({suit, count}) => {
+            const aceOfSuit = `A${suit}`;
+            if (!wildCandidates.includes(aceOfSuit)) {
+                wildCandidates.push(aceOfSuit);
+                console.log(`✅ Added missing flush Ace: ${aceOfSuit} (${count} cards in ${suit})`);
+            } else {
+                console.log(`⚠️ Flush Ace ${aceOfSuit} already found (${count} cards in ${suit})`);
+            }
+        });
+    } else {
+        console.log(`No flush opportunities (4+ cards) found`);
+    }
+
+    // Step 5: Results
     const results = {
         caseId: caseId,
         testName: testCase.name,
