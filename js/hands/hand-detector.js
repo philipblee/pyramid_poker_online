@@ -511,10 +511,17 @@ class HandDetector {
         // Generate all combinations (one card from each value)
         const generateCombos = (valueIndex, currentCombo) => {
             if (valueIndex >= values.length) {
-                // Complete combination - add as straight
-                this.addHand([...currentCombo], 'Straight');
+                // Check if this is actually a straight flush (straight + same suit)
+                const suits = currentCombo.map(card => card.suit);
+                const isActualStraightFlush = suits.every(suit => suit === suits[0]);
+
+                // Only add as straight if it's NOT a straight flush
+                if (!isActualStraightFlush) {
+                    this.addHand([...currentCombo], 'Straight');
+                }
                 return;
             }
+
 
             const value = values[valueIndex];
             const availableCards = cardsByValue[value];

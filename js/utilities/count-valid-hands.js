@@ -41,11 +41,21 @@ class CountValidHands {
         // Calculate flush hands
         this.calculateFlushHands(suitCounts, calculated);
 
+
+
         // Calculate straight hands
         this.calculateStraightHands(rankCounts, calculated);
 
+
+
         // Calculate straight flush hands
         this.calculateStraightFlushHands(suitCounts, testCards, calculated);
+
+        // Subtract straight flushes from flush count to eliminate duplicates
+        calculated.flush = calculated.flush - calculated.straightFlush;
+
+        // Subtract straight flushes from straight count to eliminate duplicates
+        calculated.straight = calculated.straight - calculated.straightFlush;
 
         // Calculate full houses
         this.calculateFullHouses(rankCounts, calculated);
