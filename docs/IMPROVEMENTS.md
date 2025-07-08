@@ -1,5 +1,7 @@
 # Pyramid Poker - Improvements & Issues
 
+### New Game vs. New Round - How does Config work
+
 ### Scoring System Needs Enhancement
 - **Date**: July 4, 2025  
 - **Context**: Cases 1-5 testing shows 4 Aces = 4 Eights = same score
