@@ -24,13 +24,15 @@ class AutoArrangeManager {
         if (wildCards.length === 1) {
             console.log('🃏 Single wild detected - using smart optimization');
             return this.optimizeSingleWild(allCards, playerData);
-        } else if (wildCards.length > 1) {
+        } else if (wildCards.length === 2) {
+            console.log('🃏🃏 Two wilds detected - using smart optimization');
+            return this.optimizeTwoWilds(allCards, playerData);
+        } else if (wildCards.length > 2) {
             console.log('🃏 Multiple wilds detected - using fallback');
             return this.fallbackAutoArrange(allCards, playerData);
         }
 
         console.log('🧠 Smart Auto-Arrange starting with BestArrangementGenerator...');
-
         // Use our optimized arrangement generator (handles ALL hand types including 6-8 card special hands)
         const bestArrangement = this.findBestArrangementOptimized(allCards);
         if (bestArrangement) {
@@ -93,6 +95,50 @@ class AutoArrangeManager {
             return this.fallbackAutoArrange(allCards, playerData);
         }
     }
+
+    /**
+     * NEW: Two wild optimization using proven smart approach
+     */
+    optimizeTwoWilds(allCards, playerData) {
+        try {
+            const result = twoWildBestFromCards(allCards);
+
+            console.log('🔍 Debug result:', result); // Debug logging
+
+            if (result && result.arrangement) {
+                console.log(`✨ Two wild optimization successful! Score: ${result.score}`);
+                console.log(`✨ Wild cards used: ${result.wildCards.join(', ')}`);
+
+                // Calculate staging cards
+                const usedCards = [
+                    ...result.arrangement.back.cards,
+                    ...result.arrangement.middle.cards,
+                    ...result.arrangement.front.cards
+                ];
+
+                const stagingCards = allCards.filter(card =>
+                    !usedCards.some(usedCard => usedCard.id === card.id)
+                );
+
+                const arrangement = {
+                    back: result.arrangement.back.cards,
+                    middle: result.arrangement.middle.cards,
+                    front: result.arrangement.front.cards,
+                    staging: stagingCards
+                };
+
+                return this.applyArrangement(playerData, arrangement);
+            }
+
+            console.warn('⚠️ Two wild optimization failed, using fallback');
+            return this.fallbackAutoArrange(allCards, playerData);
+
+        } catch (error) {
+            console.error('❌ Two wild optimization error:', error);
+            return this.fallbackAutoArrange(allCards, playerData);
+        }
+    }
+
 
     /**
      * Find best arrangement using greedy branch-and-bound algorithm
