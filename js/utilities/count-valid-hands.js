@@ -26,7 +26,7 @@ class CountValidHands {
             suitCounts[card.suit] = (suitCounts[card.suit] || 0) + 1;
         });
 
-        console.log('🔢 CALCULATING EXPECTED COUNTS:');
+        console.log('🔢 Counting Valid Hands by Type:');
         console.log('Rank distribution:', rankCounts);
         console.log('Suit distribution:', suitCounts);
 
@@ -58,7 +58,7 @@ class CountValidHands {
             .filter(([key]) => key !== 'total')
             .reduce((sum, [, count]) => sum + count, 0);
 
-        console.log('📊 CALCULATED EXPECTED COUNTS:', calculated);
+        console.log('📊 Valid Hand Counts:', calculated);
         return calculated;
     }
 
@@ -94,7 +94,7 @@ class CountValidHands {
                 calculated.fourOfAKind += availableKickers; // Expanded 4K hands
                 calculated.threeOfAKind += count; // 4K → 3K drop-one variants
 
-                console.log(`🃏 4K of ${rank}s: ${availableKickers} kickers available → ${availableKickers} complete 4K hands`);
+                // console.log(`🃏 4K of ${rank}s: ${availableKickers} kickers available → ${availableKickers} complete 4K hands`);
             }
 
             // Handle 5+ cards: natural + drop-one variants
@@ -127,17 +127,17 @@ class CountValidHands {
     calculateAvailableKickers(excludeRank, rankCounts) {
         let kickers = 0;
 
-        console.log(`🃏 Calculating kickers for 4K of ${excludeRank}s:`);
+        // console.log(`🃏 Calculating kickers for 4K of ${excludeRank}s:`);
 
         Object.entries(rankCounts).forEach(([rank, count]) => {
             if (rank !== excludeRank) {
                 // Each individual card can be a kicker
                 kickers += count;
-                console.log(`  ${rank}: ${count} cards → ${count} kickers`);
+                // console.log(`  ${rank}: ${count} cards → ${count} kickers`);
             }
         });
 
-        console.log(`🃏 Total kickers available: ${kickers}`);
+        // console.log(`🃏 Total kickers available: ${kickers}`);
         return kickers;
     }
 
@@ -153,7 +153,7 @@ class CountValidHands {
             calculated.twoPair = 0;
         }
 
-        console.log(`👥 Two pairs: C(${totalPairs}, 2) = ${calculated.twoPair}`);
+        // console.log(`👥 Two pairs: C(${totalPairs}, 2) = ${calculated.twoPair}`);
     }
 
     /**
@@ -231,7 +231,7 @@ class CountValidHands {
                         (suitRankCounts[this.getRankValue(card.rank)] || 0) + 1;
                 });
 
-                console.log(`🌈 Suit ${suit} rank counts:`, suitRankCounts);
+                // console.log(`🌈 Suit ${suit} rank counts:`, suitRankCounts);
 
                 for (let length = 5; length <= Math.min(8, count); length++) {
                     const combinations = this.calculateStraightFlushCombinations(suitRankCounts, length);
@@ -262,7 +262,7 @@ class CountValidHands {
                     product * suitRankCounts[val], 1
                 );
                 totalCombinations += combinations;
-                console.log(`🌈 Found ${length}-card SF ${consecutive.join('-')}: ${combinations} combinations`);
+                // console.log(`🌈 Found ${length}-card SF ${consecutive.join('-')}: ${combinations} combinations`);
             }
         }
 
@@ -277,7 +277,7 @@ class CountValidHands {
                     product * suitRankCounts[val], 1
                 );
                 totalCombinations += combinations;
-                console.log(`🌈 Found ${length}-card wheel SF A-${wheelValues.slice(1).join('-')}: ${combinations} combinations`);
+                // console.log(`🌈 Found ${length}-card wheel SF A-${wheelValues.slice(1).join('-')}: ${combinations} combinations`);
             }
         }
 
@@ -289,7 +289,7 @@ class CountValidHands {
      */
     calculateSingleCardHands(testCards, calculated) {
         calculated.highCard = testCards.length;
-        console.log(`🃏 Single cards: ${calculated.highCard} (one per card)`);
+        // console.log(`🃏 Single cards: ${calculated.highCard} (one per card)`);
     }
 
     /**
@@ -376,5 +376,33 @@ class CountValidHands {
             'J': 11, 'Q': 12, 'K': 13, 'A': 14
         };
         return values[rank];
+    }
+
+    /**
+     * Calculate natural 4K count (without kicker expansion)
+     * Add this method to the CountValidHands class
+     * @param {string} cardString - Cards to analyze
+     * @returns {number} Count of natural 4-of-a-kind hands
+     */
+    calculateNatural4K(cardString) {
+        const testCards = this.parseCards(cardString);
+
+        // Count cards by rank
+        const rankCounts = {};
+        testCards.forEach(card => {
+            rankCounts[card.rank] = (rankCounts[card.rank] || 0) + 1;
+        });
+
+        let natural4K = 0;
+
+        // Only count ranks that have exactly 4 or more cards (natural 4K)
+        Object.entries(rankCounts).forEach(([rank, count]) => {
+            if (count >= 4) {
+                natural4K += 1; // Each rank with 4+ cards contributes 1 natural 4K
+            }
+        });
+
+        console.log(`🎯 Natural 4K count: ${natural4K}`);
+        return natural4K;
     }
 }

@@ -66,9 +66,9 @@ class BestArrangementGenerator {
         // Return completed arrangement with card arrays (ready for game)
 
         return {
-        back: { ...arrangement.back, cards: backCards, isIncomplete: false },
-        middle: { ...arrangement.middle, cards: middleCards, isIncomplete: false },
-        front: { ...arrangement.front, cards: frontCards, isIncomplete: false }
+            back: { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
+            middle: { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
+            front: { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false }
         };
 
     }
