@@ -540,41 +540,6 @@ class ChinesePokerGame {
         });
 
 
-//        playerNames.forEach(playerName => {
-//            const hand = this.submittedHands.get(playerName);
-//            let playerBonus = 0;
-//
-//            const frontEval = evaluateThreeCardHand(hand.front);
-//            const middleEval = evaluateHand(hand.middle);
-//            const backEval = evaluateHand(hand.back);
-//
-//            // Front hand bonuses
-//            if (hand.front.length === 3) {
-//                if (frontEval.hand_rank[0] === 4) playerBonus += 3; // Three of a kind
-//            } else if (hand.front.length === 5) {
-//                if (frontEval.hand_rank[0] === 10) playerBonus += 18; // Five of a Kind
-//                else if (frontEval.hand_rank[0] === 9) playerBonus += 15; // Straight Flush
-//                else if (frontEval.hand_rank[0] === 8) playerBonus += 12; // Four of a Kind
-//                else if (frontEval.hand_rank[0] === 7) playerBonus += 5; // Full House
-//                else if (frontEval.hand_rank[0] === 6) playerBonus += 4; // Flush
-//                else if (frontEval.hand_rank[0] === 5) playerBonus += 4; // Straight
-//            }
-//
-//            // Middle hand bonuses
-//            if (middleEval.hand_rank[0] === 10) playerBonus += 12; // Five of a Kind
-//            else if (middleEval.hand_rank[0] === 9) playerBonus += 10; // Straight Flush
-//            else if (middleEval.hand_rank[0] === 8) playerBonus += 8; // Four of a Kind
-//            else if (middleEval.hand_rank[0] === 7) playerBonus += 2; // Full House
-//
-//            // Back hand bonuses
-//            if (backEval.hand_rank[0] === 10) playerBonus += 6; // Five of a Kind
-//            else if (backEval.hand_rank[0] === 9) playerBonus += 5; // Straight Flush
-//            else if (backEval.hand_rank[0] === 8) playerBonus += 4; // Four of a Kind
-//
-//            bonusPoints.set(playerName, playerBonus);
-//            roundScores.set(playerName, playerBonus);
-//        });
-//
         // Head-to-head comparisons
         for (let i = 0; i < playerNames.length; i++) {
             for (let j = i + 1; j < playerNames.length; j++) {

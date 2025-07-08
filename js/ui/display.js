@@ -5,12 +5,12 @@
 function createCardElement(card) {
     const cardEl = document.createElement('div');
 
-    console.log(`🃏 Creating card element:`, {
-        rank: card.rank,
-        suit: card.suit,
-        isWild: card.isWild,
-        wasWild: card.wasWild
-    });
+    //    console.log(`🃏 Creating card element:`, {
+    //        rank: card.rank,
+    //        suit: card.suit,
+    //        isWild: card.isWild,
+    //        wasWild: card.wasWild
+    //    });
 
     if (card.isWild) {
         cardEl.className = 'card wild';

@@ -53,7 +53,6 @@ function displayArrangementResults(result, testName) {
     }
 
     // Show the best arrangement
-    console.log(`🔧 Algorithm: BestArrangementGenerator - ${result.success ? 'SUCCESS' : 'FAILED'}`);
     console.log(`🏆 Best Arrangement (Score: ${result.score}):`);
     console.log(`   🔙 Back:   ${result.arrangement.back.handType} - [${result.arrangement.back.hand_rank.join(', ')}]`);
     console.log(`   🔄 Middle: ${result.arrangement.middle.handType} - [${result.arrangement.middle.hand_rank.join(', ')}]`);
@@ -132,9 +131,10 @@ function performanceTest(caseId = 1, iterations = 5) {
     console.log(`\n⚡ ======== PERFORMANCE TEST ========`);
     console.log(`Case ${caseId}, ${iterations} iterations`);
 
-    // NEW way (simplified):
+    // Get the test data once
     const testResult = runSingleTest(caseId);
-    const sortedHands = testResult.results.hands; // Already sorted!
+    const sorter = new HandSorter();
+    const sortResult = sorter.sortHandsByStrength(testResult.results.hands);
 
     const times = [];
     const scores = [];
@@ -168,7 +168,7 @@ function performanceTest(caseId = 1, iterations = 5) {
 /**
  * Compare with exhaustive search (small subset)
  * @param {number} caseId - Test case to use
- * @param {number} maxHands - Limit hands for exhaustive comparison
+ * @param {number} maxHands - Limit hands for comparison
  */
 function compareWithExhaustive(caseId = 1, maxHands = 100) {
     console.log(`\n🔬 ======== GREEDY VS EXHAUSTIVE COMPARISON ========`);
@@ -190,53 +190,8 @@ function compareWithExhaustive(caseId = 1, maxHands = 100) {
     console.log(`   Time: ${(greedyEnd - greedyStart).toFixed(2)}ms`);
     console.log(`   Nodes: ${greedyResult.statistics.exploredNodes}`);
 
-    // TODO: Implement simple exhaustive search for comparison
-    console.log(`\n🔍 Exhaustive search comparison: [Not implemented yet]`);
-    console.log(`   Would check all valid combinations of ${maxHands} hands`);
+    console.log(`\n🔍 Note: Exhaustive search comparison requires additional implementation`);
+    console.log(`   Would systematically check all valid combinations of ${maxHands} hands`);
 
     return greedyResult;
-}
-
-/**
- * Run baseline test - same format but with three hands shown
- * @param {number} maxCases - Number of cases to test
- */
-function runBaselineTest(maxCases = 101) {
-    console.log(`🔍 ======== TESTING ${maxCases} CASES ========`);
-
-    const results = [];
-    const startTime = performance.now();
-
-    for (let i = 1; i <= maxCases; i++) {
-        console.log(`\n--- Running Case ${i} ---`);
-        const result = testBestArrangementGenerator(i);
-        if (result) {
-            results.push({
-                caseId: i,
-                score: result.score,
-                success: result.success,  // ADD THIS LINE
-                searchTime: result.statistics.searchTime,
-                efficiency: result.statistics.efficiency,
-                exploredNodes: result.statistics.exploredNodes,
-                backHand: result.arrangement?.back.handType || 'Unknown',
-                middleHand: result.arrangement?.middle.handType || 'Unknown',
-                frontHand: result.arrangement?.front.handType || 'Unknown'
-            });
-        }
-    }
-
-    const totalTime = performance.now() - startTime;
-
-    // Summary - same format as baseline but with three hands
-    console.log(`\n📊 ======== BASELINE SUMMARY ========`);
-    console.log(`Total cases: ${results.length}/${maxCases}`);
-    console.log(`Success rate: ${results.filter(r => r.success).length}/${results.length} (${(results.filter(r => r.success).length / results.length * 100).toFixed(1)}%)`);
-    console.log(`Total time: ${totalTime.toFixed(2)}ms`);
-    console.log(`Average time per case: ${(totalTime / results.length).toFixed(2)}ms`);
-
-    results.forEach(r => {
-        console.log(`Case ${r.caseId}: Score ${r.score}, ${r.searchTime.toFixed(1)}ms, ${r.exploredNodes} nodes | Back: ${r.backHand} | Middle: ${r.middleHand} | Front: ${r.frontHand}`);
-    });
-
-    return results;
 }
