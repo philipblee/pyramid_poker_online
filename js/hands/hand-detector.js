@@ -58,7 +58,7 @@ class HandDetector {
      * SPECIAL: 4K hands are expanded with kickers to create complete 5-card hands
      */
     detectOfAKind(rankCounts) {
-        Object.entries(this.rankCounts).forEach(([rank, count]) => {
+        Object.entries(rankCounts).forEach(([rank, count]) => {
             if (count >= 2) {
                 const allCardsOfRank = this.cards.filter(c => c.rank === rank);
 
@@ -379,7 +379,7 @@ class HandDetector {
             }
         }
         console.log(`👥 Created ${twoPairCount} two pair hands`);
-    }
+    }scratch
 
 
     // Detect straights using consecutive rank counts
@@ -471,7 +471,7 @@ class HandDetector {
                 const suitCards = this.cards.filter(c => c.suit === suit);
 
                 // Generate all 5-card combinations from this suit
-                const flushCombinations = this.generateCombinations(suitCards, 5);
+                const flushCombinations = Analysis.generateCombinations(suitCards, 5);
 
                 console.log(`♠️ Suit ${suit}: ${count} cards → ${flushCombinations.length} flushes`);
 
@@ -485,31 +485,6 @@ class HandDetector {
         });
     }
 
-
-    // Generate all combinations of r cards from the given array
-    generateCombinations(cards, r) {
-        if (r > cards.length) return [];
-        if (r === 1) return cards.map(card => [card]);
-        if (r === cards.length) return [cards];
-
-        const combinations = [];
-
-        function combine(start, current) {
-            if (current.length === r) {
-                combinations.push([...current]);
-                return;
-            }
-
-            for (let i = start; i < cards.length; i++) {
-                current.push(cards[i]);
-                combine(i + 1, current);
-                current.pop();
-            }
-        }
-
-        combine(0, []);
-        return combinations;
-    }
 
     // Detect single card hands (high cards)
     detectSingleCards() {
