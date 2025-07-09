@@ -148,10 +148,7 @@ class HandDetector {
         const kickers = [];
 
         // Count ranks in remaining cards
-        const remainingRankCounts = {};
-        remainingCards.forEach(card => {
-            remainingRankCounts[card.rank] = (remainingRankCounts[card.rank] || 0) + 1;
-        });
+        const remainingRankCounts = new Analysis(remainingCards).rankCounts;
 
         // Process each rank
         Object.entries(remainingRankCounts).forEach(([rank, count]) => {
