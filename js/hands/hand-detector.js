@@ -279,9 +279,7 @@ class HandDetector {
         return kickersNeeded;
     }
 
-    /**
-     * Check if hand type is straight or better (for front 5-card requirement)
-     */
+    // Check if hand type is straight or better (for front 5-card requirement)
     isStraightOrBetter(handType) {
         return ['Straight', 'Flush', 'Full House', 'Four of a Kind',
                 'Straight Flush', 'Five of a Kind',
@@ -289,18 +287,13 @@ class HandDetector {
                 '6-card Straight Flush', '7-card Straight Flush', '8-card Straight Flush'].includes(handType);
     }
 
-    /**
-     * Check if hand type is valid for 6-8 card hands
-     */
+    // Check if hand type is valid for 6-8 card hands
     isStraightFlushOrOfAKind(handType) {
         return handType.includes('Straight Flush') ||
                handType.includes('of a Kind');
     }
 
-    /**
-     * Count how many cards we have of each rank and suit
-     */
-
+    // Count how many cards we have of each rank and suit
     countRanksAndSuits() {
         const rankCounts = this.analysis.rankCounts;
         const suitCounts = this.analysis.suitCounts;
@@ -312,9 +305,7 @@ class HandDetector {
     }
 
 
-    /**
-     * Detect straight flushes (5-8 cards) using consecutive rank counts within each suit
-     */
+    // Detect straight flushes (5-8 cards) using consecutive rank counts within each suit
     detectStraightFlushes(suitCounts) {
         console.log(`🌈 Straight flush detection starting...`);
 
@@ -339,9 +330,8 @@ class HandDetector {
         });
     }
 
-    /**
-     * Detect straights within a specific suit (for straight flushes)
-     */
+
+    // Detect straights within a specific suit (for straight flushes)
     detectStraightsInSuit(suitRankCounts, suitCards, suit) {
         // Convert ranks to values for easier consecutive checking
         // Convert ranks to values for easier consecutive checking
@@ -389,9 +379,8 @@ class HandDetector {
         }
     }
 
-    /**
-     * Generate all combinations for a specific straight flush
-     */
+
+    // Generate all combinations for a specific straight flush
     generateStraightFlushCombinations(values, valueCounts, rankValues, suitCards, suit, straightLength) {
         // Get all cards for each value in the straight flush (from this suit only)
         const cardsByValue = {};
@@ -424,9 +413,8 @@ class HandDetector {
         generateCombos(0, []);
     }
 
-    /**
-     * Detect two pairs using existing pair hands
-     */
+
+    // Detect two pairs using existing pair hands
     detectTwoPairs() {
         const pairs = this.allHands.filter(h => h.handType === 'Pair');
         console.log(`👥 Two pair detection: ${pairs.length} pairs available`);
@@ -444,9 +432,8 @@ class HandDetector {
         console.log(`👥 Created ${twoPairCount} two pair hands`);
     }
 
-    /**
-     * Detect straights using consecutive rank counts
-     */
+
+    // Detect straights using consecutive rank counts
     detectStraights(rankCounts) {
         // Convert ranks to values for easier consecutive checking
         const rankValues = Analysis.RANK_VALUES;
@@ -485,9 +472,9 @@ class HandDetector {
         }
     }
 
-    /**
-     * Generate all combinations for a specific straight
-     */
+
+    // Generate all combinations for a specific straight
+
     generateStraightCombinations(values, valueCounts, rankValues) {
         // Get all cards for each value in the straight
         const cardsByValue = {};
@@ -526,9 +513,8 @@ class HandDetector {
         generateCombos(0, []);
     }
 
-    /**
-     * Detect flushes using combinations from each suit
-     */
+
+    // Detect flushes using combinations from each suit
     detectFlushes(suitCounts) {
         Object.entries(suitCounts).forEach(([suit, count]) => {
             if (count >= 5) {
@@ -550,9 +536,8 @@ class HandDetector {
         });
     }
 
-    /**
-     * Generate all combinations of r cards from the given array
-     */
+
+    // Generate all combinations of r cards from the given array
     generateCombinations(cards, r) {
         if (r > cards.length) return [];
         if (r === 1) return cards.map(card => [card]);
@@ -577,9 +562,7 @@ class HandDetector {
         return combinations;
     }
 
-    /**
-     * Detect single card hands (high cards)
-     */
+    // Detect single card hands (high cards)
     detectSingleCards() {
         console.log(`🃏 Single card detection starting...`);
 
@@ -594,9 +577,8 @@ class HandDetector {
         console.log(`🃏 Created ${singleCardCount} single card hands`);
     }
 
-    /**
-     * Add a single card hand to our results (modified version of addHand)
-     */
+
+    // Add a single card hand to our results (modified version of addHand)
     addSingleCardHand(cards, handType) {
         // Get proper hand ranking from card-evaluation.js
         const handStrength = evaluateHand(cards);
@@ -627,9 +609,9 @@ class HandDetector {
         console.log(`🃏 Found: ${handType} ${cards[0].rank} of ${cards[0].suit} (${cards.length} card) - Valid: ${validPositions.join(', ')} - ${incompleteStatus}`);
     }
 
-    /**
-     * Detect full houses using all available trips and pairs
-     */
+
+    // Detect full houses using all available trips and pairs
+
     detectFullHouses() {
         // Get all trips and pairs from our existing hands
         const trips = this.allHands.filter(h => h.handType === 'Three of a Kind');
@@ -651,9 +633,9 @@ class HandDetector {
         console.log(`🏠 Created ${fullHouseCount} full houses`);
     }
 
-    /**
-     * Add a hand to our results - NOW WITH INCOMPLETE HANDS FLAGS!
-     */
+
+    // Add a hand to our results - NOW WITH INCOMPLETE HANDS FLAGS!
+
 
     addHand(cards, handType) {
         // Get proper hand ranking - TODO: Move to separate incomplete-hand-evaluator.js later
@@ -757,9 +739,7 @@ class HandDetector {
         return results;
     }
 
-    /**
-     * Check if a 5-card combination is a straight flush
-     */
+    // Check if a 5-card combination is a straight flush
     isStraightFlush(cards) {
         // Get the values and sort them
         const values = cards.map(card => this.getRankValue(card.rank)).sort((a, b) => a - b);
@@ -775,9 +755,8 @@ class HandDetector {
         return isRegularStraight || isWheelStraight;
     }
 
-    /*
-     * Calculate position-specific scores for a hand
-     */
+
+    // Calculate position-specific scores for a hand
     calculatePositionScores(handStrength, validPositions, cardCount) {
         const scores = {};
 
@@ -788,10 +767,8 @@ class HandDetector {
         return scores;
     }
 
-    /**
-     * Get numeric value for rank
-     */
 
+    // Get numeric value for rank
      getRankValue(rank) {
         return Analysis.RANK_VALUES[rank];
     }
