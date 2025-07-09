@@ -16,6 +16,8 @@ class HandDetector {
         this.suitCounts = this.analysis.suitCounts;
         console.log('📊 Rank counts:', this.rankCounts);
         console.log('📊 Suit counts:', this.suitCounts);
+
+        this.results = this.detectAllHands();
     }
 
     /**
@@ -24,6 +26,7 @@ class HandDetector {
      * @returns {Object} Structured results with optionally sorted hands
      */
     detectAllHands(autoSort = true) {
+        this.allHands = []; // Clear previous results
         console.log(`🔍 HandDetector analyzing ${this.cards.length} cards...`);
 
         // Count ranks and suits

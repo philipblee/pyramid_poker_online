@@ -163,7 +163,7 @@ class HandDetectorTestFramework {
             const testCards = this.parseCards(testCase.cards);
             const startTime = performance.now();
             const detector = new HandDetector(testCards);
-            const results = detector.detectAllHands();
+            const results = detector.results;
             const endTime = performance.now();
 
             // Verify results using CALCULATED expected values (source of truth)

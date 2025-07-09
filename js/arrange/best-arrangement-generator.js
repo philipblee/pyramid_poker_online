@@ -19,15 +19,16 @@ class BestArrangementGenerator {
         console.log('🔧 Completing arrangement with kickers...');
 
         const usedCardIds = new Set([
-            ...arrangement.back.cards.map(c => c.id),
-            ...arrangement.middle.cards.map(c => c.id),
-            ...arrangement.front.cards.map(c => c.id)
+            ...Analysis.getCardIds(arrangement.back.cards),
+            ...Analysis.getCardIds(arrangement.middle.cards),
+            ...Analysis.getCardIds(arrangement.front.cards)
         ]);
 
+
         // Get unused cards sorted by strength (highest first)
-        const unusedCards = this.allCards
-            .filter(card => !usedCardIds.has(card.id))
-            .sort((a, b) => (b.value || 0) - (a.value || 0));
+        const unusedCards = Analysis.sortCards(
+            this.allCards.filter(card => !usedCardIds.has(card.id))
+        );
 
         let kickerIndex = 0;
 
@@ -131,7 +132,7 @@ class BestArrangementGenerator {
      * @param {number} backIdx - Index of back hand
      */
     searchMiddleHands(sortedHands, backHand, backIdx) {
-        const backUsedCards = new Set(backHand.cards.map(c => c.id));
+        const backUsedCards = new Set(Analysis.getCardIds(backHand.cards));
 
         // Try middle hands (same strength or weaker than back)
         for (let middleIdx = backIdx; middleIdx < sortedHands.length; middleIdx++) {
@@ -164,8 +165,9 @@ class BestArrangementGenerator {
     searchFrontHands(sortedHands, backHand, middleHand, backUsedCards, middleIdx) {
         const allUsedCards = new Set([
             ...backUsedCards,
-            ...middleHand.cards.map(c => c.id)
+            ...Analysis.getCardIds(middleHand.cards)
         ]);
+
 
         // Try front hands (same strength or weaker than middle)
         for (let frontIdx = middleIdx; frontIdx < sortedHands.length; frontIdx++) {
@@ -326,7 +328,7 @@ class BestArrangementGenerator {
             ...arrangement.front.cards
         ];
 
-        const cardIds = allCards.map(c => c.id);
+        const cardIds = Analysis.getCardIds(allCards);
         const uniqueCardIds = new Set(cardIds);
 
         if (cardIds.length !== uniqueCardIds.size) {

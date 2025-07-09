@@ -240,6 +240,10 @@ class Analysis {
         });
     }
 
+    static getCardIds(cards) {
+        return cards.map(c => c.id);
+    }
+
     static sortCards(cards) {
         return cards.sort((a, b) => {
             const rankDiff = Analysis.RANK_ORDER[b.rank] - Analysis.RANK_ORDER[a.rank];
