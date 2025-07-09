@@ -138,35 +138,6 @@ class HandDetector {
     }
 
     /**
-     * Find available kickers: singles and individual cards from pairs
-     * @param {Array} remainingCards - Cards not used in the main hand
-     * @returns {Array} Array of kicker arrays (each kicker is 1-card array)
-     */
-    findKickers(remainingCards) {
-        const kickers = [];
-
-        // Count ranks in remaining cards
-        const remainingRankCounts = new Analysis(remainingCards).rankCounts;
-
-        // Process each rank
-        Object.entries(remainingRankCounts).forEach(([rank, count]) => {
-            const cardsOfRank = remainingCards.filter(c => c.rank === rank);
-
-            if (count === 1) {
-                // Single card - add as kicker
-                kickers.push([cardsOfRank[0]]);
-            } else if (count === 2) {
-                // Pair - add each card individually as separate kickers
-                kickers.push([cardsOfRank[0]]);
-                kickers.push([cardsOfRank[1]]);
-            }
-        });
-
-        console.log(`🃏 Found ${kickers.length} total kickers from remaining cards`);
-        return kickers;
-    }
-
-    /**
      * Determine which positions a hand can legally be placed in
      * @param {string} handType - Type of hand (e.g., 'Straight', 'Pair')
      * @param {number} cardCount - Number of cards in hand
@@ -732,7 +703,7 @@ class HandDetector {
     // Check if a 5-card combination is a straight flush
     isStraightFlush(cards) {
         // Get the values and sort them
-        const values = cards.map(card => this.getRankValue(card.rank)).sort((a, b) => a - b);
+        const values = cards.map(card => Analysis.RANK_VALUES[card.rank]).sort((a, b) => a - b);
 
         // Check for regular straight (consecutive values)
         const isRegularStraight = values.every((val, i) => i === 0 || val === values[i-1] + 1);
@@ -757,10 +728,5 @@ class HandDetector {
         return scores;
     }
 
-
-    // Get numeric value for rank
-     getRankValue(rank) {
-        return Analysis.RANK_VALUES[rank];
-    }
 
 }
