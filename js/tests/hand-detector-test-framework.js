@@ -65,31 +65,6 @@ class HandDetectorTestFramework {
         return calculated;
     }
 
-
-    // Fixed calculateAvailableKickers method for test framework
-    // The issue was in how we calculated kickers for 4K expansion
-
-    /**
-     * FIXED: Calculate available kickers for 4K expansion
-     * Returns number of individual cards available as kickers
-     */
-    calculateAvailableKickers(excludeRank, rankCounts) {
-        let kickers = 0;
-
-        console.log(`🃏 Calculating kickers for 4K of ${excludeRank}s:`);
-
-        Object.entries(rankCounts).forEach(([rank, count]) => {
-            if (rank !== excludeRank) {
-                // Each individual card can be a kicker
-                kickers += count;
-                console.log(`  ${rank}: ${count} cards → ${count} kickers`);
-            }
-        });
-
-        console.log(`🃏 Total kickers available: ${kickers}`);
-        return kickers;
-    }
-
     /**
      * Combination formula C(n,r) = n! / (r! * (n-r)!)
      */

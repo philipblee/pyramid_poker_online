@@ -41,12 +41,8 @@ class CountValidHands {
         // Calculate flush hands
         this.calculateFlushHands(suitCounts, calculated);
 
-
-
         // Calculate straight hands
         this.calculateStraightHands(rankCounts, calculated);
-
-
 
         // Calculate straight flush hands
         this.calculateStraightFlushHands(suitCounts, testCards, calculated);
@@ -138,12 +134,11 @@ class CountValidHands {
         let kickers = 0;
 
         // console.log(`🃏 Calculating kickers for 4K of ${excludeRank}s:`);
-
         Object.entries(rankCounts).forEach(([rank, count]) => {
             if (rank !== excludeRank) {
-                // Each individual card can be a kicker
-                kickers += count;
-                // console.log(`  ${rank}: ${count} cards → ${count} kickers`);
+                if (count === 1) kickers += 1;      // Singles only
+                else if (count === 2) kickers += 2; // Pairs only
+                // Don't count trips/quads
             }
         });
 

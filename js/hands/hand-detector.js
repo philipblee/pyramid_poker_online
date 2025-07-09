@@ -159,11 +159,6 @@ class HandDetector {
                 // Pair - add each card individually as separate kickers
                 kickers.push([cardsOfRank[0]]);
                 kickers.push([cardsOfRank[1]]);
-            } else if (count >= 3) {
-                // Trip or higher - add each card individually
-                cardsOfRank.forEach(card => {
-                    kickers.push([card]);
-                });
             }
         });
 
