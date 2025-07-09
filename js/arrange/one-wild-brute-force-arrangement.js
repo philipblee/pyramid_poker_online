@@ -36,6 +36,10 @@ function oneWildBruteForceArrangement(caseId) {
             // Replace wild card with candidate and parse
             const cards = CardParser.parseWithWildSubstitution(testCase.cards, candidate);
 
+            console.log(`🔍 Parsed ${cards.length} cards for ${candidate}`);
+
+
+
             // Run HandDetector (auto-sorted)
             const detector = new HandDetector(cards);
             const handResults = detector.detectAllHands(); // Pre-sorted hands!
@@ -125,7 +129,7 @@ function oneWildBruteForceArrangement(caseId) {
  * @returns {Array} Array of all possible card strings
  */
 function generateAll52Cards() {
-    const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+    const ranks = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
     const suits = ['♠', '♥', '♦', '♣'];
 
     const allCards = [];
