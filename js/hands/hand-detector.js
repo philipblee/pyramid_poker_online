@@ -84,8 +84,7 @@ class HandDetector {
                     const fourOfAKindCards = allCardsOfRank.slice(0, 4);
 
                     // Find all available kickers (remaining cards not of this rank)
-                    const remainingCards = this.cards.filter(c => c.rank !== rank);
-                    const availableKickers = this.findKickers(remainingCards);
+                    const availableKickers = this.analysis.findKickers([rank]);
 
                     console.log(`🃏 Found ${availableKickers.length} kickers for 4K of ${rank}s`);
 
@@ -123,8 +122,7 @@ class HandDetector {
                         // If this creates a 4K, expand it with kickers too
                         if (targetSize === 4) {
                             console.log(`🃏 Drop-one variant created 4K of ${rank}s - expanding with kickers...`);
-                            const remainingCards = this.cards.filter(c => c.rank !== rank);
-                            const availableKickers = this.findKickers(remainingCards);
+                            const availableKickers = this.analysis.findKickers([rank]);
 
                             availableKickers.forEach(kicker => {
                                 const completeHand = [...variantHand, ...kicker];
