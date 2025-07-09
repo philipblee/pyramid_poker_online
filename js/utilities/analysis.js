@@ -36,6 +36,16 @@ class Analysis {
         };
     }
 
+    static WHEEL_STRAIGHT = [14, 2, 3, 4, 5]; // A-2-3-4-5 (Ace acts as 1)
+
+    static generateConsecutiveValues(startValue, length) {
+        return Array.from({length}, (_, i) => startValue + i);
+    }
+
+    static generateWheelValues(length) {
+        return [14, ...Array.from({length: length - 1}, (_, i) => i + 2)];
+    }
+
     static get RANK_ORDER() {
         return { 'A': 14, 'K': 13, 'Q': 12, 'J': 11, '10': 10, '9': 9, '8': 8, '7': 7, '6': 6, '5': 5, '4': 4, '3': 3, '2': 2 };
     }

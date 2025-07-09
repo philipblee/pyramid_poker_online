@@ -10,6 +10,12 @@ class HandDetector {
         this.cards = cards.filter(c => !c.isWild); // No wilds for now
         this.allHands = [];
         this.analysis = new Analysis(this.cards);
+
+        // Extract counts once in constructor
+        this.rankCounts = this.analysis.rankCounts;
+        this.suitCounts = this.analysis.suitCounts;
+        console.log('📊 Rank counts:', this.rankCounts);
+        console.log('📊 Suit counts:', this.suitCounts);
     }
 
     /**
@@ -21,13 +27,13 @@ class HandDetector {
         console.log(`🔍 HandDetector analyzing ${this.cards.length} cards...`);
 
         // Count ranks and suits
-        const { rankCounts, suitCounts } = this.countRanksAndSuits();
+        // const { rankCounts, this.suitCounts } = this.countRanksAndSuits();
 
         // Detect straight flushes (5-8 cards)
-        this.detectStraightFlushes(suitCounts);
+        this.detectStraightFlushes(this.suitCounts);
 
         // Detect of-a-kind hands with drop-one-card pattern AND 4K expansion
-        this.detectOfAKind(rankCounts);
+        this.detectOfAKind(this.rankCounts);
 
         // Detect two pairs
         this.detectTwoPairs();
@@ -36,10 +42,10 @@ class HandDetector {
         this.detectFullHouses();
 
         // Detect flushes using combinations from each suit
-        this.detectFlushes(suitCounts);
+        this.detectFlushes(this.suitCounts);
 
         // Detect straights using consecutive rank counts
-        this.detectStraights(rankCounts);
+        this.detectStraights(this.rankCounts);
 
         // Detect single cards
         this.detectSingleCards();
@@ -52,7 +58,7 @@ class HandDetector {
      * SPECIAL: 4K hands are expanded with kickers to create complete 5-card hands
      */
     detectOfAKind(rankCounts) {
-        Object.entries(rankCounts).forEach(([rank, count]) => {
+        Object.entries(this.rankCounts).forEach(([rank, count]) => {
             if (count >= 2) {
                 const allCardsOfRank = this.cards.filter(c => c.rank === rank);
 
@@ -254,23 +260,12 @@ class HandDetector {
                handType.includes('of a Kind');
     }
 
-    // Count how many cards we have of each rank and suit
-    countRanksAndSuits() {
-        const rankCounts = this.analysis.rankCounts;
-        const suitCounts = this.analysis.suitCounts;
-
-        console.log('📊 Rank counts:', rankCounts);
-        console.log('📊 Suit counts:', suitCounts);
-
-        return { rankCounts, suitCounts };
-    }
-
 
     // Detect straight flushes (5-8 cards) using consecutive rank counts within each suit
     detectStraightFlushes(suitCounts) {
         console.log(`🌈 Straight flush detection starting...`);
 
-        Object.entries(suitCounts).forEach(([suit, count]) => {
+        Object.entries(this.suitCounts).forEach(([suit, count]) => {
             if (count >= 5) {
                 console.log(`🌈 Checking suit ${suit} with ${count} cards...`);
 
@@ -295,7 +290,6 @@ class HandDetector {
     // Detect straights within a specific suit (for straight flushes)
     detectStraightsInSuit(suitRankCounts, suitCards, suit) {
         // Convert ranks to values for easier consecutive checking
-        // Convert ranks to values for easier consecutive checking
         const rankValues = Analysis.RANK_VALUES;
 
         // Create value-to-count mapping for this suit
@@ -309,10 +303,7 @@ class HandDetector {
         for (let straightLength = 5; straightLength <= 8; straightLength++) {
             // Check regular straights (5-6-7-8-9 through sequences ending at Ace)
             for (let startValue = 2; startValue <= (15 - straightLength); startValue++) {
-                const consecutive = [];
-                for (let i = 0; i < straightLength; i++) {
-                    consecutive.push(startValue + i);
-                }
+                const consecutive = Analysis.generateConsecutiveValues(startValue, straightLength);
 
                 // Check if all consecutive values exist in this suit
                 if (consecutive.every(val => valueCounts[val] > 0)) {
@@ -325,10 +316,7 @@ class HandDetector {
 
             // Check wheel straight flush (A-2-3-4-5, A-2-3-4-5-6, etc.)
             if (straightLength <= 6) { // Wheel can only go up to A-2-3-4-5-6
-                const wheelValues = [14]; // Start with Ace
-                for (let i = 2; i < 2 + straightLength - 1; i++) {
-                    wheelValues.push(i);
-                }
+                const wheelValues = Analysis.generateWheelValues(straightLength);
 
                 if (wheelValues.every(val => valueCounts[val] > 0)) {
                     console.log(`🌈 Found ${straightLength}-card wheel straight flush in ${suit}: A-${wheelValues.slice(1).join('-')}`);
@@ -401,7 +389,7 @@ class HandDetector {
 
         // Create value-to-count mapping
         const valueCounts = {};
-        Object.entries(rankCounts).forEach(([rank, count]) => {
+        Object.entries(this.rankCounts).forEach(([rank, count]) => {
             const value = rankValues[rank];
             valueCounts[value] = count;
         });
@@ -423,7 +411,7 @@ class HandDetector {
         }
 
         // Check wheel straight (A-2-3-4-5)
-        const wheelValues = [14, 2, 3, 4, 5]; // A=14, but acts as 1 in wheel
+        const wheelValues = Analysis.WHEEL_STRAIGHT; // A=14, but acts as 1 in wheel
         if (wheelValues.every(val => valueCounts[val] > 0)) {
             const wheelCount = wheelValues.reduce((product, val) => product * valueCounts[val], 1);
             console.log(`🔢 Found wheel straight A-2-3-4-5: ${wheelCount} combinations`);
@@ -477,7 +465,7 @@ class HandDetector {
 
     // Detect flushes using combinations from each suit
     detectFlushes(suitCounts) {
-        Object.entries(suitCounts).forEach(([suit, count]) => {
+        Object.entries(this.suitCounts).forEach(([suit, count]) => {
             if (count >= 5) {
                 // Get all cards of this suit
                 const suitCards = this.cards.filter(c => c.suit === suit);
