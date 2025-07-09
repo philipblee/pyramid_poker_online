@@ -222,7 +222,7 @@ class Analysis {
     // UTILITY FUNCTIONS - Available for other modules
     // =============================================================================
 
-    parseCardString(cardString) {
+    static parseCardString(cardString) {
         return cardString.trim().split(/\s+/).map((token, index) => {
             const match = token.match(/^(\d+|[AKQJ])([♠♥♦♣])$/);
             if (!match) {
@@ -240,14 +240,14 @@ class Analysis {
         });
     }
 
-    sortCards(cards = this.cards) {
+    static sortCards(cards) {
         return cards.sort((a, b) => {
             const rankDiff = Analysis.RANK_ORDER[b.rank] - Analysis.RANK_ORDER[a.rank];
             return rankDiff !== 0 ? rankDiff : Analysis.SUIT_ORDER[a.suit] - Analysis.SUIT_ORDER[b.suit];
         });
     }
 
-    generateCombinations(cards, r) {
+    static generateCombinations(cards, r) {
         if (r > cards.length) return [];
         if (r === 1) return cards.map(card => [card]);
         if (r === cards.length) return [cards];
