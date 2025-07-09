@@ -349,10 +349,8 @@ class HandDetector {
      */
     detectStraightsInSuit(suitRankCounts, suitCards, suit) {
         // Convert ranks to values for easier consecutive checking
-        const rankValues = {
-            '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
-            'J': 11, 'Q': 12, 'K': 13, 'A': 14
-        };
+        // Convert ranks to values for easier consecutive checking
+        const rankValues = Analysis.RANK_VALUES;
 
         // Create value-to-count mapping for this suit
         const valueCounts = {};
@@ -456,10 +454,7 @@ class HandDetector {
      */
     detectStraights(rankCounts) {
         // Convert ranks to values for easier consecutive checking
-        const rankValues = {
-            '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
-            'J': 11, 'Q': 12, 'K': 13, 'A': 14
-        };
+        const rankValues = Analysis.RANK_VALUES;
 
         // Create value-to-count mapping
         const valueCounts = {};
@@ -801,6 +796,7 @@ class HandDetector {
     /**
      * Get numeric value for rank
      */
+
      getRankValue(rank) {
         return Analysis.RANK_VALUES[rank];
     }
