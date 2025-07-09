@@ -54,6 +54,11 @@ class Analysis {
         return { '♠': 1, '♥': 2, '♦': 3, '♣': 4 };
     }
 
+    static RANKS_ACES_FIRST = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
+
+
+
+
     // =============================================================================
     // STATIC UTILITIES - No card analysis needed
     // =============================================================================
@@ -104,6 +109,23 @@ class Analysis {
             isWild: false,
             wasWild: true
         };
+    }
+
+    static generateAll52CardStringsAcesFirst() {
+        const cards = [];
+        Analysis.RANKS_ACES_FIRST.forEach(rank => {
+            Analysis.SUITS.forEach(suit => {
+                cards.push(rank + suit);
+            });
+        });
+        return cards;
+    }
+
+    static getDefaultRelevantHandTypes() {
+        return [
+            'threeOfAKind', 'natural4K', 'fiveOfAKind', 'sixOfAKind', 'sevenOfAKind', 'eightOfAKind',
+            'straight', 'straightFlush', 'sixCardStraightFlush', 'sevenCardStraightFlush', 'eightCardStraightFlush'
+        ];
     }
 
     // =============================================================================

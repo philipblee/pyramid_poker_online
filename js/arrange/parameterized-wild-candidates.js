@@ -11,7 +11,7 @@ function parameterizedWildCandidates(cardObjects, relevantHandTypes = null) {
     console.log(`Analyzing ${cardObjects.length} card objects with individual hand type comparison`);
 
     // Use default relevant hand types if none provided
-    const handTypes = relevantHandTypes || getDefaultRelevantHandTypes();
+    const handTypes = relevantHandTypes || Analysis.getDefaultRelevantHandTypes();
     console.log(`📋 Relevant hand types: ${handTypes.join(', ')}`);
 
     // Step 1: Get baseline hand counts using our new adapter
@@ -26,13 +26,13 @@ function parameterizedWildCandidates(cardObjects, relevantHandTypes = null) {
 
     // Step 2: Test each possible wild card substitution
     console.log('\n🔄 Step 2: Testing all 52 possible wild cards...');
-    const allCards = generateAll52Cards();
+    const allCards = Analysis.generateAll52CardStringsAcesFirst();
     const wildCandidates = [];
     const rejectedCards = [];
 
     allCards.forEach((cardString, index) => {
         // Convert card string to card object
-        const wildCard = createCardObjectFromString(cardString);
+        const wildCard = Analysis.createCardFromString(cardString);
         console.log("Trying this card:", wildCard)
 
         // Create test hand (16 + 1 wild = 17 cards)
@@ -102,81 +102,8 @@ function parameterizedWildCandidates(cardObjects, relevantHandTypes = null) {
     return results;
 }
 
-/**
- * Get default relevant hand types (what matters for wild card optimization)
- * FIXED: Use natural4K instead of fourOfAKind to avoid kicker expansion
- * @returns {Array} Array of hand type property names
- */
-function getDefaultRelevantHandTypes() {
-    return [
-        'threeOfAKind',
-        'natural4K',          // ← FIXED: Use natural4K instead of fourOfAKind
-        'fiveOfAKind',
-        'sixOfAKind',
-        'sevenOfAKind',
-        'eightOfAKind',
-        'straight',
-        'straightFlush',
-        'sixCardStraightFlush',
-        'sevenCardStraightFlush',
-        'eightCardStraightFlush',
-        'fullHouse'
-    ];
-}
 
-/**
- * Generate all 52 possible cards as strings
- * @returns {Array} Array of card strings like "A♠", "K♥", etc.
- */
-function generateAll52Cards() {
-    const ranks = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
-    const suits = ['♠', '♥', '♦', '♣'];
 
-    const allCards = [];
-    ranks.forEach(rank => {
-        suits.forEach(suit => {
-            allCards.push(rank + suit);
-        });
-    });
-
-    return allCards;
-}
-
-/**
- * Create a card object from a card string
- * @param {string} cardString - Card string like "A♠"
- * @returns {Object} Card object
- */
-function createCardObjectFromString(cardString) {
-    const match = cardString.match(/^(\d+|[AKQJ])([♠♥♦♣])$/);
-    if (!match) {
-        throw new Error(`Invalid card format: ${cardString}`);
-    }
-
-    const [, rank, suit] = match;
-
-    return {
-        id: `${rank}${suit}_wild`,
-        rank: rank,
-        suit: suit,
-        value: getRankValue(rank),
-        isWild: false,
-        wasWild: true
-    };
-}
-
-/**
- * Get numeric value for rank
- * @param {string} rank - Card rank
- * @returns {number} Numeric value (2-14, A=14)
- */
-function getRankValue(rank) {
-    const values = {
-        '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
-        'J': 11, 'Q': 12, 'K': 13, 'A': 14
-    };
-    return values[rank] || 0;
-}
 
 // Test function
 function testParameterizedWildCandidates() {
