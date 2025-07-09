@@ -9,6 +9,7 @@ class HandDetector {
     constructor(cards) {
         this.cards = cards.filter(c => !c.isWild); // No wilds for now
         this.allHands = [];
+        this.analysis = new Analysis(this.cards);
     }
 
     /**
@@ -299,23 +300,17 @@ class HandDetector {
     /**
      * Count how many cards we have of each rank and suit
      */
+
     countRanksAndSuits() {
-        const rankCounts = {};
-        const suitCounts = {};
-
-        this.cards.forEach(card => {
-            // Count ranks
-            rankCounts[card.rank] = (rankCounts[card.rank] || 0) + 1;
-
-            // Count suits
-            suitCounts[card.suit] = (suitCounts[card.suit] || 0) + 1;
-        });
+        const rankCounts = this.analysis.rankCounts;
+        const suitCounts = this.analysis.suitCounts;
 
         console.log('📊 Rank counts:', rankCounts);
         console.log('📊 Suit counts:', suitCounts);
 
         return { rankCounts, suitCounts };
     }
+
 
     /**
      * Detect straight flushes (5-8 cards) using consecutive rank counts within each suit
