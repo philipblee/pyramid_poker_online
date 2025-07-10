@@ -14,6 +14,12 @@ class ChinesePokerGame {
         this.submittedHands = new Map();
         this.sidebarVisible = true;
 
+        // NEW: Round tracking
+        this.currentRound = 0;          // 0 = no game started, 1-3 = active rounds
+        this.maxRounds = 3;             // Tournament limit
+        this.roundHistory = [];         // Store completed round data
+        this.tournamentScores = new Map(); // Running totals across rounds
+
         // Auto-add default players for easier testing
         this.playerManager.addDefaultPlayers();
 
@@ -70,12 +76,23 @@ class ChinesePokerGame {
             return;
         }
 
+        // NEW: Initialize tournament
+        console.log('🏆 Starting new tournament...');
+        this.currentRound = 1;
+        this.roundHistory = [];
+        this.tournamentScores.clear();
+
+        // Initialize tournament scores for all players
+        for (let player of this.playerManager.players) {
+            this.tournamentScores.set(player.name, 0);
+        }
+
         // Hide sidebar when game starts
         if (this.sidebarVisible) {
             toggleSidebar(this);
         }
 
-        // Setup new game
+        // Setup first round
         this.deckManager.createNewDeck();
         this.gameState = 'playing';
         this.playerManager.currentPlayerIndex = 0;
@@ -104,14 +121,32 @@ class ChinesePokerGame {
             return;
         }
 
-        console.log('🔄 Starting new round with existing players...');
+        // Check if tournament is complete
+        if (this.currentRound >= this.maxRounds) {
+            alert(`Tournament complete! All ${this.maxRounds} rounds have been played. Click "New Game" to start a new tournament.`);
+            return;
+        }
+
+        // Check if we're in the middle of a round
+        if (this.gameState === 'playing') {
+            const readyCount = this.playerManager.getReadyCount();
+            if (readyCount < this.playerManager.players.length) {
+                if (!confirm(`Round ${this.currentRound} is still in progress (${readyCount}/${this.playerManager.players.length} players ready). Start Round ${this.currentRound + 1} anyway?`)) {
+                    return;
+                }
+            }
+        }
+
+        // Advance to next round
+        this.currentRound++;
+        console.log(`🔄 Starting Round ${this.currentRound} of ${this.maxRounds}...`);
 
         // Hide sidebar when round starts
         if (this.sidebarVisible) {
             toggleSidebar(this);
         }
 
-        // Setup new round (same as startNewGame but keeps existing players)
+        // Setup new round (same as before but with round tracking)
         this.deckManager.createNewDeck();
         this.gameState = 'playing';
         this.playerManager.currentPlayerIndex = 0;
@@ -135,7 +170,7 @@ class ChinesePokerGame {
 
         this.loadCurrentPlayerHand();
         updateDisplay(this);
-}
+    }
 
     loadCurrentPlayerHand() {
         if (this.gameState !== 'playing') return;
@@ -180,7 +215,6 @@ class ChinesePokerGame {
             }, 1000);
         }, 500);
     }
-
 
 
     // Add these methods to your js/core/game.js file
@@ -567,56 +601,166 @@ class ChinesePokerGame {
     }
 
     calculateScores() {
-        const playerNames = this.playerManager.getPlayerNames();
-        const roundScores = new Map();
-        const detailedResults = [];
-        const bonusPoints = new Map();
+    const playerNames = this.playerManager.getPlayerNames();
+    const roundScores = new Map();
+    const detailedResults = [];
+    const bonusPoints = new Map();
 
-        // Initialize scores
-        playerNames.forEach(name => {
-            roundScores.set(name, 0);
-            bonusPoints.set(name, 0);
-        });
+    // Initialize round scores
+    playerNames.forEach(name => {
+        roundScores.set(name, 0);
+        bonusPoints.set(name, 0);
+    });
 
-        // Calculate bonus points for each player
-        // Keep this simple initialization:
-        playerNames.forEach(name => {
-            roundScores.set(name, 0);  // Start at 0, not bonus points
-        });
+    // Head-to-head comparisons (same as before)
+    for (let i = 0; i < playerNames.length; i++) {
+        for (let j = i + 1; j < playerNames.length; j++) {
+            const player1 = playerNames[i];
+            const player2 = playerNames[j];
 
+            const hand1 = this.submittedHands.get(player1);
+            const hand2 = this.submittedHands.get(player2);
 
-        // Head-to-head comparisons
-        for (let i = 0; i < playerNames.length; i++) {
-            for (let j = i + 1; j < playerNames.length; j++) {
-                const player1 = playerNames[i];
-                const player2 = playerNames[j];
+            const result = this.compareHands(hand1, hand2);
 
-                const hand1 = this.submittedHands.get(player1);
-                const hand2 = this.submittedHands.get(player2);
+            roundScores.set(player1, roundScores.get(player1) + result.player1Score);
+            roundScores.set(player2, roundScores.get(player2) + result.player2Score);
 
-                const result = this.compareHands(hand1, hand2);
-
-                roundScores.set(player1, roundScores.get(player1) + result.player1Score);
-                roundScores.set(player2, roundScores.get(player2) + result.player2Score);
-
-                detailedResults.push({
-                    player1,
-                    player2,
-                    player1Score: result.player1Score,
-                    player2Score: result.player2Score,
-                    details: result.details
-                });
-            }
+            detailedResults.push({
+                player1,
+                player2,
+                player1Score: result.player1Score,
+                player2Score: result.player2Score,
+                details: result.details
+            });
         }
+    }
 
-        // Update total scores
+    // NEW: Only store round history ONCE per round
+    const roundAlreadyStored = this.roundHistory.some(round => round.roundNumber === this.currentRound);
+    if (!roundAlreadyStored) {
+        const roundData = {
+            roundNumber: this.currentRound,
+            roundScores: new Map(roundScores),
+            detailedResults: [...detailedResults],
+            submittedHands: new Map(this.submittedHands),
+            timestamp: new Date()
+        };
+        this.roundHistory.push(roundData);
+
+        // Update tournament totals only once per round
         roundScores.forEach((roundScore, playerName) => {
-            this.playerManager.updatePlayerScore(playerName, roundScore);
+            const currentTotal = this.tournamentScores.get(playerName) || 0;
+            this.tournamentScores.set(playerName, currentTotal + roundScore);
+        });
+    }
+
+    // Update individual round scores (keep existing for current round display)
+    roundScores.forEach((roundScore, playerName) => {
+        this.playerManager.updatePlayerScore(playerName, roundScore);
+    });
+
+    showScoringPopup(this, detailedResults, roundScores, new Map());
+    updateDisplay(this);
+
+    // Check if tournament is complete
+    if (this.currentRound >= this.maxRounds) {
+        console.log('🏆 Tournament Complete!');
+        setTimeout(() => {
+            this.showTournamentSummary();
+        }, 2000);
+    }
+}
+
+    showTournamentSummary() {
+        console.log('🏆 Showing tournament summary...');
+
+        // DEBUG: Check what's actually in round history
+        console.log('Round history length:', this.roundHistory.length);
+        this.roundHistory.forEach((round, index) => {
+            console.log(`Round ${index + 1}:`, round.roundNumber, 'Scores:', [...round.roundScores.entries()]);
         });
 
-        showScoringPopup(this, detailedResults, roundScores, new Map());
-        updateDisplay(this);
+    // Create sorted tournament standings
+    const standings = [...this.tournamentScores.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .map((entry, index) => ({
+            position: index + 1,
+            playerName: entry[0],
+            totalScore: entry[1]
+        }));
+
+    // Create tournament summary modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.8); z-index: 1001;
+        display: flex; align-items: center; justify-content: center;
+    `;
+
+    const content = document.createElement('div');
+    content.style.cssText = `
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        border-radius: 15px; border: 2px solid #ffd700;
+        max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;
+        color: white; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        padding: 30px; text-align: center;
+    `;
+
+    // Build HTML content
+    let html = `
+        <h1 style="color: #ffd700; margin-bottom: 30px; font-size: 32px;">
+            🏆 TOURNAMENT COMPLETE! 🏆
+        </h1>
+        <div style="background: rgba(255, 215, 0, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+            <h2 style="color: #4ecdc4; margin-bottom: 20px;">Final Standings</h2>
+    `;
+
+    standings.forEach(standing => {
+        const medal = standing.position === 1 ? '🥇' :
+                     standing.position === 2 ? '🥈' :
+                     standing.position === 3 ? '🥉' : '🏅';
+        const bgColor = standing.position === 1 ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255, 255, 255, 0.1)';
+        html += `
+            <div style="background: ${bgColor}; padding: 15px; margin: 10px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 20px;">${medal} ${standing.position}. ${standing.playerName}</span>
+                <span style="font-size: 18px; font-weight: bold; color: #4ecdc4;">${standing.totalScore} points</span>
+            </div>
+        `;
+    });
+
+    html += `</div><div style="background: rgba(52, 73, 94, 0.5); padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+        <h3 style="color: #4ecdc4; margin-bottom: 15px;">Round-by-Round Breakdown</h3>
+    `;
+
+    for (let round = 1; round <= this.roundHistory.length; round++) {
+        const roundData = this.roundHistory[round - 1];
+        html += `<div style="margin-bottom: 15px;"><h4 style="color: #ffd700;">Round ${round}</h4>`;
+        roundData.roundScores.forEach((score, playerName) => {
+            const sign = score > 0 ? '+' : '';
+            const color = score > 0 ? '#4ecdc4' : score < 0 ? '#ff6b6b' : '#95a5a6';
+            html += `<div style="color: ${color};">${playerName}: ${sign}${score}</div>`;
+        });
+        html += `</div>`;
     }
+
+    html += `
+        </div>
+        <button onclick="this.parentElement.parentElement.remove(); game.gameState='waiting'; game.currentRound=0; updateDisplay(game);"
+                style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
+            Start New Tournament
+        </button>
+    `;
+
+    content.innerHTML = html;
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+
+    // Reset to waiting state when closed
+    this.gameState = 'waiting';
+    this.currentRound = 0;
+    updateDisplay(this);
+}
 
     compareHands(hand1, hand2) {
         let player1Score = 0;
