@@ -52,7 +52,7 @@ class TestExecution {
         console.log('🎯 This should FIND the Aces as candidates (5K improvement)');
 
         // Test the refactored generator
-        const result = parameterizedWildCandidates(test16CardsWithQuads);
+        const result = oneWildCandidates(test16CardsWithQuads);
 
         console.log('\n🔍 Checking for Ace candidates:');
         const aceCards = ['A♠', 'A♥', 'A♦', 'A♣'];
