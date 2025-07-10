@@ -25,16 +25,17 @@
 
         <div class="game-controls">
             <button id="newGame" class="btn btn-primary">New Game</button>
+            <button id="newRound" class="btn btn-secondary">New Round</button>
             <button id="addPlayer" class="btn btn-secondary">+Player</button>
             <button id="autoArrange" class="btn btn-secondary">Auto</button>
             <button id="sortByRank" class="btn btn-secondary">Rank</button>
             <button id="sortBySuit" class="btn btn-secondary">Suit</button>
             <button id="submitHand" class="btn btn-primary" disabled>Submit</button>
-            <button id="gameConfig" class="btn btn-secondary" onclick="openGameConfig()">⚙️ Config</button>
+            <!-- Remove the config button - it will be accessible via New Game -->
         </div>
 
         <div class="status" id="status">
-            Click "New Game" to start playing!
+            Click "New Game" to configure a new game, or "New Round" to deal new hands!
         </div>
 
         <div class="game-area" id="gameArea">

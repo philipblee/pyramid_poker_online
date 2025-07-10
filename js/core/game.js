@@ -29,7 +29,12 @@ class ChinesePokerGame {
     get deck() { return this.deckManager.deck; }
 
     initializeEventListeners() {
-        document.getElementById('newGame').addEventListener('click', () => this.startNewGame());
+        // NEW: Make "newGame" button open config screen
+        document.getElementById('newGame').addEventListener('click', () => openGameConfig());
+
+        // NEW: Add "newRound" button to deal new hands to existing players
+        document.getElementById('newRound').addEventListener('click', () => this.startNewRound());
+
         document.getElementById('addPlayer').addEventListener('click', () => this.addPlayer());
         document.getElementById('autoArrange').addEventListener('click', () => this.autoArrangeManager.autoArrangeHand());
         document.getElementById('sortByRank').addEventListener('click', () => this.resetAndSortByRank());
@@ -91,6 +96,46 @@ class ChinesePokerGame {
         this.loadCurrentPlayerHand();
         updateDisplay(this);
     }
+
+    startNewRound() {
+        // Must have existing players to start a new round
+        if (this.playerManager.players.length < 2) {
+            alert('Need at least 2 players to start a round. Click "New Game" to configure players.');
+            return;
+        }
+
+        console.log('🔄 Starting new round with existing players...');
+
+        // Hide sidebar when round starts
+        if (this.sidebarVisible) {
+            toggleSidebar(this);
+        }
+
+        // Setup new round (same as startNewGame but keeps existing players)
+        this.deckManager.createNewDeck();
+        this.gameState = 'playing';
+        this.playerManager.currentPlayerIndex = 0;
+        this.submittedHands.clear();
+
+        // Reset all players' ready status
+        for (let player of this.playerManager.players) {
+            player.ready = false;
+        }
+
+        // Deal new cards to all existing players
+        for (let player of this.playerManager.players) {
+            const hand = this.deckManager.dealCards(17);
+            this.playerHands.set(player.name, {
+                cards: hand,
+                back: [],
+                middle: [],
+                front: []
+            });
+        }
+
+        this.loadCurrentPlayerHand();
+        updateDisplay(this);
+}
 
     loadCurrentPlayerHand() {
         if (this.gameState !== 'playing') return;
