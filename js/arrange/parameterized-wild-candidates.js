@@ -102,9 +102,6 @@ function parameterizedWildCandidates(cardObjects, relevantHandTypes = null) {
     return results;
 }
 
-
-
-
 // Test function
 function testParameterizedWildCandidates() {
     console.log('\n🧪 Testing Parameterized Wild Candidates');
@@ -148,4 +145,26 @@ function testParameterizedWildCandidates() {
     });
 
     return result;
+}
+
+
+/**
+ * Generate wild candidates from a test case ID (wrapper for backward compatibility)
+ * @param {number} caseId - Test case ID from one-wild-test-cases.js
+ * @returns {Object} Results with smart candidates (same format as old generateWildCandidates)
+ */
+function parameterizedWildCandidatesFromCaseId(caseId) {
+    // Get test case
+    const testCase = ONE_WILD_TEST_CASES.find(t => t.id === caseId);
+    if (!testCase) {
+        console.log(`❌ Test case ${caseId} not found`);
+        return null;
+    }
+
+    // Extract non-wild cards
+    const allCards = CardParser.parseCardString(testCase.cards);
+    const nonWildCards = allCards.filter(card => !card.isWild);
+
+    // Call the main function
+    return parameterizedWildCandidates(nonWildCards);
 }

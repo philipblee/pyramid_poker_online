@@ -41,7 +41,7 @@ function oneWildBestFromCards(cardObjects) {
 
     // STEP 3: Get smart candidates using converted cards
     console.log(`\n📋 Step 3: Getting smart candidates...`);
-    const candidatesResult = generateWildCandidatesFromCards(properCardObjects);
+    const candidatesResult = parameterizedWildCandidates(nonWildCards);
 
     if (!candidatesResult) {
         console.log(`❌ Failed to get smart candidates`);
@@ -179,37 +179,18 @@ function oneWildBestFromCards(cardObjects) {
  * @returns {Object} Card object with wasWild flag
  */
 function createCardFromString(cardString, originalId) {
-    // Parse rank and suit from string like "A♠"
-    const match = cardString.match(/^(\d+|[AKQJ])([♠♥♦♣])$/);
-    if (!match) {
-        throw new Error(`Invalid card format: ${cardString}`);
-    }
-
-    const [, rank, suit] = match;
-
-    const substitutedCard = {
-        id: originalId,
-        rank: rank,
-        suit: suit,
-        isWild: false,
-        wasWild: true,  // Visual indication flag
-        value: getRankValue(rank)
-    };
-
-    return substitutedCard;
+    const baseCard = Analysis.createCardFromString(cardString);
+    baseCard.id = originalId;  // Override with the original wild card's ID
+    return baseCard;
 }
 
+
 /**
- * Get numeric value for rank (copied from brute force)
- * @param {string} rank - Card rank
- * @returns {number} Numeric value
+ * Quick test function for console use
+ * @param {Array} cardObjects - Array of card objects with 1 wild
  */
-function getRankValue(rank) {
-    const values = {
-        '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
-        'J': 11, 'Q': 12, 'K': 13, 'A': 14
-    };
-    return values[rank] || 0;
+function testOneWildBestFromCards(cardObjects) {
+    return oneWildBestFromCards(cardObjects);
 }
 
 /**
@@ -219,3 +200,27 @@ function getRankValue(rank) {
 function testOneWildBestFromCards(cardObjects) {
     return oneWildBestFromCards(cardObjects);
 }
+
+/**
+ * Test oneWildBestFromCards using a case from one-wild-test-cases.js
+ * @param {number} caseId - Test case ID to convert to card objects
+ */
+function testOneWildFromCardsWithCase(caseId = 1) {
+    console.log(`\n🧪 Testing oneWildBestFromCards with case ${caseId}`);
+
+    // Get test case
+    const testCase = ONE_WILD_TEST_CASES.find(t => t.id === caseId);
+    if (!testCase) {
+        console.log(`❌ Test case ${caseId} not found`);
+        return null;
+    }
+
+    // Parse the cards string into card objects
+    const cardObjects = CardParser.parseCards(testCase.cards);
+    console.log(`✅ Parsed ${cardObjects.length} card objects from case ${caseId}`);
+
+    // Test the function
+    return oneWildBestFromCards(cardObjects);
+}
+
+

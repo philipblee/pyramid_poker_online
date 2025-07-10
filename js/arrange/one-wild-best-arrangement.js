@@ -8,7 +8,8 @@ function oneWildBestArrangement(caseId) {
 
     // Step 1: Get smart candidates
     console.log(`\n📋 Step 1: Getting smart candidates...`);
-    const candidatesResult = generateWildCandidates(caseId);
+    // const candidatesResult = generateWildCandidates(caseId);
+    const candidatesResult = parameterizedWildCandidatesFromCaseId(caseId);
 
     if (!candidatesResult) {
         console.log(`❌ Failed to get candidates for case ${caseId}`);
