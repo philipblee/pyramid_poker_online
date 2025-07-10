@@ -1,180 +1,248 @@
 // js/arrange/two-wild-strategy-one.js
-// Strategy 1: Find same-suit 2-wild combinations that create 5-8 card straight flushes
+// Hard-coded wild candidates generator for 15 cards + 2 wilds, straight flushes only
 
 /**
- * Execute Strategy 1: Same-suit 2-wild combinations for straight flushes
- * @param {Array} cards - Array of 15 non-wild cards
- * @returns {Array} Array of 2-card combinations that improve straight flush count
- */
-function twoWildStrategyOne(cards) {
-    console.log('\n🎯 ======== STRATEGY 1: SAME-SUIT STRAIGHT FLUSHES ========');
-    console.log(`Analyzing ${cards.length} cards for 2-wild straight flush opportunities`);
+* Generate two-wild candidates for straight flush improvements
+* @param {Array} cardObjects - Array of 15 non-wild cards
+* @returns {Object} Results with smart 2-wild combinations and statistics
+*/
+function twoWildStrategyOne(cardObjects) {
+   console.log('\n🎯 ======== TWO WILD CANDIDATES ========');
+   console.log(`Analyzing ${cardObjects.length} card objects for 2-wild straight flush combinations`);
 
-    // Get baseline straight flush count
-    const baselineCount = countStraightFlushes(cards);
-    console.log(`📊 Baseline 5-8 card straight flushes: ${baselineCount}`);
+   // Hard-coded for straight flushes only
+   const handTypes = ['straightFlush', 'sixCardStraightFlush', 'sevenCardStraightFlush', 'eightCardStraightFlush'];
+   console.log(`📋 Hand types: ${handTypes.join(', ')}`);
 
-    const validCombinations = [];
+   // Step 1: Get baseline hand counts
+   console.log('\n📊 Step 1: Getting baseline hand counts...');
+   const baselineCounts = countValidHandsFromCards(cardObjects);
 
-    // Test same-suit combinations only (312 total vs 1,326)
-    for (let suit of ['♠', '♥', '♦', '♣']) {
-        console.log(`\n🔍 Testing ${suit} suit combinations...`);
+   console.log('🔢 Baseline straight flush counts:');
+   handTypes.forEach(handType => {
+       const count = baselineCounts[handType] || 0;
+       console.log(`   ${handType}: ${count}`);
+   });
 
-        const suitCombos = generateSameSuitCombinations(suit, cards);
-        console.log(`   Generated ${suitCombos.length} same-suit combinations`);
+   // Step 2: Test each possible 2-wild combination
+   console.log('\n🔄 Step 2: Testing all 312 same-suit combinations...');
+   const allCombinations = generateAll312SameSuitCombinations(cardObjects);
+   const wildCandidates = [];
+   const rejectedCombinations = [];
 
-        suitCombos.forEach(combo => {
-            const testCards = [...cards, ...combo];
-            const testCount = countStraightFlushes(testCards);
+   allCombinations.forEach((combination, index) => {
+       // Create test hand (15 + 2 wilds = 17 cards)
+       const testCards = [...cardObjects, ...combination];
 
-            if (testCount > baselineCount) {
-                validCombinations.push({
-                    cards: combo,
-                    suit: suit,
-                    baselineCount: baselineCount,
-                    improvedCount: testCount,
-                    improvement: testCount - baselineCount
-                });
+       // Get hand counts for test case
+       const testCounts = countValidHandsFromCards(testCards);
 
-                console.log(`   ✅ Found improvement: ${combo.map(c => c.rank + c.suit).join(', ')} (+${testCount - baselineCount})`);
-            }
-        });
-    }
+       // Check if ANY straight flush type improved
+       let improved = false;
+       let improvementDetails = [];
 
-    console.log(`\n📋 Strategy 1 Results:`);
-    console.log(`   Valid combinations found: ${validCombinations.length}`);
-    console.log(`   Expected range: 0-5 combinations`);
+       handTypes.forEach(handType => {
+           const baselineCount = baselineCounts[handType] || 0;
+           const testCount = testCounts[handType] || 0;
 
-    // Sort by improvement (highest first)
-    validCombinations.sort((a, b) => b.improvement - a.improvement);
+           if (testCount > baselineCount) {
+               improved = true;
+               improvementDetails.push(`${handType}: ${baselineCount} → ${testCount} (+${testCount - baselineCount})`);
+           }
+       });
 
-    // Return just the card combinations
-    return validCombinations.map(combo => combo.cards);
+       // Accept if ANY straight flush type improved
+       if (improved) {
+           console.log(`   ✅Combination Accepted: ${combination.map(c => c.rank + c.suit).join(', ')}`);
+           wildCandidates.push({
+               combination: combination,
+               improvements: improvementDetails
+           });
+
+           if (improvementDetails.length === 1) {
+               console.log(`   ✅ ${combination.map(c => c.rank + c.suit).join(', ')}: ${improvementDetails[0]}`);
+           } else {
+               console.log(`   ✅ ${combination.map(c => c.rank + c.suit).join(', ')}: ${improvementDetails.length} improvements`);
+           }
+       } else {
+           rejectedCombinations.push(combination);
+           console.log(`   ✅ Rejected Combination: ${combination.map(c => c.rank + c.suit).join(', ')}`);
+       }
+
+       // Progress indicator
+       if ((index + 1) % 20 === 0) {
+           console.log(`   Progress: ${index + 1}/312 combinations tested...`);
+       }
+   });
+
+   // Step 3: Results
+   const results = {
+       baseline: cardObjects,
+       baselineCounts: baselineCounts,
+       handTypes: handTypes,
+       wildCandidates: wildCandidates.map(c => c.combination), // Just the combinations
+       wildCandidateDetails: wildCandidates, // Full details with improvements
+       wildCandidatesCount: wildCandidates.length,
+       rejectedCombinations: rejectedCombinations,
+       rejectedCount: rejectedCombinations.length,
+       efficiency: ((312 - wildCandidates.length) / 312 * 100).toFixed(1)
+   };
+
+   console.log(`\n📋 ======== RESULTS ========`);
+   console.log(`✅ Wild combinations: ${results.wildCandidatesCount}/312 (${((results.wildCandidatesCount/312)*100).toFixed(1)}%)`);
+   console.log(`❌ Rejected combinations: ${results.rejectedCount}/312 (${results.efficiency}%)`);
+   console.log(`🎯 Efficiency: ${results.efficiency}% search space reduction`);
+
+    return results;  // Just full object with metadata
 }
 
 /**
- * Generate all same-suit 2-card combinations for a given suit
- * @param {string} suit - Suit to generate combinations for
- * @param {Array} existingCards - Cards already in hand (to avoid duplicates)
- * @returns {Array} Array of 2-card combinations
- */
-function generateSameSuitCombinations(suit, existingCards) {
-    const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+* Generate all 312 same-suit 2-card combinations
+* @param {Array} existingCards - Cards already in hand (to avoid duplicates)
+* @returns {Array} Array of all possible 2-card same-suit combinations
+*/
+function generateAll312SameSuitCombinations(existingCards) {
+   const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+   const suits = ['♠', '♥', '♦', '♣'];
+   const allCombinations = [];
 
-    // Get ranks already used in this suit
-    const usedRanks = new Set(
-        existingCards
-            .filter(card => card.suit === suit)
-            .map(card => card.rank)
-    );
+   suits.forEach(suit => {
+       // Get ranks already used in this suit
+       const usedRanks = new Set(
+           existingCards
+               .filter(card => card.suit === suit)
+               .map(card => card.rank)
+       );
 
-    // Get available ranks for this suit
-    const availableRanks = ranks.filter(rank => !usedRanks.has(rank));
+       // Get available ranks for this suit
+       const availableRanks = ranks.filter(rank => !usedRanks.has(rank));
 
-    const combinations = [];
+       // Generate all 2-card combinations from available ranks
+       for (let i = 0; i < availableRanks.length; i++) {
+           for (let j = i + 1; j < availableRanks.length; j++) {
+               const card1 = createWildCard(availableRanks[i], suit, 1);
+               const card2 = createWildCard(availableRanks[j], suit, 2);
 
-    // Generate all 2-card combinations from available ranks
-    for (let i = 0; i < availableRanks.length; i++) {
-        for (let j = i + 1; j < availableRanks.length; j++) {
-            const card1 = createWildCard(availableRanks[i], suit, 1);
-            const card2 = createWildCard(availableRanks[j], suit, 2);
+               allCombinations.push([card1, card2]);
+           }
+       }
+   });
 
-            combinations.push([card1, card2]);
-        }
-    }
-
-    return combinations;
+   return allCombinations;
 }
 
 /**
- * Count 5-8 card straight flushes in a hand
- * @param {Array} cards - Cards to analyze
- * @returns {number} Count of 5-8 card straight flushes
- */
-function countStraightFlushes(cards) {
-    // Use existing HandDetector
-    const detector = new HandDetector(cards);
-    const results = detector.detectAllHands();
-
-    let straightFlushCount = 0;
-
-    results.hands.forEach(hand => {
-        if (isStraightFlush(hand) && hand.cardCount >= 5 && hand.cardCount <= 8) {
-            straightFlushCount++;
-        }
-    });
-
-    return straightFlushCount;
-}
-
-/**
- * Check if a hand is a straight flush
- * @param {Object} hand - Hand to check
- * @returns {boolean} True if hand is a straight flush
- */
-function isStraightFlush(hand) {
-    return hand.handType === 'Straight Flush' ||
-           hand.handType.includes('Straight Flush');
-}
-
-/**
- * Create a wild card object
- * @param {string} rank - Card rank
- * @param {string} suit - Card suit
- * @param {number} wildIndex - Index for unique ID
- * @returns {Object} Wild card object
- */
+* Create a wild card object
+* @param {string} rank - Card rank
+* @param {string} suit - Card suit
+* @param {number} wildIndex - Index for unique ID
+* @returns {Object} Wild card object
+*/
 function createWildCard(rank, suit, wildIndex) {
-    return {
-        id: `${rank}${suit}_wild${wildIndex}`,
-        rank: rank,
-        suit: suit,
-        value: getRankValue(rank),
-        isWild: false,
-        wasWild: true
-    };
-}
-
-/**
- * Helper function to get rank value
- * @param {string} rank - Card rank
- * @returns {number} Numeric value
- */
-function getRankValue(rank) {
-    const values = {
-        '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
-        'J': 11, 'Q': 12, 'K': 13, 'A': 14
-    };
-    return values[rank];
+   return {
+       id: `${rank}${suit}_wild${wildIndex}`,
+       rank: rank,
+       suit: suit,
+       value: Analysis.getRankValue(rank),
+       isWild: false,
+       wasWild: true
+   };
 }
 
 // Test function
-function testStrategyOne() {
-    console.log('\n🧪 Testing Strategy 1 Implementation');
+function testTwoWildCandidates() {
+   console.log('\n🧪 Testing Two Wild Candidates');
 
-    // Create test cards that could form straight flush with 2 wilds
-    const testCards = [
-        {id: 'A♠_1', rank: 'A', suit: '♠', value: 14, isWild: false},
-        {id: 'K♠_2', rank: 'K', suit: '♠', value: 13, isWild: false},
-        {id: 'Q♠_3', rank: 'Q', suit: '♠', value: 12, isWild: false},
-        {id: '9♠_4', rank: '9', suit: '♠', value: 9, isWild: false},
-        {id: '8♠_5', rank: '8', suit: '♠', value: 8, isWild: false},
-        // Add some other suits
-        {id: '7♥_6', rank: '7', suit: '♥', value: 7, isWild: false},
-        {id: '6♥_7', rank: '6', suit: '♥', value: 6, isWild: false},
-        {id: '5♦_8', rank: '5', suit: '♦', value: 5, isWild: false}
-    ];
+   // Create test cards that could form straight flush with 2 wilds
+   const test15Cards = [
+       {id: 'A♠_1', rank: 'A', suit: '♠', value: 14, isWild: false},
+       {id: 'K♠_2', rank: 'K', suit: '♠', value: 13, isWild: false},
+       {id: 'Q♠_3', rank: 'Q', suit: '♠', value: 12, isWild: false},
+       {id: '9♠_4', rank: '9', suit: '♠', value: 9, isWild: false},
+       {id: '8♠_5', rank: '8', suit: '♠', value: 8, isWild: false},
+       // Add some other suits
+       {id: '7♥_6', rank: '7', suit: '♥', value: 7, isWild: false},
+       {id: '6♥_7', rank: '6', suit: '♥', value: 6, isWild: false},
+       {id: '5♦_8', rank: '5', suit: '♦', value: 5, isWild: false},
+       {id: '4♦_9', rank: '4', suit: '♦', value: 4, isWild: false},
+       {id: '3♣_10', rank: '3', suit: '♣', value: 3, isWild: false},
+       {id: '2♣_11', rank: '2', suit: '♣', value: 2, isWild: false},
+       {id: 'J♥_12', rank: 'J', suit: '♥', value: 11, isWild: false},
+       {id: '10♦_13', rank: '10', suit: '♦', value: 10, isWild: false},
+       {id: '6♣_14', rank: '6', suit: '♣', value: 6, isWild: false},
+       {id: '4♥_15', rank: '4', suit: '♥', value: 4, isWild: false}
+   ];
 
-    console.log(`\n📋 Test cards: ${testCards.map(c => c.rank + c.suit).join(', ')}`);
+   console.log(`\n📋 Testing with ${test15Cards.length} card objects`);
+   console.log('🎯 This should find 2-wild combinations that improve straight flushes');
 
-    const results = twoWildStrategyOne(testCards);
+   // Test the function
+   const result = twoWildCandidates(test15Cards);
 
-    console.log(`\n📊 Strategy 1 Test Results:`);
-    console.log(`   Combinations found: ${results.length}`);
+   console.log('\n🔍 Sample results:');
+   result.wildCandidates.slice(0, 3).forEach((combo, index) => {
+       console.log(`   ${index + 1}: ${combo.map(c => c.rank + c.suit).join(', ')}`);
+   });
 
-    results.forEach((combo, index) => {
-        console.log(`   ${index + 1}: ${combo.map(c => c.rank + c.suit).join(', ')}`);
-    });
-
-    return results;
+   return result;
 }
+
+/**
+* Compare original strategy one vs two-wild-candidates with timing
+* @param {Array} cards - Test cards (15 non-wild cards)
+*/
+//function compareStrategyOneVsTwoWildCandidates(cards) {
+//   console.log('\n🔬 ======== COMPARING STRATEGY 1 VS TWO-WILD-CANDIDATES ========');
+//
+//   // Time original version (HandDetector 312 times)
+//   console.log('\n📊 Timing Original Strategy 1...');
+//   const originalStart = performance.now();
+//   const originalResults = twoWildStrategyOne(cards);
+//   const originalEnd = performance.now();
+//   const originalTime = originalEnd - originalStart;
+//
+//   // Time new version (called once)
+//   console.log('\n📊 Timing Two-Wild-Candidates...');
+//   const newStart = performance.now();
+//   const newResult = twoWildCandidates(cards);
+//   const newResults = newResult.wildCandidates;
+//   const newEnd = performance.now();
+//   const newTime = newEnd - newStart;
+//
+//   // Calculate speedup
+//   const speedup = originalTime / newTime;
+//   const timeSaved = originalTime - newTime;
+//
+//   // Compare results
+//   console.log('\n📋 ======== COMPARISON RESULTS ========');
+//   console.log(`Original Strategy 1: ${originalResults.length} combinations`);
+//   console.log(`Two-Wild-Candidates: ${newResults.length} combinations`);
+//
+//   // Check if results match
+//   const originalCombos = new Set(originalResults.map(combo =>
+//       combo.map(c => c.rank + c.suit).sort().join(',')
+//   ));
+//   const newCombos = new Set(newResults.map(combo =>
+//       combo.map(c => c.rank + c.suit).sort().join(',')
+//   ));
+//
+//   const match = originalCombos.size === newCombos.size &&
+//                 [...originalCombos].every(combo => newCombos.has(combo));
+//
+//   console.log(`Results match: ${match ? '✅ YES' : '❌ NO'}`);
+//
+//   console.log('\n⚡ ======== TIMING RESULTS ========');
+//   console.log(`Original Strategy 1: ${originalTime.toFixed(2)}ms`);
+//   console.log(`Two-Wild-Candidates: ${newTime.toFixed(2)}ms`);
+//   console.log(`Time saved: ${timeSaved.toFixed(2)}ms`);
+//   console.log(`Speedup: ${speedup.toFixed(1)}x faster`);
+//   console.log(`Efficiency gain: ${((timeSaved / originalTime) * 100).toFixed(1)}% reduction`);
+//
+//   if (!match) {
+//       console.log('\n⚠️ Differences found:');
+//       console.log('Original only:', [...originalCombos].filter(c => !newCombos.has(c)));
+//       console.log('New only:', [...newCombos].filter(c => !originalCombos.has(c)));
+//   }
+//
+//   return { originalTime, newTime, speedup, timeSaved, match };
+//}

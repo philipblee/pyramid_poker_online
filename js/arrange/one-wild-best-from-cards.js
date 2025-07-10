@@ -41,7 +41,7 @@ function oneWildBestFromCards(cardObjects) {
 
     // STEP 3: Get smart candidates using converted cards
     console.log(`\n📋 Step 3: Getting smart candidates...`);
-    const candidatesResult = parameterizedWildCandidates(nonWildCards);
+    const candidatesResult = oneWildCandidates(nonWildCards);
 
     if (!candidatesResult) {
         console.log(`❌ Failed to get smart candidates`);
@@ -216,7 +216,7 @@ function testOneWildFromCardsWithCase(caseId = 1) {
     }
 
     // Parse the cards string into card objects
-    const cardObjects = CardParser.parseCards(testCase.cards);
+    const cardObjects = CardParser.parseCardStrings(testCase.cards);
     console.log(`✅ Parsed ${cardObjects.length} card objects from case ${caseId}`);
 
     // Test the function

@@ -44,7 +44,9 @@ function twoWildBestFromCards(cardObjects) {
 
     // Strategy 1: Same-suit combinations for straight flushes
     console.log(`   Running Strategy 1...`);
-    const strategy1Results = twoWildStrategyOne(nonWildCards);
+
+    const result = twoWildStrategyOne(nonWildCards);        // NEW: object
+    const strategy1Results = result.wildCandidates;           // Extract array
 
     // Strategy 2: Nested wild candidates for comprehensive coverage
     console.log(`   Running Strategy 2...`);
