@@ -223,4 +223,31 @@ function testOneWildFromCardsWithCase(caseId = 1) {
     return oneWildBestFromCards(cardObjects);
 }
 
+/**
+ * Find best arrangement for a hand with one wild card using case ID (wrapper for backward compatibility)
+ * @param {number} caseId - Test case ID from one-wild-test-cases.js
+ * @returns {Object} Best arrangement result (same format as oneWildBestFromCards)
+ */
+function oneWildBestFromCaseId(caseId) {
+    console.log(`\n🎯 ======== ONE WILD BEST ARRANGEMENT - CASE ${caseId} ========`);
 
+    // Get test case
+    const testCase = ONE_WILD_TEST_CASES.find(t => t.id === caseId);
+    if (!testCase) {
+        console.log(`❌ Test case ${caseId} not found`);
+        return {
+            arrangement: null,
+            score: -Infinity,
+            wildCard: null,
+            success: false,
+            statistics: null
+        };
+    }
+
+    // Parse the cards string into card objects
+    const cardObjects = CardParser.parseCardString(testCase.cards);
+    console.log(`✅ Parsed ${cardObjects.length} card objects from case ${caseId}`);
+
+    // Call the main function
+    return oneWildBestFromCards(cardObjects);
+}
