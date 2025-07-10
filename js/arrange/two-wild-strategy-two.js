@@ -4,7 +4,7 @@
 /**
  * Execute Strategy 2: Nested wild candidate generation
  * @param {Array} cards - Array of 15 non-wild cards
- * @returns {Array} Array of 2-card combinations that improve relevant hand count
+ * @returns {Object} Results with 2-wild combinations and statistics
  */
 
 function twoWildStrategyTwo(cards) {
@@ -21,11 +21,13 @@ function twoWildStrategyTwo(cards) {
     // Step 1: Get first-layer wild candidates from 15 baseline cards
     console.log('\n📋 Step 1: First Wild Card - using 15 cards find subset candidates');
     console.log('DEBUG: About to call parameterizedWildCandidates...');
-    const firstResult = parameterizedWildCandidates(cards, firstLayerRelevantHands);
+    const firstResult = oneWildCandidates(cards);   // change 1
     console.log('DEBUG: parameterizedWildCandidates returned:', firstResult);
     console.log('DEBUG: About to map wildCandidateDetails...');
 
-    const firstLayerCandidates = firstResult.wildCandidateDetails.map(c => c.cardObject);
+    const firstLayerCandidates = firstResult.wildCandidates.map(cardString =>
+        Analysis.createCardFromString(cardString)
+    );
     const firstLayerCount = firstLayerCandidates.length; // Add this line
 
     console.log('DEBUG: firstLayerCandidates created, length:', firstLayerCandidates.length);
@@ -46,8 +48,10 @@ function twoWildStrategyTwo(cards) {
         const sixteenCardHand = [...cards, firstCard];
 
         // Get second-layer candidates for this 16-card hand
-        const secondResult = parameterizedWildCandidates(sixteenCardHand, secondLayerRelevantHands);
-        const secondLayerCandidates = secondResult.wildCandidateDetails.map(c => c.cardObject);
+        const secondResult = oneWildCandidates(sixteenCardHand);
+        const secondLayerCandidates = secondResult.wildCandidates.map(cardString =>
+            Analysis.createCardFromString(cardString)
+        );
 
         console.log(`   Found ${secondLayerCandidates.length} second-layer candidates`);
 
@@ -197,24 +201,24 @@ function testStrategyTwo() {
     //        {id: '7♣_15', rank: '7', suit: '♣', value: 7, isWild: false}
     //    ];
 
-    const testCards = [
-        // Completely scattered, no patterns
-        {id: 'A♠_1', rank: 'A', suit: '♠', value: 14, isWild: false},
-        {id: 'K♥_2', rank: 'K', suit: '♥', value: 13, isWild: false},
-        {id: 'Q♦_3', rank: 'Q', suit: '♦', value: 12, isWild: false},
-        {id: 'J♣_4', rank: 'J', suit: '♣', value: 11, isWild: false},
-        {id: '9♠_5', rank: '9', suit: '♠', value: 9, isWild: false},
-        {id: '7♥_6', rank: '7', suit: '♥', value: 7, isWild: false},
-        {id: '5♦_7', rank: '5', suit: '♦', value: 5, isWild: false},
-        {id: '3♣_8', rank: '3', suit: '♣', value: 3, isWild: false},
-        {id: '2♠_9', rank: '2', suit: '♠', value: 2, isWild: false},
-        {id: '8♥_10', rank: '8', suit: '♥', value: 8, isWild: false},
-        {id: '6♦_11', rank: '6', suit: '♦', value: 6, isWild: false},
-        {id: '4♣_12', rank: '4', suit: '♣', value: 4, isWild: false},
-        {id: '10♠_13', rank: '10', suit: '♠', value: 10, isWild: false},
-        {id: '9♥_14', rank: '9', suit: '♥', value: 9, isWild: false},
-        {id: '8♦_15', rank: '8', suit: '♦', value: 8, isWild: false}
-    ];
+//    const testCards = [
+//        // Completely scattered, no patterns
+//        {id: 'A♠_1', rank: 'A', suit: '♠', value: 14, isWild: false},
+//        {id: 'K♥_2', rank: 'K', suit: '♥', value: 13, isWild: false},
+//        {id: 'Q♦_3', rank: 'Q', suit: '♦', value: 12, isWild: false},
+//        {id: 'J♣_4', rank: 'J', suit: '♣', value: 11, isWild: false},
+//        {id: '9♠_5', rank: '9', suit: '♠', value: 9, isWild: false},
+//        {id: '7♥_6', rank: '7', suit: '♥', value: 7, isWild: false},
+//        {id: '5♦_7', rank: '5', suit: '♦', value: 5, isWild: false},
+//        {id: '3♣_8', rank: '3', suit: '♣', value: 3, isWild: false},
+//        {id: '2♠_9', rank: '2', suit: '♠', value: 2, isWild: false},
+//        {id: '8♥_10', rank: '8', suit: '♥', value: 8, isWild: false},
+//        {id: '6♦_11', rank: '6', suit: '♦', value: 6, isWild: false},
+//        {id: '4♣_12', rank: '4', suit: '♣', value: 4, isWild: false},
+//        {id: '10♠_13', rank: '10', suit: '♠', value: 10, isWild: false},
+//        {id: '9♥_14', rank: '9', suit: '♥', value: 9, isWild: false},
+//        {id: '8♦_15', rank: '8', suit: '♦', value: 8, isWild: false}
+//    ];
 
 
     console.log(`\n📋 Test cards: ${testCards.map(c => c.rank + c.suit).join(', ')}`);

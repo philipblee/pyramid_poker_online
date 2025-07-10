@@ -14,6 +14,7 @@ function oneWildCandidates(cardObjects) {
    const handTypes = ['natural4K', 'fiveOfAKind', 'sixOfAKind', 'sevenOfAKind', 'eightOfAKind',
                      'straight', 'straightFlush', 'sixCardStraightFlush',
                      'sevenCardStraightFlush', 'eightCardStraightFlush'];
+                     
    console.log(`📋 Hand types: ${handTypes.join(', ')}`);
 
    // Step 1: Get baseline hand counts
@@ -137,24 +138,10 @@ function testOneWildCandidates() {
    console.log('\n🔍 Checking for Ace candidates:');
    const aceCards = ['A♠', 'A♥', 'A♦', 'A♣'];
    aceCards.forEach(ace => {
-       const found = result.includes(ace);
+       const found = result.wildCandidates.includes(ace);;
        console.log(`   ${ace}: ${found ? '✅ FOUND' : '❌ MISSING'}`);
    });
 
-    // Instead of: return wildCandidates;
-    // Use this to match the original format:
-
-    const results = {
-        baseline: cardObjects,
-        baselineCounts: baselineCounts,
-        relevantHandTypes: handTypes,
-        wildCandidates: wildCandidates, // Array of card strings
-        wildCandidatesCount: wildCandidates.length,
-        rejectedCards: rejectedCards,
-        rejectedCount: rejectedCards.length,
-        efficiency: (((52 - wildCandidates.length) / 52) * 100).toFixed(1)
-    };
-
-    return results;
+    return result;
 
 }
