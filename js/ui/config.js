@@ -93,7 +93,6 @@ class ConfigUI {
         tooltip.style.top = y + 'px';
     }
 
-
     updateButtonText() {
     const configButton = document.getElementById('gameConfig');
     const config = window.gameConfig.getConfig();
@@ -124,9 +123,6 @@ class ConfigUI {
         tooltip.style.display = 'block';
     }
 
-
-
-    // just replaced
     createConfigModal() {
     // Create modal HTML if it doesn't exist
     if (document.getElementById('configModal')) return;
@@ -135,7 +131,7 @@ class ConfigUI {
         <div id="configModal" class="config-modal" style="display: none;">
             <div class="config-content">
                 <div class="config-header">
-                    <h2>⚙️ Game Configuration</h2>
+                    <h2>⚙️ Game Settings</h2>
                     <button class="config-close" id="configClose">×</button>
                 </div>
                 <div class="config-body">
@@ -185,6 +181,21 @@ class ConfigUI {
                                 <option value="3">3 - Triple Deck</option>
                             </select>
                             <div class="config-description">More decks allow for larger games and more duplicate cards.</div>
+                        </div>
+                    </div>
+
+                    // Player Settings Section
+                    <div class="config-section">
+                        <h3>👥 Player Settings</h3>
+                        <div class="config-option">
+                            <label>Current Players:</label>
+                            <div id="playerManagement" style="margin: 10px 0;">
+                                <!-- Player list will be populated here -->
+                            </div>
+                            <button type="button" id="addPlayerBtn" class="btn btn-secondary" style="width: 100%; margin: 5px 0;">
+                                + Add Player
+                            </button>
+                            <div class="config-description">Add or remove players before starting the tournament.</div>
                         </div>
                     </div>
 
@@ -378,6 +389,8 @@ class ConfigUI {
                 this.save();
             } else if (e.target.id === 'configReset') {
                 this.reset();
+            } else if (e.target.id === 'addPlayerBtn') {  // NEW
+                this.addPlayer();
             }
         });
 
@@ -416,6 +429,64 @@ class ConfigUI {
         }
     }
 
+    loadPlayerList() {
+    const playerManagement = document.getElementById('playerManagement');
+    if (!playerManagement) return;
+
+    playerManagement.innerHTML = '';
+
+    // Get current players from game
+    const players = window.game ? window.game.playerManager.players : [];
+
+    players.forEach((player, index) => {
+        const playerDiv = document.createElement('div');
+        playerDiv.style.cssText = `
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 12px; margin: 5px 0; border-radius: 6px;
+            background: rgba(78, 205, 196, 0.1); border: 1px solid #4ecdc4;
+        `;
+
+        playerDiv.innerHTML = `
+            <span style="color: #4ecdc4;">${player.name}</span>
+            <button onclick="window.configUI.removePlayer(${index})"
+                    style="background: #ff6b6b; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                Remove
+            </button>
+        `;
+
+        playerManagement.appendChild(playerDiv);
+    });
+
+    // Show player count
+    const countDiv = document.createElement('div');
+    countDiv.style.cssText = 'color: #95a5a6; font-size: 12px; margin-top: 5px;';
+    countDiv.textContent = `${players.length} player(s) - Need at least 2 to start tournament`;
+    playerManagement.appendChild(countDiv);
+}
+
+    addPlayer() {
+        if (!window.game) {
+            this.showNotification('Game not initialized yet', 'error');
+            return;
+        }
+
+        const playerName = window.game.addPlayer();
+        if (playerName) {
+            this.loadPlayerList();
+            this.showNotification(`Added ${playerName}`, 'success');
+        }
+    }
+
+    removePlayer(index) {
+    if (!window.game) return;
+
+    const removedPlayer = window.game.playerManager.removePlayer(index);
+    if (removedPlayer) {
+        this.loadPlayerList();
+        updateDisplay(window.game);
+        this.showNotification(`Removed ${removedPlayer.name}`, 'info');
+    }
+}
 
     show() {
         this.isOpen = true;
@@ -442,6 +513,9 @@ class ConfigUI {
 
         // Show/hide computer players option
         this.toggleComputerPlayersOption();
+
+        // NEW: Load current players
+        this.loadPlayerList();
     }
 
     // Update the updatePreview method
@@ -540,7 +614,7 @@ class ConfigUI {
 window.configUI = new ConfigUI();
 
 // Global function to open configuration
-function openGameConfig() {
+function openGameSettings() {
     window.configUI.show();
 }
 
