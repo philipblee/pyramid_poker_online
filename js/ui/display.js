@@ -88,80 +88,177 @@ function setupDragAndDrop(game) {
     });
 }
 
-
 // Update game status display
 function updateStatus(game) {
     const status = document.getElementById('status');
-    const roundInfo = document.getElementById('roundInfo');
-    const roundCounter = document.getElementById('roundCounter');
-
-    // Update round counter display
-    if (game.currentRound > 0) {
-        roundInfo.style.display = 'block';
-        roundCounter.textContent = `Round ${game.currentRound} of ${game.maxRounds}`;
-    } else {
-        roundInfo.style.display = 'none';
-    }
 
     if (game.gameState === 'waiting') {
         status.textContent = `Players: ${game.playerManager.players.length}/4 - Add players and click "New Game" to start!`;
     } else if (game.gameState === 'playing') {
         const currentPlayer = game.playerManager.getCurrentPlayer();
         const readyCount = game.playerManager.getReadyCount();
-        status.textContent = `Round ${game.currentRound}: ${currentPlayer.name}'s turn - Arrange your cards! (${readyCount}/${game.playerManager.players.length} players ready)`;
+        status.textContent = `Round ${game.currentRound} of ${game.maxRounds}: ${currentPlayer.name}'s turn - Arrange your cards! (${readyCount}/${game.playerManager.players.length} players ready)`;
     } else if (game.gameState === 'scoring') {
-        status.textContent = `Round ${game.currentRound} complete! Check the scores below.`;
+        status.textContent = `Round ${game.currentRound} of ${game.maxRounds} complete! Check the scores below.`;
     }
 }
-
 
 // Update player list display
 function updatePlayerList(game) {
     const playerList = document.getElementById('playerList');
     playerList.innerHTML = '';
 
-    game.playerManager.players.forEach((player, index) => {
-        const playerDiv = document.createElement('div');
-        playerDiv.className = 'player-item';
-
-        if (game.gameState === 'playing' && index === game.playerManager.currentPlayerIndex) {
-            playerDiv.classList.add('current');
-        }
-        if (player.ready) {
-            playerDiv.classList.add('ready');
-        }
-
-        const score = game.playerManager.getPlayerScore(player.name);
-        playerDiv.innerHTML = `
-            <span>${player.name}</span>
-            <span>${player.ready ? '✓' : ''} ${score} pts</span>
+    // 1. FIRST: Tournament standings (if tournament is active)
+    if (game.currentRound > 0) {
+        const standingsSection = document.createElement('div');
+        standingsSection.className = 'tournament-standings';
+        standingsSection.innerHTML = `
+            <h4 style="color: #ffd700; margin: 0 0 10px 0; font-size: 14px;">🏆 Tournament Standings</h4>
         `;
 
-        playerList.appendChild(playerDiv);
-    });
+        // Sort players by tournament total scores
+        const standings = [...game.tournamentScores.entries()]
+            .sort((a, b) => b[1] - a[1]);
+
+        standings.forEach(([playerName, totalScore], index) => {
+            const position = index + 1;
+            const medal = position === 1 ? '🥇' : position === 2 ? '🥈' : position === 3 ? '🥉' : `${position}.`;
+
+            // Color logic for tournament scores
+            const scoreColor = totalScore < 0 ? '#ff6b6b' : '#4ecdc4';
+
+            const standingDiv = document.createElement('div');
+            standingDiv.style.cssText = `
+                display: flex; justify-content: space-between;
+                padding: 8px 12px; margin: 3px 0;
+                background: rgba(255, 215, 0, 0.1); border-radius: 6px;
+                border: 1px solid rgba(255, 215, 0, 0.3);
+                font-size: 13px; font-weight: bold;
+            `;
+            standingDiv.innerHTML = `
+                <span style="color: #ffd700;">${medal} ${playerName}</span>
+                <span style="color: ${scoreColor};">${totalScore > 0 ? '+' : ''}${totalScore}</span>
+            `;
+            standingsSection.appendChild(standingDiv);
+        });
+
+        playerList.appendChild(standingsSection);
+    }
+
+    // 2. SECOND: All completed rounds + current round (stacked vertically)
+    if (game.currentRound > 0) {
+        // Show all rounds from 1 to current round
+        for (let roundNum = 1; roundNum <= game.currentRound; roundNum++) {
+            const roundSection = document.createElement('div');
+            roundSection.className = 'round-section';
+
+            // Get scores for this specific round
+            let roundScores = new Map();
+            if (roundNum === game.currentRound && game.gameState === 'playing') {
+                // Current round in progress - show current scores
+                game.playerManager.players.forEach(player => {
+                    const score = game.playerManager.getPlayerScore(player.name);
+                    roundScores.set(player.name, score);
+                });
+            } else {
+                // Completed round - get from history
+                const historicalRound = game.roundHistory.find(round => round.roundNumber === roundNum);
+                if (historicalRound) {
+                    roundScores = historicalRound.roundScores;
+                }
+            }
+
+            // Create clickable round header
+            const roundHeader = document.createElement('div');
+            roundHeader.style.cssText = `
+                color: #4ecdc4; font-size: 12px; font-weight: bold;
+                margin: 15px 0 5px 0; cursor: pointer;
+                padding: 5px 8px; border-radius: 4px;
+                background: rgba(78, 205, 196, 0.1);
+                border: 1px solid rgba(78, 205, 196, 0.3);
+                transition: background 0.2s ease;
+            `;
+            roundHeader.innerHTML = `📋 Round ${roundNum}`;
+
+            // Add hover effect and click handler for completed rounds
+            if (game.roundHistory.find(round => round.roundNumber === roundNum)) {
+                roundHeader.style.cursor = 'pointer';
+                roundHeader.onclick = () => showHistoricalRound(game, roundNum);
+                roundHeader.onmouseover = () => roundHeader.style.background = 'rgba(78, 205, 196, 0.2)';
+                roundHeader.onmouseout = () => roundHeader.style.background = 'rgba(78, 205, 196, 0.1)';
+            } else {
+                roundHeader.style.cursor = 'default';
+                roundHeader.style.opacity = '0.7';
+            }
+
+            roundSection.appendChild(roundHeader);
+
+            // Show players for this round with smaller fonts
+            game.playerManager.players.forEach((player, index) => {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'round-player-item';
+                playerDiv.style.cssText = `
+                    display: flex; justify-content: space-between;
+                    padding: 3px 12px; margin: 1px 0;
+                    font-size: 11px; color: #ecf0f1;
+                    background: rgba(255, 255, 255, 0.05);
+                    border-radius: 3px;
+                `;
+
+                // Add current player indicator for active round
+                if (roundNum === game.currentRound && game.gameState === 'playing' && index === game.playerManager.currentPlayerIndex) {
+                    playerDiv.style.background = 'rgba(78, 205, 196, 0.2)';
+                    playerDiv.style.border = '1px solid #4ecdc4';
+                }
+
+                // Add ready indicator for active round
+                let readyIndicator = '';
+                if (roundNum === game.currentRound && game.gameState === 'playing' && player.ready) {
+                    readyIndicator = '✓ ';
+                }
+
+
+                const score = roundScores.get(player.name) || 0;
+
+                // Color logic for round scores
+                const scoreColor = score < 0 ? '#ff6b6b' : '#4ecdc4';
+
+                playerDiv.innerHTML = `
+                    <span>${readyIndicator}${player.name}</span>
+                    <span style="color: ${scoreColor};">${score > 0 ? '+' : ''}${score} pts</span>
+                `;
+
+
+                roundSection.appendChild(playerDiv);
+            });
+
+            playerList.appendChild(roundSection);
+        }
+    } else {
+        // No tournament started - show basic player list
+        const playersSection = document.createElement('div');
+        playersSection.innerHTML = `
+            <h4 style="color: #ecf0f1; margin: 0 0 10px 0; font-size: 14px;">👥 Players</h4>
+        `;
+
+        game.playerManager.players.forEach((player, index) => {
+            const playerDiv = document.createElement('div');
+            playerDiv.className = 'player-item';
+            playerDiv.innerHTML = `<span>${player.name}</span>`;
+            playersSection.appendChild(playerDiv);
+        });
+
+        playerList.appendChild(playersSection);
+    }
 }
 
-// Update scoring display
+// Update scoring
 function updateScoring(game) {
     const scoring = document.getElementById('scoring');
-    const scoreList = document.getElementById('scoreList');
 
-    if (game.gameState === 'scoring' && game.playerManager.getAllScores().size > 0) {
-        scoring.style.display = 'block';
-        scoreList.innerHTML = '';
-
-        const sortedScores = [...game.playerManager.getAllScores().entries()].sort((a, b) => b[1] - a[1]);
-
-        sortedScores.forEach(([playerName, score]) => {
-            const scoreDiv = document.createElement('div');
-            scoreDiv.className = 'score-item';
-            scoreDiv.innerHTML = `
-                <span>${playerName}</span>
-                <span>${score} points</span>
-            `;
-            scoreList.appendChild(scoreDiv);
-        });
-    } else {
+    // Always hide the redundant current scores section
+    // We show tournament standings in the player list now
+    if (scoring) {
         scoring.style.display = 'none';
     }
 }
@@ -170,14 +267,14 @@ function updateScoring(game) {
 function updateButtonStates(game) {
     const newGameBtn = document.getElementById('newGame');
     const newRoundBtn = document.getElementById('newRound');
-    const addPlayerBtn = document.getElementById('addPlayer');
+//    const addPlayerBtn = document.getElementById('addPlayer');
     const autoBtn = document.getElementById('autoArrange');
     const rankBtn = document.getElementById('sortByRank');
     const suitBtn = document.getElementById('sortBySuit');
     const submitBtn = document.getElementById('submitHand');
 
     if (game.gameState === 'waiting') {
-        addPlayerBtn.disabled = false;
+//        addPlayerBtn.disabled = false;
         newGameBtn.disabled = game.playerManager.players.length < 2;
         newRoundBtn.disabled = false; // No tournament started
         autoBtn.disabled = true;
@@ -185,7 +282,7 @@ function updateButtonStates(game) {
         suitBtn.disabled = true;
         submitBtn.disabled = true;
     } else if (game.gameState === 'playing') {
-        addPlayerBtn.disabled = true;
+//        addPlayerBtn.disabled = true;
         newGameBtn.disabled = false;
 
         // NEW LOGIC: Check if any players have started playing (moved cards around)
@@ -199,7 +296,7 @@ function updateButtonStates(game) {
         rankBtn.disabled = false;
         suitBtn.disabled = false;
     } else if (game.gameState === 'scoring') {
-        addPlayerBtn.disabled = false;
+//        addPlayerBtn.disabled = false;
         newGameBtn.disabled = false;
         newRoundBtn.disabled = game.currentRound >= game.maxRounds; // Enable for next round
         autoBtn.disabled = true;
@@ -249,4 +346,19 @@ function updateDisplay(game) {
     updatePlayerList(game);
     updateScoring(game);
     updateButtonStates(game);
+}
+
+// Show historical round results
+function showHistoricalRound(game, roundNumber) {
+    console.log(`📋 Showing historical Round ${roundNumber} results...`);
+
+    const roundData = game.roundHistory.find(round => round.roundNumber === roundNumber);
+    if (!roundData) {
+        console.error(`Round ${roundNumber} data not found`);
+        return;
+    }
+
+    // For now, just show the scoring popup with historical data
+    // We'll enhance this in Phase 3B to have round selector tabs
+    showScoringPopup(game, roundData.detailedResults, roundData.roundScores, new Map(), roundNumber);
 }

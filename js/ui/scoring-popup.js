@@ -35,11 +35,26 @@ function getCardCountFromSubmittedHands(game, playerName, position) {
     return 5; // Default
 }
 
+
 // Enhanced showScoringPopup with proper large hand support
-function showScoringPopup(game, detailedResults, roundScores, specialPoints) {
+function showScoringPopup(game, detailedResults, roundScores, specialPoints, roundNumber = null) {
     const popup = document.getElementById('scoringPopup');
     const allPlayerHands = document.getElementById('allPlayerHands');
     const roundRobinResults = document.getElementById('roundRobinResults');
+
+    // Update the popup title to show which round
+    const title = roundNumber ? `Round ${roundNumber} Results` : `Round ${game.currentRound} Results`;
+    popup.querySelector('h2').textContent = `🏆 ${title}`;
+
+    // For historical rounds, get hands from round history
+    let handsToDisplay;
+    if (roundNumber && game.roundHistory) {
+        const historicalRound = game.roundHistory.find(round => round.roundNumber === roundNumber);
+        handsToDisplay = historicalRound ? historicalRound.submittedHands : game.submittedHands;
+    } else {
+        handsToDisplay = game.submittedHands;
+    }
+
 
     // Display all player hands with card counts
     allPlayerHands.innerHTML = '';

@@ -12,7 +12,7 @@ class ChinesePokerGame {
         this.gameState = 'waiting';
         this.playerHands = new Map();
         this.submittedHands = new Map();
-        this.sidebarVisible = true;
+        this.sidebarVisible = false;
 
         // NEW: Round tracking
         this.currentRound = 0;          // 0 = no game started, 1-3 = active rounds
@@ -41,7 +41,7 @@ class ChinesePokerGame {
         // NEW: Add "newRound" button to deal new hands to existing players
         document.getElementById('newRound').addEventListener('click', () => this.startNewRound());
 
-        document.getElementById('addPlayer').addEventListener('click', () => this.addPlayer());
+//        document.getElementById('addPlayer').addEventListener('click', () => this.addPlayer());
         document.getElementById('autoArrange').addEventListener('click', () => this.autoArrangeManager.autoArrangeHand());
         document.getElementById('sortByRank').addEventListener('click', () => this.resetAndSortByRank());
         document.getElementById('sortBySuit').addEventListener('click', () => this.resetAndSortBySuit());
@@ -88,9 +88,9 @@ class ChinesePokerGame {
         }
 
         // Hide sidebar when game starts
-        if (this.sidebarVisible) {
-            toggleSidebar(this);
-        }
+//        if (this.sidebarVisible) {
+//            toggleSidebar(this);
+//        }
 
         // Setup first round
         this.deckManager.createNewDeck();
@@ -141,10 +141,10 @@ class ChinesePokerGame {
         this.currentRound++;
         console.log(`🔄 Starting Round ${this.currentRound} of ${this.maxRounds}...`);
 
-        // Hide sidebar when round starts
-        if (this.sidebarVisible) {
-            toggleSidebar(this);
-        }
+//        // Hide sidebar when round starts
+//        if (this.sidebarVisible) {
+//            toggleSidebar(this);
+//        }
 
         // Setup new round (same as before but with round tracking)
         this.deckManager.createNewDeck();
@@ -657,19 +657,20 @@ class ChinesePokerGame {
 
     // Update individual round scores (keep existing for current round display)
     roundScores.forEach((roundScore, playerName) => {
-        this.playerManager.updatePlayerScore(playerName, roundScore);
+        if (!roundAlreadyStored) {
+            this.playerManager.updatePlayerScore(playerName, roundScore);
+        }
     });
 
     showScoringPopup(this, detailedResults, roundScores, new Map());
     updateDisplay(this);
 
-    // Check if tournament is complete
+    // NEW - No popup, just return to display
     if (this.currentRound >= this.maxRounds) {
-        console.log('🏆 Tournament Complete!');
-        setTimeout(() => {
-            this.showTournamentSummary();
-        }, 2000);
+        console.log('🏆 Tournament Complete! Check final standings in sidebar.');
+        // Just return to normal display - tournament standings show the results
     }
+
 }
 
     showTournamentSummary() {
