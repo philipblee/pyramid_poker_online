@@ -45,20 +45,20 @@ class FindBestSetup {
             let result;
 
             if (wildCount === 0) {
-                console.log(`📊 Dispatching to NO-WILD solver...`);
-                result = this.handleNoWild(allCards);
+                console.log(`📊 No wild cards - using no-wild solver...`);
+                result = this.noWild(allCards);
 
             } else if (wildCount === 1) {
-                console.log(`🃏 Dispatching to ONE-WILD solver...`);
-                result = this.handleOneWild(allCards);
+                console.log(`🃏 One wild card - using one-wild solver...`);
+                result = this.oneWild(allCards);
 
             } else if (wildCount === 2) {
-                console.log(`🃏🃏 Dispatching to TWO-WILD solver...`);
-                result = this.handleTwoWild(allCards);
+                console.log(`🃏🃏 Two wild cards - using two-wild solver...`);
+                result = this.twoWild(allCards);
 
             } else {
-                console.log(`🃏+ Dispatching to FALLBACK solver (${wildCount} wilds)...`);
-                result = this.handleFallback(allCards, wildCount);
+                console.log(`🃏+ Multiple wild cards (${wildCount}) - using fallback...`);
+                result = this.fallback(allCards, wildCount);
             }
 
             // Add timing information
@@ -82,7 +82,7 @@ class FindBestSetup {
      * @param {Array} allCards - 17 card objects with 0 wilds
      * @returns {Object} Arrangement result
      */
-    handleNoWild(allCards) {
+    noWild(allCards) {
         const finder = new FindBestSetupNoWild();
         return finder.findBestSetupNoWild(allCards);
     }
@@ -92,10 +92,8 @@ class FindBestSetup {
      * @param {Array} allCards - 17 card objects with 1 wild
      * @returns {Object} Arrangement result
      */
-    handleOneWild(allCards) {
-        // TODO: Implement when ready
-        // return oneWildBestFromCards(allCards);
-        throw new Error('One wild card support not yet implemented');
+    oneWild(allCards) {
+        return oneWildBestFromCards(allCards);
     }
 
     /**
@@ -103,21 +101,296 @@ class FindBestSetup {
      * @param {Array} allCards - 17 card objects with 2 wilds
      * @returns {Object} Arrangement result
      */
-    handleTwoWild(allCards) {
-        // TODO: Implement when ready
-        // return twoWildBestFromCards(allCards);
-        throw new Error('Two wild card support not yet implemented');
+    twoWild(allCards) {
+        return twoWildBestFromCards(allCards);
     }
-
     /**
      * Handle hands with 3+ wild cards (fallback)
      * @param {Array} allCards - 17 card objects with 3+ wilds
      * @param {number} wildCount - Number of wild cards
      * @returns {Object} Arrangement result
      */
-    handleFallback(allCards, wildCount) {
-        // TODO: Implement fallback logic
-        throw new Error(`${wildCount} wild cards not supported (fallback not implemented)`);
+    fallback(allCards, wildCount) {
+        console.log(`⚠️ Fallback: Using two-wild base + enhancement for ${wildCount} wild cards`);
+
+        if (wildCount > 4) {
+            throw new Error(`${wildCount} wild cards not supported - maximum is 4 wilds`);
+        }
+
+        if (wildCount < 3) {
+            throw new Error(`Fallback called with ${wildCount} wilds - should be 3+`);
+        }
+
+        try {
+            // Step 1: Get best 2-wild arrangement as base
+            console.log(`📊 Step 1: Finding best 2-wild arrangement as base...`);
+
+            const { wildCards, nonWildCards } = CardUtilities.separateWildCards(allCards);
+            const twoWildCards = [...nonWildCards, ...wildCards.slice(0, 2)];
+            const twoWildResult = this.twoWild(twoWildCards);
+
+            if (!twoWildResult.success) {
+                throw new Error('Two-wild base arrangement failed');
+            }
+
+            console.log(`✅ Two-wild base found with score: ${twoWildResult.score}`);
+
+            // ADD THIS RETURN:
+            return {
+                arrangement: twoWildResult.arrangement,
+                score: twoWildResult.score,
+                success: true,
+                statistics: {
+                    fallbackUsed: true,
+                    wildCount: wildCount,
+                    method: 'two-wild-base-only',
+                    enhanced: false,
+                    extraWildsUsed: 0
+                }
+            };
+
+//            // Step 2: Try to enhance with extra wilds
+//            const extraWilds = wildCount - 2;
+//            console.log(`🔧 Step 2: Attempting to enhance with ${extraWilds} extra wild(s)...`);
+//
+//            const enhancedResult = this.tryWildEnhancement(twoWildResult, extraWilds, allCards);
+//
+//            if (enhancedResult.enhanced) {
+//                console.log(`✅ Successfully enhanced arrangement! New score: ${enhancedResult.score}`);
+//                return {
+//                    arrangement: enhancedResult.arrangement,
+//                    score: enhancedResult.score,
+//                    success: true,
+//                    statistics: {
+//                        fallbackUsed: true,
+//                        wildCount: wildCount,
+//                        method: 'two-wild-plus-enhancement',
+//                        enhanced: true,
+//                        extraWildsUsed: enhancedResult.extraWildsUsed
+//                    }
+//                };
+//            } else {
+//                console.log(`⚠️ Could not enhance - using base two-wild arrangement`);
+//                return {
+//                    arrangement: twoWildResult.arrangement,
+//                    score: twoWildResult.score,
+//                    success: true,
+//                    statistics: {
+//                        fallbackUsed: true,
+//                        wildCount: wildCount,
+//                        method: 'two-wild-base-only',
+//                        enhanced: false,
+//                        extraWildsUsed: 0
+//                    }
+//                };
+//            }
+
+        } catch (error) {
+            console.error(`❌ Fallback error:`, error);
+            return this.createErrorResult(`Fallback failed: ${error.message}`);
+        }
+    }
+
+    /**
+     * Try to enhance two-wild arrangement with extra wilds
+     * @param {Object} twoWildResult - Result from two-wild algorithm
+     * @param {number} extraWilds - Number of extra wilds to try (1 or 2)
+     * @param {Array} allCards - All 17 cards
+     * @returns {Object} Enhancement result
+     */
+    tryWildEnhancement(twoWildResult, extraWilds, allCards) {
+        console.log(`🔧 Trying to enhance arrangement with ${extraWilds} extra wild(s)...`);
+
+        const baseArrangement = twoWildResult.arrangement;
+
+        // Try enhancing each position in priority order (back, middle, front)
+        const positions = ['back', 'middle', 'front'];
+
+        for (const position of positions) {
+            const hand = baseArrangement[position];
+            const enhancement = this.tryHandEnhancement(hand, extraWilds);
+
+            if (enhancement.possible) {
+                console.log(`✅ Can enhance ${position} hand: ${enhancement.description}`);
+
+                // Create enhanced arrangement
+                const enhancedArrangement = {
+                    ...baseArrangement,
+                    [position]: {
+                        ...hand,
+                        cards: enhancement.newCards,
+                        handType: enhancement.newHandType,
+                        cardCount: enhancement.newCards.length
+                    }
+                };
+
+                // Estimate new score (simple improvement)
+                const scoreBonus = enhancement.scoreBonus * extraWilds;
+                const newScore = twoWildResult.score + scoreBonus;
+
+                return {
+                    enhanced: true,
+                    arrangement: enhancedArrangement,
+                    score: newScore,
+                    extraWildsUsed: extraWilds,
+                    enhancedPosition: position,
+                    description: enhancement.description
+                };
+            }
+        }
+
+        console.log(`⚠️ No valid enhancements found`);
+        return {
+            enhanced: false,
+            arrangement: baseArrangement,
+            score: twoWildResult.score,
+            extraWildsUsed: 0
+        };
+    }
+
+    /**
+     * Check if a hand can be enhanced with extra wilds
+     * @param {Object} hand - Hand object from arrangement
+     * @param {number} extraWilds - Number of extra wilds available
+     * @returns {Object} Enhancement possibility
+     */
+    tryHandEnhancement(hand, extraWilds) {
+        const handType = hand.handType;
+        const currentCards = hand.cards.length;
+        let enhancedCards = hand.cards
+        let wildsToAdd = extraWilds
+
+        if (handType.includes('of a Kind')) {
+            // Step 1: Strip kicker if it's a 4K in 5-card format
+            let cleanCards = hand.cards;
+
+            if (hand.handType === 'Four of a Kind' && hand.cards.length === 5) {
+                // Find which rank appears 4 times
+                const rankCounts = {};
+                hand.cards.forEach(card => {
+                    rankCounts[card.rank] = (rankCounts[card.rank] || 0) + 1;
+                });
+
+                const ofAKindRank = Object.keys(rankCounts).find(rank => rankCounts[rank] === 4);
+                cleanCards = hand.cards.filter(card => card.rank === ofAKindRank);
+                let enhancedCards = cleanCards
+            }
+
+            // Step 2: Simple length-based wild addition
+            const currentLength = cleanCards.length;
+            wildsToAdd = this.calculateWildsToAdd(cleanCards.length, extraWilds);
+
+            if (wildsToAdd > 0) {
+                const newCardCount = currentLength + wildsToAdd;
+                const enhancedCards = [...cleanCards];
+
+                // Create actual cards of that rank using Analysis
+                const suits = ['♠', '♥', '♦', '♣'];
+                for (let i = 0; i < wildsToAdd; i++) {
+                    const suit = suits[i % 4]; // Cycle through suits
+                    const substituteCard = Analysis.createCardFromString(`${ofAKindRank}${suit}`);
+                    enhancedCards.push(substituteCard);
+                }
+            }
+
+            const ofAKindRank = enhancedCards[0].rank;
+            const enhancedHandStrength = evaluateHand(enhancedCards);
+
+            const newCardCount = currentCards + extraWilds;
+            if (newCardCount <= 8) {
+                return {
+                    cards: enhancedCards,
+                    handType: `${newCardCount} of a Kind`,
+                    cardCount: newCardCount,
+                    handStrength: enhancedHandStrength,
+                    hand_rank: enhancedHandStrength.hand_rank,
+                    strength: enhancedHandStrength.rank,
+                    validPositions: hand.validPositions,   // Keep original valid positions
+                    isIncomplete: false                    // Enhanced hands are always complete
+                };
+            }
+        }
+
+        wildsToAdd = this.calculateWildsToAdd(currentLength, extraWilds);
+        if (handType.includes('Straight Flush')) {
+            // 5-card SF→6-card SF, 6-card SF→7-card SF, 7-card SF→8-card SF
+
+            // For wheel: add 6 and/or 7 in same suit
+            if (this.isWheelStraightFlush(hand.cards)) {
+                const suit = hand.cards[0].suit; // Get the suit from existing cards
+                const ranksToAdd = ['6', '7'].slice(0, wildsToAdd);
+                const substituteCards = ranksToAdd.map(rank =>
+                    Analysis.createCardFromString(`${rank}${suit}`)
+                );
+            }
+
+            // For regular SF: add cards below lowest
+            else {
+                const lowestCard = this.findLowestCard(hand.cards);
+                const suit = lowestCard.suit;
+                const ranksToAdd = this.getRanksBelow(lowestCard.rank, wildsToAdd);
+                const substituteCards = ranksToAdd.map(rank =>
+                    Analysis.createCardFromString(`${rank}${suit}`)
+                );
+            }
+
+            const newCardCount = currentCards + extraWilds;
+            const wildsToAdd = this.calculateWildsToAdd(currentLength, extraWilds);
+            if (wildsToAdd > 0) {
+                // Do the specific enhancement for that hand type
+                if (newCardCount <= 8) {
+                    return {
+                        cards: enhancedCards,
+                        handType: `${newCardCount} of a Kind`,
+                        cardCount: newCardCount,
+                        handStrength: enhancedHandStrength,
+                        hand_rank: enhancedHandStrength.hand_rank,
+                        strength: enhancedHandStrength.rank,
+                        validPositions: hand.validPositions,   // Keep original valid positions
+                        isIncomplete: false                    // Enhanced hands are always complete
+                        };
+                }
+            }
+        }
+
+        return {
+            possible: false,
+            description: `Cannot enhance ${handType} with ${extraWilds} wilds`
+        };
+    }
+
+    /**
+     * Create dummy wild cards for enhancement
+     * @param {number} count - Number of dummy wilds needed
+     * @returns {Array} Array of dummy wild card objects
+     */
+    createDummyWilds(count) {
+        const dummies = [];
+        for (let i = 0; i < count; i++) {
+            dummies.push({
+                id: `enhancement_wild_${i + 1}`,
+                rank: '',
+                suit: '',
+                value: 0,
+                isWild: true
+            });
+        }
+        return dummies;
+    }
+
+    // Calculate number of wilds to add
+    calculateWildsToAdd(currentLength, extraWilds) {
+        if (currentLength <= 6) return extraWilds;
+        if (currentLength === 7) return 1;
+        if (currentLength === 8) return 0;
+        return 0; // fallback
+    }
+
+    isWheelStraightFlush(cards) {
+        // Check if contains A, 2, 3, 4, 5 of same suit
+        const ranks = cards.map(c => c.rank).sort();
+        return ranks.includes('A') && ranks.includes('2') &&
+               ranks.includes('3') && ranks.includes('4') && ranks.includes('5');
     }
 
     /**

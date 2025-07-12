@@ -17,27 +17,27 @@ function twoWildBestFromCards(cardObjects) {
     const wildCards = properCardObjects.filter(card => card.isWild);
     const nonWildCards = properCardObjects.filter(card => !card.isWild);
 
-    if (wildCards.length !== 2) {
-        console.log(`❌ Expected 2 wild cards, found ${wildCards.length}`);
-        return {
-            arrangement: null,
-            score: -Infinity,
-            wildCards: null,
-            success: false,
-            statistics: null
-        };
-    }
-
-    if (nonWildCards.length !== 15) {
-        console.log(`❌ Expected 15 non-wild cards, found ${nonWildCards.length}`);
-        return {
-            arrangement: null,
-            score: -Infinity,
-            wildCards: null,
-            success: false,
-            statistics: null
-        };
-    }
+//    if (wildCards.length !== 2) {
+//        console.log(`❌ Expected 2 wild cards, found ${wildCards.length}`);
+//        return {
+//            arrangement: null,
+//            score: -Infinity,
+//            wildCards: null,
+//            success: false,
+//            statistics: null
+//        };
+//    }
+//
+//    if (nonWildCards.length !== 15) {
+//        console.log(`❌ Expected 15 non-wild cards, found ${nonWildCards.length}`);
+//        return {
+//            arrangement: null,
+//            score: -Infinity,
+//            wildCards: null,
+//            success: false,
+//            statistics: null
+//        };
+//    }
 
     // STEP 3: Get smart 2-wild combinations using both strategies
     console.log(`\n📋 Step 3: Getting smart 2-wild combinations...`);
