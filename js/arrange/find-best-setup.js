@@ -135,6 +135,21 @@ class FindBestSetup {
 
             console.log(`✅ Two-wild base found with score: ${twoWildResult.score}`);
 
+
+            // In findBestSetup (or its component methods), calculate unused cards
+            const usedCards = [
+                ...result.arrangement.back.cards,
+                ...result.arrangement.middle.cards,
+                ...result.arrangement.front.cards
+            ];
+
+            const stagingCards = allCards.filter(card =>
+                !usedCards.some(usedCard => usedCard.id === card.id)
+            );
+
+            // Add staging to the arrangement
+            result.arrangement.staging = stagingCards;
+
             // ADD THIS RETURN:
             return {
                 arrangement: twoWildResult.arrangement,

@@ -1,0 +1,7 @@
+2025-07-13
+- Sorting strategy 2
+- Arrangement Model includes "unused cards in staging"
+- Card Model card: includes 2 card string
+- Card Model alphaCard: includes alpha string which is "Suit+Rank" or "W"+"number
+    Suit is "SHDC", "A23456789TJQK"
+- 3 wild and 4 wild solve by adding one wild at a time and calling find-best-setup-one-wild

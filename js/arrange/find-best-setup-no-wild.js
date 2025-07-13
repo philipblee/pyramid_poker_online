@@ -64,12 +64,14 @@ class FindBestSetupNoWild {
 
         console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
 
-        // Return completed arrangement with card arrays (ready for game)
+        // After adding all kickers, calculate remaining staging cards
+        const remainingCards = unusedCards.slice(kickerIndex);
 
         return {
             back: { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
             middle: { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
-            front: { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false }
+            front: { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
+            stagingCards: remainingCards  // NEW: Add staging cards to arrangement
         };
 
     }

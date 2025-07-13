@@ -5,7 +5,11 @@
  * Create allCards array from NO_WILD_TEST_CASES by case ID
  * @param {number} caseId - Test case ID from NO_WILD_TEST_CASES
  * @returns {Array} Array of 17 card objects ready for testing
- */
+ * example of how to invoke
+ * const allCards = createFromCardsTestCase(1);
+ * const result = findBestSetup(allCards);
+ * console.log('Result:', result);
+  */
 function createFromCardsTestCase(caseId) {
     console.log(`🧪 Creating card objects from NO_WILD test case ${caseId}`);
 
