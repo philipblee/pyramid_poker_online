@@ -93,29 +93,31 @@ function FindBestSetupTwoWild(cardObjects) {
             const handResults = detector.detectAllHands();
 
             // Run BestArrangementGenerator
-            const generator = new BestArrangementGenerator();
-            const arrangementResult = generator.generateBestArrangement(handResults.hands, cards);
+            const finder = new FindBestSetupNoWild();
+            const result = finder.findBestSetupNoWild(cards);
 
-            if (arrangementResult.success) {
+            if (result.success) {
                 results.push({
                     wildCards: [combination[0].rank + combination[0].suit, combination[1].rank + combination[1].suit],
-                    arrangement: arrangementResult.arrangement,
-                    score: arrangementResult.score,
+                    arrangement: result.arrangement,
+                    score: result.score,
                     success: true,
-                    statistics: arrangementResult.statistics,
+                    statistics: result.statistics,
                     handCount: handResults.total
                 });
+
             } else {
                 results.push({
                     wildCards: [combination[0].rank + combination[0].suit, combination[1].rank + combination[1].suit],
                     arrangement: null,
                     score: -Infinity,
                     success: false,
-                    statistics: arrangementResult.statistics,
+                    statistics: result.statistics,
                     handCount: handResults.total,
                     error: 'No valid arrangement found'
                 });
             }
+
 
         } catch (error) {
             results.push({

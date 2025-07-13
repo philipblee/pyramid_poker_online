@@ -76,9 +76,8 @@ function FindBestSetupOneWild(cardObjects) {
             const detector = new HandDetector(cards);
             const handResults = detector.detectAllHands();
 
-            // Run BestArrangementGenerator
-            const generator = new BestArrangementGenerator();
-            const arrangementResult = generator.generateBestArrangement(handResults.hands, cards);
+            const finder = new FindBestSetupNoWild();
+            const arrangementResult = finder.findBestSetupNoWild(cards);
 
             if (arrangementResult.success) {
                 results.push({
@@ -144,13 +143,11 @@ function FindBestSetupOneWild(cardObjects) {
         // Show optimal score distribution
         const optimalScore = best.score;
         const optimalResults = successful.filter(r => r.score === optimalScore);
-        console.log(`\n🎯 Optimal Score Analysis:`);
-        console.log(`   Optimal score: ${optimalScore} points`);
-        console.log(`   Cards achieving optimal: ${optimalResults.length}/${successful.length}`);
-        console.log(`   Optimal wild cards: ${optimalResults.map(r => r.wildCard).join(', ')}`);
+        console.log(`\n🎯 Best Score Analysis:`);
+        console.log(`   Best score: ${optimalScore} points`);
+        console.log(`   Cards used in best arrangement: ${optimalResults.length}/${successful.length}`);
+        console.log(`   Best wild cards: ${optimalResults.map(r => r.wildCard).join(', ')}`);
 
-        // Return same format as brute force version
-        console.log(`🔍 DEBUG: Returning best result from smart success block`);
         return {
             arrangement: best.arrangement,
             score: best.score,

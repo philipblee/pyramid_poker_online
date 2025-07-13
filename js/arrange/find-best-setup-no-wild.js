@@ -92,7 +92,6 @@ class FindBestSetupNoWild {
 
         // Rest of existing logic...
         this.allCards = allCards;
-        console.log('🔍 DEBUG: allCards stored:', this.allCards ? this.allCards.length : 'null'); // DEBUG LINE
         this.resetSearch();
         const startTime = performance.now();
 
@@ -112,13 +111,9 @@ class FindBestSetupNoWild {
 
         // Complete the best arrangement with kickers if we have cards available
         let finalArrangement = this.bestArrangement;
-        console.log('🔍 DEBUG: About to complete arrangement, allCards exists:', !!this.allCards); // DEBUG LINE
         if (finalArrangement && this.allCards) {
-            console.log('🔍 DEBUG: Calling completeArrangementWithKickers'); // DEBUG LINE
             finalArrangement = this.completeArrangementWithKickers(finalArrangement);
         }
-
-        console.log(`🔍 DEBUG: FindBestSetupNoWild success = ${finalArrangement !== null}`);
 
         return {
             arrangement: finalArrangement,
