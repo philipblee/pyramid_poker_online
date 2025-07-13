@@ -133,4 +133,27 @@ class PlayerManager {
         }
         return false;
     }
+
+    removePlayer(index) {
+        if (index >= 0 && index < this.players.length) {
+            const removedPlayer = this.players[index];
+
+            // Remove from players array
+            this.players.splice(index, 1);
+
+            // Remove from scores if they exist
+            if (this.scores.has(removedPlayer.name)) {
+                this.scores.delete(removedPlayer.name);
+            }
+
+            // Adjust current player index if necessary
+            if (this.currentPlayerIndex >= index && this.currentPlayerIndex > 0) {
+                this.currentPlayerIndex--;
+            }
+
+            console.log(`Removed player: ${removedPlayer.name}`);
+            return removedPlayer;
+        }
+        return null;
+    }
 }

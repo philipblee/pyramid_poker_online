@@ -36,7 +36,7 @@ class ChinesePokerGame {
 
     initializeEventListeners() {
         // NEW: Make "newGame" button open config screen
-        document.getElementById('newGame').addEventListener('click', () => openGameConfig());
+        document.getElementById('newGame').addEventListener('click', () => openGameSettings());
 
         // NEW: Add "newRound" button to deal new hands to existing players
         document.getElementById('newRound').addEventListener('click', () => this.startNewRound());
