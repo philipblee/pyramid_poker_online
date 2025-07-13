@@ -7,7 +7,7 @@
  * @param {Array} cardObjects - Array of 17 card objects (including 2 wilds)
  * @returns {Object} Best arrangement result (same format as one-wild version)
  */
-function twoWildBestFromCards(cardObjects) {
+function FindBestSetupTwoWild(cardObjects) {
     console.log(`\n🧠 ======== TWO WILD SMART ARRANGEMENT - FROM CARDS ========`);
 
     // STEP 1: Convert to Card Model format FIRST

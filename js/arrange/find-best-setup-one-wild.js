@@ -7,7 +7,7 @@
  * @param {Array} cardObjects - Array of 17 card objects (including 1 wild)
  * @returns {Object} Best arrangement result (same format as brute force version)
  */
-function oneWildBestFromCards(cardObjects) {
+function FindBestSetupOneWild(cardObjects) {
     console.log(`\n🧠 ======== ONE WILD SMART ARRANGEMENT - FROM CARDS ========`);
 
     // STEP 1: Convert to Card Model format FIRST
