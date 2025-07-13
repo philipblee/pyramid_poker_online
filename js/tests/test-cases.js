@@ -1008,6 +1008,11 @@ function getTestCase(id) {
     return TEST_CASES.find(testCase => testCase.id === id) || null;
 }
 
+// Get card array from caseId
+    function getTestCaseCards(caseId) {
+    const testCase = getTestCase(caseId);
+    return Analysis.parseCardString(testCase.cards); // or CardParser.parseCardString
+}
 /**
  * Get test cases by wild count
  * @param {number} wildCount - Number of wild cards (0, 1, 2, etc.)
@@ -1016,6 +1021,8 @@ function getTestCase(id) {
 function getTestCasesByWildCount(wildCount) {
     return TEST_CASES.filter(testCase => testCase.wildCount === wildCount);
 }
+
+
 
 /**
  * Get wild count from test case ID
@@ -1051,3 +1058,4 @@ if (typeof module !== 'undefined' && module.exports) {
         validateTestCaseId
     };
 }
+

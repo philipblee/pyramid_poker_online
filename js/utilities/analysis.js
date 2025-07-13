@@ -245,22 +245,34 @@ class Analysis {
     // =============================================================================
 
     static parseCardString(cardString) {
-        return cardString.trim().split(/\s+/).map((token, index) => {
-            const match = token.match(/^(\d+|[AKQJ])([♠♥♦♣])$/);
-            if (!match) {
-                throw new Error(`Invalid card format: ${token}`);
-            }
-
-            const [, rank, suit] = match;
+    return cardString.trim().split(/\s+/).map((token, index) => {
+        // Handle wild cards first
+        if (token === '🃏') {
             return {
-                id: `${rank}${suit}_${index + 1}`,
-                rank: rank,
-                suit: suit,
-                value: Analysis.getRankValue(rank),
-                isWild: false
+                id: `wild_${index + 1}`,
+                rank: '',
+                suit: '',
+                value: 0,
+                isWild: true
             };
-        });
-    }
+        }
+
+        // Handle regular cards
+        const match = token.match(/^(\d+|[AKQJ])([♠♥♦♣])$/);
+        if (!match) {
+            throw new Error(`Invalid card format: ${token}`);
+        }
+
+        const [, rank, suit] = match;
+        return {
+            id: `${rank}${suit}_${index + 1}`,
+            rank: rank,
+            suit: suit,
+            value: Analysis.getRankValue(rank),
+            isWild: false
+        };
+    });
+}
 
     static getCardIds(cards) {
         return cards.map(c => c.id);

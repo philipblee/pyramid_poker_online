@@ -93,7 +93,7 @@ class FindBestSetup {
      * @returns {Object} Arrangement result
      */
     oneWild(allCards) {
-        return findBestSetupOneWild(allCards);
+        return FindBestSetupOneWild(allCards);
     }
 
     /**
@@ -102,7 +102,7 @@ class FindBestSetup {
      * @returns {Object} Arrangement result
      */
     twoWild(allCards) {
-        return findBestSetupTwoWild(allCards);
+        return FindBestSetupTwoWild(allCards);
     }
     /**
      * Handle hands with 3+ wild cards (fallback)
