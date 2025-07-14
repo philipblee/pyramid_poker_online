@@ -8,9 +8,12 @@
  */
 
 function twoWildStrategyTwo(cards) {
+    const startTime = performance.now();
+
     const firstLayerRelevantHands = ['threeOfAKind', 'natural4K', 'fiveOfAKind', 'sixOfAKind', 'sevenOfAKind',
-    'eightOfAKind', 'straightFlush', 'sixCardStraightFlush', 'sevenCardStraightFlush', 'eightCardStraightFlush'];
+        'eightOfAKind', 'straightFlush', 'sixCardStraightFlush', 'sevenCardStraightFlush', 'eightCardStraightFlush'];
     const secondLayerRelevantHands = [...firstLayerRelevantHands, 'straight'];
+
     console.log('\n🎯 ======== STRATEGY 2: NESTED WILD CANDIDATES ========');
     console.log(`Analyzing ${cards.length} cards using nested wild candidate approach`);
 
@@ -20,28 +23,29 @@ function twoWildStrategyTwo(cards) {
 
     // Step 1: Get first-layer wild candidates from 15 baseline cards
     console.log('\n📋 Step 1: First Wild Card - using 15 cards find subset candidates');
-    console.log('DEBUG: About to call oneWildCandidates...');
-    const firstResult = oneWildCandidates(cards);   // change 1
+    const step1Start = performance.now();
+    const firstResult = oneWildCandidates(cards);
+    const step1End = performance.now();
+    console.log(`⏱️ Step 1 timing: ${(step1End - step1Start).toFixed(2)}ms`);
+
     console.log('DEBUG: oneWildCandidates returned:', firstResult);
-    console.log('DEBUG: About to map wildCandidateDetails...');
 
     const firstLayerCandidates = firstResult.wildCandidates.map(cardString =>
         Analysis.createCardFromString(cardString)
     );
-    const firstLayerCount = firstLayerCandidates.length; // Add this line
+    const firstLayerCount = firstLayerCandidates.length;
 
-    console.log('DEBUG: firstLayerCandidates created, length:', firstLayerCandidates.length);
     console.log(`✅ Found ${firstLayerCandidates.length} first-layer candidates`);
-
-    // return firstLayerCandidates; // Just return first layer for now
-
 
     const validTwoCardCombinations = [];
 
     // Step 2: For each first-layer candidate, find second-layer candidates
     console.log('\n📋 Step 2: Second Wild Card - using 16 cards');
+    const step2Start = performance.now();
 
     firstLayerCandidates.forEach((firstCard, index) => {
+        const iterationStart = performance.now();
+
         console.log(`\n🔍 Testing first card ${index + 1}/${firstLayerCandidates.length}: ${firstCard.rank}${firstCard.suit}`);
 
         // Create 16-card hand (15 baseline + 1 first candidate)
@@ -60,8 +64,16 @@ function twoWildStrategyTwo(cards) {
             validTwoCardCombinations.push([firstCard, secondCard]);
         });
 
+        const iterationEnd = performance.now();
+        if (index < 5 || index % 10 === 0) {
+            console.log(`   ⏱️ Iteration ${index + 1}: ${(iterationEnd - iterationStart).toFixed(2)}ms`);
+        }
+
         console.log(`   ✅ Added ${secondLayerCandidates.length} combinations with ${firstCard.rank}${firstCard.suit}`);
     });
+
+    const step2End = performance.now();
+    console.log(`⏱️ Step 2 timing: ${(step2End - step2Start).toFixed(2)}ms`);
 
     // Deduplicate combinations
     const dedupedCombinations = validTwoCardCombinations.filter((combo, index, array) => {
@@ -75,18 +87,38 @@ function twoWildStrategyTwo(cards) {
     console.log(`   Total 2-card combinations found: ${validTwoCardCombinations.length}`);
     console.log(`   After deduplication: ${dedupedCombinations.length}`);
 
-    // Add this right before the return statement
+    // Debug: Show complete list of 2-card combinations (in order)
     console.log(`\n🔍 DEBUG: Complete list of 2-card combinations (in order):`);
     dedupedCombinations.forEach((combo, index) => {
         console.log(`   ${index + 1}: [${combo[0].rank}${combo[0].suit}, ${combo[1].rank}${combo[1].suit}]`);
     });
 
+    const totalEnd = performance.now();
+    console.log(`⏱️ Total timing: ${(totalEnd - startTime).toFixed(2)}ms`);
+
+    // After deduplication, sort by combined rank value (highest first)
+    const sortedCombinations = dedupedCombinations.sort((a, b) => {
+        const aValue = a[0].value + a[1].value;
+        const bValue = b[0].value + b[1].value;
+        return bValue - aValue; // Descending order (highest first)
+    });
+
+    console.log(`\n📋 Strategy 2 Results:`);
+    console.log(`   Total 2-card combinations found: ${validTwoCardCombinations.length}`);
+    console.log(`   After deduplication: ${dedupedCombinations.length}`);
+    console.log(`   After sorting by rank: ${sortedCombinations.length}`);
+
+    // Debug: Show complete list of 2-card combinations (in sorted order)
+    console.log(`\n🔍 DEBUG: Complete list of 2-card combinations (sorted by rank):`);
+    sortedCombinations.forEach((combo, index) => {
+        const totalValue = combo[0].value + combo[1].value;
+//        console.log(`   ${index + 1}: [${combo[0].rank}${combo[0].suit}, ${combo[1].rank}${combo[1].suit}] (${totalValue})`);
+    });
 
     return {
         combinations: dedupedCombinations,
         firstLayerCount: firstLayerCount
     };
-
 }
 
 /**

@@ -16,7 +16,7 @@ class FindBestSetupNoWild {
      * @returns {Object} - Completed arrangement with card arrays
      */
     completeArrangementWithKickers(arrangement) {
-        console.log('🔧 Completing arrangement with kickers...');
+        // console.log('🔧 Completing arrangement with kickers...');
 
         const usedCardIds = new Set([
             ...Analysis.getCardIds(arrangement.back.cards),
@@ -39,7 +39,7 @@ class FindBestSetupNoWild {
             for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
                 backCards.push(unusedCards[kickerIndex++]);
             }
-            console.log(`🃏 Added ${needed} kickers to back hand`);
+            // console.log(`🃏 Added ${needed} kickers to back hand`);
         }
 
         // Complete middle hand to 5 cards if needed
@@ -49,7 +49,7 @@ class FindBestSetupNoWild {
             for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
                 middleCards.push(unusedCards[kickerIndex++]);
             }
-            console.log(`🃏 Added ${needed} kickers to middle hand`);
+            // console.log(`🃏 Added ${needed} kickers to middle hand`);
         }
 
         // Complete front hand to 3 cards if needed
@@ -59,10 +59,10 @@ class FindBestSetupNoWild {
             for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
                 frontCards.push(unusedCards[kickerIndex++]);
             }
-            console.log(`🃏 Added ${needed} kickers to front hand`);
+            // console.log(`🃏 Added ${needed} kickers to front hand`);
         }
 
-        console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
+        // console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
 
         // After adding all kickers, calculate remaining staging cards
         const remainingCards = unusedCards.slice(kickerIndex);
@@ -83,11 +83,11 @@ class FindBestSetupNoWild {
      * @returns {Object} - Best arrangement with score and statistics
      */
      findBestSetupNoWild(allCards) {
-        console.log(`🎯 FindBestSetupNoWild: Finding optimal setup from 17 cards...`);
+        // console.log(`🎯 FindBestSetupNoWild: Finding optimal setup from 17 cards...`);
 
         // NEW: Call hand-detector first
         const handDetector = new HandDetector(allCards);
-        const detectionResults = handDetector.detectAllHands();
+        const detectionResults = handDetector.results;
         const sortedHands = detectionResults.hands;
 
         // Rest of existing logic...
@@ -134,22 +134,48 @@ class FindBestSetupNoWild {
      * @param {Object} backHand - Selected back hand
      * @param {number} backIdx - Index of back hand
      */
+//    searchMiddleHands(sortedHands, backHand, backIdx) {
+//        const backUsedCards = new Set(Analysis.getCardIds(backHand.cards));
+//
+//        // Try middle hands (same strength or weaker than back)
+//        for (let middleIdx = backIdx; middleIdx < sortedHands.length; middleIdx++) {
+//            const middleHand = sortedHands[middleIdx];
+//
+//            if (!this.canUseInPosition(middleHand, 'middle')) continue;
+//            if (this.hasCardOverlap(backUsedCards, middleHand.cards)) continue;
+//
+//            // Pruning: check if this branch can possibly beat current best
+//            const partialScore = this.calculatePartialScore(backHand, middleHand);
+//            const maxFrontScore = this.estimateMaxFrontScore(sortedHands, middleIdx);
+//
+//            if (partialScore + maxFrontScore <= this.bestScore) {
+//                this.prunedNodes++;
+//                continue;
+//            }
+//
+//            this.searchFrontHands(sortedHands, backHand, middleHand, backUsedCards, middleIdx);
+//        }
+//    }
+
     searchMiddleHands(sortedHands, backHand, backIdx) {
         const backUsedCards = new Set(Analysis.getCardIds(backHand.cards));
 
-        // Try middle hands (same strength or weaker than back)
         for (let middleIdx = backIdx; middleIdx < sortedHands.length; middleIdx++) {
             const middleHand = sortedHands[middleIdx];
 
             if (!this.canUseInPosition(middleHand, 'middle')) continue;
             if (this.hasCardOverlap(backUsedCards, middleHand.cards)) continue;
 
-            // Pruning: check if this branch can possibly beat current best
+            // DEBUG: Check pruning logic
             const partialScore = this.calculatePartialScore(backHand, middleHand);
             const maxFrontScore = this.estimateMaxFrontScore(sortedHands, middleIdx);
+            const estimatedTotal = partialScore + maxFrontScore;
+
+            // console.log(`🔍 PRUNING CHECK: Partial=${partialScore.toFixed(2)}, MaxFront=${maxFrontScore.toFixed(2)}, Total=${estimatedTotal.toFixed(2)}, Best=${this.bestScore.toFixed(2)}`);
 
             if (partialScore + maxFrontScore <= this.bestScore) {
                 this.prunedNodes++;
+                // console.log(`✂️ PRUNED: ${estimatedTotal.toFixed(2)} <= ${this.bestScore.toFixed(2)}`);
                 continue;
             }
 
@@ -220,10 +246,22 @@ class FindBestSetupNoWild {
      * @param {Object} middleHand - Middle hand
      * @returns {number} - Partial score
      */
+//    calculatePartialScore(backHand, middleHand) {
+//        // Simplified scoring - just hand strengths for now
+//        // TODO: Replace with actual Pyramid Poker scoring
+//        return (backHand.strength || 0) + (middleHand.strength || 0);
+//    }
+
+    /**
+     * Calculate partial score for back + middle (for pruning)
+     * @param {Object} backHand - Back hand
+     * @param {Object} middleHand - Middle hand
+     * @returns {number} - Partial score using actual Pyramid Poker points
+     */
     calculatePartialScore(backHand, middleHand) {
-        // Simplified scoring - just hand strengths for now
-        // TODO: Replace with actual Pyramid Poker scoring
-        return (backHand.strength || 0) + (middleHand.strength || 0);
+        const backScore = ScoringUtilities.getExpectedPoints(backHand.handStrength, backHand.cards, 'back');
+        const middleScore = ScoringUtilities.getExpectedPoints(middleHand.handStrength, middleHand.cards, 'middle');
+        return backScore + middleScore;
     }
 
     /**
@@ -232,12 +270,29 @@ class FindBestSetupNoWild {
      * @param {number} startIdx - Index to start searching from
      * @returns {number} - Estimated maximum front score
      */
+//    estimateMaxFrontScore(sortedHands, startIdx) {
+//        // Simple estimate: strongest hand that could be front
+//        for (let i = startIdx; i < Math.min(startIdx + 50, sortedHands.length); i++) {
+//            const hand = sortedHands[i];
+//            if (this.canUseInPosition(hand, 'front')) {
+//                return hand.strength || 0;
+//            }
+//        }
+//        return 0;
+//    }
+
+    /**
+     * Estimate maximum possible front score for pruning
+     * @param {Array} sortedHands - All hands
+     * @param {number} startIdx - Index to start searching from
+     * @returns {number} - Estimated maximum front score using actual Pyramid Poker points
+     */
     estimateMaxFrontScore(sortedHands, startIdx) {
-        // Simple estimate: strongest hand that could be front
+        // Find strongest hand that could be front and calculate its actual points
         for (let i = startIdx; i < Math.min(startIdx + 50, sortedHands.length); i++) {
             const hand = sortedHands[i];
             if (this.canUseInPosition(hand, 'front')) {
-                return hand.strength || 0;
+                return ScoringUtilities.getExpectedPoints(hand.handStrength, hand.cards, 'front');
             }
         }
         return 0;
@@ -285,7 +340,7 @@ class FindBestSetupNoWild {
      * Reset search state
      */
     resetSearch() {
-        this.bestScore = -Infinity;
+        // this.bestScore = -Infinity;
         this.bestArrangement = null;
         this.exploredNodes = 0;
         this.prunedNodes = 0;

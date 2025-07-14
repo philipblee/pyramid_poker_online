@@ -8,7 +8,7 @@
  * @returns {Object} Best arrangement result (same format as one-wild version)
  */
 function FindBestSetupTwoWild(cardObjects) {
-    console.log(`\n🧠 ======== TWO WILD SMART ARRANGEMENT - FROM CARDS ========`);
+    // console.loglog(`\n🧠 ======== TWO WILD SMART ARRANGEMENT - FROM CARDS ========`);
 
     // STEP 1: Convert to Card Model format FIRST
     const properCardObjects = convertToCardModel(cardObjects);
@@ -17,49 +17,27 @@ function FindBestSetupTwoWild(cardObjects) {
     const wildCards = properCardObjects.filter(card => card.isWild);
     const nonWildCards = properCardObjects.filter(card => !card.isWild);
 
-//    if (wildCards.length !== 2) {
-//        console.log(`❌ Expected 2 wild cards, found ${wildCards.length}`);
-//        return {
-//            arrangement: null,
-//            score: -Infinity,
-//            wildCards: null,
-//            success: false,
-//            statistics: null
-//        };
-//    }
-//
-//    if (nonWildCards.length !== 15) {
-//        console.log(`❌ Expected 15 non-wild cards, found ${nonWildCards.length}`);
-//        return {
-//            arrangement: null,
-//            score: -Infinity,
-//            wildCards: null,
-//            success: false,
-//            statistics: null
-//        };
-//    }
-
     // STEP 3: Get smart 2-wild combinations using both strategies
-    console.log(`\n📋 Step 3: Getting smart 2-wild combinations...`);
+    // console.loglog(`\n📋 Step 3: Getting smart 2-wild combinations...`);
 
     // Strategy 1: Same-suit combinations for straight flushes
-    console.log(`   Running Strategy 1...`);
+    // console.loglog(`   Running Strategy 1...`);
 
     const result = twoWildStrategyOne(nonWildCards);        // NEW: object
     const strategy1Results = result.wildCandidates;           // Extract array
 
     // Strategy 2: Nested wild candidates for comprehensive coverage
-    console.log(`   Running Strategy 2...`);
+    // console.loglog(`   Running Strategy 2...`);
     const strategy2Result = twoWildStrategyTwo(nonWildCards);
     const strategy2Results = strategy2Result.combinations;
 
     // Combine and deduplicate
-    console.log(`   Combining strategies...`);
+    // console.loglog(`   Combining strategies...`);
     const allCombinations = combineAndDeduplicate(strategy1Results, strategy2Results);
 
-    console.log(`✅ Generated ${allCombinations.length} smart 2-wild combinations`);
-    console.log(`   Strategy 1: ${strategy1Results.length} combinations`);
-    console.log(`   Strategy 2: ${strategy2Results.length} combinations (${strategy2Result.firstLayerCount}/52 first-layer)`);
+    // console.loglog(`✅ Generated ${allCombinations.length} smart 2-wild combinations`);
+    // console.loglog(`   Strategy 1: ${strategy1Results.length} combinations`);
+    // console.loglog(`   Strategy 2: ${strategy2Results.length} combinations (${strategy2Result.firstLayerCount}/52 first-layer)`);
 
     if (allCombinations.length === 0) {
         console.log(`❌ No smart combinations found`);
@@ -73,14 +51,16 @@ function FindBestSetupTwoWild(cardObjects) {
     }
 
     // STEP 4: Process each smart 2-wild combination (same proven logic as one-wild)
-    console.log(`\n🔄 Step 4: Processing ${allCombinations.length} combinations (smart subset)...`);
+    // console.loglog(`\n🔄 Step 4: Processing ${allCombinations.length} combinations (smart subset)...`);
     const results = [];
+
+    let globalBestScore = -Infinity;
 
     allCombinations.forEach((combination, index) => {
         // Progress indicator every 10 combinations
-        if ((index + 1) % 10 === 0) {
-            console.log(`   Progress: ${index + 1}/${allCombinations.length} combinations processed...`);
-        }
+        //if ((index + 1) % 10 === 0) {
+            // console.loglog(`   Progress: ${index + 1}/${allCombinations.length} combinations processed...`);
+        //}
 
         try {
             // Create two substituted cards
@@ -90,11 +70,16 @@ function FindBestSetupTwoWild(cardObjects) {
 
             // Run HandDetector (auto-sorted)
             const detector = new HandDetector(cards);
-            const handResults = detector.detectAllHands();
+            const handResults = detector.results
 
             // Run BestArrangementGenerator
             const finder = new FindBestSetupNoWild();
+            finder.bestScore = globalBestScore; // 🔥 SEED with global best
             const result = finder.findBestSetupNoWild(cards);
+
+            if (result.success && result.score > globalBestScore) {
+                globalBestScore = result.score; // 🔥 UPDATE global best
+            }
 
             if (result.success) {
                 results.push({
@@ -133,42 +118,42 @@ function FindBestSetupTwoWild(cardObjects) {
     });
 
     // STEP 5: Sort results by score and summarize (same as one-wild)
-    console.log(`\n📊 Step 5: Analyzing smart results...`);
+    // console.log(`\n📊 Step 5: Analyzing smart results...`);
     results.sort((a, b) => b.score - a.score);
 
     const successful = results.filter(r => r.success);
     const failed = results.filter(r => !r.success);
 
-    console.log(`\n✅ ======== SMART SUMMARY ========`);
-    console.log(`Total combinations processed: ${results.length}`);
-    console.log(`Successful arrangements: ${successful.length}`);
-    console.log(`Failed attempts: ${failed.length}`);
+     console.log(`\n✅ ======== SMART SUMMARY ========`);
+     console.log(`Total combinations processed: ${results.length}`);
+     console.log(`Successful arrangements: ${successful.length}`);
+     console.log(`Failed attempts: ${failed.length}`);
 
     if (successful.length > 0) {
         const best = successful[0];
-        console.log(`\n🏆 Best Result (Smart Two-Wild):`);
-        console.log(`   Wild cards: ${best.wildCards.join(', ')}`);
-        console.log(`   Score: ${best.score}`);
-        console.log(`   Back: ${best.arrangement.back.handType} (${best.arrangement.back.cardCount} cards)`);
-        console.log(`   Middle: ${best.arrangement.middle.handType} (${best.arrangement.middle.cardCount} cards)`);
-        console.log(`   Front: ${best.arrangement.front.handType} (${best.arrangement.front.cardCount} cards)`);
+        // console.log(`\n🏆 Best Result (Smart Two-Wild):`);
+        // console.log(`   Wild cards: ${best.wildCards.join(', ')}`);
+        // console.log(`   Score: ${best.score}`);
+        // console.log(`   Back: ${best.arrangement.back.handType} (${best.arrangement.back.cardCount} cards)`);
+        // console.log(`   Middle: ${best.arrangement.middle.handType} (${best.arrangement.middle.cardCount} cards)`);
+        // console.log(`   Front: ${best.arrangement.front.handType} (${best.arrangement.front.cardCount} cards)`);
 
         // Show top 5 results for smart approach
-        console.log(`\n🥇 Top 5 Results (Smart Two-Wild):`);
+        // console.log(`\n🥇 Top 5 Results (Smart Two-Wild):`);
         successful.slice(0, 5).forEach((result, index) => {
-            console.log(`   ${index + 1}. ${result.wildCards.join(', ')}: ${result.score} points`);
+            // console.log(`   ${index + 1}. ${result.wildCards.join(', ')}: ${result.score} points`);
         });
 
         // Show optimal score distribution
         const optimalScore = best.score;
         const optimalResults = successful.filter(r => r.score === optimalScore);
-        console.log(`\n🎯 Optimal Score Analysis:`);
-        console.log(`   Optimal score: ${optimalScore} points`);
-        console.log(`   Combinations achieving optimal: ${optimalResults.length}/${successful.length}`);
-        console.log(`   Optimal wild combinations: ${optimalResults.map(r => r.wildCards.join(', ')).slice(0, 3).join(' | ')}`);
+        // console.log(`\n🎯 Optimal Score Analysis:`);
+        // console.log(`   Optimal score: ${optimalScore} points`);
+        // console.log(`   Combinations achieving optimal: ${optimalResults.length}/${successful.length}`);
+        // console.log(`   Optimal wild combinations: ${optimalResults.map(r => r.wildCards.join(', ')).slice(0, 3).join(' | ')}`);
 
         // Return same format as one-wild version
-        console.log(`🔍 DEBUG: Returning best result from smart success block`);
+        // console.log(`🔍 DEBUG: Returning best result from smart success block`);
         return {
             arrangement: best.arrangement,
             score: best.score,

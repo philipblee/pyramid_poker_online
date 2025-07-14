@@ -14,8 +14,8 @@ class HandDetector {
         // Extract counts once in constructor
         this.rankCounts = this.analysis.rankCounts;
         this.suitCounts = this.analysis.suitCounts;
-        console.log('📊 Rank counts:', this.rankCounts);
-        console.log('📊 Suit counts:', this.suitCounts);
+//        console.log('📊 Rank counts:', this.rankCounts);
+//        console.log('📊 Suit counts:', this.suitCounts);
 
         this.results = this.detectAllHands();
     }
@@ -27,7 +27,7 @@ class HandDetector {
      */
     detectAllHands(autoSort = true) {
         this.allHands = []; // Clear previous results
-        console.log(`🔍 HandDetector analyzing ${this.cards.length} cards...`);
+//        console.log(`🔍 HandDetector analyzing ${this.cards.length} cards...`);
 
         // Count ranks and suits
         // const { rankCounts, this.suitCounts } = this.countRanksAndSuits();
@@ -87,7 +87,7 @@ class HandDetector {
 
                 // Handle 4K: EXPAND with kickers to create complete 5-card hands
                 else if (count === 4) {
-                    console.log(`🃏 Expanding 4K of ${rank}s with kickers...`);
+//                    console.log(`🃏 Expanding 4K of ${rank}s with kickers...`);
 
                     // Get the four cards of this rank
                     const fourOfAKindCards = allCardsOfRank.slice(0, 4);
@@ -95,13 +95,13 @@ class HandDetector {
                     // Find all available kickers (remaining cards not of this rank)
                     const availableKickers = this.analysis.findKickers([rank]);
 
-                    console.log(`🃏 Found ${availableKickers.length} kickers for 4K of ${rank}s`);
+                    // console.log(`🃏 Found ${availableKickers.length} kickers for 4K of ${rank}s`);
 
                     // Generate complete 5-card 4K hands
                     availableKickers.forEach((kicker, index) => {
                         const completeHand = [...fourOfAKindCards, ...kicker];
                         this.addHand(completeHand, 'Four of a Kind');
-                        console.log(`🃏 Created 4K + ${kicker.map(c => c.rank + c.suit).join(',')} (variant ${index + 1})`);
+                        // console.log(`🃏 Created 4K + ${kicker.map(c => c.rank + c.suit).join(',')} (variant ${index + 1})`);
                     });
 
                     // Also create 3-of-a-kind variants by dropping one 4K card
@@ -130,7 +130,7 @@ class HandDetector {
 
                         // If this creates a 4K, expand it with kickers too
                         if (targetSize === 4) {
-                            console.log(`🃏 Drop-one variant created 4K of ${rank}s - expanding with kickers...`);
+                            // console.log(`🃏 Drop-one variant created 4K of ${rank}s - expanding with kickers...`);
                             const availableKickers = this.analysis.findKickers([rank]);
 
                             availableKickers.forEach(kicker => {
@@ -266,11 +266,11 @@ class HandDetector {
 
     // Detect straight flushes (5-8 cards) using consecutive rank counts within each suit
     detectStraightFlushes(suitCounts) {
-        console.log(`🌈 Straight flush detection starting...`);
+        // console.log(`🌈 Straight flush detection starting...`);
 
         Object.entries(this.suitCounts).forEach(([suit, count]) => {
             if (count >= 5) {
-                console.log(`🌈 Checking suit ${suit} with ${count} cards...`);
+                // console.log(`🌈 Checking suit ${suit} with ${count} cards...`);
 
                 // Get only cards of this suit
                 const suitCards = this.cards.filter(c => c.suit === suit);
@@ -281,7 +281,7 @@ class HandDetector {
                     suitRankCounts[card.rank] = (suitRankCounts[card.rank] || 0) + 1;
                 });
 
-                console.log(`🌈 Suit ${suit} rank counts:`, suitRankCounts);
+                // console.log(`🌈 Suit ${suit} rank counts:`, suitRankCounts);
 
                 // Detect straights within this suit (5-8 cards)
                 this.detectStraightsInSuit(suitRankCounts, suitCards, suit);
@@ -310,7 +310,7 @@ class HandDetector {
 
                 // Check if all consecutive values exist in this suit
                 if (consecutive.every(val => valueCounts[val] > 0)) {
-                    console.log(`🌈 Found ${straightLength}-card straight flush in ${suit}: ${consecutive.join('-')}`);
+                    // console.log(`🌈 Found ${straightLength}-card straight flush in ${suit}: ${consecutive.join('-')}`);
 
                     // Generate all combinations for this straight flush
                     this.generateStraightFlushCombinations(consecutive, valueCounts, rankValues, suitCards, suit, straightLength);
@@ -322,7 +322,7 @@ class HandDetector {
                 const wheelValues = Analysis.generateWheelValues(straightLength);
 
                 if (wheelValues.every(val => valueCounts[val] > 0)) {
-                    console.log(`🌈 Found ${straightLength}-card wheel straight flush in ${suit}: A-${wheelValues.slice(1).join('-')}`);
+                    // console.log(`🌈 Found ${straightLength}-card wheel straight flush in ${suit}: A-${wheelValues.slice(1).join('-')}`);
 
                     // Generate wheel straight flush combinations
                     this.generateStraightFlushCombinations(wheelValues, valueCounts, rankValues, suitCards, suit, straightLength);
@@ -369,7 +369,7 @@ class HandDetector {
     // Detect two pairs using existing pair hands
     detectTwoPairs() {
         const pairs = this.allHands.filter(h => h.handType === 'Pair');
-        console.log(`👥 Two pair detection: ${pairs.length} pairs available`);
+        // console.log(`👥 Two pair detection: ${pairs.length} pairs available`);
 
         let twoPairCount = 0;
         if (pairs.length >= 2) {
@@ -381,7 +381,7 @@ class HandDetector {
                 }
             }
         }
-        console.log(`👥 Created ${twoPairCount} two pair hands`);
+        // console.log(`👥 Created ${twoPairCount} two pair hands`);
     }scratch
 
 
@@ -397,7 +397,7 @@ class HandDetector {
             valueCounts[value] = count;
         });
 
-        console.log(`🔢 Straight detection - value counts:`, valueCounts);
+        // console.log(`🔢 Straight detection - value counts:`, valueCounts);
 
         // Check regular straights (5-6-7-8-9 through 10-J-Q-K-A)
         for (let startValue = 2; startValue <= 10; startValue++) {
@@ -406,7 +406,7 @@ class HandDetector {
             // Check if all 5 consecutive values exist
             if (consecutive.every(val => valueCounts[val] > 0)) {
                 const straightCount = consecutive.reduce((product, val) => product * valueCounts[val], 1);
-                console.log(`🔢 Found straight ${startValue}-${startValue+4}: ${straightCount} combinations`);
+                // console.log(`🔢 Found straight ${startValue}-${startValue+4}: ${straightCount} combinations`);
 
                 // Generate all combinations for this straight
                 this.generateStraightCombinations(consecutive, valueCounts, rankValues);
@@ -417,7 +417,7 @@ class HandDetector {
         const wheelValues = Analysis.WHEEL_STRAIGHT; // A=14, but acts as 1 in wheel
         if (wheelValues.every(val => valueCounts[val] > 0)) {
             const wheelCount = wheelValues.reduce((product, val) => product * valueCounts[val], 1);
-            console.log(`🔢 Found wheel straight A-2-3-4-5: ${wheelCount} combinations`);
+            // console.log(`🔢 Found wheel straight A-2-3-4-5: ${wheelCount} combinations`);
 
             // Generate wheel straight combinations
             this.generateStraightCombinations(wheelValues, valueCounts, rankValues);
@@ -476,7 +476,7 @@ class HandDetector {
                 // Generate all 5-card combinations from this suit
                 const flushCombinations = Analysis.generateCombinations(suitCards, 5);
 
-                console.log(`♠️ Suit ${suit}: ${count} cards → ${flushCombinations.length} flushes`);
+                // console.log(`♠️ Suit ${suit}: ${count} cards → ${flushCombinations.length} flushes`);
 
                 flushCombinations.forEach(combo => {
                     // Check if this combination is actually a straight flush
@@ -491,7 +491,7 @@ class HandDetector {
 
     // Detect single card hands (high cards)
     detectSingleCards() {
-        console.log(`🃏 Single card detection starting...`);
+        // console.log(`🃏 Single card detection starting...`);
 
         let singleCardCount = 0;
 
@@ -501,7 +501,7 @@ class HandDetector {
             singleCardCount++;
         });
 
-        console.log(`🃏 Created ${singleCardCount} single card hands`);
+        // console.log(`🃏 Created ${singleCardCount} single card hands`);
     }
 
 
@@ -533,7 +533,7 @@ class HandDetector {
         });
 
         const incompleteStatus = isIncomplete ? `INCOMPLETE - needs ${JSON.stringify(kickersNeeded)}` : 'COMPLETE';
-        console.log(`🃏 Found: ${handType} ${cards[0].rank} of ${cards[0].suit} (${cards.length} card) - Valid: ${validPositions.join(', ')} - ${incompleteStatus}`);
+        // console.log(`🃏 Found: ${handType} ${cards[0].rank} of ${cards[0].suit} (${cards.length} card) - Valid: ${validPositions.join(', ')} - ${incompleteStatus}`);
     }
 
 
@@ -544,7 +544,7 @@ class HandDetector {
         const trips = this.allHands.filter(h => h.handType === 'Three of a Kind');
         const pairs = this.allHands.filter(h => h.handType === 'Pair');
 
-        console.log(`🏠 Full house detection: ${trips.length} trips, ${pairs.length} pairs`);
+        // console.log(`🏠 Full house detection: ${trips.length} trips, ${pairs.length} pairs`);
 
         // Create full house from each trip + each pair (different ranks only)
         let fullHouseCount = 0;
@@ -557,7 +557,7 @@ class HandDetector {
                 }
             });
         });
-        console.log(`🏠 Created ${fullHouseCount} full houses`);
+        // console.log(`🏠 Created ${fullHouseCount} full houses`);
     }
 
 
@@ -632,7 +632,7 @@ class HandDetector {
         });
 
         const incompleteStatus = isIncomplete ? `INCOMPLETE - needs ${JSON.stringify(kickersNeeded)}` : 'COMPLETE';
-        console.log(`🎯 Found: ${handType} of ${cards[0].rank}s (${cards.length} cards) - Strength: ${handStrength.rank} - Valid: ${validPositions.join(', ')} - ${incompleteStatus}`);
+        // console.log(`🎯 Found: ${handType} of ${cards[0].rank}s (${cards.length} cards) - Strength: ${handStrength.rank} - Valid: ${validPositions.join(', ')} - ${incompleteStatus}`);
     }
 
     /**
@@ -644,11 +644,11 @@ class HandDetector {
         let handsToReturn = this.allHands;
 
         if (autoSort) {
-            console.log('🔄 Auto-sorting hands by strength...');
+            // console.log('🔄 Auto-sorting hands by strength...');
             const sorter = new HandSorter();
             const sortResult = sorter.sortHandsByStrength(this.allHands);
             handsToReturn = sortResult.sortedHands;
-            console.log(`✅ Auto-sorted ${handsToReturn.length} hands`);
+            // console.log(`✅ Auto-sorted ${handsToReturn.length} hands`);
         }
 
         const results = {
@@ -658,11 +658,11 @@ class HandDetector {
             incompleteHands: handsToReturn.filter(h => h.isIncomplete).length
         };
 
-        console.log(`✅ HandDetector found ${results.total} hands (${results.completeHands} complete, ${results.incompleteHands} incomplete) with proper rankings, position validation, and completion flags!`);
+        // console.log(`✅ HandDetector found ${results.total} hands (${results.completeHands} complete, ${results.incompleteHands} incomplete) with proper rankings, position validation, and completion flags!`);
         if (autoSort) {
-            console.log(`🔄 Hands are pre-sorted by strength (strongest first)`);
+            // console.log(`🔄 Hands are pre-sorted by strength (strongest first)`);
         }
-        console.log(`🃏 4K hands have been expanded with kickers and are now complete!`);
+        // console.log(`🃏 4K hands have been expanded with kickers and are now complete!`);
         return results;
     }
 

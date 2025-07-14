@@ -74,7 +74,7 @@ function FindBestSetupOneWild(cardObjects) {
 
             // Run HandDetector (auto-sorted)
             const detector = new HandDetector(cards);
-            const handResults = detector.detectAllHands();
+            const handResults = detector.results;
 
             const finder = new FindBestSetupNoWild();
             const arrangementResult = finder.findBestSetupNoWild(cards);

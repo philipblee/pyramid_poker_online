@@ -26,9 +26,9 @@ class CountValidHands {
             suitCounts[card.suit] = (suitCounts[card.suit] || 0) + 1;
         });
 
-        console.log('🔢 Counting Valid Hands by Type:');
-        console.log('Rank distribution:', rankCounts);
-        console.log('Suit distribution:', suitCounts);
+//        console.log('🔢 Counting Valid Hands by Type:');
+//        console.log('Rank distribution:', rankCounts);
+//        console.log('Suit distribution:', suitCounts);
 
         const calculated = {};
 
@@ -64,7 +64,7 @@ class CountValidHands {
             .filter(([key]) => key !== 'total')
             .reduce((sum, [, count]) => sum + count, 0);
 
-        console.log('📊 Valid Hand Counts:', calculated);
+//        console.log('📊 Valid Hand Counts:', calculated);
         return calculated;
     }
 
@@ -407,7 +407,7 @@ class CountValidHands {
             }
         });
 
-        console.log(`🎯 Natural 4K count: ${natural4K}`);
+        // console.log(`🎯 Natural 4K count: ${natural4K}`);
         return natural4K;
     }
 }

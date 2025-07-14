@@ -8,7 +8,7 @@ class HandSorter {
      * @returns {Object} - Sorted hands with metadata
      */
     sortHandsByStrength(hands) {
-        console.log(`🔄 HandSorter: Sorting ${hands.length} hands by strength...`);
+//        console.log(`🔄 HandSorter: Sorting ${hands.length} hands by strength...`);
 
         if (!hands || hands.length === 0) {
             return {
@@ -43,9 +43,9 @@ class HandSorter {
             handTypeDistribution: this.getHandTypeDistribution(sorted)
         };
 
-        console.log(`✅ HandSorter: Sorted ${sorted.length} hands`);
-        console.log(`   Strongest: ${metadata.strengthRange.strongest.handType}`);
-        console.log(`   Weakest: ${metadata.strengthRange.weakest.handType}`);
+//        console.log(`✅ HandSorter: Sorted ${sorted.length} hands`);
+//        console.log(`   Strongest: ${metadata.strengthRange.strongest.handType}`);
+//        console.log(`   Weakest: ${metadata.strengthRange.weakest.handType}`);
 
         return {
             sortedHands: sorted,
