@@ -75,6 +75,13 @@ function twoWildStrategyTwo(cards) {
     console.log(`   Total 2-card combinations found: ${validTwoCardCombinations.length}`);
     console.log(`   After deduplication: ${dedupedCombinations.length}`);
 
+    // Add this right before the return statement
+    console.log(`\n🔍 DEBUG: Complete list of 2-card combinations (in order):`);
+    dedupedCombinations.forEach((combo, index) => {
+        console.log(`   ${index + 1}: [${combo[0].rank}${combo[0].suit}, ${combo[1].rank}${combo[1].suit}]`);
+    });
+
+
     return {
         combinations: dedupedCombinations,
         firstLayerCount: firstLayerCount
@@ -116,110 +123,6 @@ function getRankValue(rank) {
 // Test function
 function testStrategyTwo() {
     console.log('\n🧪 Testing Strategy 2 Implementation');
-
-    // Create test cards - smaller set for testing
-    //    const testCards = [
-    //        // Scattered singles (no pairs, no sequences)
-    //        {id: 'A♠_1', rank: 'A', suit: '♠', value: 14, isWild: false},
-    //        {id: '9♥_2', rank: '9', suit: '♥', value: 9, isWild: false},
-    //        {id: '6♦_3', rank: '6', suit: '♦', value: 6, isWild: false},
-    //        {id: '3♣_4', rank: '3', suit: '♣', value: 3, isWild: false},
-    //        {id: 'K♥_5', rank: 'K', suit: '♥', value: 13, isWild: false},
-    //        {id: '7♦_6', rank: '7', suit: '♦', value: 7, isWild: false},
-    //        {id: '4♠_7', rank: '4', suit: '♠', value: 4, isWild: false},
-    //        {id: 'J♣_8', rank: 'J', suit: '♣', value: 11, isWild: false},
-    //        {id: '5♥_9', rank: '5', suit: '♥', value: 5, isWild: false},
-    //        {id: '2♦_10', rank: '2', suit: '♦', value: 2, isWild: false},
-    //        {id: '10♠_11', rank: '10', suit: '♠', value: 10, isWild: false},
-    //        {id: '8♣_12', rank: '8', suit: '♣', value: 8, isWild: false},
-    //        {id: 'Q♥_13', rank: 'Q', suit: '♥', value: 12, isWild: false},
-    //        {id: '6♠_14', rank: '6', suit: '♠', value: 6, isWild: false},
-    //        {id: '9♦_15', rank: '9', suit: '♦', value: 9, isWild: false}
-    //    ];
-
-    //    const testCards = [
-    //        // Five Jacks
-    //        {id: 'J♠_1', rank: 'J', suit: '♠', value: 11, isWild: false},
-    //        {id: 'J♥_2', rank: 'J', suit: '♥', value: 11, isWild: false},
-    //        {id: 'J♦_3', rank: 'J', suit: '♦', value: 11, isWild: false},
-    //        {id: 'J♣_4', rank: 'J', suit: '♣', value: 11, isWild: false},
-    //        {id: 'J♠_5', rank: 'J', suit: '♠', value: 11, isWild: false}, // 5th Jack (duplicate spade)
-    //
-    //        // Five 3's
-    //        {id: '3♠_6', rank: '3', suit: '♠', value: 3, isWild: false},
-    //        {id: '3♥_7', rank: '3', suit: '♥', value: 3, isWild: false},
-    //        {id: '3♦_8', rank: '3', suit: '♦', value: 3, isWild: false},
-    //        {id: '3♣_9', rank: '3', suit: '♣', value: 3, isWild: false},
-    //        {id: '3♠_10', rank: '3', suit: '♠', value: 3, isWild: false}, // 5th 3 (duplicate spade)
-    //
-    //        // Scattered singles
-    //        {id: 'A♥_11', rank: 'A', suit: '♥', value: 14, isWild: false},
-    //        {id: 'Q♠_12', rank: 'Q', suit: '♠', value: 12, isWild: false},
-    //        {id: '8♦_13', rank: '8', suit: '♦', value: 8, isWild: false},
-    //        {id: '7♣_14', rank: '7', suit: '♣', value: 7, isWild: false},
-    //        {id: '4♥_15', rank: '4', suit: '♥', value: 4, isWild: false}
-    //    ];
-
-    //    const testCards = [
-    //        // Three Aces (close to 4K)
-    //        {id: 'A♠_1', rank: 'A', suit: '♠', value: 14, isWild: false},
-    //        {id: 'A♥_2', rank: 'A', suit: '♥', value: 14, isWild: false},
-    //        {id: 'A♦_3', rank: 'A', suit: '♦', value: 14, isWild: false},
-    //        // Three Kings (close to 4K)
-    //        {id: 'K♠_4', rank: 'K', suit: '♠', value: 13, isWild: false},
-    //        {id: 'K♥_5', rank: 'K', suit: '♥', value: 13, isWild: false},
-    //        {id: 'K♦_6', rank: 'K', suit: '♦', value: 13, isWild: false},
-    //        // Scattered singles
-    //        {id: '9♣_7', rank: '9', suit: '♣', value: 9, isWild: false},
-    //        {id: '7♦_8', rank: '7', suit: '♦', value: 7, isWild: false},
-    //        {id: '5♥_9', rank: '5', suit: '♥', value: 5, isWild: false},
-    //        {id: '3♣_10', rank: '3', suit: '♣', value: 3, isWild: false},
-    //        {id: '8♠_11', rank: '8', suit: '♠', value: 8, isWild: false},
-    //        {id: '6♥_12', rank: '6', suit: '♥', value: 6, isWild: false},
-    //        {id: '4♦_13', rank: '4', suit: '♦', value: 4, isWild: false},
-    //        {id: '2♣_14', rank: '2', suit: '♣', value: 2, isWild: false},
-    //        {id: '10♠_15', rank: '10', suit: '♠', value: 10, isWild: false}
-    //    ];
-
-    //    const testCards = [
-    //        // Spades sequence with gaps
-    //        {id: 'A♠_1', rank: 'A', suit: '♠', value: 14, isWild: false},
-    //        {id: 'K♠_2', rank: 'K', suit: '♠', value: 13, isWild: false},
-    //        {id: 'Q♠_3', rank: 'Q', suit: '♠', value: 12, isWild: false},
-    //        {id: '10♠_4', rank: '10', suit: '♠', value: 10, isWild: false},
-    //        {id: '8♠_5', rank: '8', suit: '♠', value: 8, isWild: false},
-    //        {id: '6♠_6', rank: '6', suit: '♠', value: 6, isWild: false},
-    //        // Random other suits
-    //        {id: '9♥_7', rank: '9', suit: '♥', value: 9, isWild: false},
-    //        {id: '7♦_8', rank: '7', suit: '♦', value: 7, isWild: false},
-    //        {id: '5♣_9', rank: '5', suit: '♣', value: 5, isWild: false},
-    //        {id: '4♥_10', rank: '4', suit: '♥', value: 4, isWild: false},
-    //        {id: '3♦_11', rank: '3', suit: '♦', value: 3, isWild: false},
-    //        {id: '2♣_12', rank: '2', suit: '♣', value: 2, isWild: false},
-    //        {id: 'J♥_13', rank: 'J', suit: '♥', value: 11, isWild: false},
-    //        {id: '9♦_14', rank: '9', suit: '♦', value: 9, isWild: false},
-    //        {id: '7♣_15', rank: '7', suit: '♣', value: 7, isWild: false}
-    //    ];
-
-    //    const testCards = [
-    //        // Completely scattered, no patterns
-    //        {id: 'A♠_1', rank: 'A', suit: '♠', value: 14, isWild: false},
-    //        {id: 'K♥_2', rank: 'K', suit: '♥', value: 13, isWild: false},
-    //        {id: 'Q♦_3', rank: 'Q', suit: '♦', value: 12, isWild: false},
-    //        {id: 'J♣_4', rank: 'J', suit: '♣', value: 11, isWild: false},
-    //        {id: '9♠_5', rank: '9', suit: '♠', value: 9, isWild: false},
-    //        {id: '7♥_6', rank: '7', suit: '♥', value: 7, isWild: false},
-    //        {id: '5♦_7', rank: '5', suit: '♦', value: 5, isWild: false},
-    //        {id: '3♣_8', rank: '3', suit: '♣', value: 3, isWild: false},
-    //        {id: '2♠_9', rank: '2', suit: '♠', value: 2, isWild: false},
-    //        {id: '8♥_10', rank: '8', suit: '♥', value: 8, isWild: false},
-    //        {id: '6♦_11', rank: '6', suit: '♦', value: 6, isWild: false},
-    //        {id: '4♣_12', rank: '4', suit: '♣', value: 4, isWild: false},
-    //        {id: '10♠_13', rank: '10', suit: '♠', value: 10, isWild: false},
-    //        {id: '9♥_14', rank: '9', suit: '♥', value: 9, isWild: false},
-    //        {id: '8♦_15', rank: '8', suit: '♦', value: 8, isWild: false}
-    //    ];
-
 
     console.log(`\n📋 Test cards: ${testCards.map(c => c.rank + c.suit).join(', ')}`);
 
