@@ -1,7 +1,7 @@
 {
-  "version": "v2.1-58-g947213c-dirty",
-  "commit": "947213c",
-  "branch": "analysis",
-  "buildDate": "2025-07-10T19:52:27.041Z",
-  "lastCommit": "2025-07-10 15:14:35 -0400"
+  "version": "v2.3.0",
+  "commit": "10e29d4",
+  "branch": "main",
+  "buildDate": "2025-07-14T10:44:06.616Z",
+  "lastCommit": "2025-07-13 22:59:25 -0400"
 }
