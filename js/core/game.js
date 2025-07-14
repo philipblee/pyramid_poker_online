@@ -726,77 +726,83 @@ class ChinesePokerGame {
     }
 
     calculateScores() {
-    const playerNames = this.playerManager.getPlayerNames();
-    const roundScores = new Map();
-    const detailedResults = [];
-    const bonusPoints = new Map();
+        const playerNames = this.playerManager.getPlayerNames();
+        const roundScores = new Map();
+        const detailedResults = [];
+        const bonusPoints = new Map();
 
-    // Initialize round scores
-    playerNames.forEach(name => {
-        roundScores.set(name, 0);
-        bonusPoints.set(name, 0);
-    });
+        // Initialize round scores
+        playerNames.forEach(name => {
+            roundScores.set(name, 0);
+            bonusPoints.set(name, 0);
+        });
 
-    // Head-to-head comparisons (same as before)
-    for (let i = 0; i < playerNames.length; i++) {
-        for (let j = i + 1; j < playerNames.length; j++) {
-            const player1 = playerNames[i];
-            const player2 = playerNames[j];
+        // Head-to-head comparisons (same as before)
+        for (let i = 0; i < playerNames.length; i++) {
+            for (let j = i + 1; j < playerNames.length; j++) {
+                const player1 = playerNames[i];
+                const player2 = playerNames[j];
 
-            const hand1 = this.submittedHands.get(player1);
-            const hand2 = this.submittedHands.get(player2);
+                const hand1 = this.submittedHands.get(player1);
+                const hand2 = this.submittedHands.get(player2);
 
-            const result = this.compareHands(hand1, hand2);
+                const result = this.compareHands(hand1, hand2);
 
-            roundScores.set(player1, roundScores.get(player1) + result.player1Score);
-            roundScores.set(player2, roundScores.get(player2) + result.player2Score);
+                roundScores.set(player1, roundScores.get(player1) + result.player1Score);
+                roundScores.set(player2, roundScores.get(player2) + result.player2Score);
 
-            detailedResults.push({
-                player1,
-                player2,
-                player1Score: result.player1Score,
-                player2Score: result.player2Score,
-                details: result.details
+                detailedResults.push({
+                    player1,
+                    player2,
+                    player1Score: result.player1Score,
+                    player2Score: result.player2Score,
+                    details: result.details
+                });
+            }
+        }
+
+        // NEW: Only store round history ONCE per round
+        const roundAlreadyStored = this.roundHistory.some(round => round.roundNumber === this.currentRound);
+        if (!roundAlreadyStored) {
+            const roundData = {
+                roundNumber: this.currentRound,
+                roundScores: new Map(roundScores),
+                detailedResults: [...detailedResults],
+                submittedHands: new Map(this.submittedHands),
+                timestamp: new Date()
+            };
+            this.roundHistory.push(roundData);
+
+            // Update tournament totals only once per round
+            roundScores.forEach((roundScore, playerName) => {
+                const currentTotal = this.tournamentScores.get(playerName) || 0;
+                this.tournamentScores.set(playerName, currentTotal + roundScore);
             });
         }
-    }
 
-    // NEW: Only store round history ONCE per round
-    const roundAlreadyStored = this.roundHistory.some(round => round.roundNumber === this.currentRound);
-    if (!roundAlreadyStored) {
-        const roundData = {
-            roundNumber: this.currentRound,
-            roundScores: new Map(roundScores),
-            detailedResults: [...detailedResults],
-            submittedHands: new Map(this.submittedHands),
-            timestamp: new Date()
-        };
-        this.roundHistory.push(roundData);
-
-        // Update tournament totals only once per round
+        // Update individual round scores (keep existing for current round display)
         roundScores.forEach((roundScore, playerName) => {
-            const currentTotal = this.tournamentScores.get(playerName) || 0;
-            this.tournamentScores.set(playerName, currentTotal + roundScore);
+            if (!roundAlreadyStored) {
+                this.playerManager.updatePlayerScore(playerName, roundScore);
+            }
         });
-    }
 
-    // Update individual round scores (keep existing for current round display)
-    roundScores.forEach((roundScore, playerName) => {
-        if (!roundAlreadyStored) {
-            this.playerManager.updatePlayerScore(playerName, roundScore);
+        showScoringPopup(this, detailedResults, roundScores, new Map());
+        updateDisplay(this);
+
+        // NEW - No popup, just return to display
+        if (this.currentRound >= this.maxRounds) {
+            console.log('🏆 Tournament Complete! Check final standings in sidebar.');
+            // Just return to normal display - tournament standings show the results
         }
-    });
+        // ADD THIS RETURN at the end:
+        return {
+            detailedResults,
+            roundScores,
+            bonusPoints
+        };
 
-    showScoringPopup(this, detailedResults, roundScores, new Map());
-    updateDisplay(this);
-
-    // NEW - No popup, just return to display
-    if (this.currentRound >= this.maxRounds) {
-        console.log('🏆 Tournament Complete! Check final standings in sidebar.');
-        // Just return to normal display - tournament standings show the results
     }
-
-}
 
     showTournamentSummary() {
         console.log('🏆 Showing tournament summary...');
