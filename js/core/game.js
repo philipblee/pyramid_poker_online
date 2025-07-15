@@ -40,9 +40,7 @@ class ChinesePokerGame {
 
         // NEW: Add "newRound" button to deal new hands to existing players
         document.getElementById('newRound').addEventListener('click', () => this.startNewRound());
-
-//        document.getElementById('addPlayer').addEventListener('click', () => this.addPlayer());
-        document.getElementById('autoArrange').addEventListener('click', () => this.autoArrangeManager.autoArrangeHand());
+        document.getElementById('autoArrange').addEventListener('click', () => this.handleAutoArrangeToggle());
         document.getElementById('sortByRank').addEventListener('click', () => this.resetAndSortByRank());
         document.getElementById('sortBySuit').addEventListener('click', () => this.resetAndSortBySuit());
         document.getElementById('submitHand').addEventListener('click', () => this.submitCurrentHand());
@@ -62,36 +60,63 @@ class ChinesePokerGame {
         return playerName;
     }
 
+    handleAutoArrangeToggle() {
+        if (this.autoArrangeUsed) {
+            // Undo auto-arrange
+            this.restoreToDealtState();
+            this.autoArrangeUsed = false;
+            document.getElementById('autoArrange').textContent = 'Auto';
+            console.log('🔄 Undid auto-arrange');
+        } else {
+            // Run auto-arrange
+            this.autoArrangeManager.autoArrangeHand();
+            this.autoArrangeUsed = true;
+            document.getElementById('autoArrange').textContent = 'Undo Auto';
+            console.log('🧠 Auto-arrange applied');
+        }
+    }
+
+    restoreToDealtState() {
+        const currentPlayer = this.playerManager.getCurrentPlayer();
+        const playerData = this.playerHands.get(currentPlayer.name);
+
+        if (!playerData || !playerData.originalCards) return;
+
+        // Restore from original dealt cards (not current modified ones)
+        playerData.cards = [...playerData.originalCards];  // Copy of originals
+        playerData.back = [];
+        playerData.middle = [];
+        playerData.front = [];
+
+        this.loadCurrentPlayerHand();
+        console.log('🔄 Restored to original dealt state');
+    }
+
     startNewGame() {
-        // Ensure we have players
-        const playersAdded = this.playerManager.ensurePlayersExist();
-        if (playersAdded) {
-            updateDisplay(this);
-            console.log('Added default players for testing');
-        }
+            // Ensure we have players
+            const playersAdded = this.playerManager.ensurePlayersExist();
+            if (playersAdded) {
+                updateDisplay(this);
+                console.log('Added default players for testing');
+            }
 
-        try {
-            this.playerManager.validateMinimumPlayers();
-        } catch (error) {
-            alert(error.message);
-            return;
-        }
+            try {
+                this.playerManager.validateMinimumPlayers();
+            } catch (error) {
+                alert(error.message);
+                return;
+            }
 
-        // NEW: Initialize tournament
-        console.log('🏆 Starting new tournament...');
-        this.currentRound = 1;
-        this.roundHistory = [];
-        this.tournamentScores.clear();
+            // NEW: Initialize tournament
+            console.log('🏆 Starting new tournament...');
+            this.currentRound = 1;
+            this.roundHistory = [];
+            this.tournamentScores.clear();
 
-        // Initialize tournament scores for all players
-        for (let player of this.playerManager.players) {
-            this.tournamentScores.set(player.name, 0);
-        }
-
-        // Hide sidebar when game starts
-//        if (this.sidebarVisible) {
-//            toggleSidebar(this);
-//        }
+            // Initialize tournament scores for all players
+            for (let player of this.playerManager.players) {
+                this.tournamentScores.set(player.name, 0);
+            }
 
         // Setup first round
         this.deckManager.createNewDeck();
@@ -106,28 +131,29 @@ class ChinesePokerGame {
             console.log(`\n🎴 Cards dealt to ${player.name}:`);
             console.log('Current format:', hand);
             const analysis = new Analysis(hand);
-            console.log('Analysis sees:', analysis.cards);
-            console.log('Analysis summary:', analysis.summary());
-
-            // ADD THIS NEW INSPECTION:
-            console.log('\n🔍 CARD FORMAT ANALYSIS:');
-            console.log('First card structure:', hand[0]);
-            console.log('Card Model compliance check:');
-            const requiredProps = ['id', 'rank', 'suit', 'value', 'isWild'];
-            const firstCard = hand[0];
-            requiredProps.forEach(prop => {
-                const hasProperty = firstCard.hasOwnProperty(prop);
-                console.log(`  ${prop}: ${hasProperty ? '✅' : '❌'} ${hasProperty ? firstCard[prop] : 'MISSING'}`);
-            });
-
-            // Check if any cards have non-standard properties
-            const extraProps = Object.keys(firstCard).filter(key => !['id', 'rank', 'suit', 'value', 'isWild', 'wasWild'].includes(key));
-            if (extraProps.length > 0) {
-                console.log('  Extra properties:', extraProps);
-            }
+//            console.log('Analysis sees:', analysis.cards);
+//            console.log('Analysis summary:', analysis.summary());
+//
+//            // ADD THIS NEW INSPECTION:
+//            console.log('\n🔍 CARD FORMAT ANALYSIS:');
+//            console.log('First card structure:', hand[0]);
+//            console.log('Card Model compliance check:');
+//            const requiredProps = ['id', 'rank', 'suit', 'value', 'isWild'];
+//            const firstCard = hand[0];
+//            requiredProps.forEach(prop => {
+//                const hasProperty = firstCard.hasOwnProperty(prop);
+//                console.log(`  ${prop}: ${hasProperty ? '✅' : '❌'} ${hasProperty ? firstCard[prop] : 'MISSING'}`);
+//            });
+//
+//            // Check if any cards have non-standard properties
+//            const extraProps = Object.keys(firstCard).filter(key => !['id', 'rank', 'suit', 'value', 'isWild', 'wasWild'].includes(key));
+//            if (extraProps.length > 0) {
+//                console.log('  Extra properties:', extraProps);
+//            }
 
             this.playerHands.set(player.name, {
                 cards: hand,
+                originalCards: [...hand],  // Save original dealt cards
                 back: [],
                 middle: [],
                 front: []
@@ -166,11 +192,6 @@ class ChinesePokerGame {
         this.currentRound++;
         console.log(`🔄 Starting Round ${this.currentRound} of ${this.maxRounds}...`);
 
-//        // Hide sidebar when round starts
-//        if (this.sidebarVisible) {
-//            toggleSidebar(this);
-//        }
-
         // Setup new round (same as before but with round tracking)
         this.deckManager.createNewDeck();
         this.gameState = 'playing';
@@ -186,32 +207,33 @@ class ChinesePokerGame {
         for (let player of this.playerManager.players) {
             const hand = this.deckManager.dealCards(17);
 
-            // ADD THE SAME LOGGING HERE:
-            console.log(`\n🎴 Cards dealt to ${player.name}:`);
-            console.log('Current format:', hand);
-            const analysis = new Analysis(hand);
-            console.log('Analysis sees:', analysis.cards);
-            console.log('Analysis summary:', analysis.summary());
+//            // ADD THE SAME LOGGING HERE:
+//            console.log(`\n🎴 Cards dealt to ${player.name}:`);
+//            console.log('Current format:', hand);
+//            const analysis = new Analysis(hand);
+//            console.log('Analysis sees:', analysis.cards);
+//            console.log('Analysis summary:', analysis.summary());
+//
+//            console.log('\n🔍 CARD FORMAT ANALYSIS:');
+//            console.log('First card structure:', hand[0]);
+//            console.log('Card Model compliance check:');
+//            const requiredProps = ['id', 'rank', 'suit', 'value', 'isWild'];
+//            const firstCard = hand[0];
+//            requiredProps.forEach(prop => {
+//                const hasProperty = firstCard.hasOwnProperty(prop);
+//                console.log(`  ${prop}: ${hasProperty ? '✅' : '❌'} ${hasProperty ? firstCard[prop] : 'MISSING'}`);
+//            });
 
-            console.log('\n🔍 CARD FORMAT ANALYSIS:');
-            console.log('First card structure:', hand[0]);
-            console.log('Card Model compliance check:');
-            const requiredProps = ['id', 'rank', 'suit', 'value', 'isWild'];
-            const firstCard = hand[0];
-            requiredProps.forEach(prop => {
-                const hasProperty = firstCard.hasOwnProperty(prop);
-                console.log(`  ${prop}: ${hasProperty ? '✅' : '❌'} ${hasProperty ? firstCard[prop] : 'MISSING'}`);
-            });
-
-            const extraProps = Object.keys(firstCard).filter(key => !['id', 'rank', 'suit', 'value', 'isWild', 'wasWild'].includes(key));
-            if (extraProps.length > 0) {
-                console.log('  Extra properties:', extraProps);
-            }
+//            const extraProps = Object.keys(firstCard).filter(key => !['id', 'rank', 'suit', 'value', 'isWild', 'wasWild'].includes(key));
+//            if (extraProps.length > 0) {
+//                console.log('  Extra properties:', extraProps);
+//            }
 
 
 
             this.playerHands.set(player.name, {
                 cards: hand,
+                originalCards: [...hand],  // Save original dealt cards
                 back: [],
                 middle: [],
                 front: []
@@ -266,10 +288,6 @@ class ChinesePokerGame {
         }, 500);
     }
 
-
-    // Add these methods to your js/core/game.js file
-    // Insert them after the loadCurrentPlayerHand() method
-
     moveCard(cardData, sourceId, targetHand) {
         const card = JSON.parse(cardData);
         const currentPlayer = this.playerManager.getCurrentPlayer();
@@ -285,6 +303,7 @@ class ChinesePokerGame {
 
         const targetKey = getHandKey(targetHand);
         const targetArray = targetKey === 'cards' ? playerData.cards : playerData[targetKey];
+
 
         if (targetKey === 'front' && targetArray.length >= 5) {
             alert('Front hand can only have up to 5 cards!');
@@ -552,6 +571,7 @@ class ChinesePokerGame {
         const allCards = [...playerData.cards, ...playerData.back, ...playerData.middle, ...playerData.front];
 
         playerData.cards = allCards;
+        playerData.cards = this.restoreWildsInStaging(playerData.cards);
         playerData.back = [];
         playerData.middle = [];
         playerData.front = [];
@@ -574,6 +594,7 @@ class ChinesePokerGame {
         });
 
         playerData.cards = allCards;
+//        playerData.cards = this.restoreWildsInStaging(playerData.cards);
         playerData.back = [];
         playerData.middle = [];
         playerData.front = [];
@@ -688,6 +709,10 @@ class ChinesePokerGame {
 
         this.playerManager.setPlayerReady(currentPlayer.name, true);
         this.playerManager.nextPlayer();
+
+         // Reset auto button for next turn (always happens after submit)
+        this.autoArrangeUsed = false;
+        document.getElementById('autoArrange').textContent = 'Auto';
 
         if (this.playerManager.areAllPlayersReady()) {
             this.calculateScores();
