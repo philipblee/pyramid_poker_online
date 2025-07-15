@@ -45,6 +45,8 @@ class ChinesePokerGame {
         document.getElementById('sortBySuit').addEventListener('click', () => this.resetAndSortBySuit());
         document.getElementById('submitHand').addEventListener('click', () => this.submitCurrentHand());
         document.getElementById('gameSettings').addEventListener('click', () => openGameSettings());
+        document.getElementById('helpButton').addEventListener('click', () => openGameRules());
+
 
         const toggleButton = document.getElementById('sidebarToggle');
         if (toggleButton) {
