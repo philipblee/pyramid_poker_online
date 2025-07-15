@@ -566,6 +566,10 @@ class ConfigUI {
             this.updateButtonText();
             this.close();
 
+            if (window.game) {
+                window.game.startNewGame();  // Actually start the new game!
+            }
+
             // Show confirmation
             this.showNotification('Configuration saved successfully!', 'success');
 

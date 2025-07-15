@@ -1,7 +1,7 @@
 {
-  "version": "v2.3.0",
-  "commit": "10e29d4",
-  "branch": "main",
-  "buildDate": "2025-07-14T10:44:06.616Z",
-  "lastCommit": "2025-07-13 22:59:25 -0400"
+  "version": "v2.3.0-2-g3fc195b",
+  "commit": "3fc195b",
+  "branch": "refactor-game-dot-js",
+  "buildDate": "2025-07-15T14:15:42.474Z",
+  "lastCommit": "2025-07-15 10:15:26 -0400"
 }

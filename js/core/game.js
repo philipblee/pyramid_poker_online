@@ -36,7 +36,7 @@ class ChinesePokerGame {
 
     initializeEventListeners() {
         // NEW: Make "newGame" button open config screen
-        document.getElementById('newGame').addEventListener('click', () => openGameSettings());
+        document.getElementById('newGame').addEventListener('click', () => this.startNewGame());
 
         // NEW: Add "newRound" button to deal new hands to existing players
         document.getElementById('newRound').addEventListener('click', () => this.startNewRound());
@@ -46,6 +46,7 @@ class ChinesePokerGame {
         document.getElementById('sortByRank').addEventListener('click', () => this.resetAndSortByRank());
         document.getElementById('sortBySuit').addEventListener('click', () => this.resetAndSortBySuit());
         document.getElementById('submitHand').addEventListener('click', () => this.submitCurrentHand());
+        document.getElementById('gameSettings').addEventListener('click', () => openGameSettings());
 
         const toggleButton = document.getElementById('sidebarToggle');
         if (toggleButton) {
