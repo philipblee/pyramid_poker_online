@@ -63,7 +63,7 @@ function createDeck() {
     for (let i = 1; i <= wildCardCount; i++) {
         deck.push({
             suit: '🃏',
-            rank: 'WILD',
+            rank: '🃏',        // Changed from 'WILD' to '🃏'
             value: 15,
             id: `WILD_JOKER_${i}`,
             isWild: true

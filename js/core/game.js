@@ -101,6 +101,30 @@ class ChinesePokerGame {
         // Deal cards to all players
         for (let player of this.playerManager.players) {
             const hand = this.deckManager.dealCards(17);
+
+            console.log(`\n🎴 Cards dealt to ${player.name}:`);
+            console.log('Current format:', hand);
+            const analysis = new Analysis(hand);
+            console.log('Analysis sees:', analysis.cards);
+            console.log('Analysis summary:', analysis.summary());
+
+            // ADD THIS NEW INSPECTION:
+            console.log('\n🔍 CARD FORMAT ANALYSIS:');
+            console.log('First card structure:', hand[0]);
+            console.log('Card Model compliance check:');
+            const requiredProps = ['id', 'rank', 'suit', 'value', 'isWild'];
+            const firstCard = hand[0];
+            requiredProps.forEach(prop => {
+                const hasProperty = firstCard.hasOwnProperty(prop);
+                console.log(`  ${prop}: ${hasProperty ? '✅' : '❌'} ${hasProperty ? firstCard[prop] : 'MISSING'}`);
+            });
+
+            // Check if any cards have non-standard properties
+            const extraProps = Object.keys(firstCard).filter(key => !['id', 'rank', 'suit', 'value', 'isWild', 'wasWild'].includes(key));
+            if (extraProps.length > 0) {
+                console.log('  Extra properties:', extraProps);
+            }
+
             this.playerHands.set(player.name, {
                 cards: hand,
                 back: [],
@@ -160,6 +184,31 @@ class ChinesePokerGame {
         // Deal new cards to all existing players
         for (let player of this.playerManager.players) {
             const hand = this.deckManager.dealCards(17);
+
+            // ADD THE SAME LOGGING HERE:
+            console.log(`\n🎴 Cards dealt to ${player.name}:`);
+            console.log('Current format:', hand);
+            const analysis = new Analysis(hand);
+            console.log('Analysis sees:', analysis.cards);
+            console.log('Analysis summary:', analysis.summary());
+
+            console.log('\n🔍 CARD FORMAT ANALYSIS:');
+            console.log('First card structure:', hand[0]);
+            console.log('Card Model compliance check:');
+            const requiredProps = ['id', 'rank', 'suit', 'value', 'isWild'];
+            const firstCard = hand[0];
+            requiredProps.forEach(prop => {
+                const hasProperty = firstCard.hasOwnProperty(prop);
+                console.log(`  ${prop}: ${hasProperty ? '✅' : '❌'} ${hasProperty ? firstCard[prop] : 'MISSING'}`);
+            });
+
+            const extraProps = Object.keys(firstCard).filter(key => !['id', 'rank', 'suit', 'value', 'isWild', 'wasWild'].includes(key));
+            if (extraProps.length > 0) {
+                console.log('  Extra properties:', extraProps);
+            }
+
+
+
             this.playerHands.set(player.name, {
                 cards: hand,
                 back: [],
@@ -258,10 +307,43 @@ class ChinesePokerGame {
     }
 
     validateHands() {
+        // Add this at the start of validateHands():
+        console.log('🔄 validateHands() called');
+
         const currentPlayer = this.playerManager.getCurrentPlayer();
         const playerData = this.playerHands.get(currentPlayer.name);
 
         if (!playerData) return;
+
+        // ADD THIS TEST HERE (where playerData exists):
+        if (playerData.back.length === 5) {
+            console.log('\n🧪 Testing HandDetector on 5 cards:');
+            console.log('Input cards:', playerData.back);
+
+            const detector = new HandDetector(playerData.back);
+            const results = detector.detectAllHands();
+
+            console.log('HandDetector results:');
+            console.log('Total hands found:', results.total);
+            console.log('All hands:', results.hands);
+
+            if (results.hands && results.hands.length > 0) {
+                console.log('First hand (Hand Model):', results.hands[0]);
+                console.log('Has validPositions?', !!results.hands[0].validPositions);
+                console.log('Has isIncomplete?', !!results.hands[0].isIncomplete);
+            } else {
+                console.log('⚠️ No hands detected!');
+            }
+        }
+
+
+        // After this line: const playerData = this.playerHands.get(currentPlayer.name);
+        // Add:
+        if (playerData && playerData.cards.length > 0) {
+            console.log(`\n🔍 Validating ${currentPlayer.name}'s cards:`);
+            const analysis = new Analysis(playerData.cards);
+            analysis.debugInfo();
+        }
 
         const backHand = document.getElementById('backHand');
         const middleHand = document.getElementById('middleHand');
@@ -437,7 +519,10 @@ class ChinesePokerGame {
         const maxValue = Math.max(...values);
 
         // Check all possible consecutive straights
-        for (let start = Math.max(2, minValue - wildCount); start <= Math.min(14 - targetLength + 1, maxValue + wildCount); start++) {
+        for (let start = Math.max(Analysis.getRankValue('2'), minValue - wildCount);
+             start <= Math.min(Analysis.getRankValue('A') - targetLength + 1, maxValue + wildCount); start++) {
+
+        }
             const straightValues = [];
             for (let i = 0; i < targetLength; i++) {
                 straightValues.push(start + i);
@@ -445,11 +530,11 @@ class ChinesePokerGame {
 
             const needed = straightValues.filter(v => !values.includes(v)).length;
             if (needed <= wildCount) return true;
-        }
+
 
         // Check wheel straights (A-2-3-4-5-6 for 6-card, A-2-3-4-5 for 5-card, etc.)
         if (targetLength <= 6) {
-            const wheelStraight = [14, 2, 3, 4, 5, 6].slice(0, targetLength);
+            const wheelStraight = Analysis.generateWheelValues(targetLength);
             const wheelNeeded = wheelStraight.filter(v => !values.includes(v)).length;
             if (wheelNeeded <= wildCount) return true;
         }
@@ -525,6 +610,19 @@ class ChinesePokerGame {
         const playerData = this.playerHands.get(currentPlayer.name);
 
         if (!playerData) return;
+
+        // Before the hand evaluation section, add:
+        console.log(`\n✅ ${currentPlayer.name} submitting hands:`);
+        console.log('Back hand:', playerData.back);
+        console.log('Middle hand:', playerData.middle);
+        console.log('Front hand:', playerData.front);
+
+        // Analyze each hand
+        if (playerData.back.length > 0) {
+            const backAnalysis = new Analysis(playerData.back);
+            console.log('Back analysis:', backAnalysis.summary());
+        }
+
 
         const backCount = playerData.back.length;
         const middleCount = playerData.middle.length;
@@ -847,63 +945,27 @@ class ChinesePokerGame {
     }
 
     getHandPoints(handEval, cardCount, position) {
-        const handRank = handEval.hand_rank[0];
-
-        if (position === 'back') {
-            if (cardCount === 5) {
-                if (handRank === 8) return 4;  // Four of a Kind
-                if (handRank === 9) return 5;  // Straight Flush
-                if (handRank === 10) return 6; // Five of a Kind
-                return 1;
-            } else if (cardCount === 6) {
-                if (handRank === 11) return 8;  // 6-card Straight Flush
-                if (handRank === 12) return 10; // 6 of a Kind
-                return 1;
-            } else if (cardCount === 7) {
-                if (handRank === 13) return 11; // 7-card Straight Flush
-                if (handRank === 14) return 14; // 7 of a Kind
-                return 1;
-            } else if (cardCount === 8) {
-                if (handRank === 15) return 14; // 8-card Straight Flush
-                if (handRank === 16) return 18; // 8 of a Kind
-                return 1;
-            }
-        } else if (position === 'middle') {
-            if (cardCount === 5) {
-                if (handRank === 7) return 2;  // Full House
-                if (handRank === 8) return 8;  // Four of a Kind
-                if (handRank === 9) return 10; // Straight Flush
-                if (handRank === 10) return 12; // Five of a Kind
-                return 1;
-            } else if (cardCount === 6) {
-                if (handRank === 11) return 16; // 6-card Straight Flush
-                if (handRank === 12) return 20; // 6 of a Kind
-                return 1;
-            } else if (cardCount === 7) {
-                if (handRank === 13) return 22; // 7-card Straight Flush
-                if (handRank === 14) return 28; // 7 of a Kind
-                return 1;
-            }
-        } else if (position === 'front') {
-            if (cardCount === 3) {
-                if (handRank === 4) return 3; // Three of a kind
-                return 1;
-            } else if (cardCount === 5) {
-                if (handRank === 5) return 4;  // Straight
-                if (handRank === 6) return 4;  // Flush
-                if (handRank === 7) return 5;  // Full House
-                if (handRank === 8) return 12; // Four of a Kind
-                if (handRank === 9) return 15; // Straight Flush
-                if (handRank === 10) return 18; // Five of a Kind
-                return 1;
-            }
-        }
-
-        return 1;
+        return ScoringUtilities.getPointsForHand(handEval, position, cardCount);
     }
 
     closeScoringPopup() {
         closeScoringPopup();
+    }
+
+    // ADD THIS AS A NEW METHOD - doesn't touch existing code
+    compareScoringMethods(handEval, cardCount, position) {
+        // Call your existing method (unchanged)
+        const currentPoints = this.getHandPoints(handEval, cardCount, position);
+
+        // Call standard method
+        const standardPoints = ScoringUtilities.getPointsForHand(handEval, position, cardCount);
+
+        // Just log the comparison
+        console.log(`🎯 Scoring comparison - ${position} (${cardCount} cards):`,
+                    `current=${currentPoints}, standard=${standardPoints}`,
+                    currentPoints === standardPoints ? '✅ MATCH' : '❌ DIFFERENT');
+
+        // Don't return anything - this is just for comparison
     }
 
 }

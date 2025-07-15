@@ -164,42 +164,6 @@ class FindBestSetup {
                 }
             };
 
-//            // Step 2: Try to enhance with extra wilds
-//            const extraWilds = wildCount - 2;
-//            console.log(`🔧 Step 2: Attempting to enhance with ${extraWilds} extra wild(s)...`);
-//
-//            const enhancedResult = this.tryWildEnhancement(twoWildResult, extraWilds, allCards);
-//
-//            if (enhancedResult.enhanced) {
-//                console.log(`✅ Successfully enhanced arrangement! New score: ${enhancedResult.score}`);
-//                return {
-//                    arrangement: enhancedResult.arrangement,
-//                    score: enhancedResult.score,
-//                    success: true,
-//                    statistics: {
-//                        fallbackUsed: true,
-//                        wildCount: wildCount,
-//                        method: 'two-wild-plus-enhancement',
-//                        enhanced: true,
-//                        extraWildsUsed: enhancedResult.extraWildsUsed
-//                    }
-//                };
-//            } else {
-//                console.log(`⚠️ Could not enhance - using base two-wild arrangement`);
-//                return {
-//                    arrangement: twoWildResult.arrangement,
-//                    score: twoWildResult.score,
-//                    success: true,
-//                    statistics: {
-//                        fallbackUsed: true,
-//                        wildCount: wildCount,
-//                        method: 'two-wild-base-only',
-//                        enhanced: false,
-//                        extraWildsUsed: 0
-//                    }
-//                };
-//            }
-
         } catch (error) {
             console.error(`❌ Fallback error:`, error);
             return this.createErrorResult(`Fallback failed: ${error.message}`);

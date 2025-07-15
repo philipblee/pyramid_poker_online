@@ -4,6 +4,8 @@
 // Added validPositions field for Phase 2 combination generator
 // Integrated with card-evaluation.js for proper hand rankings
 // NEW: 4K hands are expanded with kickers during detection (complete hands only)
+// HandDetector works on a set of card arrays of any length
+// For each hand found it populates the Hand Model with addHand - now used by game.js
 
 class HandDetector {
     constructor(cards) {
