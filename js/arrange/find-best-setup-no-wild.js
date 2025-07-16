@@ -128,35 +128,6 @@ class FindBestSetupNoWild {
         };
     }
 
-    /**
-     * Search for compatible middle hands
-     * @param {Array} sortedHands - All hands
-     * @param {Object} backHand - Selected back hand
-     * @param {number} backIdx - Index of back hand
-     */
-//    searchMiddleHands(sortedHands, backHand, backIdx) {
-//        const backUsedCards = new Set(Analysis.getCardIds(backHand.cards));
-//
-//        // Try middle hands (same strength or weaker than back)
-//        for (let middleIdx = backIdx; middleIdx < sortedHands.length; middleIdx++) {
-//            const middleHand = sortedHands[middleIdx];
-//
-//            if (!this.canUseInPosition(middleHand, 'middle')) continue;
-//            if (this.hasCardOverlap(backUsedCards, middleHand.cards)) continue;
-//
-//            // Pruning: check if this branch can possibly beat current best
-//            const partialScore = this.calculatePartialScore(backHand, middleHand);
-//            const maxFrontScore = this.estimateMaxFrontScore(sortedHands, middleIdx);
-//
-//            if (partialScore + maxFrontScore <= this.bestScore) {
-//                this.prunedNodes++;
-//                continue;
-//            }
-//
-//            this.searchFrontHands(sortedHands, backHand, middleHand, backUsedCards, middleIdx);
-//        }
-//    }
-
     searchMiddleHands(sortedHands, backHand, backIdx) {
         const backUsedCards = new Set(Analysis.getCardIds(backHand.cards));
 
