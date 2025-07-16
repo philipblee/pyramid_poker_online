@@ -8,7 +8,7 @@
  * @returns {Object} Best arrangement result (same format as brute force version)
  */
 function FindBestSetupOneWild(cardObjects) {
-    console.log(`\n🧠 ======== ONE WILD SMART ARRANGEMENT - FROM CARDS ========`);
+//    console.log(`\n🧠 ======== ONE WILD SMART ARRANGEMENT - FROM CARDS ========`);
 
     // STEP 1: Convert to Card Model format FIRST
     const properCardObjects = convertToCardModel(cardObjects);
@@ -40,7 +40,7 @@ function FindBestSetupOneWild(cardObjects) {
     }
 
     // STEP 3: Get smart candidates using converted cards
-    console.log(`\n📋 Step 3: Getting smart candidates...`);
+//    console.log(`\n📋 Step 3: Getting smart candidates...`);
     const candidatesResult = oneWildCandidates(nonWildCards);
 
     if (!candidatesResult) {
@@ -55,17 +55,17 @@ function FindBestSetupOneWild(cardObjects) {
     }
 
     const allCandidates = candidatesResult.wildCandidates;
-    console.log(`✅ Generated ${allCandidates.length} smart candidates`);
+//    console.log(`✅ Generated ${allCandidates.length} smart candidates`);
 
     // STEP 4: Process each smart candidate (same proven logic as brute force)
-    console.log(`\n🔄 Step 4: Processing ${allCandidates.length} candidates (smart subset)...`);
+//    console.log(`\n🔄 Step 4: Processing ${allCandidates.length} candidates (smart subset)...`);
     const results = [];
 
     allCandidates.forEach((candidate, index) => {
         // Progress indicator every 5 cards for smart subset
-        if ((index + 1) % 5 === 0) {
-            console.log(`   Progress: ${index + 1}/${allCandidates.length} candidates processed...`);
-        }
+//        if ((index + 1) % 5 === 0) {
+//            console.log(`   Progress: ${index + 1}/${allCandidates.length} candidates processed...`);
+//        }
 
         try {
             // Create substituted card (same as brute force)
@@ -114,39 +114,39 @@ function FindBestSetupOneWild(cardObjects) {
     });
 
     // STEP 5: Sort results by score and summarize (same as brute force)
-    console.log(`\n📊 Step 5: Analyzing smart results...`);
+//    console.log(`\n📊 Step 5: Analyzing smart results...`);
     results.sort((a, b) => b.score - a.score);
 
     const successful = results.filter(r => r.success);
     const failed = results.filter(r => !r.success);
 
-    console.log(`\n✅ ======== SMART SUMMARY ========`);
-    console.log(`Total candidates processed: ${results.length}`);
-    console.log(`Successful arrangements: ${successful.length}`);
-    console.log(`Failed attempts: ${failed.length}`);
+//    console.log(`\n✅ ======== SMART SUMMARY ========`);
+//    console.log(`Total candidates processed: ${results.length}`);
+//    console.log(`Successful arrangements: ${successful.length}`);
+//    console.log(`Failed attempts: ${failed.length}`);
 
     if (successful.length > 0) {
         const best = successful[0];
-        console.log(`\n🏆 Best Result (Smart):`);
-        console.log(`   Wild card: ${best.wildCard}`);
-        console.log(`   Score: ${best.score}`);
-        console.log(`   Back: ${best.arrangement.back.handType}`);
-        console.log(`   Middle: ${best.arrangement.middle.handType}`);
-        console.log(`   Front: ${best.arrangement.front.handType}`);
+//        console.log(`\n🏆 Best Result (Smart):`);
+//        console.log(`   Wild card: ${best.wildCard}`);
+//        console.log(`   Score: ${best.score}`);
+//        console.log(`   Back: ${best.arrangement.back.handType}`);
+//        console.log(`   Middle: ${best.arrangement.middle.handType}`);
+//        console.log(`   Front: ${best.arrangement.front.handType}`);
 
         // Show top 5 results for smart approach
-        console.log(`\n🥇 Top 5 Results (Smart):`);
-        successful.slice(0, 5).forEach((result, index) => {
-            console.log(`   ${index + 1}. ${result.wildCard}: ${result.score} points`);
-        });
+//        console.log(`\n🥇 Top 5 Results (Smart):`);
+//        successful.slice(0, 5).forEach((result, index) => {
+//            console.log(`   ${index + 1}. ${result.wildCard}: ${result.score} points`);
+//        });
 
         // Show optimal score distribution
         const optimalScore = best.score;
         const optimalResults = successful.filter(r => r.score === optimalScore);
-        console.log(`\n🎯 Best Score Analysis:`);
-        console.log(`   Best score: ${optimalScore} points`);
-        console.log(`   Cards used in best arrangement: ${optimalResults.length}/${successful.length}`);
-        console.log(`   Best wild cards: ${optimalResults.map(r => r.wildCard).join(', ')}`);
+//        console.log(`\n🎯 Best Score Analysis:`);
+//        console.log(`   Best score: ${optimalScore} points`);
+//        console.log(`   Cards used in best arrangement: ${optimalResults.length}/${successful.length}`);
+//        console.log(`   Best wild cards: ${optimalResults.map(r => r.wildCard).join(', ')}`);
 
         return {
             arrangement: best.arrangement,

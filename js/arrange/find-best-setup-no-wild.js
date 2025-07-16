@@ -185,7 +185,7 @@ class FindBestSetupNoWild {
             if (score > this.bestScore) {
                 this.bestScore = score;
                 this.bestArrangement = arrangement;
-                console.log(`🏆 New best arrangement found! Score: ${score}`);
+                // console.log(`🏆 New best arrangement found! Score: ${score}`);
                 this.logArrangement(arrangement);
             }
         }

@@ -13,3 +13,18 @@ const allCards = createFromCardsTestCase(2001); // or whatever case number you u
 // Run the optimized algorithm
 const result = findBestSetup(allCards);
 console.log(result);
+
+// Test single hand for PlayHandStats
+testPlayHandStats()
+
+// Test with different parameters
+testPlayHandStats(4, 1)  // 4 players, 1 wild
+testPlayHandStats(6, 0)  // 6 players, no wilds
+
+// Or create instance and run manually
+const stats = new PlayHandStats();
+const result = stats.playHandStats(6, 2);
+console.log(result);
+
+// Check class statistics
+stats.getStatistics();
