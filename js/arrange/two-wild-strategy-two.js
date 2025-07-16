@@ -14,39 +14,38 @@ function twoWildStrategyTwo(cards) {
         'eightOfAKind', 'straightFlush', 'sixCardStraightFlush', 'sevenCardStraightFlush', 'eightCardStraightFlush'];
     const secondLayerRelevantHands = [...firstLayerRelevantHands, 'straight'];
 
-    console.log('\n🎯 ======== STRATEGY 2: NESTED WILD CANDIDATES ========');
-    console.log(`Analyzing ${cards.length} cards using nested wild candidate approach`);
+//    console.log('\n🎯 ======== STRATEGY 2: NESTED WILD CANDIDATES ========');
+//    console.log(`Analyzing ${cards.length} cards using nested wild candidate approach`);
 
     const relevantHands = ['threeOfAKind', 'natural4K', 'fiveOfAKind', 'sixOfAKind', 'sevenOfAKind',
                             'eightOfAKind', 'straight', 'straightFlush', 'sixCardStraightFlush',
                             'sevenCardStraightFlush', 'eightCardStraightFlush'];
 
     // Step 1: Get first-layer wild candidates from 15 baseline cards
-    console.log('\n📋 Step 1: First Wild Card - using 15 cards find subset candidates');
+//    console.log('\n📋 Step 1: First Wild Card - using 15 cards find subset candidates');
     const step1Start = performance.now();
     const firstResult = oneWildCandidates(cards);
     const step1End = performance.now();
-    console.log(`⏱️ Step 1 timing: ${(step1End - step1Start).toFixed(2)}ms`);
-
-    console.log('DEBUG: oneWildCandidates returned:', firstResult);
+//    console.log(`⏱️ Step 1 timing: ${(step1End - step1Start).toFixed(2)}ms`);
+//    console.log('DEBUG: oneWildCandidates returned:', firstResult);
 
     const firstLayerCandidates = firstResult.wildCandidates.map(cardString =>
         Analysis.createCardFromString(cardString)
     );
     const firstLayerCount = firstLayerCandidates.length;
 
-    console.log(`✅ Found ${firstLayerCandidates.length} first-layer candidates`);
+//    console.log(`✅ Found ${firstLayerCandidates.length} first-layer candidates`);
 
     const validTwoCardCombinations = [];
 
     // Step 2: For each first-layer candidate, find second-layer candidates
-    console.log('\n📋 Step 2: Second Wild Card - using 16 cards');
+//    console.log('\n📋 Step 2: Second Wild Card - using 16 cards');
     const step2Start = performance.now();
 
     firstLayerCandidates.forEach((firstCard, index) => {
         const iterationStart = performance.now();
 
-        console.log(`\n🔍 Testing first card ${index + 1}/${firstLayerCandidates.length}: ${firstCard.rank}${firstCard.suit}`);
+//        console.log(`\n🔍 Testing first card ${index + 1}/${firstLayerCandidates.length}: ${firstCard.rank}${firstCard.suit}`);
 
         // Create 16-card hand (15 baseline + 1 first candidate)
         const sixteenCardHand = [...cards, firstCard];
@@ -57,7 +56,7 @@ function twoWildStrategyTwo(cards) {
             Analysis.createCardFromString(cardString)
         );
 
-        console.log(`   Found ${secondLayerCandidates.length} second-layer candidates`);
+//        console.log(`   Found ${secondLayerCandidates.length} second-layer candidates`);
 
         // Create two-card combinations: [firstCard, secondCard]
         secondLayerCandidates.forEach(secondCard => {
@@ -65,15 +64,15 @@ function twoWildStrategyTwo(cards) {
         });
 
         const iterationEnd = performance.now();
-        if (index < 5 || index % 10 === 0) {
-            console.log(`   ⏱️ Iteration ${index + 1}: ${(iterationEnd - iterationStart).toFixed(2)}ms`);
-        }
+//        if (index < 5 || index % 10 === 0) {
+//            console.log(`   ⏱️ Iteration ${index + 1}: ${(iterationEnd - iterationStart).toFixed(2)}ms`);
+//        }
 
-        console.log(`   ✅ Added ${secondLayerCandidates.length} combinations with ${firstCard.rank}${firstCard.suit}`);
+//        console.log(`   ✅ Added ${secondLayerCandidates.length} combinations with ${firstCard.rank}${firstCard.suit}`);
     });
 
     const step2End = performance.now();
-    console.log(`⏱️ Step 2 timing: ${(step2End - step2Start).toFixed(2)}ms`);
+//    console.log(`⏱️ Step 2 timing: ${(step2End - step2Start).toFixed(2)}ms`);
 
     // Deduplicate combinations
     const dedupedCombinations = validTwoCardCombinations.filter((combo, index, array) => {

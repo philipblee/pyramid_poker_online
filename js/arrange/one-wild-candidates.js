@@ -7,28 +7,28 @@
 * @returns {Array} Array of wild card strings that improve hand counts
 */
 function oneWildCandidates(cardObjects) {
-   console.log('\n🎯 ======== ONE WILD CANDIDATES ========');
-   console.log(`Analyzing ${cardObjects.length} card objects for 1-wild improvements`);
+//   console.log('\n🎯 ======== ONE WILD CANDIDATES ========');
+//   console.log(`Analyzing ${cardObjects.length} card objects for 1-wild improvements`);
 
    // Hard-coded relevant hand types
    const handTypes = ['natural4K', 'fiveOfAKind', 'sixOfAKind', 'sevenOfAKind', 'eightOfAKind',
                      'straight', 'straightFlush', 'sixCardStraightFlush',
                      'sevenCardStraightFlush', 'eightCardStraightFlush'];
                      
-   console.log(`📋 Hand types: ${handTypes.join(', ')}`);
+//   console.log(`📋 Hand types: ${handTypes.join(', ')}`);
 
    // Step 1: Get baseline hand counts
-   console.log('\n📊 Step 1: Getting baseline hand counts...');
+//   console.log('\n📊 Step 1: Getting baseline hand counts...');
    const baselineCounts = countValidHandsFromCards(cardObjects);
 
-   console.log('🔢 Baseline hand counts:');
-   handTypes.forEach(handType => {
-       const count = baselineCounts[handType] || 0;
-       console.log(`   ${handType}: ${count}`);
-   });
+//   console.log('🔢 Baseline hand counts:');
+//   handTypes.forEach(handType => {
+//       const count = baselineCounts[handType] || 0;
+//       console.log(`   ${handType}: ${count}`);
+//   });
 
    // Step 2: Test each possible wild card substitution
-   console.log('\n🔄 Step 2: Testing all 52 possible wild cards...');
+//   console.log('\n🔄 Step 2: Testing all 52 possible wild cards...');
    const allCards = Analysis.generateAll52CardStringsAcesFirst();
    const wildCandidates = [];
    const rejectedCards = [];
@@ -73,16 +73,16 @@ function oneWildCandidates(cardObjects) {
        }
 
        // Progress indicator
-       if ((index + 1) % 13 === 0) {
-           console.log(`   Progress: ${index + 1}/52 cards tested...`);
-       }
+//       if ((index + 1) % 13 === 0) {
+//           console.log(`   Progress: ${index + 1}/52 cards tested...`);
+//       }
    });
 
-   console.log(`\n📋 ======== RESULTS ========`);
-   console.log(`✅ Wild candidates: ${wildCandidates.length}/52 (${((wildCandidates.length/52)*100).toFixed(1)}%)`);
-   console.log(`❌ Rejected cards: ${rejectedCards.length}/52 (${((rejectedCards.length/52)*100).toFixed(1)}%)`);
-   console.log(`🎯 Efficiency: ${(((52 - wildCandidates.length) / 52) * 100).toFixed(1)}% search space reduction`);
-   console.log(`📝 Wild candidates: ${wildCandidates.join(', ')}`);
+//   console.log(`\n📋 ======== RESULTS ========`);
+//   console.log(`✅ Wild candidates: ${wildCandidates.length}/52 (${((wildCandidates.length/52)*100).toFixed(1)}%)`);
+//   console.log(`❌ Rejected cards: ${rejectedCards.length}/52 (${((rejectedCards.length/52)*100).toFixed(1)}%)`);
+//   console.log(`🎯 Efficiency: ${(((52 - wildCandidates.length) / 52) * 100).toFixed(1)}% search space reduction`);
+//   console.log(`📝 Wild candidates: ${wildCandidates.join(', ')}`);
 
     const results = {
         baseline: cardObjects,

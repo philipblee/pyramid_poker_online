@@ -7,25 +7,25 @@
 * @returns {Object} Results with smart 2-wild combinations and statistics
 */
 function twoWildStrategyOne(cardObjects) {
-   console.log('\n🎯 ======== TWO WILD CANDIDATES ========');
-   console.log(`Analyzing ${cardObjects.length} card objects for 2-wild straight flush combinations`);
+//   console.log('\n🎯 ======== TWO WILD CANDIDATES ========');
+//   console.log(`Analyzing ${cardObjects.length} card objects for 2-wild straight flush combinations`);
 
    // Hard-coded for straight flushes only
    const handTypes = ['straightFlush', 'sixCardStraightFlush', 'sevenCardStraightFlush', 'eightCardStraightFlush'];
-   console.log(`📋 Hand types: ${handTypes.join(', ')}`);
+//   console.log(`📋 Hand types: ${handTypes.join(', ')}`);
 
    // Step 1: Get baseline hand counts
-   console.log('\n📊 Step 1: Getting baseline hand counts...');
+//   console.log('\n📊 Step 1: Getting baseline hand counts...');
    const baselineCounts = countValidHandsFromCards(cardObjects);
 
-   console.log('🔢 Baseline straight flush counts:');
+//   console.log('🔢 Baseline straight flush counts:');
    handTypes.forEach(handType => {
        const count = baselineCounts[handType] || 0;
-       console.log(`   ${handType}: ${count}`);
+//       console.log(`   ${handType}: ${count}`);
    });
 
    // Step 2: Test each possible 2-wild combination
-   console.log('\n🔄 Step 2: Testing all 312 same-suit combinations...');
+//   console.log('\n🔄 Step 2: Testing all 312 same-suit combinations...');
    const allCombinations = generateAll312SameSuitCombinations(cardObjects);
    const wildCandidates = [];
    const rejectedCombinations = [];
@@ -53,7 +53,7 @@ function twoWildStrategyOne(cardObjects) {
 
        // Accept if ANY straight flush type improved
        if (improved) {
-           console.log(`   ✅Combination Accepted: ${combination.map(c => c.rank + c.suit).join(', ')}`);
+//           console.log(`   ✅Combination Accepted: ${combination.map(c => c.rank + c.suit).join(', ')}`);
            wildCandidates.push({
                combination: combination,
                improvements: improvementDetails
@@ -66,13 +66,13 @@ function twoWildStrategyOne(cardObjects) {
            }
        } else {
            rejectedCombinations.push(combination);
-           console.log(`   ✅ Rejected Combination: ${combination.map(c => c.rank + c.suit).join(', ')}`);
+//           console.log(`   ✅ Rejected Combination: ${combination.map(c => c.rank + c.suit).join(', ')}`);
        }
 
-       // Progress indicator
-       if ((index + 1) % 20 === 0) {
-           console.log(`   Progress: ${index + 1}/312 combinations tested...`);
-       }
+//       // Progress indicator
+//       if ((index + 1) % 20 === 0) {
+//           console.log(`   Progress: ${index + 1}/312 combinations tested...`);
+//       }
    });
 
    // Step 3: Results
