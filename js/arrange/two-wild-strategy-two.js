@@ -83,15 +83,15 @@ function twoWildStrategyTwo(cards) {
         ) === index;
     });
 
-    console.log(`\n📋 Strategy 2 Results:`);
-    console.log(`   Total 2-card combinations found: ${validTwoCardCombinations.length}`);
-    console.log(`   After deduplication: ${dedupedCombinations.length}`);
+//    console.log(`\n📋 Strategy 2 Results:`);
+//    console.log(`   Total 2-card combinations found: ${validTwoCardCombinations.length}`);
+//    console.log(`   After deduplication: ${dedupedCombinations.length}`);
 
     // Debug: Show complete list of 2-card combinations (in order)
-    console.log(`\n🔍 DEBUG: Complete list of 2-card combinations (in order):`);
-    dedupedCombinations.forEach((combo, index) => {
-        console.log(`   ${index + 1}: [${combo[0].rank}${combo[0].suit}, ${combo[1].rank}${combo[1].suit}]`);
-    });
+    //    console.log(`\n🔍 DEBUG: Complete list of 2-card combinations (in order):`);
+    //    dedupedCombinations.forEach((combo, index) => {
+    //        console.log(`   ${index + 1}: [${combo[0].rank}${combo[0].suit}, ${combo[1].rank}${combo[1].suit}]`);
+    //    });
 
     const totalEnd = performance.now();
     console.log(`⏱️ Total timing: ${(totalEnd - startTime).toFixed(2)}ms`);

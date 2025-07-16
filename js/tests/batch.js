@@ -120,6 +120,31 @@ class Batch {
         const rangeCases = TEST_CASES.filter(c => c.id >= startId && c.id <= endId);
         return this.test(TestClass, methodName, rangeCases, options);
     }
+
+    // Add to Batch class
+    static playHandStats(handCount = 100, options = {}) {
+        console.log(`🎲 ======== BATCH HAND STATS: ${handCount} HANDS ========`);
+
+        const allResults = [];
+        const startTime = performance.now();
+
+        for (let i = 0; i < handCount; i++) {
+            if (options.showProgress && i % 10 === 0) {
+                console.log(`[${i + 1}/${handCount}] Generating hands...`);
+            }
+
+            const stats = new PlayHandStats();
+            const handResult = stats.playHandStats();
+            allResults.push(handResult);
+        }
+
+        const endTime = performance.now();
+
+        // Use existing displayBatchSummary pattern + export
+        this.processHandStats(allResults, endTime - startTime, handCount, options);
+
+        return allResults;
+    }
 }
 
 // Export for use in other modules

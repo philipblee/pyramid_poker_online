@@ -59,17 +59,17 @@ function oneWildCandidates(cardObjects) {
 
        // Accept if ANY relevant hand type improved
        if (improved) {
-           console.log(`   ✅Card Accepted: ${cardString}`);
+//           console.log(`   ✅Card Accepted: ${cardString}`);
            wildCandidates.push(cardString);
 
-           if (improvementDetails.length === 1) {
-               console.log(`   ✅ ${cardString}: ${improvementDetails[0]}`);
-           } else {
-               console.log(`   ✅ ${cardString}: ${improvementDetails.length} improvements`);
-           }
+//           if (improvementDetails.length === 1) {
+//               console.log(`   ✅ ${cardString}: ${improvementDetails[0]}`);
+//           } else {
+//               console.log(`   ✅ ${cardString}: ${improvementDetails.length} improvements`);
+//           }
        } else {
            rejectedCards.push(cardString);
-           console.log(`   ✅ Rejected Card: ${cardString}`);
+//           console.log(`   ✅ Rejected Card: ${cardString}`);
        }
 
        // Progress indicator

@@ -5,3 +5,11 @@
 - Card Model alphaCard: includes alpha string which is "Suit+Rank" or "W"+"number
     Suit is "SHDC", "A23456789TJQK"
 - 3 wild and 4 wild solve by adding one wild at a time and calling find-best-setup-one-wild
+
+// Console commands to test/run findBestSetup
+// Create cards from a test case
+const allCards = createFromCardsTestCase(2001); // or whatever case number you used
+
+// Run the optimized algorithm
+const result = findBestSetup(allCards);
+console.log(result);

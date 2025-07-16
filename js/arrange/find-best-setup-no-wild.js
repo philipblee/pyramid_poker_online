@@ -322,15 +322,15 @@ class FindBestSetupNoWild {
      * @param {Object} arrangement - Arrangement to log
      */
     logArrangement(arrangement) {
-        console.log(`   Back: ${arrangement.back.handType} (${arrangement.back.cards.length} cards)`);
-        console.log(`   Middle: ${arrangement.middle.handType} (${arrangement.middle.cards.length} cards)`);
-        console.log(`   Front: ${arrangement.front.handType} (${arrangement.front.cards.length} cards)`);
+//        console.log(`   Back: ${arrangement.back.handType} (${arrangement.back.cards.length} cards)`);
+//        console.log(`   Middle: ${arrangement.middle.handType} (${arrangement.middle.cards.length} cards)`);
+//        console.log(`   Front: ${arrangement.front.handType} (${arrangement.front.cards.length} cards)`);
 
         // Show cards used
         const totalCards = arrangement.back.cards.length +
                           arrangement.middle.cards.length +
                           arrangement.front.cards.length;
-        console.log(`   Total cards used: ${totalCards}/17`);
+//        console.log(`   Total cards used: ${totalCards}/17`);
     }
 
     /**
