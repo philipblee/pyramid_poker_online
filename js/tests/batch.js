@@ -141,10 +141,26 @@ class Batch {
         const endTime = performance.now();
 
         // Use existing displayBatchSummary pattern + export
-        this.processHandStats(allResults, endTime - startTime, handCount, options);
+//        this.processHandStats(allResults, endTime - startTime, handCount, options);
 
         return allResults;
     }
+
+    static downloadResults(results, filename = 'hand-stats.json') {
+        const jsonData = JSON.stringify(results, null, 2);
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+
+        URL.revokeObjectURL(url);
+
+        console.log(`📁 Downloaded ${filename} (${(jsonData.length / 1024).toFixed(1)} KB)`);
+    }
+
 }
 
 // Export for use in other modules

@@ -58,7 +58,7 @@ function createDeck() {
     // Add configurable number of wild cards
     const wildCardCount = window.gameConfig ? window.gameConfig.getWildCardCount() : 2; // Default to 2 if config not loaded
 
-    console.log(`🃏 Creating deck with ${wildCardCount} wild cards`);
+//    console.log(`🃏 Creating deck with ${wildCardCount} wild cards`);
 
     for (let i = 1; i <= wildCardCount; i++) {
         deck.push({

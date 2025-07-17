@@ -124,10 +124,10 @@ function FindBestSetupTwoWild(cardObjects) {
     const successful = results.filter(r => r.success);
     const failed = results.filter(r => !r.success);
 
-     console.log(`\n✅ ======== SMART SUMMARY ========`);
-     console.log(`Total combinations processed: ${results.length}`);
-     console.log(`Successful arrangements: ${successful.length}`);
-     console.log(`Failed attempts: ${failed.length}`);
+//     console.log(`\n✅ ======== SMART SUMMARY ========`);
+//     console.log(`Total combinations processed: ${results.length}`);
+//     console.log(`Successful arrangements: ${successful.length}`);
+//     console.log(`Failed attempts: ${failed.length}`);
 
     if (successful.length > 0) {
         const best = successful[0];

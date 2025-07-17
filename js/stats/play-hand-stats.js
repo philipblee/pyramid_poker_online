@@ -20,7 +20,7 @@ class PlayHandStats {
      * @returns {Object} Complete hand statistics
      */
     playHandStats(playerCount = 6, wildCount = 2) {
-        console.log(`🎯 Playing one hand: ${playerCount} players, ${wildCount} wilds`);
+//        console.log(`🎯 Playing one hand: ${playerCount} players, ${wildCount} wilds`);
 
         const startTime = performance.now();
 
@@ -122,7 +122,7 @@ class PlayHandStats {
      * @returns {Array} Array of head-to-head results
      */
     calculateCleanHeadToHeadScoring(playerData) {
-        console.log(`⚔️ Clean head-to-head scoring for ${playerData.length} players...`);
+//        console.log(`⚔️ Clean head-to-head scoring for ${playerData.length} players...`);
 
         const results = [];
 
@@ -150,7 +150,7 @@ class PlayHandStats {
             }
         }
 
-        console.log(`✅ Generated ${results.length} head-to-head matchups`);
+//        console.log(`✅ Generated ${results.length} head-to-head matchups`);
         return results;
     }
 
@@ -389,7 +389,7 @@ class PlayHandStats {
  * @returns {Object} Test results
  */
 function testPlayHandStats(playerCount = 6, wildCount = 2) {
-    console.log('🧪 Testing PlayHandStats...');
+//    console.log('🧪 Testing PlayHandStats...');
 
     const stats = new PlayHandStats();
     const result = stats.playHandStats(playerCount, wildCount);
@@ -400,14 +400,14 @@ function testPlayHandStats(playerCount = 6, wildCount = 2) {
     }
 
     // Display results
-    console.log('\n📊 HAND RESULTS:');
-    console.log(`Winner: ${result.summary.winner.name} (${result.summary.winner.score} points)`);
-    console.log(`Score range: ${result.summary.scoreRange.min} to ${result.summary.scoreRange.max}`);
+//    console.log('\n📊 HAND RESULTS:');
+//    console.log(`Winner: ${result.summary.winner.name} (${result.summary.winner.score} points)`);
+//    console.log(`Score range: ${result.summary.scoreRange.min} to ${result.summary.scoreRange.max}`);
 
-    console.log('\n👥 PLAYER SCORES:');
+//    console.log('\n👥 PLAYER SCORES:');
     result.players.forEach(player => {
         const wildInfo = player.wildCount > 0 ? ` (${player.wildCount} wilds)` : '';
-        console.log(`  ${player.name}: ${player.roundScore} points${wildInfo}`);
+//        console.log(`  ${player.name}: ${player.roundScore} points${wildInfo}`);
     });
 
     console.log('\n📈 PERFORMANCE:');

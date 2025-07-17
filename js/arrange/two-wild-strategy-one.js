@@ -59,11 +59,11 @@ function twoWildStrategyOne(cardObjects) {
                improvements: improvementDetails
            });
 
-           if (improvementDetails.length === 1) {
-               console.log(`   ✅ ${combination.map(c => c.rank + c.suit).join(', ')}: ${improvementDetails[0]}`);
-           } else {
-               console.log(`   ✅ ${combination.map(c => c.rank + c.suit).join(', ')}: ${improvementDetails.length} improvements`);
-           }
+//           if (improvementDetails.length === 1) {
+//               console.log(`   ✅ ${combination.map(c => c.rank + c.suit).join(', ')}: ${improvementDetails[0]}`);
+//           } else {
+//               console.log(`   ✅ ${combination.map(c => c.rank + c.suit).join(', ')}: ${improvementDetails.length} improvements`);
+//           }
        } else {
            rejectedCombinations.push(combination);
 //           console.log(`   ✅ Rejected Combination: ${combination.map(c => c.rank + c.suit).join(', ')}`);
@@ -88,10 +88,10 @@ function twoWildStrategyOne(cardObjects) {
        efficiency: ((312 - wildCandidates.length) / 312 * 100).toFixed(1)
    };
 
-   console.log(`\n📋 ======== RESULTS ========`);
-   console.log(`✅ Wild combinations: ${results.wildCandidatesCount}/312 (${((results.wildCandidatesCount/312)*100).toFixed(1)}%)`);
-   console.log(`❌ Rejected combinations: ${results.rejectedCount}/312 (${results.efficiency}%)`);
-   console.log(`🎯 Efficiency: ${results.efficiency}% search space reduction`);
+//   console.log(`\n📋 ======== RESULTS ========`);
+//   console.log(`✅ Wild combinations: ${results.wildCandidatesCount}/312 (${((results.wildCandidatesCount/312)*100).toFixed(1)}%)`);
+//   console.log(`❌ Rejected combinations: ${results.rejectedCount}/312 (${results.efficiency}%)`);
+//   console.log(`🎯 Efficiency: ${results.efficiency}% search space reduction`);
 
     return results;  // Just full object with metadata
 }

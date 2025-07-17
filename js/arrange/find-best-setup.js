@@ -23,7 +23,7 @@ class FindBestSetup {
      * @returns {Object} Best arrangement result (Arrangement Model format)
      */
     findBestSetup(allCards) {
-        console.log(`🎯 FindBestSetup: Analyzing 17 cards for optimal arrangement...`);
+//        console.log(`🎯 FindBestSetup: Analyzing 17 cards for optimal arrangement...`);
 
         // Validate input
         if (!this.validateInput(allCards)) {
@@ -38,26 +38,26 @@ class FindBestSetup {
             const { wildCards, nonWildCards } = CardUtilities.separateWildCards(allCards);
             const wildCount = wildCards.length;
 
-            console.log(`🃏 Wild card analysis: ${wildCount} wild cards, ${nonWildCards.length} non-wild cards`);
+//            console.log(`🃏 Wild card analysis: ${wildCount} wild cards, ${nonWildCards.length} non-wild cards`);
             this.updateWildStatistics(wildCount);
 
             // Dispatch to appropriate solver
             let result;
 
             if (wildCount === 0) {
-                console.log(`📊 No wild cards - using no-wild solver...`);
+//                console.log(`📊 No wild cards - using no-wild solver...`);
                 result = this.noWild(allCards);
 
             } else if (wildCount === 1) {
-                console.log(`🃏 One wild card - using one-wild solver...`);
+//                console.log(`🃏 One wild card - using one-wild solver...`);
                 result = this.oneWild(allCards);
 
             } else if (wildCount === 2) {
-                console.log(`🃏🃏 Two wild cards - using two-wild solver...`);
+//                console.log(`🃏🃏 Two wild cards - using two-wild solver...`);
                 result = this.twoWild(allCards);
 
             } else {
-                console.log(`🃏+ Multiple wild cards (${wildCount}) - using fallback...`);
+//                console.log(`🃏+ Multiple wild cards (${wildCount}) - using fallback...`);
                 result = this.fallback(allCards, wildCount);
             }
 
@@ -123,7 +123,7 @@ class FindBestSetup {
 
         try {
             // Step 1: Get best 2-wild arrangement as base
-            console.log(`📊 Step 1: Finding best 2-wild arrangement as base...`);
+//            console.log(`📊 Step 1: Finding best 2-wild arrangement as base...`);
 
             const { wildCards, nonWildCards } = CardUtilities.separateWildCards(allCards);
             const twoWildCards = [...nonWildCards, ...wildCards.slice(0, 2)];
@@ -133,7 +133,7 @@ class FindBestSetup {
                 throw new Error('Two-wild base arrangement failed');
             }
 
-            console.log(`✅ Two-wild base found with score: ${twoWildResult.score}`);
+//            console.log(`✅ Two-wild base found with score: ${twoWildResult.score}`);
 
 
             // In findBestSetup (or its component methods), calculate unused cards
@@ -446,14 +446,14 @@ class FindBestSetup {
      * @param {number} wildCount - Number of wild cards
      */
     logResult(result, wildCount) {
-        if (result && result.success) {
-            console.log(`✅ FindBestSetup SUCCESS (${wildCount} wilds): Score ${result.score}`);
-            if (result.statistics) {
-                console.log(`   Dispatch time: ${result.statistics.dispatchTime?.toFixed(2)}ms`);
-            }
-        } else {
-            console.log(`❌ FindBestSetup FAILED (${wildCount} wilds):`, result?.error || 'Unknown error');
-        }
+//        if (result && result.success) {
+//            console.log(`✅ FindBestSetup SUCCESS (${wildCount} wilds): Score ${result.score}`);
+//            if (result.statistics) {
+//                console.log(`   Dispatch time: ${result.statistics.dispatchTime?.toFixed(2)}ms`);
+//            }
+//        } else {
+//            console.log(`❌ FindBestSetup FAILED (${wildCount} wilds):`, result?.error || 'Unknown error');
+//        }
     }
 
     /**
