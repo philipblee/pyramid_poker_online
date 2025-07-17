@@ -7,7 +7,7 @@ class ScoringUtilities {
     // CORE SCORING: Official Pyramid Poker point values
     // =============================================================================
 
-static getPointsForHand(hand, position, cardCount = null) {
+    static getPointsForHand(hand, position, cardCount = null) {
     const handName = hand.name ? hand.name.toLowerCase() : '';
     const numCards = cardCount || (hand.cards ? hand.cards.length : 5);
     const pos = position.toLowerCase();
@@ -126,15 +126,36 @@ static getPointsForHand(hand, position, cardCount = null) {
     //        return winProbability * pointsIfWin;
     //    }
 
-    static getExpectedPoints(handStrength, cards, position, playerCount = 4) {
-        // Skip broken probability - just use base points for now
+    /**
+     * Get expected points with optional empirical data usage
+     * @param {Object} handStrength - Hand strength object with hand_rank
+     * @param {Object} cards - Cards object with length property
+     * @param {string} position - Position (back/middle/front)
+     * @param {number} playerCount - Number of players (default 4)
+     * @param {boolean} useEmpirical - Use empirical data if true (default false)
+     * @returns {number} - Expected points
+     */
+    static getExpectedPoints(handStrength, cards, position, playerCount = 4, useEmpirical = true) {
+        if (useEmpirical) {
+            // Use empirical method
+            return this.getExpectedPointsEmpirical(handStrength, cards, position, playerCount);
+        }
+
+        // Original method (current behavior)
         const pointsIfWin = this.getPointsForHand(handStrength, position, cards.length);
-
-        // Add universal tiebreaker
         const strengthBonus = this.calculateTiebreaker(handStrength.hand_rank);
-
         return pointsIfWin + strengthBonus;
     }
+
+//    static getExpectedPoints(handStrength, cards, position, playerCount = 4) {
+//        // Skip broken probability - just use base points for now
+//        const pointsIfWin = this.getPointsForHand(handStrength, position, cards.length);
+//
+//        // Add universal tiebreaker
+//        const strengthBonus = this.calculateTiebreaker(handStrength.hand_rank);
+//
+//        return pointsIfWin + strengthBonus;
+//    }
 
 
     // =============================================================================
@@ -158,6 +179,39 @@ static getPointsForHand(hand, position, cardCount = null) {
 
     static formatExpectedPoints(expectedPoints) {
         return expectedPoints.toFixed(2);
+    }
+
+    /**
+     * Get expected points using empirical win probability data from 6,000 hands
+     * @param {Object} handStrength - Hand strength object with hand_rank
+     * @param {Object} cards - Cards object with length property
+     * @param {string} position - Position (back/middle/front)
+     * @param {number} playerCount - Number of players (default 4)
+     * @returns {number} - Expected points (empirical_probability × points)
+     */
+    static getExpectedPointsEmpirical(handStrength, cards, position, playerCount = 4) {
+        // Get base points if win
+        const pointsIfWin = this.getPointsForHand(handStrength, position, cards.length);
+
+        // Get empirical win probability from your 6,000 hands data
+        const empiricalProbability = lookupWinProbability(position, handStrength.hand_rank);
+
+        let winProbability;
+        if (empiricalProbability !== null) {
+            // Use empirical data
+            winProbability = empiricalProbability;
+        } else {
+            // Fallback to estimated probability for missing data
+            winProbability = this.estimateWinProbability(handStrength, position, playerCount);
+        }
+
+        // Expected points = probability × points
+        const expectedPoints = winProbability * pointsIfWin;
+
+        // Add tiny tiebreaker for same expected points (much smaller than before)
+        const tiebreaker = this.calculateTiebreaker(handStrength.hand_rank) * 0.0001;
+
+        return expectedPoints + tiebreaker;
     }
 
     // =============================================================================
@@ -270,7 +324,7 @@ static getPointsForHand(hand, position, cardCount = null) {
         return tiebreaker;
     }
 
-}
+    }
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
