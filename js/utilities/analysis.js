@@ -347,22 +347,22 @@ class Analysis {
         };
     }
 
-    debugInfo() {
-        console.log(`\n🔍 ======== ANALYSIS DEBUG INFO ========`);
-        console.log(`📊 ${this.totalCards} cards analyzed`);
-        console.log(`📋 Rank counts:`, this.rankCounts);
-        console.log(`🃏 Suit counts:`, this.suitCounts);
-        console.log(`🎯 Total possible hands: ${this.total}`);
-
-        const relevant = this.getRelevantHandsForWildOptimization();
-        console.log(`🔥 Relevant for wild optimization: ${relevant.total}`);
-        Object.entries(relevant.categories).forEach(([type, count]) => {
-            console.log(`   ${type}: ${count}`);
-        });
-
-        console.log(`🏆 Summary:`, this.summary());
-        console.log(`========================================`);
-    }
+//    debugInfo() {
+//        console.log(`\n🔍 ======== ANALYSIS DEBUG INFO ========`);
+//        console.log(`📊 ${this.totalCards} cards analyzed`);
+//        console.log(`📋 Rank counts:`, this.rankCounts);
+//        console.log(`🃏 Suit counts:`, this.suitCounts);
+//        console.log(`🎯 Total possible hands: ${this.total}`);
+//
+//        const relevant = this.getRelevantHandsForWildOptimization();
+//        console.log(`🔥 Relevant for wild optimization: ${relevant.total}`);
+//        Object.entries(relevant.categories).forEach(([type, count]) => {
+//            console.log(`   ${type}: ${count}`);
+//        });
+//
+//        console.log(`🏆 Summary:`, this.summary());
+//        console.log(`========================================`);
+//    }
 }
 
 // Export for use in other modules

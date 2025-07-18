@@ -128,7 +128,7 @@ function evaluateHand(cards) {
         return { rank: 3, hand_rank: hand_rank.slice(), name: 'Three of a Kind' };
     }
 
-    console.log('Two Pair debug 1:', { valuesByCount, pairs: valuesByCount[2] });
+//    console.log('Two Pair debug 1:', { valuesByCount, pairs: valuesByCount[2] });
 
     // This block covers both pair and two pair (highest count of cards is 2)
     if (counts[0] === 2) {
@@ -140,7 +140,7 @@ function evaluateHand(cards) {
             hand_rank[2] = Math.min(...pairs);
             hand_rank[3] = valuesByCount[1] ? valuesByCount[1][0] : 0;
 
-            console.log('Two Pair debug 2:', { pairs, higherPair, lowerPair, kicker });
+//            console.log('Two Pair debug 2:', { pairs, higherPair, lowerPair, kicker });
 
             return { rank: 2, hand_rank: hand_rank.slice(), name: 'Two Pair' };
         } else {

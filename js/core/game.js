@@ -337,26 +337,26 @@ class ChinesePokerGame {
 
         if (!playerData) return;
 
-        // ADD THIS TEST HERE (where playerData exists):
-        if (playerData.back.length === 5) {
-            console.log('\n🧪 Testing HandDetector on 5 cards:');
-            console.log('Input cards:', playerData.back);
-
-            const detector = new HandDetector(playerData.back);
-            const results = detector.detectAllHands();
-
-            console.log('HandDetector results:');
-            console.log('Total hands found:', results.total);
-            console.log('All hands:', results.hands);
-
-            if (results.hands && results.hands.length > 0) {
-                console.log('First hand (Hand Model):', results.hands[0]);
-                console.log('Has validPositions?', !!results.hands[0].validPositions);
-                console.log('Has isIncomplete?', !!results.hands[0].isIncomplete);
-            } else {
-                console.log('⚠️ No hands detected!');
-            }
-        }
+//        // ADD THIS TEST HERE (where playerData exists):
+//        if (playerData.back.length === 5) {
+//            console.log('\n🧪 Testing HandDetector on 5 cards:');
+//            console.log('Input cards:', playerData.back);
+//
+//            const detector = new HandDetector(playerData.back);
+//            const results = detector.detectAllHands();
+//
+////            console.log('HandDetector results:');
+////            console.log('Total hands found:', results.total);
+////            console.log('All hands:', results.hands);
+//
+////            if (results.hands && results.hands.length > 0) {
+////                console.log('First hand (Hand Model):', results.hands[0]);
+////                console.log('Has validPositions?', !!results.hands[0].validPositions);
+////                console.log('Has isIncomplete?', !!results.hands[0].isIncomplete);
+////            } else {
+////                console.log('⚠️ No hands detected!');
+////            }
+//        }
 
 
         // After this line: const playerData = this.playerHands.get(currentPlayer.name);
@@ -364,7 +364,7 @@ class ChinesePokerGame {
         if (playerData && playerData.cards.length > 0) {
             console.log(`\n🔍 Validating ${currentPlayer.name}'s cards:`);
             const analysis = new Analysis(playerData.cards);
-            analysis.debugInfo();
+//            analysis.debugInfo();
         }
 
         const backHand = document.getElementById('backHand');
@@ -544,7 +544,6 @@ class ChinesePokerGame {
         for (let start = Math.max(Analysis.getRankValue('2'), minValue - wildCount);
              start <= Math.min(Analysis.getRankValue('A') - targetLength + 1, maxValue + wildCount); start++) {
 
-        }
             const straightValues = [];
             for (let i = 0; i < targetLength; i++) {
                 straightValues.push(start + i);
@@ -552,7 +551,7 @@ class ChinesePokerGame {
 
             const needed = straightValues.filter(v => !values.includes(v)).length;
             if (needed <= wildCount) return true;
-
+        }
 
         // Check wheel straights (A-2-3-4-5-6 for 6-card, A-2-3-4-5 for 5-card, etc.)
         if (targetLength <= 6) {
@@ -636,15 +635,15 @@ class ChinesePokerGame {
         if (!playerData) return;
 
         // Before the hand evaluation section, add:
-        console.log(`\n✅ ${currentPlayer.name} submitting hands:`);
-        console.log('Back hand:', playerData.back);
-        console.log('Middle hand:', playerData.middle);
-        console.log('Front hand:', playerData.front);
+//        console.log(`\n✅ ${currentPlayer.name} submitting hands:`);
+//        console.log('Back hand:', playerData.back);
+//        console.log('Middle hand:', playerData.middle);
+//        console.log('Front hand:', playerData.front);
 
         // Analyze each hand
         if (playerData.back.length > 0) {
             const backAnalysis = new Analysis(playerData.back);
-            console.log('Back analysis:', backAnalysis.summary());
+//            console.log('Back analysis:', backAnalysis.summary());
         }
 
 
