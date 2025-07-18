@@ -264,20 +264,97 @@ class WinProbabilityData {
 // Create singleton instance
 const winProbabilityData = new WinProbabilityData();
 
+// Add this section after the class definition and before the lookup functions:
 
 
 // =============================================================================
-// LOOKUP FUNCTIONS - For integration with ScoringUtilities
+// INCOMPLETE FRONT HAND HANDLING
 // =============================================================================
+
+// Hardcoded win probabilities for incomplete front pairs (from empirical data)
+const FRONT_PAIR_WIN_PROBABILITIES = {
+    2: 0.06835,   // Pair of 2s (extrapolated)
+    3: 0.07355,   // Pair of 3s
+    4: 0.07875,   // Pair of 4s
+    5: 0.08542,   // Pair of 5s
+    6: 0.09197,   // Pair of 6s
+    7: 0.12046,   // Pair of 7s
+    8: 0.12847,   // Pair of 8s
+    9: 0.15077,   // Pair of 9s
+    10: 0.17756,  // Pair of 10s
+    11: 0.21210,  // Pair of Jacks
+    12: 0.27089,  // Pair of Queens
+    13: 0.33715,  // Pair of Kings
+    14: 0.42356   // Pair of Aces
+};
 
 /**
- * Get empirical win probability for a hand
- * @param {string} position - Position (back/middle/front)
- * @param {Array<number>} handRank - Hand rank array from handStrength.hand_rank
- * @returns {number|null} - Win probability or null if not found
+ * Handle incomplete front hands with special logic
+ * @param {Array<number>} handRank - Hand rank array
+ * @returns {number|null} - Win probability or null if not incomplete front hand
  */
-function lookupWinProbability(position, handRank) {
-    return winProbabilityData.getWinProbability(position, handRank);
+function handleIncompleteFrontHand(handRank) {
+    if (handRank.length >= 2) {
+        const handType = handRank[0];
+        const primaryRank = handRank[1];
+
+        // Handle incomplete pairs in front position
+        if (handType === 2) {
+            return FRONT_PAIR_WIN_PROBABILITIES[primaryRank] || 0.05;
+        }
+
+        // Handle incomplete high cards in front position
+        if (handType === 1) {
+            const baseProb = 0.02; // Lower than worst pair
+            const rankBonus = (primaryRank - 2) * 0.002; // Small rank scaling
+            return baseProb + rankBonus;
+        }
+    }
+
+    return null; // Not an incomplete front hand
+}
+
+/**
+ * Get empirical win probability with complete hand model
+ * @param {string} position - Position (back/middle/front)
+ * @param {Object} hand - Complete hand object with isIncomplete, hand_rank, etc.
+ * @returns {number|null} - Win probability or null if no fallback found
+ */
+function lookupWinProbability(position, hand) {
+    // Extract hand_rank for compatibility
+    const handRank = hand.hand_rank || hand;
+
+    // SPECIAL HANDLING: Incomplete front hands
+    if (position.toLowerCase() === 'front' && hand.isIncomplete) {
+        const incompleteProbability = handleIncompleteFrontHand(handRank);
+        if (incompleteProbability !== null) {
+            return incompleteProbability;
+        }
+    }
+
+    // SPECIAL HANDLING: Incomplete middle/back hands get zero probability
+    if ((position.toLowerCase() === 'middle' || position.toLowerCase() === 'back') && hand.isIncomplete) {
+        return 0.01;
+    }
+
+    // Try hierarchical fallback - progressively truncate tuple
+    for (let length = handRank.length; length >= 1; length--) {
+        let truncatedTuple = handRank.slice(0, length);
+        let probability = winProbabilityData.getWinProbability(position, truncatedTuple);
+
+        if (probability !== null) {
+            // Optional: Log fallback level for debugging (comment out to reduce noise)
+            // if (length < handRank.length) {
+            //     console.log(`🎯 Hierarchical match: level ${length}/${handRank.length} for ${position} [${handRank.join(',')}] → [${truncatedTuple.join(',')}]`);
+            // }
+
+            return probability;
+        }
+    }
+
+    // No match found at any level (comment out to reduce noise)
+    // console.warn('🚨 No hierarchical match found for:', position, handRank);
+    return null; // Let ScoringUtilities handle the final fallback
 }
 
 /**

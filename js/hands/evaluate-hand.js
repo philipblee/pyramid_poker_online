@@ -15,7 +15,7 @@ function evaluateHand(cards) {
 
     if (uniqueValues.size === 1) {
         // All same rank
-        const rank = values[0];
+        const rank = values[0,0,0,0,0,0];
     const sameRankRating = 10 + (cards.length - 5) * 2; // 6→12, 7→14, 8→16
     return { rank: sameRankRating - 1, hand_rank: [sameRankRating, rank], name: `${cards.length} of a Kind` };
     }
@@ -119,29 +119,48 @@ function evaluateHand(cards) {
         return { rank: 4, hand_rank: [5, straightInfo.high, straightInfo.low], name: 'Straight' };
     }
 
+    // Three of a Kind
     if (counts[0] === 3) {
-        // Three of a Kind: [4, trips_rank, kicker1, kicker2]
-        const tripsRank = valuesByCount[3][0];
-        const kickers = valuesByCount[1] ? valuesByCount[1].slice(0, 2) : [];
-        return { rank: 3, hand_rank: [4, tripsRank, ...kickers], name: 'Three of a Kind' };
+        hand_rank[0] = 4;
+        hand_rank[1] = valuesByCount[3][0]; // trips rank
+        hand_rank[2] = valuesByCount[1] ? valuesByCount[1][0] : 0; // first kicker
+        hand_rank[3] = valuesByCount[1] && valuesByCount[1][1] ? valuesByCount[1][1] : 0; // second kicker
+        return { rank: 3, hand_rank: hand_rank.slice(), name: 'Three of a Kind' };
     }
 
+    console.log('Two Pair debug 1:', { valuesByCount, pairs: valuesByCount[2] });
+
+    // This block covers both pair and two pair (highest count of cards is 2)
     if (counts[0] === 2) {
-        // Check if we have two pairs
         if (valuesByCount[2] && valuesByCount[2].length >= 2) {
             // Two Pair: [3, higher_pair, lower_pair, kicker]
             const pairs = valuesByCount[2];
-            const higherPair = Math.max(...pairs);
-            const lowerPair = Math.min(...pairs);
-            const kicker = valuesByCount[1] ? valuesByCount[1][0] : 0;
-            return { rank: 2, hand_rank: [3, higherPair, lowerPair, kicker], name: 'Two Pair' };
+            hand_rank[0] = 3;
+            hand_rank[1] = Math.max(...pairs);
+            hand_rank[2] = Math.min(...pairs);
+            hand_rank[3] = valuesByCount[1] ? valuesByCount[1][0] : 0;
+
+            console.log('Two Pair debug 2:', { pairs, higherPair, lowerPair, kicker });
+
+            return { rank: 2, hand_rank: hand_rank.slice(), name: 'Two Pair' };
         } else {
             // Single Pair: [2, pair_rank, kicker1, kicker2, kicker3]
-            const pairRank = valuesByCount[2][0];
-            const kickers = valuesByCount[1] ? valuesByCount[1].slice(0, 3) : [];
-            return { rank: 1, hand_rank: [2, pairRank, ...kickers], name: 'Pair' };
+            hand_rank[0] = 2;
+            hand_rank[1] = valuesByCount[2][0];
+            hand_rank[2] = valuesByCount[1] ? valuesByCount[1][0] : 0;
+            hand_rank[3] = valuesByCount[1] && valuesByCount[1][1] ? valuesByCount[1][1] : 0;
+            hand_rank[4] = valuesByCount[1] && valuesByCount[1][2] ? valuesByCount[1][2] : 0;
+            return { rank: 1, hand_rank: hand_rank.slice(), name: 'Pair' };
         }
     }
+
+    // High Card (already looks correct but make sure)
+    hand_rank[0] = 1;
+    for (let i = 0; i < 5 && i < values.length; i++) {
+        hand_rank[i + 1] = values[i];
+    }
+    return { rank: 0, hand_rank: hand_rank.slice(), name: 'High Card' };
+
 
     // High Card: [1, high, second, third, fourth, fifth]
     return { rank: 0, hand_rank: [1, ...values], name: 'High Card' };

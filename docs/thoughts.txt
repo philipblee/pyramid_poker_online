@@ -45,3 +45,8 @@ const results = Batch.playHandStats(50);
 // adds download after running playHandStats
 const results = Batch.playHandStats(1000);
 Batch.downloadResults(results, 'pyramid-poker-1000-rounds.json');
+
+current data 2,000 round 12,000 hands - not enough
+next data set 12,000 rounds 72,000 hands
+better data will create better setups, better setups will improve data
+run again, to get better setups. etc.

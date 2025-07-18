@@ -64,6 +64,30 @@ class FindBestSetupNoWild {
 
         // console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
 
+        // Re-evaluate hands with complete cards using card-evaluation.js functions
+        const reEvaluatedBack = evaluateHand(backCards);  // Always returns proper hand_rank
+        const reEvaluatedMiddle = evaluateHand(middleCards);
+        const reEvaluatedFront = evaluateThreeCardHand(frontCards);  // For 3-card front hands
+
+        // Update the arrangement objects with the new hand data
+        arrangement.back.handStrength = reEvaluatedBack;
+        arrangement.back.hand_rank = reEvaluatedBack.hand_rank;
+        arrangement.back.strength = reEvaluatedBack.rank;
+
+        arrangement.middle.handStrength = reEvaluatedMiddle;
+        arrangement.middle.hand_rank = reEvaluatedMiddle.hand_rank;
+        arrangement.middle.strength = reEvaluatedMiddle.rank;
+
+        arrangement.front.handStrength = reEvaluatedFront;
+        arrangement.front.hand_rank = reEvaluatedFront.hand_rank;
+        arrangement.front.strength = reEvaluatedFront.rank;
+
+//        console.log('Hand scores:', {
+//            back: `${backHand.handType} (incomplete: ${backHand.isIncomplete}) = ${backScore}`,
+//            middle: `${middleHand.handType} (incomplete: ${middleHand.isIncomplete}) = ${middleScore}`,
+//            front: `${frontHand.handType} (incomplete: ${frontHand.isIncomplete}) = ${frontScore}`
+//        });
+
         // After adding all kickers, calculate remaining staging cards
         const remainingCards = unusedCards.slice(kickerIndex);
 
@@ -230,8 +254,8 @@ class FindBestSetupNoWild {
      * @returns {number} - Partial score using actual Pyramid Poker points
      */
     calculatePartialScore(backHand, middleHand) {
-        const backScore = ScoringUtilities.getExpectedPoints(backHand.handStrength, backHand.cards, 'back');
-        const middleScore = ScoringUtilities.getExpectedPoints(middleHand.handStrength, middleHand.cards, 'middle');
+        const backScore = ScoringUtilities.getExpectedPoints(backHand, backHand.cards, 'back');
+        const middleScore = ScoringUtilities.getExpectedPoints(middleHand, middleHand.cards, 'middle');
         return backScore + middleScore;
     }
 
@@ -263,7 +287,7 @@ class FindBestSetupNoWild {
         for (let i = startIdx; i < Math.min(startIdx + 50, sortedHands.length); i++) {
             const hand = sortedHands[i];
             if (this.canUseInPosition(hand, 'front')) {
-                return ScoringUtilities.getExpectedPoints(hand.handStrength, hand.cards, 'front');
+                return ScoringUtilities.getExpectedPoints(hand, hand.cards, 'front');
             }
         }
         return 0;
@@ -294,7 +318,7 @@ class FindBestSetupNoWild {
 
     getHandScore(hand, position) {
        // Use expected value (probability × points) for better optimization
-        return ScoringUtilities.getExpectedPoints(hand.handStrength, hand.cards, position);
+        return ScoringUtilities.getExpectedPoints(hand, hand.cards, position);
 }
 
     /**

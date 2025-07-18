@@ -114,13 +114,32 @@
 
     <!-- JavaScript Files -->
 
+<!-- Near the bottom of index.html, before closing </body> -->
+<script>
+// Existing game initialization
+window.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Initializing Pyramid Poker...');
+
+    // Load win probability data FIRST
+    const dataLoaded = await initializeWinProbabilityData();
+    if (dataLoaded) {
+        console.log('✅ Win probability data ready (30,868 entries)');
+    } else {
+        console.log('⚠️ Using fallback probability estimates');
+    }
+
+    // Continue with existing game setup
+    // ... your existing initialization code
+});
+</script>
+
     <!-- Core dependencies first -->
     <script src="js/constants/hand-types.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/utilities/card-count.js"></script>
     <script src="js/utilities/win-probability-data.js"></script>
     <script src="js/utilities/convert-to-card-model.js"></script>
-    <script src="js/hands/evaluate-hands.js"></script>
+    <script src="js/hands/evaluate-hand.js"></script>
     <script src="js/hands/scoring-utilities.js"></script>
     <script src="js/core/player.js"></script>
     <script src="js/core/deck.js"></script>
@@ -166,6 +185,7 @@
     <script src="js/hands/auto-arrange.js"></script>
 
     <script src="js/tests/test-execution.js"></script>
+    <script src="js/tests/unittest-hand-detector.js"></script>
     <script src="js/tests/create-from-cards-test-case.js"></script>
     <script src="js/utilities/analyze-cards.js"></script>
     <script src="js/arrange/one-wild-candidates.js"></script>

@@ -189,12 +189,16 @@ class ScoringUtilities {
      * @param {number} playerCount - Number of players (default 4)
      * @returns {number} - Expected points (empirical_probability × points)
      */
-    static getExpectedPointsEmpirical(handStrength, cards, position, playerCount = 4) {
+    static getExpectedPointsEmpirical(hand, cards, position, playerCount = 4) {
+
+        // Extract handStrength from the complete hand object
+        const handStrength = hand.handStrength;
+
         // Get base points if win
-        const pointsIfWin = this.getPointsForHand(handStrength, position, cards.length);
+        const pointsIfWin = this.getPointsForHand(hand.handStrength, position, cards.length);
 
         // Get empirical win probability from your 6,000 hands data
-        const empiricalProbability = lookupWinProbability(position, handStrength.hand_rank);
+        const empiricalProbability = lookupWinProbability(position, hand);
 
         let winProbability;
         if (empiricalProbability !== null) {

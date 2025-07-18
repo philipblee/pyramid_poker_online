@@ -367,24 +367,30 @@ class HandDetector {
         generateCombos(0, []);
     }
 
+        // Detect two pairs using existing pair hands
+        detectTwoPairs() {
+            const pairs = this.allHands.filter(h => h.handType === 'Pair');
+//            console.log(`👥 Two pair detection: ${pairs.length} pairs available`);
 
-    // Detect two pairs using existing pair hands
-    detectTwoPairs() {
-        const pairs = this.allHands.filter(h => h.handType === 'Pair');
-        // console.log(`👥 Two pair detection: ${pairs.length} pairs available`);
+            let twoPairCount = 0;
+            if (pairs.length >= 2) {
+                for (let i = 0; i < pairs.length; i++) {
+                    for (let j = i + 1; j < pairs.length; j++) {
+                        // ADD THIS CHECK BEFORE COMBINING:
+                        const hasSharedCards = pairs[i].cards.some(card1 =>
+                            pairs[j].cards.some(card2 => card1.id === card2.id)
+                        );
 
-        let twoPairCount = 0;
-        if (pairs.length >= 2) {
-            for (let i = 0; i < pairs.length; i++) {
-                for (let j = i + 1; j < pairs.length; j++) {
-                    const twoPair = [...pairs[i].cards, ...pairs[j].cards];
-                    this.addHand(twoPair, 'Two Pair');
-                    twoPairCount++;
+                        if (!hasSharedCards) {  // Only combine if no shared cards
+                            const twoPair = [...pairs[i].cards, ...pairs[j].cards];
+                            this.addHand(twoPair, 'Two Pair');
+                            twoPairCount++;
+                        }
+                    }
                 }
             }
+//            console.log(`👥 Created ${twoPairCount} two pair hands`);
         }
-        // console.log(`👥 Created ${twoPairCount} two pair hands`);
-    }scratch
 
 
     // Detect straights using consecutive rank counts
@@ -579,6 +585,7 @@ class HandDetector {
                 hand_rank: [1, highCard],  // [1=High Card type, card value]
                 name: 'High Card'
             };
+
         } else if (cards.length === 2 && handType === 'Pair') {
             // Fix 2-card Pair hands
             const pairRank = cards[0].value;
@@ -587,6 +594,11 @@ class HandDetector {
                 hand_rank: [2, pairRank],  // [2=Pair type, pair rank]
                 name: 'Pair'
             };
+
+        } else if (cards.length === 4 && handType === 'Four of a Kind') {
+            // Handle 4-card Four of a Kind - let evaluateHand handle it properly
+            handStrength = evaluateHand(cards);
+
         } else if (cards.length === 4 && handType === 'Two Pair') {
             // Fix 4-card Two Pair hands
             const values = cards.map(c => c.value).sort((a, b) => b - a);
@@ -596,6 +608,14 @@ class HandDetector {
                 .filter(([rank, count]) => count === 2)
                 .map(([rank, count]) => parseInt(rank))
                 .sort((a, b) => b - a);
+
+//            console.log('Two Pair Debug in addHand:', {
+//                cards: cards.map(c => `${c.rank}${c.suit}`),
+//                values,
+//                valueCounts,
+//                pairs,
+//                pairsLength: pairs.length
+//            });
 
             handStrength = {
                 rank: 2,
