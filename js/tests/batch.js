@@ -123,7 +123,7 @@ class Batch {
 
     // Add to Batch class
     static playHandStats(handCount = 100, options = {}) {
-        console.log(`🎲 ======== BATCH HAND STATS: ${handCount} HANDS ========`);
+        console.log(`🎲 ======== BATCH STATS: ${handCount} ROUNDS ========`);
 
         const allResults = [];
         const startTime = performance.now();

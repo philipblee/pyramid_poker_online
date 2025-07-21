@@ -263,23 +263,6 @@ class FindBestSetupNoWild {
      * Estimate maximum possible front score for pruning
      * @param {Array} sortedHands - All hands
      * @param {number} startIdx - Index to start searching from
-     * @returns {number} - Estimated maximum front score
-     */
-//    estimateMaxFrontScore(sortedHands, startIdx) {
-//        // Simple estimate: strongest hand that could be front
-//        for (let i = startIdx; i < Math.min(startIdx + 50, sortedHands.length); i++) {
-//            const hand = sortedHands[i];
-//            if (this.canUseInPosition(hand, 'front')) {
-//                return hand.strength || 0;
-//            }
-//        }
-//        return 0;
-//    }
-
-    /**
-     * Estimate maximum possible front score for pruning
-     * @param {Array} sortedHands - All hands
-     * @param {number} startIdx - Index to start searching from
      * @returns {number} - Estimated maximum front score using actual Pyramid Poker points
      */
     estimateMaxFrontScore(sortedHands, startIdx) {
@@ -319,7 +302,7 @@ class FindBestSetupNoWild {
     getHandScore(hand, position) {
        // Use expected value (probability × points) for better optimization
         return ScoringUtilities.getExpectedPoints(hand, hand.cards, position);
-}
+    }
 
     /**
      * Check if search should terminate early

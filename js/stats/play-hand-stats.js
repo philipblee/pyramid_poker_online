@@ -89,7 +89,20 @@ class PlayHandStats {
                 summary: this.generateHandSummary(playerData, scoringResults)
             };
 
-            console.log(`✅ Hand complete in ${(endTime - startTime).toFixed(1)}ms`);
+            // console.log(`✅ Hand complete in ${(endTime - startTime).toFixed(1)}ms`);
+
+            // Find the winning player (highest roundScore)
+            const winningPlayer = playerData.reduce((winner, player) =>
+                player.roundScore > winner.roundScore ? player : winner
+            );
+
+            const arrangement = winningPlayer?.arrangement?.arrangement;
+            const handTypes = arrangement
+                ? `${arrangement.back.handType}, ${arrangement.middle.handType}, ${arrangement.front.handType}`
+                : 'no arrangement';
+
+            console.log(`✅ Done ${(endTime - startTime).toFixed(1)}ms - Winner: ${winningPlayer.name} (${handTypes})`);
+
             return handStats;
 
         } catch (error) {

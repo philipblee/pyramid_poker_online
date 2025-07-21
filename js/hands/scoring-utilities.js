@@ -118,36 +118,7 @@ class ScoringUtilities {
     // EXPECTED VALUE CALCULATION
     // =============================================================================
 
-    //    static getExpectedPoints(handStrength, cards, position, playerCount = 4) {
-    //        // Expected points = (Win Probability) × (Points if Win)
-    //        const winProbability = this.estimateWinProbability(handStrength, position, playerCount);
-    //        const pointsIfWin = this.getPointsForHand(handStrength, position, cards.length);
-    //
-    //        return winProbability * pointsIfWin;
-    //    }
-
-//    /**
-//     * Get expected points with optional empirical data usage
-//     * @param {Object} handStrength - Hand strength object with hand_rank
-//     * @param {Object} cards - Cards object with length property
-//     * @param {string} position - Position (back/middle/front)
-//     * @param {number} playerCount - Number of players (default 4)
-//     * @param {boolean} useEmpirical - Use empirical data if true (default false)
-//     * @returns {number} - Expected points
-//     */
-//    static getExpectedPoints(handStrength, cards, position, playerCount = 4, useEmpirical = true) {
-//        if (useEmpirical) {
-//            // Use empirical method
-//            return this.getExpectedPointsEmpirical(handStrength, cards, position, playerCount);
-//        }
-//
-//        // Original method (current behavior)
-//        const pointsIfWin = this.getPointsForHand(handStrength, position, cards.length);
-//        const strengthBonus = this.calculateTiebreaker(handStrength.hand_rank);
-//        return pointsIfWin + strengthBonus;
-//    }
-
-    static getExpectedPoints(handStrength, cards, position, playerCount = 4, method = null) {
+    static getExpectedPoints(hand, cards, position, playerCount = 4, method = null) {
         // Handle legacy boolean parameters for backward compatibility
         if (method === true) method = 'empirical';
         if (method === false) method = 'points';
@@ -160,27 +131,16 @@ class ScoringUtilities {
 
         switch(actualMethod) {
             case 'empirical':
-                return this.getExpectedPointsEmpirical(handStrength, cards, position, playerCount);
-            case 'tuple':
-                return this.getExpectedPointsTuple(handStrength, cards, position, playerCount);
+                return this.getExpectedPointsEmpirical(hand, cards, position, playerCount);
+            case 'tiered':
+                return this.getExpectedPointsTiered(hand, cards, position, playerCount);
             case 'points':
             default:
-                const pointsIfWin = this.getPointsForHand(handStrength, position, cards.length);
-                const strengthBonus = this.calculateTiebreaker(handStrength.hand_rank);
+                const pointsIfWin = this.getPointsForHand(hand, position, cards.length);
+                const strengthBonus = this.calculateTiebreaker(hand.hand_rank);
                 return pointsIfWin + strengthBonus;
         }
     }
-
-
-//    static getExpectedPoints(handStrength, cards, position, playerCount = 4) {
-//        // Skip broken probability - just use base points for now
-//        const pointsIfWin = this.getPointsForHand(handStrength, position, cards.length);
-//
-//        // Add universal tiebreaker
-//        const strengthBonus = this.calculateTiebreaker(handStrength.hand_rank);
-//
-//        return pointsIfWin + strengthBonus;
-//    }
 
 
     // =============================================================================
@@ -243,7 +203,7 @@ class ScoringUtilities {
         return expectedPoints + tiebreaker;
     }
 
-    // =============================================================================
+    // ========================================================================git =====
     // VALIDATION HELPERS
     // =============================================================================
 
