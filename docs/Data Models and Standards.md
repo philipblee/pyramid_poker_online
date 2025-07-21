@@ -1,6 +1,4 @@
-Pyramid Poker Online - Data Models and Standards.md
-
-# Pyramid Poker Online - Data Models and Standards
+## Pyramid Poker Online - Data Models and Standards
 
 This document defines the canonical data formats (schemas) used throughout the Pyramid 
 Poker Online application. All modules should conform to these standard models to ensure 

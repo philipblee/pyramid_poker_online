@@ -13,6 +13,9 @@ class GameConfig {
             // Deck settings
             deckCount: 2,                   // Number of standard decks (1-3)
 
+            // Win probability method
+            winProbabilityMethod: 'empirical',  // 'points', 'empirical', 'tuple'
+
             // Future expansion options (commented out for now)
             // maxPlayers: 4,               // Maximum players (2-6)
             // frontHandOptions: [3, 5],    // Allowed front hand sizes

@@ -126,26 +126,51 @@ class ScoringUtilities {
     //        return winProbability * pointsIfWin;
     //    }
 
-    /**
-     * Get expected points with optional empirical data usage
-     * @param {Object} handStrength - Hand strength object with hand_rank
-     * @param {Object} cards - Cards object with length property
-     * @param {string} position - Position (back/middle/front)
-     * @param {number} playerCount - Number of players (default 4)
-     * @param {boolean} useEmpirical - Use empirical data if true (default false)
-     * @returns {number} - Expected points
-     */
-    static getExpectedPoints(handStrength, cards, position, playerCount = 4, useEmpirical = true) {
-        if (useEmpirical) {
-            // Use empirical method
-            return this.getExpectedPointsEmpirical(handStrength, cards, position, playerCount);
-        }
+//    /**
+//     * Get expected points with optional empirical data usage
+//     * @param {Object} handStrength - Hand strength object with hand_rank
+//     * @param {Object} cards - Cards object with length property
+//     * @param {string} position - Position (back/middle/front)
+//     * @param {number} playerCount - Number of players (default 4)
+//     * @param {boolean} useEmpirical - Use empirical data if true (default false)
+//     * @returns {number} - Expected points
+//     */
+//    static getExpectedPoints(handStrength, cards, position, playerCount = 4, useEmpirical = true) {
+//        if (useEmpirical) {
+//            // Use empirical method
+//            return this.getExpectedPointsEmpirical(handStrength, cards, position, playerCount);
+//        }
+//
+//        // Original method (current behavior)
+//        const pointsIfWin = this.getPointsForHand(handStrength, position, cards.length);
+//        const strengthBonus = this.calculateTiebreaker(handStrength.hand_rank);
+//        return pointsIfWin + strengthBonus;
+//    }
 
-        // Original method (current behavior)
-        const pointsIfWin = this.getPointsForHand(handStrength, position, cards.length);
-        const strengthBonus = this.calculateTiebreaker(handStrength.hand_rank);
-        return pointsIfWin + strengthBonus;
+    static getExpectedPoints(handStrength, cards, position, playerCount = 4, method = null) {
+        // Handle legacy boolean parameters for backward compatibility
+        if (method === true) method = 'empirical';
+        if (method === false) method = 'points';
+
+        // Priority: passed parameter > console override > config setting > default
+        const actualMethod = method ||
+                            window.WIN_PROB_OVERRIDE ||
+                            window.gameConfig?.config?.winProbabilityMethod ||
+                            'empirical';
+
+        switch(actualMethod) {
+            case 'empirical':
+                return this.getExpectedPointsEmpirical(handStrength, cards, position, playerCount);
+            case 'tuple':
+                return this.getExpectedPointsTuple(handStrength, cards, position, playerCount);
+            case 'points':
+            default:
+                const pointsIfWin = this.getPointsForHand(handStrength, position, cards.length);
+                const strengthBonus = this.calculateTiebreaker(handStrength.hand_rank);
+                return pointsIfWin + strengthBonus;
+        }
     }
+
 
 //    static getExpectedPoints(handStrength, cards, position, playerCount = 4) {
 //        // Skip broken probability - just use base points for now
