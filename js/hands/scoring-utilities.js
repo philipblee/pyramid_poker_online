@@ -183,7 +183,7 @@ class ScoringUtilities {
         const pointsIfWin = this.getPointsForHand(hand.handStrength, position, cards.length);
 
         // Get empirical win probability from your 6,000 hands data
-        const empiricalProbability = lookupWinProbability(position, hand);
+        const empiricalProbability = lookupEmpiricalWinProbability(position, hand);
 
         let winProbability;
         if (empiricalProbability !== null) {
