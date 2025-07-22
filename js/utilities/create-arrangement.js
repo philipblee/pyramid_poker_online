@@ -23,14 +23,14 @@ function createArrangement(back, middle, front, score, stagingCards, isValid = t
     };
 }
 
-function createFindBestSetupNoWild(flag, data, options) {
+function createFindBestSetupNoWild(flag) {
   switch (flag) {
     case 'points':
-        return new OFindBestSetupNoWildPoints(data, options);
+        return new FindBestSetupNoWildPoints();
     case 'tiered':
-        return new FindBestSetupNoWildTiered(data, options);
+        return new FindBestSetupNoWildTiered();
     case 'empirical':
     default:
-        return new FindBestSetupNoWild(data, options);
+        return new FindBestSetupNoWild();
   }
 }

@@ -240,6 +240,29 @@ class ScoringUtilities {
         return expectedPoints;
     }
 
+        /**
+         * Get expected points using points only - no probability
+         * @param {Object} handStrength - Hand strength object with hand_rank
+         * @param {Object} cards - Cards object with length property
+         * @param {string} position - Position (back/middle/front)
+         * @param {number} playerCount - Number of players (default 4)
+         * @returns {number} - Expected points
+         */
+        static getExpectedPointsPoints(hand, cards, position, playerCount = 4) {
+
+            // Extract handStrength from the complete hand object
+            const handStrength = hand.handStrength;
+
+            // Get base points if win
+            const pointsIfWin = this.getPointsForHand(hand.handStrength, position, cards.length);
+
+            // Expected points = probability × points
+            const expectedPoints = pointsIfWin;
+
+            return expectedPoints;
+        }
+
+
     // ========================================================================git =====
     // VALIDATION HELPERS
     // =============================================================================

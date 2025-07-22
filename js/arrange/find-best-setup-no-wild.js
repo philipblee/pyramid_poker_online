@@ -62,7 +62,7 @@ class FindBestSetupNoWildBase {
             // console.log(`🃏 Added ${needed} kickers to front hand`);
         }
 
-        // console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
+        console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
 
         // Re-evaluate hands with complete cards using card-evaluation.js functions
         const reEvaluatedBack = evaluateHand(backCards);  // Always returns proper hand_rank
@@ -102,7 +102,8 @@ class FindBestSetupNoWildBase {
      * @returns {Object} - Best arrangement with score and statistics
      */
      findBestSetupNoWild(allCards) {
-        // console.log(`🎯 FindBestSetupNoWild: Finding optimal setup from 17 cards...`);
+
+       console.log(`🎯 FindBestSetupNoWild: Finding optimal setup from 17 cards...`);
 
         // NEW: Call hand-detector first
         const handDetector = new HandDetector(allCards);
@@ -380,7 +381,7 @@ class FindBestSetupNoWildPoints extends FindBestSetupNoWildBase {
      */
     getHandScore(hand, position) {
        // Use expected value (probability × points) for better optimization
-        return ScoringUtilities.getExpectedPoints(hand, hand.cards, position);
+        return ScoringUtilities.getExpectedPointsPoints(hand, hand.cards, position);
     }
 
     /**
@@ -390,8 +391,8 @@ class FindBestSetupNoWildPoints extends FindBestSetupNoWildBase {
      * @returns {number} - Partial score using actual Pyramid Poker points
      */
     calculatePartialScore(backHand, middleHand) {
-        const backScore = ScoringUtilities.getExpectedPoints(backHand, backHand.cards, 'back');
-        const middleScore = ScoringUtilities.getExpectedPoints(middleHand, middleHand.cards, 'middle');
+        const backScore = ScoringUtilities.getExpectedPointsPoints(backHand, backHand.cards, 'back');
+        const middleScore = ScoringUtilities.getExpectedPointsPoints(middleHand, middleHand.cards, 'middle');
         return backScore + middleScore;
     }
 
@@ -406,18 +407,18 @@ class FindBestSetupNoWildPoints extends FindBestSetupNoWildBase {
         for (let i = startIdx; i < Math.min(startIdx + 50, sortedHands.length); i++) {
             const hand = sortedHands[i];
             if (this.canUseInPosition(hand, 'front')) {
-                return ScoringUtilities.getExpectedPoints(hand, hand.cards, 'front');
+                return ScoringUtilities.getExpectedPointsPoints(hand, hand.cards, 'front');
             }
         }
         return 0;
     }
-
 }
 
 
 // Tiered subclass
 class FindBestSetupNoWildTiered extends FindBestSetupNoWildBase {
 
+//    console.log('🔍 Enter Tiered:');
     /**
      * Get score for a hand in a specific position
      * @param {Object} hand - Hand object
@@ -427,7 +428,7 @@ class FindBestSetupNoWildTiered extends FindBestSetupNoWildBase {
 
     getHandScore(hand, position) {
        // Use expected value (probability × points) for better optimization
-        return getExpectedPointsTiered(hand, hand.cards, position);
+        return ScoringUtilities.getExpectedPointsTiered();
     }
 
     /**
@@ -437,8 +438,8 @@ class FindBestSetupNoWildTiered extends FindBestSetupNoWildBase {
      * @returns {number} - Partial score using actual Pyramid Poker points
      */
     calculatePartialScore(backHand, middleHand) {
-        const backScore = getExpectedPointsTiered(backHand, backHand.cards, 'back');
-        const middleScore = getExpectedPointsTiered(middleHand, middleHand.cards, 'middle');
+        const backScore = ScoringUtilities.getExpectedPointsTiered(backHand, backHand.cards, 'back');
+        const middleScore = ScoringUtilities.getExpectedPointsTiered(middleHand, middleHand.cards, 'middle');
         return backScore + middleScore;
     }
 
@@ -453,7 +454,7 @@ class FindBestSetupNoWildTiered extends FindBestSetupNoWildBase {
         for (let i = startIdx; i < Math.min(startIdx + 50, sortedHands.length); i++) {
             const hand = sortedHands[i];
             if (this.canUseInPosition(hand, 'front')) {
-                return getExpectedPointsTiered(hand, hand.cards, 'front');
+                return ScoringUtilities.getExpectedPointsTiered(hand, hand.cards, 'front');
             }
         }
         return 0;

@@ -252,7 +252,7 @@ const tieredWinProbability = new TieredWinProbability();
  * @param {Object} hand - Complete hand object with isIncomplete, hand_rank, etc.
  * @returns {number|null} - Win probability or null if no fallback found
  */
-function lookupEmpiricalWinProbability(position, hand) {
+function lookupTieredWinProbability(position, hand) {
     // Extract hand_rank for compatibility
     const handRank = hand.hand_rank || hand;
 
