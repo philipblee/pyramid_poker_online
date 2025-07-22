@@ -16,6 +16,11 @@ class ScoringUtilities {
         // Front hand scoring (3-5 cards)
         if (handName.includes('three of a kind')) return 3;
         if (handName.includes('straight flush')) return 15;
+        if (handName.includes('flush')) {
+//            console.log('FOUND FLUSH IN FRONT!');
+//            console.trace('Call stack for flush return');  // Shows where this was called from
+            return 4;
+            }
         if (handName.includes('flush')) return 4;
         if (handName.includes('straight') && !handName.includes('straight flush')) return 4;
         if (handName.includes('full house')) return 5;
@@ -138,6 +143,13 @@ class ScoringUtilities {
             default:
                 const pointsIfWin = this.getPointsForHand(hand, position, cards.length);
                 const strengthBonus = this.calculateTiebreaker(hand.hand_rank);
+
+//                // Add logging here:
+//                console.log('🔍 Points breakdown:');
+//                console.log('  pointsIfWin:', pointsIfWin);
+//                console.log('  strengthBonus:', strengthBonus);
+//                console.log('  total:', pointsIfWin + strengthBonus);
+
                 return pointsIfWin + strengthBonus;
         }
     }

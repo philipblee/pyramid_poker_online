@@ -76,7 +76,13 @@ function FindBestSetupOneWild(cardObjects) {
             const detector = new HandDetector(cards);
             const handResults = detector.results;
 
-            const finder = new FindBestSetupNoWild();
+            // Updated calling program
+            const flag = 'empirical';  // Could come from config, env var, user input, etc.
+            const finder = createFindBestSetupNoWild(flag, [cards]);
+//            console.log(instance.calculateScore()); // Uses VariantA's scoring if flag is 'variantA'
+
+
+//            const finder = new FindBestSetupNoWild();
             const arrangementResult = finder.findBestSetupNoWild(cards);
 
             if (arrangementResult.success) {

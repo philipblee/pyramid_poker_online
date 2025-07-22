@@ -2,7 +2,7 @@
 // Greedy branch-and-bound algorithm to find optimal arrangement
 // Starts with strongest hands and uses pruning to avoid exhaustive search
 
-class FindBestSetupNoWild {
+class FindBestSetupNoWildBase {
     constructor() {
         this.bestScore = -Infinity;
         this.bestArrangement = null;
@@ -82,22 +82,17 @@ class FindBestSetupNoWild {
         arrangement.front.hand_rank = reEvaluatedFront.hand_rank;
         arrangement.front.strength = reEvaluatedFront.rank;
 
-//        console.log('Hand scores:', {
-//            back: `${backHand.handType} (incomplete: ${backHand.isIncomplete}) = ${backScore}`,
-//            middle: `${middleHand.handType} (incomplete: ${middleHand.isIncomplete}) = ${middleScore}`,
-//            front: `${frontHand.handType} (incomplete: ${frontHand.isIncomplete}) = ${frontScore}`
-//        });
-
         // After adding all kickers, calculate remaining staging cards
         const remainingCards = unusedCards.slice(kickerIndex);
 
-        return {
-            back: { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
-            middle: { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
-            front: { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
-            stagingCards: remainingCards  // NEW: Add staging cards to arrangement
-        };
-
+        // In completeArrangementWithKickers() - use factory
+        return createArrangement(
+            { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
+            { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
+            { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
+            null, // score calculated elsewhere
+            remainingCards  // stagingCards
+        );
     }
 
     /**
@@ -208,14 +203,16 @@ class FindBestSetupNoWild {
             const backScore = this.getHandScore(arrangement.back, 'back');
             const middleScore = this.getHandScore(arrangement.middle, 'middle');
             const frontScore = this.getHandScore(arrangement.front, 'front');
-            
-            // Store individual scores in arrangement
-            arrangement.backExpectedPoints = backScore;
-            arrangement.middleExpectedPoints = middleScore;
-            arrangement.frontExpectedPoints = frontScore;
-            
+
             const score = backScore + middleScore + frontScore;
-            
+
+            // Log what's already there:
+            console.log('🔍 No-Wild Scores:');
+            console.log('  backScore:', backScore);
+            console.log('  middleScore:', middleScore);
+            console.log('  frontScore:', frontScore);
+            console.log('  total score:', score);
+
             if (score > this.bestScore) {
                 this.bestScore = score;
                 this.bestArrangement = arrangement;
@@ -370,3 +367,105 @@ class FindBestSetupNoWild {
         };
     }
 }
+
+
+// Points subclass
+class FindBestSetupNoWildPoints extends FindBestSetupNoWildBase {
+
+    /**
+     * Get score for a hand in a specific position
+     * @param {Object} hand - Hand object
+     * @param {string} position - Position ('back', 'middle', 'front')
+     * @returns {number} - Hand score for that position
+     */
+    getHandScore(hand, position) {
+       // Use expected value (probability × points) for better optimization
+        return ScoringUtilities.getExpectedPoints(hand, hand.cards, position);
+    }
+
+    /**
+     * Calculate partial score for back + middle (for pruning)
+     * @param {Object} backHand - Back hand
+     * @param {Object} middleHand - Middle hand
+     * @returns {number} - Partial score using actual Pyramid Poker points
+     */
+    calculatePartialScore(backHand, middleHand) {
+        const backScore = ScoringUtilities.getExpectedPoints(backHand, backHand.cards, 'back');
+        const middleScore = ScoringUtilities.getExpectedPoints(middleHand, middleHand.cards, 'middle');
+        return backScore + middleScore;
+    }
+
+    /**
+     * Estimate maximum possible front score for pruning
+     * @param {Array} sortedHands - All hands
+     * @param {number} startIdx - Index to start searching from
+     * @returns {number} - Estimated maximum front score using actual Pyramid Poker points
+     */
+    estimateMaxFrontScore(sortedHands, startIdx) {
+        // Find strongest hand that could be front and calculate its actual points
+        for (let i = startIdx; i < Math.min(startIdx + 50, sortedHands.length); i++) {
+            const hand = sortedHands[i];
+            if (this.canUseInPosition(hand, 'front')) {
+                return ScoringUtilities.getExpectedPoints(hand, hand.cards, 'front');
+            }
+        }
+        return 0;
+    }
+
+}
+
+
+// Tiered subclass
+class FindBestSetupNoWildTiered extends FindBestSetupNoWildBase {
+
+    /**
+     * Get score for a hand in a specific position
+     * @param {Object} hand - Hand object
+     * @param {string} position - Position ('back', 'middle', 'front')
+     * @returns {number} - Hand score for that position
+     */
+
+    getHandScore(hand, position) {
+       // Use expected value (probability × points) for better optimization
+        return getExpectedPointsTiered(hand, hand.cards, position);
+    }
+
+    /**
+     * Calculate partial score for back + middle (for pruning)
+     * @param {Object} backHand - Back hand
+     * @param {Object} middleHand - Middle hand
+     * @returns {number} - Partial score using actual Pyramid Poker points
+     */
+    calculatePartialScore(backHand, middleHand) {
+        const backScore = getExpectedPointsTiered(backHand, backHand.cards, 'back');
+        const middleScore = getExpectedPointsTiered(middleHand, middleHand.cards, 'middle');
+        return backScore + middleScore;
+    }
+
+    /**
+     * Estimate maximum possible front score for pruning
+     * @param {Array} sortedHands - All hands
+     * @param {number} startIdx - Index to start searching from
+     * @returns {number} - Estimated maximum front score using actual Pyramid Poker points
+     */
+    estimateMaxFrontScore(sortedHands, startIdx) {
+        // Find strongest hand that could be front and calculate its actual points
+        for (let i = startIdx; i < Math.min(startIdx + 50, sortedHands.length); i++) {
+            const hand = sortedHands[i];
+            if (this.canUseInPosition(hand, 'front')) {
+                return getExpectedPointsTiered(hand, hand.cards, 'front');
+            }
+        }
+        return 0;
+    }
+
+}
+
+class FindBestSetupNoWildEmpirical extends FindBestSetupNoWildBase {
+//    getHandScore() { /* direct ScoringUtilities.getPointsForHand() calls */ }
+//    calculatePartialScore() { /* points logic */ }
+//    estimateMaxFrontScore() { /* points logic */ }
+}
+
+// first step in refactor, this actually solves the empirical case
+class FindBestSetupNoWild extends FindBestSetupNoWildBase {}
