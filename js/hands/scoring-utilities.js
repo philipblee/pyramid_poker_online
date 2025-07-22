@@ -166,6 +166,34 @@ class ScoringUtilities {
         return expectedPoints.toFixed(2);
     }
 
+    static getExpectedPointsTiered(hand, cards, position, playerCount = 4) {
+        // Extract handStrength from the complete hand object
+        const handStrength = hand.handStrength;
+
+        // Get base points if win
+        const pointsIfWin = this.getPointsForHand(hand.handStrength, position, cards.length);
+
+        // Get tiered win probability from your range data
+        const tieredProbability = lookupTieredWinProbability(position, hand);
+
+        let winProbability;
+        if (tieredProbability !== null) {
+            // Use tiered data
+            winProbability = tieredProbability;
+        } else {
+            // Fallback to estimated probability for missing data
+            winProbability = this.estimateWinProbability(handStrength, position, playerCount);
+        }
+
+        // Expected points = probability × points
+        const expectedPoints = winProbability * pointsIfWin;
+
+        // Add tiny tiebreaker for same expected points
+        const tiebreaker = this.calculateTiebreaker(handStrength.hand_rank) * 0.0001;
+
+        return expectedPoints;
+    }
+
     /**
      * Get expected points using empirical win probability data from 6,000 hands
      * @param {Object} handStrength - Hand strength object with hand_rank
@@ -197,10 +225,7 @@ class ScoringUtilities {
         // Expected points = probability × points
         const expectedPoints = winProbability * pointsIfWin;
 
-        // Add tiny tiebreaker for same expected points (much smaller than before)
-        const tiebreaker = this.calculateTiebreaker(handStrength.hand_rank) * 0.0001;
-
-        return expectedPoints + tiebreaker;
+        return expectedPoints;
     }
 
     // ========================================================================git =====
@@ -313,7 +338,7 @@ class ScoringUtilities {
         return tiebreaker;
     }
 
-    }
+}
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {

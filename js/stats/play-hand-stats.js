@@ -101,7 +101,7 @@ class PlayHandStats {
                 ? `${arrangement.back.handType}, ${arrangement.middle.handType}, ${arrangement.front.handType}`
                 : 'no arrangement';
 
-            console.log(`✅ Done ${(endTime - startTime).toFixed(1)}ms - Winner: ${winningPlayer.name} (${handTypes})`);
+            console.log(`✅ Done ${(endTime - startTime).toFixed(1)}ms - Win: ${winningPlayer.name} (${handTypes})`);
 
             return handStats;
 

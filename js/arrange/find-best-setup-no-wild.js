@@ -201,10 +201,26 @@ class FindBestSetupNoWild {
             if (this.hasCardOverlap(allUsedCards, frontHand.cards)) continue;
 
             this.exploredNodes++;
-
+            
             // Calculate full arrangement score
             const arrangement = { back: backHand, middle: middleHand, front: frontHand };
-            const score = this.scoreArrangement(arrangement);
+            
+            const backScore = this.getHandScore(arrangement.back, 'back');
+            const middleScore = this.getHandScore(arrangement.middle, 'middle');
+            const frontScore = this.getHandScore(arrangement.front, 'front');
+            
+            // Store individual scores in arrangement
+            arrangement.backExpectedPoints = backScore;
+            arrangement.middleExpectedPoints = middleScore;
+            arrangement.frontExpectedPoints = frontScore;
+            
+            const score = backScore + middleScore + frontScore;
+            
+            if (score > this.bestScore) {
+                this.bestScore = score;
+                this.bestArrangement = arrangement;
+                this.logArrangement(arrangement);
+            }
 
             if (score > this.bestScore) {
                 this.bestScore = score;
@@ -239,18 +255,6 @@ class FindBestSetupNoWild {
      * Calculate partial score for back + middle (for pruning)
      * @param {Object} backHand - Back hand
      * @param {Object} middleHand - Middle hand
-     * @returns {number} - Partial score
-     */
-//    calculatePartialScore(backHand, middleHand) {
-//        // Simplified scoring - just hand strengths for now
-//        // TODO: Replace with actual Pyramid Poker scoring
-//        return (backHand.strength || 0) + (middleHand.strength || 0);
-//    }
-
-    /**
-     * Calculate partial score for back + middle (for pruning)
-     * @param {Object} backHand - Back hand
-     * @param {Object} middleHand - Middle hand
      * @returns {number} - Partial score using actual Pyramid Poker points
      */
     calculatePartialScore(backHand, middleHand) {
@@ -274,22 +278,6 @@ class FindBestSetupNoWild {
             }
         }
         return 0;
-    }
-
-    /**
-     * Score a complete arrangement
-     * @param {Object} arrangement - {back, middle, front}
-     * @returns {number} - Total arrangement score
-     */
-    scoreArrangement(arrangement) {
-        // Placeholder scoring - replace with actual Pyramid Poker scoring
-        // This should use the ScoringUtilities class when available
-
-        const backScore = this.getHandScore(arrangement.back, 'back');
-        const middleScore = this.getHandScore(arrangement.middle, 'middle');
-        const frontScore = this.getHandScore(arrangement.front, 'front');
-
-        return backScore + middleScore + frontScore;
     }
 
     /**

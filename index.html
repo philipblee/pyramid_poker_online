@@ -120,12 +120,20 @@
 window.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Initializing Pyramid Poker...');
 
-    // Load win probability data FIRST
-    const dataLoaded = await initializeEmpiricalWinProbability();
-    if (dataLoaded) {
-        console.log('✅ Win probability data ready (30,868 entries)');
+    // Load empirical win probability data
+    const empiricalLoaded = await initializeEmpiricalWinProbability();
+    if (empiricalLoaded) {
+        console.log('✅ Empirical win probability data ready (30,868 entries)');
     } else {
-        console.log('⚠️ Using fallback probability estimates');
+        console.log('⚠️ Empirical data failed to load');
+    }
+
+    // Load tiered win probability data
+    const tieredLoaded = await initializeTieredWinProbability();
+    if (tieredLoaded) {
+        console.log('✅ Tiered win probability data ready (1978 entries)');
+    } else {
+        console.log('⚠️ Tiered data failed to load');
     }
 
     // Continue with existing game setup
@@ -133,11 +141,13 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 </script>
 
+
     <!-- Core dependencies first -->
     <script src="js/constants/hand-types.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/utilities/card-count.js"></script>
     <script src="js/utilities/empirical-win-probability.js"></script>
+    <script src="js/utilities/tiered-win-probability.js"></script>
     <script src="js/utilities/convert-to-card-model.js"></script>
     <script src="js/hands/evaluate-hand.js"></script>
     <script src="js/hands/scoring-utilities.js"></script>
@@ -191,6 +201,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     <script src="js/arrange/one-wild-candidates.js"></script>
     <script src="js/tests/batch.js"></script>
     <script src="js/stats/play-hand-stats.js"></script>
+<!--    <script src="data/convert-tiered-csv.js"></script>-->
 
 
 </body>

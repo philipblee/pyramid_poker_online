@@ -124,19 +124,19 @@ function FindBestSetupTwoWild(cardObjects) {
     const successful = results.filter(r => r.success);
     const failed = results.filter(r => !r.success);
 
-//     console.log(`\n✅ ======== SMART SUMMARY ========`);
-//     console.log(`Total combinations processed: ${results.length}`);
-//     console.log(`Successful arrangements: ${successful.length}`);
-//     console.log(`Failed attempts: ${failed.length}`);
+     console.log(`\n✅ ======== WILD Combinations ========`);
+     console.log(`Total combinations processed: ${results.length}`);
+     console.log(`Successful arrangements: ${successful.length}`);
+     console.log(`Failed attempts: ${failed.length}`);
 
     if (successful.length > 0) {
         const best = successful[0];
-        // console.log(`\n🏆 Best Result (Smart Two-Wild):`);
-        // console.log(`   Wild cards: ${best.wildCards.join(', ')}`);
-        // console.log(`   Score: ${best.score}`);
-        // console.log(`   Back: ${best.arrangement.back.handType} (${best.arrangement.back.cardCount} cards)`);
-        // console.log(`   Middle: ${best.arrangement.middle.handType} (${best.arrangement.middle.cardCount} cards)`);
-        // console.log(`   Front: ${best.arrangement.front.handType} (${best.arrangement.front.cardCount} cards)`);
+        console.log(`\n🏆 Best Result (Smart Two-Wild):`);
+        console.log(`   Wild cards: ${best.wildCards.join(', ')}`);
+        console.log(`   Score: ${best.score}`);
+        console.log(`   Back: ${best.arrangement.back.handType} (${best.arrangement.back.cardCount} cards)`);
+        console.log(`   Middle: ${best.arrangement.middle.handType} (${best.arrangement.middle.cardCount} cards)`);
+        console.log(`   Front: ${best.arrangement.front.handType} (${best.arrangement.front.cardCount} cards)`);
 
         // Show top 5 results for smart approach
         // console.log(`\n🥇 Top 5 Results (Smart Two-Wild):`);

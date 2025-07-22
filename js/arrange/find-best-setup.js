@@ -56,6 +56,9 @@ class FindBestSetup {
 //                console.log(`🃏🃏 Two wild cards - using two-wild solver...`);
                 result = this.twoWild(allCards);
 
+
+
+
             } else {
 //                console.log(`🃏+ Multiple wild cards (${wildCount}) - using fallback...`);
                 result = this.fallback(allCards, wildCount);
