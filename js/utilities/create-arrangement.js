@@ -12,6 +12,9 @@
  * @returns {Object} Standard Arrangement Model object
  */
 function createArrangement(back, middle, front, score, stagingCards, isValid = true) {
+    // Read method from game-config automatically
+    const method = window.gameConfig?.config?.winProbabilityMethod || 'empirical';
+
     return {
         back,
         middle,
@@ -19,6 +22,7 @@ function createArrangement(back, middle, front, score, stagingCards, isValid = t
         score,
         isValid,
         stagingCards,
+        method,
         statistics: null
     };
 }

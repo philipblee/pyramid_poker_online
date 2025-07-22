@@ -62,7 +62,7 @@ class FindBestSetupNoWildBase {
             // console.log(`🃏 Added ${needed} kickers to front hand`);
         }
 
-        console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
+//        console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
 
         // Re-evaluate hands with complete cards using card-evaluation.js functions
         const reEvaluatedBack = evaluateHand(backCards);  // Always returns proper hand_rank
@@ -103,7 +103,7 @@ class FindBestSetupNoWildBase {
      */
      findBestSetupNoWild(allCards) {
 
-       console.log(`🎯 FindBestSetupNoWild: Finding optimal setup from 17 cards...`);
+//       console.log(`🎯 FindBestSetupNoWild: Finding optimal setup from 17 cards...`);
 
         // NEW: Call hand-detector first
         const handDetector = new HandDetector(allCards);
@@ -207,12 +207,12 @@ class FindBestSetupNoWildBase {
 
             const score = backScore + middleScore + frontScore;
 
-            // Log what's already there:
-            console.log('🔍 No-Wild Scores:');
-            console.log('  backScore:', backScore);
-            console.log('  middleScore:', middleScore);
-            console.log('  frontScore:', frontScore);
-            console.log('  total score:', score);
+//            // Log what's already there:
+//            console.log('🔍 No-Wild Scores:');
+//            console.log('  backScore:', backScore);
+//            console.log('  middleScore:', middleScore);
+//            console.log('  frontScore:', frontScore);
+//            console.log('  total score:', score);
 
             if (score > this.bestScore) {
                 this.bestScore = score;
@@ -418,14 +418,12 @@ class FindBestSetupNoWildPoints extends FindBestSetupNoWildBase {
 // Tiered subclass
 class FindBestSetupNoWildTiered extends FindBestSetupNoWildBase {
 
-//    console.log('🔍 Enter Tiered:');
     /**
      * Get score for a hand in a specific position
      * @param {Object} hand - Hand object
      * @param {string} position - Position ('back', 'middle', 'front')
      * @returns {number} - Hand score for that position
      */
-
     getHandScore(hand, position) {
        // Use expected value (probability × points) for better optimization
         return ScoringUtilities.getExpectedPointsTiered();
@@ -462,11 +460,7 @@ class FindBestSetupNoWildTiered extends FindBestSetupNoWildBase {
 
 }
 
-class FindBestSetupNoWildEmpirical extends FindBestSetupNoWildBase {
-//    getHandScore() { /* direct ScoringUtilities.getPointsForHand() calls */ }
-//    calculatePartialScore() { /* points logic */ }
-//    estimateMaxFrontScore() { /* points logic */ }
-}
+class FindBestSetupNoWildEmpirical extends FindBestSetupNoWildBase {}
 
 // first step in refactor, this actually solves the empirical case
 class FindBestSetupNoWild extends FindBestSetupNoWildBase {}

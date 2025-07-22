@@ -55,19 +55,15 @@ function FindBestSetupOneWild(cardObjects) {
     }
 
     const allCandidates = candidatesResult.wildCandidates;
-    console.log(`✅ Generated ${allCandidates.length} smart candidates`);
+//    console.log(`✅ Generated ${allCandidates.length} smart candidates`);
 
     // STEP 4: Process each smart candidate (same proven logic as brute force)
-    console.log(`\n🔄 Step 4: Processing ${allCandidates.length} candidates (smart subset)...`);
+//    console.log(`\n🔄 Step 4: Processing ${allCandidates.length} candidates (smart subset)...`);
     const results = [];
 
     let globalBestScore = -Infinity;
 
     allCandidates.forEach((candidate, index) => {
-        // Progress indicator every 5 cards for smart subset
-//        if ((index + 1) % 5 === 0) {
-//            console.log(`   Progress: ${index + 1}/${allCandidates.length} candidates processed...`);
-//        }
 
         try {
 
@@ -83,10 +79,7 @@ function FindBestSetupOneWild(cardObjects) {
             const flag = 'points';  // Could come from config, env var, user input, etc.
             const finder = createFindBestSetupNoWild(flag);
             finder.bestScore = globalBestScore; // 🔥 SEED with global best
-//            console.log(instance.calculateScore()); // Uses VariantA's scoring if flag is 'variantA'
 
-
-//            const finder = new FindBestSetupNoWild();
             const arrangementResult = finder.findBestSetupNoWild(cards);
 
             if (arrangementResult.success && arrangementResult.score > globalBestScore)
@@ -133,10 +126,10 @@ function FindBestSetupOneWild(cardObjects) {
     const successful = results.filter(r => r.success);
     const failed = results.filter(r => !r.success);
 
-    console.log(`\n✅ ======== SMART SUMMARY ========`);
-    console.log(`Total candidates processed: ${results.length}`);
-    console.log(`Successful arrangements: ${successful.length}`);
-    console.log(`Failed attempts: ${failed.length}`);
+//    console.log(`\n✅ ======== SMART SUMMARY ========`);
+//    console.log(`Total candidates processed: ${results.length}`);
+//    console.log(`Successful arrangements: ${successful.length}`);
+//    console.log(`Failed attempts: ${failed.length}`);
 
     if (successful.length > 0) {
         const best = successful[0];
