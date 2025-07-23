@@ -16,7 +16,7 @@ class FindBestSetupNoWildBase {
      * @returns {Object} - Completed arrangement with card arrays
      */
     completeArrangementWithKickers(arrangement) {
-        // console.log('🔧 Completing arrangement with kickers...');
+//        console.log('🔧 Completing arrangement with kickers...');
 
         const usedCardIds = new Set([
             ...Analysis.getCardIds(arrangement.back.cards),
@@ -39,7 +39,7 @@ class FindBestSetupNoWildBase {
             for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
                 backCards.push(unusedCards[kickerIndex++]);
             }
-            // console.log(`🃏 Added ${needed} kickers to back hand`);
+            console.log(`🃏 Added ${needed} kickers to back hand`);
         }
 
         // Complete middle hand to 5 cards if needed
@@ -49,7 +49,7 @@ class FindBestSetupNoWildBase {
             for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
                 middleCards.push(unusedCards[kickerIndex++]);
             }
-            // console.log(`🃏 Added ${needed} kickers to middle hand`);
+            console.log(`🃏 Added ${needed} kickers to middle hand`);
         }
 
         // Complete front hand to 3 cards if needed
@@ -59,7 +59,7 @@ class FindBestSetupNoWildBase {
             for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
                 frontCards.push(unusedCards[kickerIndex++]);
             }
-            // console.log(`🃏 Added ${needed} kickers to front hand`);
+            console.log(`🃏 Added ${needed} kickers to front hand`);
         }
 
 //        console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
@@ -103,7 +103,7 @@ class FindBestSetupNoWildBase {
      */
      findBestSetupNoWild(allCards) {
 
-//       console.log(`🎯 FindBestSetupNoWild: Finding optimal setup from 17 cards...`);
+//        console.log(`🎯 FindBestSetupNoWild: Finding optimal setup from 17 cards...`);
 
         // NEW: Call hand-detector first
         const handDetector = new HandDetector(allCards);
@@ -162,11 +162,11 @@ class FindBestSetupNoWildBase {
             const maxFrontScore = this.estimateMaxFrontScore(sortedHands, middleIdx);
             const estimatedTotal = partialScore + maxFrontScore;
 
-            // console.log(`🔍 PRUNING CHECK: Partial=${partialScore.toFixed(2)}, MaxFront=${maxFrontScore.toFixed(2)}, Total=${estimatedTotal.toFixed(2)}, Best=${this.bestScore.toFixed(2)}`);
+//            console.log(`🔍 PRUNING CHECK: Partial=${partialScore.toFixed(2)}, MaxFront=${maxFrontScore.toFixed(2)}, Total=${estimatedTotal.toFixed(2)}, Best=${this.bestScore.toFixed(2)}`);
 
             if (partialScore + maxFrontScore <= this.bestScore) {
                 this.prunedNodes++;
-                // console.log(`✂️ PRUNED: ${estimatedTotal.toFixed(2)} <= ${this.bestScore.toFixed(2)}`);
+//                console.log(`✂️ PRUNED: ${estimatedTotal.toFixed(2)} <= ${this.bestScore.toFixed(2)}`);
                 continue;
             }
 
@@ -207,12 +207,12 @@ class FindBestSetupNoWildBase {
 
             const score = backScore + middleScore + frontScore;
 
-//            // Log what's already there:
-//            console.log('🔍 No-Wild Scores:');
-//            console.log('  backScore:', backScore);
-//            console.log('  middleScore:', middleScore);
-//            console.log('  frontScore:', frontScore);
-//            console.log('  total score:', score);
+            // Log what's already there:
+            console.log('🔍 No-Wild Scores:');
+            console.log('  backScore:', backScore);
+            console.log('  middleScore:', middleScore);
+            console.log('  frontScore:', frontScore);
+            console.log('  total score:', score);
 
             if (score > this.bestScore) {
                 this.bestScore = score;
@@ -223,7 +223,7 @@ class FindBestSetupNoWildBase {
             if (score > this.bestScore) {
                 this.bestScore = score;
                 this.bestArrangement = arrangement;
-                // console.log(`🏆 New best arrangement found! Score: ${score}`);
+                console.log(`🏆 New best arrangement found! Score: ${score}`);
                 this.logArrangement(arrangement);
             }
         }
@@ -424,9 +424,11 @@ class FindBestSetupNoWildTiered extends FindBestSetupNoWildBase {
      * @param {string} position - Position ('back', 'middle', 'front')
      * @returns {number} - Hand score for that position
      */
+
     getHandScore(hand, position) {
-       // Use expected value (probability × points) for better optimization
-        return ScoringUtilities.getExpectedPointsTiered();
+    // Use expected value (probability × points) for better optimization
+    // FIXED: Pass all required parameters to getExpectedPointsTiered
+    return ScoringUtilities.getExpectedPointsTiered(hand, hand.cards, position, 4);
     }
 
     /**

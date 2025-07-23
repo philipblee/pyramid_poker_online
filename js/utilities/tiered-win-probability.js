@@ -253,6 +253,8 @@ const tieredWinProbability = new TieredWinProbability();
  * @returns {number|null} - Win probability or null if no fallback found
  */
 function lookupTieredWinProbability(position, hand) {
+//    console.log('🔍 Lookup tiered probability:', { position, handRank: hand.hand_rank });
+
     // Extract hand_rank for compatibility
     const handRank = hand.hand_rank || hand;
 
@@ -268,35 +270,57 @@ function lookupTieredWinProbability(position, hand) {
     if ((position.toLowerCase() === 'middle' || position.toLowerCase() === 'back') && hand.isIncomplete) {
         if (position.toLowerCase() === 'middle') {
             // Try tiered incomplete middle hand lookup
-            const empiricalProbability = handleIncompleteMiddleHand(hand.hand_rank);
-            if (empiricalProbability !== null) {
-                return empiricalProbability;
+            const tieredProbability = handleIncompleteMiddleHand(hand.hand_rank);
+            if (tieredProbability !== null) {
+                return tieredProbability;
             }
         }
 
         // Fall back to low probability for back position or if middle lookup fails
-        return 0.01;
+        return 0.001;
     }
 
-    // Try hierarchical fallback - progressively truncate tuple
-    for (let length = handRank.length; length >= 1; length--) {
+    // Try hierarchical fallback - 3 elements, then 2 elements only
+    for (let length = Math.min(handRank.length, 3); length >= 2; length--) {
         let truncatedTuple = handRank.slice(0, length);
-        let probability = empiricalWinProbability.getEmpiricalWinProbability(position, truncatedTuple);
+        let probability = tieredWinProbability.getTieredWinProbability(position, truncatedTuple);
 
         if (probability !== null) {
-            // Optional: Log fallback level for debugging (comment out to reduce noise)
-            // if (length < handRank.length) {
-            //     console.log(`🎯 Hierarchical match: level ${length}/${handRank.length} for ${position} [${handRank.join(',')}] → [${truncatedTuple.join(',')}]`);
-            // }
-
+//            console.log(`🎯 Hierarchical match: level ${length}/${handRank.length} for ${position} [${handRank.join(',')}] → [${truncatedTuple.join(',')}] = ${probability}`);
             return probability;
+        }
+
+        if (probability === null) {
+            return 001;
         }
     }
 
-    // No match found at any level (comment out to reduce noise)
-    // console.warn('🚨 No hierarchical match found for:', position, handRank);
+    // Final fallback to hardcoded hand type probabilities
+    if (handRank.length >= 2) {
+        const handType = handRank[0];
+        const primaryRank = handRank[1];
+
+        // Use existing hardcoded fallback functions
+        if (position.toLowerCase() === 'front') {
+            const frontFallback = handleIncompleteFrontHand(handRank);
+            if (frontFallback !== null) {
+                console.log(`🎯 Front hardcoded fallback: ${frontFallback}`);
+                return frontFallback;
+            }
+        } else if (position.toLowerCase() === 'middle') {
+            const middleFallback = handleIncompleteMiddleHand(handRank);
+            if (middleFallback !== null) {
+                console.log(`🎯 Middle hardcoded fallback: ${middleFallback}`);
+                return middleFallback;
+            }
+        }
+    }
+
+    console.log('❌ No match found at any level, returning null');
     return null; // Let ScoringUtilities handle the final fallback
 }
+
+
 
 /**
  * Initialize win probability data (call once at startup)

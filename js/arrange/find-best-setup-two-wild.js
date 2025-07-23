@@ -8,7 +8,7 @@
  * @returns {Object} Best arrangement result (same format as one-wild version)
  */
 function FindBestSetupTwoWild(cardObjects) {
-    // console.loglog(`\n🧠 ======== TWO WILD SMART ARRANGEMENT - FROM CARDS ========`);
+//    console.log(`\n🧠 ======== TWO WILD SMART ARRANGEMENT - FROM CARDS ========`);
 
     // STEP 1: Convert to Card Model format FIRST
     const properCardObjects = convertToCardModel(cardObjects);
@@ -18,26 +18,26 @@ function FindBestSetupTwoWild(cardObjects) {
     const nonWildCards = properCardObjects.filter(card => !card.isWild);
 
     // STEP 3: Get smart 2-wild combinations using both strategies
-    // console.loglog(`\n📋 Step 3: Getting smart 2-wild combinations...`);
+    // console.log(`\n📋 Step 3: Getting smart 2-wild combinations...`);
 
     // Strategy 1: Same-suit combinations for straight flushes
-    // console.loglog(`   Running Strategy 1...`);
+    // console.log(`   Running Strategy 1...`);
 
     const result = twoWildStrategyOne(nonWildCards);        // NEW: object
     const strategy1Results = result.wildCandidates;           // Extract array
 
     // Strategy 2: Nested wild candidates for comprehensive coverage
-    // console.loglog(`   Running Strategy 2...`);
+    // console.log(`   Running Strategy 2...`);
     const strategy2Result = twoWildStrategyTwo(nonWildCards);
     const strategy2Results = strategy2Result.combinations;
 
     // Combine and deduplicate
-    // console.loglog(`   Combining strategies...`);
+//    console.log(`   Combining strategies...`);
     const allCombinations = combineAndDeduplicate(strategy1Results, strategy2Results);
 
-    // console.loglog(`✅ Generated ${allCombinations.length} smart 2-wild combinations`);
-    // console.loglog(`   Strategy 1: ${strategy1Results.length} combinations`);
-    // console.loglog(`   Strategy 2: ${strategy2Results.length} combinations (${strategy2Result.firstLayerCount}/52 first-layer)`);
+//    console.log(`✅ Generated ${allCombinations.length} smart 2-wild combinations`);
+//    console.log(`   Strategy 1: ${strategy1Results.length} combinations`);
+//    console.log(`   Strategy 2: ${strategy2Results.length} combinations (${strategy2Result.firstLayerCount}/52 first-layer)`);
 
     if (allCombinations.length === 0) {
         console.log(`❌ No smart combinations found`);
@@ -51,15 +51,18 @@ function FindBestSetupTwoWild(cardObjects) {
     }
 
     // STEP 4: Process each smart 2-wild combination (same proven logic as one-wild)
-    // console.loglog(`\n🔄 Step 4: Processing ${allCombinations.length} combinations (smart subset)...`);
+    // console.log(`\n🔄 Step 4: Processing ${allCombinations.length} combinations (smart subset)...`);
     const results = [];
 
     let globalBestScore = -Infinity;
 
+//    console.log(`🔄 Starting to process ${allCombinations.length} combinations...`);
+
     allCombinations.forEach((combination, index) => {
+//        console.log(`Processing combination ${index}...`); // Add this first
         // Progress indicator every 10 combinations
         //if ((index + 1) % 10 === 0) {
-            // console.loglog(`   Progress: ${index + 1}/${allCombinations.length} combinations processed...`);
+            // console.log(`   Progress: ${index + 1}/${allCombinations.length} combinations processed...`);
         //}
 
         try {
@@ -68,16 +71,29 @@ function FindBestSetupTwoWild(cardObjects) {
             const substitutedCard2 = createCardFromObject(combination[1], wildCards[1].id);
             const cards = [...nonWildCards, substitutedCard1, substitutedCard2];
 
+            // ADD THIS LOGGING (just for first few combinations):
+            if (index < 3) {
+//                console.log(`🔍 Combo ${index} ID Analysis:`);
+//                console.log('  Original wild card IDs:', wildCards.map(w => w.id));
+//                console.log('  Substituted card 1 ID:', substitutedCard1.id);
+//                console.log('  Substituted card 2 ID:', substitutedCard2.id);
+//                console.log('  Card 1 full:', substitutedCard1);
+//                console.log('  Card 2 full:', substitutedCard2);
+            }
+
             // Run HandDetector (auto-sorted)
             const detector = new HandDetector(cards);
             const handResults = detector.results
 
+//            console.log(`  Cards created for combo ${index}`); // ADD THIS
+
             // ✅ Should read from game-config:
             const flag = window.gameConfig?.config?.winProbabilityMethod || 'empirical';
-
             const finder = createFindBestSetupNoWild(flag);
-            finder.bestScore = globalBestScore; // 🔥 SEED with global best
             const result = finder.findBestSetupNoWild(cards);
+
+            finder.bestScore = globalBestScore; // 🔥 SEED with global best
+//            const result = finder.findBestSetupNoWild(cards);
 
             if (result.success && result.score > globalBestScore) {
                 globalBestScore = result.score; // 🔥 UPDATE global best
@@ -94,6 +110,7 @@ function FindBestSetupTwoWild(cardObjects) {
                 });
 
             } else {
+                console.log(`  Failed: ${result.error || 'Unknown error'}`);
                 results.push({
                     wildCards: [combination[0].rank + combination[0].suit, combination[1].rank + combination[1].suit],
                     arrangement: null,

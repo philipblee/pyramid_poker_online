@@ -85,6 +85,12 @@ class ScoringUtilities {
 
         // Base probabilities for 4-player game (adjustable for different player counts)
         const baseProbabilities = {
+            16: 0.90, // Very strong large hands
+            15: 0.88,
+            14: 0.86,
+            13: 0.84,
+            12: 0.82,
+            11: 0.80, // Strong large hands
             10: 0.85, // Five of a kind - very likely to win
             9: 0.75,  // Straight flush - strong
             8: 0.65,  // Four of a kind - good
@@ -141,7 +147,12 @@ class ScoringUtilities {
                 return this.getExpectedPointsTiered(hand, cards, position, playerCount);
             case 'points':
             default:
-                const pointsIfWin = this.getPointsForHand(hand, position, cards.length);
+                console.log('🔍 Debug positionScores:');
+                console.log('  hand.positionScores:', hand.positionScores);
+                console.log('  position:', position);
+                console.log('  hand.positionScores[position]:', hand.positionScores[position]);
+
+                const pointsIfWin = hand.positionScores[position];
                 const strengthBonus = this.calculateTiebreaker(hand.hand_rank);
 
 //                // Add logging here:
@@ -179,6 +190,9 @@ class ScoringUtilities {
     }
 
     static getExpectedPointsTiered(hand, cards, position, playerCount = 4) {
+
+//        console.log('🔍 Tiered method called:', { position, handType: hand.handType });
+
         // Extract handStrength from the complete hand object
         const handStrength = hand.handStrength;
 
@@ -187,6 +201,8 @@ class ScoringUtilities {
 
         // Get tiered win probability from your range data
         const tieredProbability = lookupTieredWinProbability(position, hand);
+
+//        console.log('  Tiered probability:', tieredProbability);
 
         let winProbability;
         if (tieredProbability !== null) {
@@ -254,7 +270,7 @@ class ScoringUtilities {
             const handStrength = hand.handStrength;
 
             // Get base points if win
-            const pointsIfWin = this.getPointsForHand(hand.handStrength, position, cards.length);
+            const pointsIfWin = hand.positionScores[position];  // Use the correct pre-calculated value
 
             // Expected points = probability × points
             const expectedPoints = pointsIfWin;
