@@ -147,10 +147,10 @@ class ScoringUtilities {
                 return this.getExpectedPointsTiered(hand, cards, position, playerCount);
             case 'points':
             default:
-                console.log('🔍 Debug positionScores:');
-                console.log('  hand.positionScores:', hand.positionScores);
-                console.log('  position:', position);
-                console.log('  hand.positionScores[position]:', hand.positionScores[position]);
+//                console.log('🔍 Debug positionScores:');
+//                console.log('  hand.positionScores:', hand.positionScores);
+//                console.log('  position:', position);
+//                console.log('  hand.positionScores[position]:', hand.positionScores[position]);
 
                 const pointsIfWin = hand.positionScores[position];
                 const strengthBonus = this.calculateTiebreaker(hand.hand_rank);

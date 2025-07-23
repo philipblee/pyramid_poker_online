@@ -39,7 +39,7 @@ class FindBestSetupNoWildBase {
             for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
                 backCards.push(unusedCards[kickerIndex++]);
             }
-            console.log(`🃏 Added ${needed} kickers to back hand`);
+//            console.log(`🃏 Added ${needed} kickers to back hand`);
         }
 
         // Complete middle hand to 5 cards if needed
@@ -49,7 +49,7 @@ class FindBestSetupNoWildBase {
             for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
                 middleCards.push(unusedCards[kickerIndex++]);
             }
-            console.log(`🃏 Added ${needed} kickers to middle hand`);
+//            console.log(`🃏 Added ${needed} kickers to middle hand`);
         }
 
         // Complete front hand to 3 cards if needed
@@ -59,7 +59,7 @@ class FindBestSetupNoWildBase {
             for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
                 frontCards.push(unusedCards[kickerIndex++]);
             }
-            console.log(`🃏 Added ${needed} kickers to front hand`);
+//            console.log(`🃏 Added ${needed} kickers to front hand`);
         }
 
 //        console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
@@ -208,11 +208,11 @@ class FindBestSetupNoWildBase {
             const score = backScore + middleScore + frontScore;
 
             // Log what's already there:
-            console.log('🔍 No-Wild Scores:');
-            console.log('  backScore:', backScore);
-            console.log('  middleScore:', middleScore);
-            console.log('  frontScore:', frontScore);
-            console.log('  total score:', score);
+//            console.log('🔍 No-Wild Scores:');
+//            console.log('  backScore:', backScore);
+//            console.log('  middleScore:', middleScore);
+//            console.log('  frontScore:', frontScore);
+//            console.log('  total score:', score);
 
             if (score > this.bestScore) {
                 this.bestScore = score;
@@ -223,7 +223,7 @@ class FindBestSetupNoWildBase {
             if (score > this.bestScore) {
                 this.bestScore = score;
                 this.bestArrangement = arrangement;
-                console.log(`🏆 New best arrangement found! Score: ${score}`);
+//                console.log(`🏆 New best arrangement found! Score: ${score}`);
                 this.logArrangement(arrangement);
             }
         }
