@@ -884,31 +884,31 @@ const TEST_CASES = [
 
     {
        id: 2004,
-       name: "Random Test Case 104 (2 wilds)",
+       name: "Random Test Case 2004 (2 wilds)",
        cards: "4♣ 2♥ Q♠ 8♥ 2♥ 10♥ 2♦ Q♣ 9♥ 5♠ K♦ 3♦ 5♠ 2♦ 4♣ 🃏 🃏"
    },
 
     {
        id: 2005,
-       name: "Random Test Case 105 (2 wilds)",
+       name: "Random Test Case 2005 (2 wilds)",
        cards: "9♠ J♥ 6♦ 5♠ 2♦ 3♠ 9♦ 6♣ 4♣ 5♠ 2♥ 7♣ 6♠ 5♦ 7♣ 🃏 🃏"
    },
 
     {
        id: 2006,
-       name: "Random Test Case 106 (2 wilds)",
+       name: "Random Test Case 2006 (2 wilds)",
        cards: "2♦ K♣ 8♣ 6♦ Q♠ 4♥ 2♠ Q♥ 2♥ 9♦ 5♠ A♣ 6♦ 4♦ J♦ 🃏 🃏"
    },
 
     {
        id: 2007,
-       name: "Random Test Case 107 (2 wilds)",
+       name: "Random Test Case 2007 (2 wilds)",
        cards: "Q♣ J♠ 6♦ 3♦ 3♣ Q♣ 7♣ 2♠ K♠ 2♥ K♦ 10♥ 4♣ 2♣ Q♠ 🃏 🃏"
    },
 
     {
        id: 2008,
-       name: "Random Test Case 108 (2 wilds)",
+       name: "Random Test Case 2008 (2 wilds)",
        cards: "3♣ 10♠ 3♥ Q♥ A♣ 5♠ 8♥ 9♥ 7♠ 9♥ 4♣ 6♦ 6♠ 3♣ Q♣ 🃏 🃏"
    },
 

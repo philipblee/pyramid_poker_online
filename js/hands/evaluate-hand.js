@@ -6,7 +6,7 @@ function evaluateHand(cards) {
     // Initialize with enough zeros to prevent undefined
     let hand_rank = [1, 0, 0, 0, 0, 0]; // 6 positions should cover all cases
 
-    // Handle large hands (6, 7, 8 cards) - basic evaluation for now
+    // Handle hands with 6, 7, 8 cards - basic evaluation for now
     if (cards.length > 5) {
 
     // Quick check: are all cards the same rank?
@@ -16,8 +16,8 @@ function evaluateHand(cards) {
     if (uniqueValues.size === 1) {
         // All same rank
         const rank = values[0,0,0,0,0,0];
-    const sameRankRating = 10 + (cards.length - 5) * 2; // 6→12, 7→14, 8→16
-    return { rank: sameRankRating - 1, hand_rank: [sameRankRating, rank], name: `${cards.length} of a Kind` };
+        const sameRankRating = 10 + (cards.length - 5) * 2; // 6→12, 7→14, 8→16
+        return { rank: sameRankRating - 1, hand_rank: [sameRankRating, rank], name: `${cards.length} of a Kind` };
     }
 
     // Quick check: are all cards same suit and sequential?
@@ -26,7 +26,7 @@ function evaluateHand(cards) {
 
     if (uniqueSuits.size === 1) {
         const sortedValues = [...uniqueValues].sort((a, b) => a - b);
-
+        // All same suit, must be Straight Flush
         // Check for regular sequential
         const isSequential = sortedValues.every((val, i) => i === 0 || val === sortedValues[i-1] + 1);
 

@@ -412,6 +412,145 @@ class FindBestSetupNoWildPoints extends FindBestSetupNoWildBase {
         }
         return 0;
     }
+
+    /**
+     * Search for compatible front hands
+     * @param {Array} sortedHands - All hands
+     * @param {Object} backHand - Selected back hand
+     * @param {Object} middleHand - Selected middle hand
+     * @param {Set} backUsedCards - Cards used by back hand
+     * @param {number} middleIdx - Index of middle hand
+     */
+    searchFrontHands(sortedHands, backHand, middleHand, backUsedCards, middleIdx) {
+        const allUsedCards = new Set([
+            ...backUsedCards,
+            ...Analysis.getCardIds(middleHand.cards)
+        ]);
+
+
+        // Try front hands (same strength or weaker than middle)
+        for (let frontIdx = middleIdx; frontIdx < sortedHands.length; frontIdx++) {
+            const frontHand = sortedHands[frontIdx];
+
+            if (!this.canUseInPosition(frontHand, 'front')) continue;
+            if (this.hasCardOverlap(allUsedCards, frontHand.cards)) continue;
+
+            this.exploredNodes++;
+
+            // Calculate full arrangement score
+            const arrangement = { back: backHand, middle: middleHand, front: frontHand };
+
+            const backScore = this.getHandScore(arrangement.back, 'back');
+            const middleScore = this.getHandScore(arrangement.middle, 'middle');
+            const frontScore = this.getHandScore(arrangement.front, 'front');
+
+            const score = backScore + middleScore + frontScore;
+
+            // Log what's already there:
+//            console.log('🔍 No-Wild Scores:');
+//            console.log('  backScore:', backScore);
+//            console.log('  middleScore:', middleScore);
+//            console.log('  frontScore:', frontScore);
+//            console.log('  total score:', score);
+
+            if (score > this.bestScore) {
+                this.bestScore = score;
+                this.bestArrangement = arrangement;
+                this.logArrangement(arrangement);
+            }
+
+            if (score > this.bestScore) {
+                this.bestScore = score;
+                this.bestArrangement = arrangement;
+//                console.log(`🏆 New best arrangement found! Score: ${score}`);
+                this.logArrangement(arrangement);
+            }
+        }
+    }
+    /**
+     * Complete arrangement by adding kickers to incomplete hands
+     * @param {Object} arrangement - {back, middle, front} with hand objects
+     * @returns {Object} - Completed arrangement with card arrays
+     */
+    completeArrangementWithKickers(arrangement) {
+//        console.log('🔧 Completing arrangement with kickers...');
+
+        const usedCardIds = new Set([
+            ...Analysis.getCardIds(arrangement.back.cards),
+            ...Analysis.getCardIds(arrangement.middle.cards),
+            ...Analysis.getCardIds(arrangement.front.cards)
+        ]);
+
+
+        // Get unused cards sorted by strength (highest first)
+        const unusedCards = Analysis.sortCards(
+            this.allCards.filter(card => !usedCardIds.has(card.id))
+        );
+
+        let kickerIndex = 0;
+
+        // Complete back hand to 5 cards if needed
+        const backCards = [...arrangement.back.cards];
+        if (backCards.length < 5) {
+            const needed = 5 - backCards.length;
+            for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
+                backCards.push(unusedCards[kickerIndex++]);
+            }
+//            console.log(`🃏 Added ${needed} kickers to back hand`);
+        }
+
+        // Complete middle hand to 5 cards if needed
+        const middleCards = [...arrangement.middle.cards];
+        if (middleCards.length < 5) {
+            const needed = 5 - middleCards.length;
+            for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
+                middleCards.push(unusedCards[kickerIndex++]);
+            }
+//            console.log(`🃏 Added ${needed} kickers to middle hand`);
+        }
+
+        // Complete front hand to 3 cards if needed
+        const frontCards = [...arrangement.front.cards];
+        if (frontCards.length < 3) {
+            const needed = 3 - frontCards.length;
+            for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
+                frontCards.push(unusedCards[kickerIndex++]);
+            }
+//            console.log(`🃏 Added ${needed} kickers to front hand`);
+        }
+
+//        console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
+
+        // Re-evaluate hands with complete cards using evaluate-hand.js functions
+        const reEvaluatedBack = evaluateHand(backCards);  // Always returns proper hand_rank
+        const reEvaluatedMiddle = evaluateHand(middleCards);
+        const reEvaluatedFront = evaluateThreeCardHand(frontCards);  // For 3-card front hands
+
+        // Update the arrangement objects with the new hand data
+        arrangement.back.handStrength = reEvaluatedBack;
+        arrangement.back.hand_rank = reEvaluatedBack.hand_rank;
+        arrangement.back.strength = reEvaluatedBack.rank;
+
+        arrangement.middle.handStrength = reEvaluatedMiddle;
+        arrangement.middle.hand_rank = reEvaluatedMiddle.hand_rank;
+        arrangement.middle.strength = reEvaluatedMiddle.rank;
+
+        arrangement.front.handStrength = reEvaluatedFront;
+        arrangement.front.hand_rank = reEvaluatedFront.hand_rank;
+        arrangement.front.strength = reEvaluatedFront.rank;
+
+        // After adding all kickers, calculate remaining staging cards
+        const remainingCards = unusedCards.slice(kickerIndex);
+
+        // In completeArrangementWithKickers() - use factory
+        return createArrangement(
+            { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
+            { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
+            { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
+            null, // score calculated elsewhere
+            remainingCards  // stagingCards
+        );
+    }
 }
 
 
@@ -458,6 +597,146 @@ class FindBestSetupNoWildTiered extends FindBestSetupNoWildBase {
             }
         }
         return 0;
+    }
+
+    /**
+     * Search for compatible front hands
+     * @param {Array} sortedHands - All hands
+     * @param {Object} backHand - Selected back hand
+     * @param {Object} middleHand - Selected middle hand
+     * @param {Set} backUsedCards - Cards used by back hand
+     * @param {number} middleIdx - Index of middle hand
+     */
+    searchFrontHands(sortedHands, backHand, middleHand, backUsedCards, middleIdx) {
+        const allUsedCards = new Set([
+            ...backUsedCards,
+            ...Analysis.getCardIds(middleHand.cards)
+        ]);
+
+
+        // Try front hands (same strength or weaker than middle)
+        for (let frontIdx = middleIdx; frontIdx < sortedHands.length; frontIdx++) {
+            const frontHand = sortedHands[frontIdx];
+
+            if (!this.canUseInPosition(frontHand, 'front')) continue;
+            if (this.hasCardOverlap(allUsedCards, frontHand.cards)) continue;
+
+            this.exploredNodes++;
+
+            // Calculate full arrangement score
+            const arrangement = { back: backHand, middle: middleHand, front: frontHand };
+
+            const backScore = this.getHandScore(arrangement.back, 'back');
+            const middleScore = this.getHandScore(arrangement.middle, 'middle');
+            const frontScore = this.getHandScore(arrangement.front, 'front');
+
+            const score = backScore + middleScore + frontScore;
+
+            // Log what's already there:
+//            console.log('🔍 No-Wild Scores:');
+//            console.log('  backScore:', backScore);
+//            console.log('  middleScore:', middleScore);
+//            console.log('  frontScore:', frontScore);
+//            console.log('  total score:', score);
+
+            if (score > this.bestScore) {
+                this.bestScore = score;
+                this.bestArrangement = arrangement;
+                this.logArrangement(arrangement);
+            }
+
+            if (score > this.bestScore) {
+                this.bestScore = score;
+                this.bestArrangement = arrangement;
+//                console.log(`🏆 New best arrangement found! Score: ${score}`);
+                this.logArrangement(arrangement);
+            }
+        }
+    }
+
+    /**
+     * Complete arrangement by adding kickers to incomplete hands
+     * @param {Object} arrangement - {back, middle, front} with hand objects
+     * @returns {Object} - Completed arrangement with card arrays
+     */
+    completeArrangementWithKickers(arrangement) {
+//        console.log('🔧 Completing arrangement with kickers...');
+
+        const usedCardIds = new Set([
+            ...Analysis.getCardIds(arrangement.back.cards),
+            ...Analysis.getCardIds(arrangement.middle.cards),
+            ...Analysis.getCardIds(arrangement.front.cards)
+        ]);
+
+
+        // Get unused cards sorted by strength (highest first)
+        const unusedCards = Analysis.sortCards(
+            this.allCards.filter(card => !usedCardIds.has(card.id))
+        );
+
+        let kickerIndex = 0;
+
+        // Complete back hand to 5 cards if needed
+        const backCards = [...arrangement.back.cards];
+        if (backCards.length < 5) {
+            const needed = 5 - backCards.length;
+            for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
+                backCards.push(unusedCards[kickerIndex++]);
+            }
+//            console.log(`🃏 Added ${needed} kickers to back hand`);
+        }
+
+        // Complete middle hand to 5 cards if needed
+        const middleCards = [...arrangement.middle.cards];
+        if (middleCards.length < 5) {
+            const needed = 5 - middleCards.length;
+            for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
+                middleCards.push(unusedCards[kickerIndex++]);
+            }
+//            console.log(`🃏 Added ${needed} kickers to middle hand`);
+        }
+
+        // Complete front hand to 3 cards if needed
+        const frontCards = [...arrangement.front.cards];
+        if (frontCards.length < 3) {
+            const needed = 3 - frontCards.length;
+            for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
+                frontCards.push(unusedCards[kickerIndex++]);
+            }
+//            console.log(`🃏 Added ${needed} kickers to front hand`);
+        }
+
+//        console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
+
+        // Re-evaluate hands with complete cards using card-evaluation.js functions
+        const reEvaluatedBack = evaluateHand(backCards);  // Always returns proper hand_rank
+        const reEvaluatedMiddle = evaluateHand(middleCards);
+        const reEvaluatedFront = evaluateThreeCardHand(frontCards);  // For 3-card front hands
+
+        // Update the arrangement objects with the new hand data
+        arrangement.back.handStrength = reEvaluatedBack;
+        arrangement.back.hand_rank = reEvaluatedBack.hand_rank;
+        arrangement.back.strength = reEvaluatedBack.rank;
+
+        arrangement.middle.handStrength = reEvaluatedMiddle;
+        arrangement.middle.hand_rank = reEvaluatedMiddle.hand_rank;
+        arrangement.middle.strength = reEvaluatedMiddle.rank;
+
+        arrangement.front.handStrength = reEvaluatedFront;
+        arrangement.front.hand_rank = reEvaluatedFront.hand_rank;
+        arrangement.front.strength = reEvaluatedFront.rank;
+
+        // After adding all kickers, calculate remaining staging cards
+        const remainingCards = unusedCards.slice(kickerIndex);
+
+        // In completeArrangementWithKickers() - use factory
+        return createArrangement(
+            { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
+            { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
+            { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
+            null, // score calculated elsewhere
+            remainingCards  // stagingCards
+        );
     }
 
 }
