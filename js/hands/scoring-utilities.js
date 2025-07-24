@@ -147,10 +147,10 @@ class ScoringUtilities {
                 return this.getExpectedPointsTiered(hand, cards, position, playerCount);
             case 'points':
             default:
-                console.log('🔍 Debug positionScores:');
-                console.log('  hand.positionScores:', hand.positionScores);
-                console.log('  position:', position);
-                console.log('  hand.positionScores[position]:', hand.positionScores[position]);
+//                console.log('🔍 Debug positionScores:');
+//                console.log('  hand.positionScores:', hand.positionScores);
+//                console.log('  position:', position);
+//                console.log('  hand.positionScores[position]:', hand.positionScores[position]);
 
                 const pointsIfWin = hand.positionScores[position];
                 const strengthBonus = this.calculateTiebreaker(hand.hand_rank);
@@ -317,13 +317,13 @@ class ScoringUtilities {
     // =============================================================================
 
     static debugHandScoring(hand, position, cardCount, label = "") {
-        console.log(`\n🎯 ${label} Hand Scoring Debug:`);
-        console.log(`Position: ${position}`);
-        console.log(`Hand: ${hand.name}`);
-        console.log(`Cards: ${cardCount}`);
-        console.log(`Points if Win: ${this.getPointsForHand(hand, position, cardCount)}`);
-        console.log(`Win Probability: ${this.formatWinProbability(this.estimateWinProbability(hand, position))}`);
-        console.log(`Expected Points: ${this.formatExpectedPoints(this.getExpectedPoints(hand, {length: cardCount}, position))}`);
+//        console.log(`\n🎯 ${label} Hand Scoring Debug:`);
+//        console.log(`Position: ${position}`);
+//        console.log(`Hand: ${hand.name}`);
+//        console.log(`Cards: ${cardCount}`);
+//        console.log(`Points if Win: ${this.getPointsForHand(hand, position, cardCount)}`);
+//        console.log(`Win Probability: ${this.formatWinProbability(this.estimateWinProbability(hand, position))}`);
+//        console.log(`Expected Points: ${this.formatExpectedPoints(this.getExpectedPoints(hand, {length: cardCount}, position))}`);
     }
 
     // =============================================================================
@@ -367,12 +367,12 @@ class ScoringUtilities {
 
     static printPointsReference() {
         const table = this.getPointsReferenceTable();
-        console.log("\n📊 Pyramid Poker Points Reference:");
+//        console.log("\n📊 Pyramid Poker Points Reference:");
 
         Object.keys(table).forEach(position => {
-            console.log(`\n${position.toUpperCase()} HAND:`);
+//            console.log(`\n${position.toUpperCase()} HAND:`);
             Object.entries(table[position]).forEach(([hand, points]) => {
-                console.log(`  ${hand}: ${points} points`);
+//                console.log(`  ${hand}: ${points} points`);
             });
         });
     }
