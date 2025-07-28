@@ -1,16 +1,18 @@
 // js/tests/comprehensive-test-all-methods.js
-// Systematic testing: 10 cases each for no/one/two wild × 3 methods = 90 total tests
+// Enhanced: Compare arrangements between methods to ensure same optimal results
 
 function runComprehensiveTests() {
-    console.log('\n🧪 ======== COMPREHENSIVE TEST SUITE ========');
+    console.log('\n🧪 ======== COMPREHENSIVE TEST SUITE WITH ARRANGEMENT COMPARISON ========');
     console.log('Testing all wild scenarios × all optimization methods');
     console.log('Total tests: 90 (10 cases × 3 wild scenarios × 3 methods)');
+    console.log('NEW: Comparing arrangements between methods for consistency');
 
     const results = {
         noWild: { points: [], empirical: [], tiered: [] },
         oneWild: { points: [], empirical: [], tiered: [] },
         twoWild: { points: [], empirical: [], tiered: [] },
-        summary: { passed: 0, failed: 0, total: 90 }
+        summary: { passed: 0, failed: 0, total: 90 },
+        comparisons: [] // NEW: Track arrangement comparisons
     };
 
     // Test ranges
@@ -20,28 +22,72 @@ function runComprehensiveTests() {
         { name: 'Two-Wild', start: 2001, end: 2010, wildCount: 2 }
     ];
 
-    // Test each range with each method
+    // Test each range with each method AND compare arrangements
     testRanges.forEach(range => {
         console.log(`\n📋 ======== ${range.name} Tests (Cases ${range.start}-${range.end}) ========`);
 
-        // Test Points method
-        console.log(`\n🎯 Testing ${range.name} + Points...`);
-        const pointsResults = testWildScenarioWithMethod(range, 'points');
-        results[toCamelCase(range.name)].points = pointsResults;
+        // Test all three methods for each case and compare
+        for (let testId = range.start; testId <= range.end; testId++) {
+            console.log(`\n🔍 Test Case ${testId}:`);
 
-        // Test Empirical method
-        console.log(`\n📊 Testing ${range.name} + Empirical...`);
-        const empiricalResults = testWildScenarioWithMethod(range, 'empirical');
-        results[toCamelCase(range.name)].empirical = empiricalResults;
+            const caseResults = {};
+            const methods = ['points', 'empirical', 'tiered'];
 
-        // Test Tiered method
-        console.log(`\n📈 Testing ${range.name} + Tiered...`);
-        const tieredResults = testWildScenarioWithMethod(range, 'tiered');
-        results[toCamelCase(range.name)].tiered = tieredResults;
+            // Run all three methods on same test case
+            methods.forEach(method => {
+                console.log(`  ${method.padEnd(10)}: `, { endLine: false });
+
+                try {
+                    const cards = createFromCardsTestCase(testId);
+                    const originalMethod = gameConfig.config.winProbabilityMethod;
+                    gameConfig.config.winProbabilityMethod = method;
+
+                    const setup = new FindBestSetup();
+                    const startTime = performance.now();
+                    const result = setup.findBestSetup(cards);
+                    const endTime = performance.now();
+
+                    gameConfig.config.winProbabilityMethod = originalMethod;
+
+                    caseResults[method] = {
+                        testId,
+                        method,
+                        wildCount: range.wildCount,
+                        success: result.success,
+                        score: result.score,
+                        time: endTime - startTime,
+                        arrangement: result.arrangement,
+                        cards: cards
+                    };
+
+                    console.log(result.success ? '✅' : '❌', `(${result.score.toFixed(2)}, ${(endTime - startTime).toFixed(0)}ms)`);
+
+                } catch (error) {
+                    console.log(`❌ ERROR: ${error.message}`);
+                    caseResults[method] = {
+                        testId, method, wildCount: range.wildCount,
+                        success: false, score: 0, time: 0, error: error.message
+                    };
+                }
+            });
+
+            // Store individual results
+            results[toCamelCase(range.name)].points.push(caseResults.points);
+            results[toCamelCase(range.name)].empirical.push(caseResults.empirical);
+            results[toCamelCase(range.name)].tiered.push(caseResults.tiered);
+
+            // NEW: Compare arrangements between methods
+            const comparison = compareArrangements(caseResults, testId);
+            results.comparisons.push(comparison);
+            displayArrangementComparison(comparison);
+        }
     });
 
     // Calculate summary statistics
     calculateSummaryStats(results);
+
+    // NEW: Display arrangement comparison summary
+    displayArrangementSummary(results.comparisons);
 
     // Display comprehensive results
     displayComprehensiveResults(results);
@@ -49,62 +95,142 @@ function runComprehensiveTests() {
     return results;
 }
 
-function testWildScenarioWithMethod(range, method) {
-    const results = [];
+function compareArrangements(caseResults, testId) {
+    const methods = ['points', 'empirical', 'tiered'];
+    const arrangements = {};
+    const scores = {};
 
-    for (let testId = range.start; testId <= range.end; testId++) {
-        console.log(`  Test ${testId}: `, { endLine: false });
+    // Extract arrangements and scores
+    methods.forEach(method => {
+        const result = caseResults[method];
+        if (result && result.success && result.arrangement) {
+            arrangements[method] = serializeArrangement(result.arrangement);
+            scores[method] = result.score;
+        } else {
+            arrangements[method] = null;
+            scores[method] = null;
+        }
+    });
 
-        try {
-            // Create cards for test case
-            const cards = createFromCardsTestCase(testId);
+    // Compare arrangements
+    const comparison = {
+        testId,
+        arrangements,
+        scores,
+        identical: false,
+        scoresSimilar: false,
+        differences: []
+    };
 
-            // Set optimization method via GameConfig
-            const originalMethod = gameConfig.config.winProbabilityMethod;
-            gameConfig.config.winProbabilityMethod = method;
+    // Check if all successful arrangements are identical
+    const successfulMethods = methods.filter(m => arrangements[m] !== null);
+    if (successfulMethods.length > 1) {
+        const firstArrangement = arrangements[successfulMethods[0]];
+        comparison.identical = successfulMethods.every(method =>
+            arrangements[method] === firstArrangement
+        );
 
-            // Create FindBestSetup instance
-            const setup = new FindBestSetup();
+        // Check if scores are similar (within 5%)
+        const scoreValues = successfulMethods.map(m => scores[m]).filter(s => s !== null);
+        if (scoreValues.length > 1) {
+            const maxScore = Math.max(...scoreValues);
+            const minScore = Math.min(...scoreValues);
+            const scoreDiff = ((maxScore - minScore) / maxScore) * 100;
+            comparison.scoresSimilar = scoreDiff < 5; // Within 5%
+            comparison.scoreDifference = scoreDiff.toFixed(2) + '%';
+        }
 
-            // Run test
-            const startTime = performance.now();
-            const result = setup.findBestSetup(cards);
-            const endTime = performance.now();
-
-            // Restore original method
-            gameConfig.config.winProbabilityMethod = originalMethod;
-
-            // Record result
-            const testResult = {
-                testId,
-                method,
-                wildCount: range.wildCount,
-                success: result.success,
-                score: result.score,
-                time: endTime - startTime,
-                arrangement: result.arrangement ? 'Valid' : 'None'
-            };
-
-            results.push(testResult);
-
-            // Quick status
-            console.log(result.success ? '✅' : '❌', `(${result.score.toFixed(2)}, ${(endTime - startTime).toFixed(0)}ms)`);
-
-        } catch (error) {
-            console.log(`❌ ERROR: ${error.message}`);
-            results.push({
-                testId,
-                method,
-                wildCount: range.wildCount,
-                success: false,
-                score: 0,
-                time: 0,
-                error: error.message
+        // Find specific differences
+        if (!comparison.identical) {
+            methods.forEach(method1 => {
+                methods.forEach(method2 => {
+                    if (method1 < method2 && arrangements[method1] && arrangements[method2]) {
+                        if (arrangements[method1] !== arrangements[method2]) {
+                            comparison.differences.push({
+                                methods: `${method1} vs ${method2}`,
+                                score1: scores[method1],
+                                score2: scores[method2],
+                                arrangement1: arrangements[method1],
+                                arrangement2: arrangements[method2]
+                            });
+                        }
+                    }
+                });
             });
         }
     }
 
-    return results;
+    return comparison;
+}
+
+function serializeArrangement(arrangement) {
+    if (!arrangement) return null;
+
+    const serialize = (hand) => {
+        if (!hand || !hand.cards) return 'empty';
+        return hand.cards
+            .map(card => `${card.rank}${card.suit}`)
+            .sort()
+            .join(',');
+    };
+
+    return {
+        back: serialize(arrangement.back),
+        middle: serialize(arrangement.middle),
+        front: serialize(arrangement.front)
+    };
+}
+
+function displayArrangementComparison(comparison) {
+    if (comparison.identical) {
+        console.log(`    🎯 Arrangements: IDENTICAL (all methods found same optimal solution)`);
+        if (comparison.scoresSimilar) {
+            console.log(`    📊 Scores: Similar (within ${comparison.scoreDifference})`);
+        }
+    } else if (comparison.differences.length > 0) {
+        console.log(`    ⚠️  Arrangements: DIFFERENT between methods!`);
+        comparison.differences.forEach(diff => {
+            console.log(`      ${diff.methods}: Score ${diff.score1.toFixed(2)} vs ${diff.score2.toFixed(2)}`);
+        });
+    }
+}
+
+function displayArrangementSummary(comparisons) {
+    console.log('\n🔍 ======== ARRANGEMENT COMPARISON SUMMARY ========');
+
+    const identicalCount = comparisons.filter(c => c.identical).length;
+    const differentCount = comparisons.filter(c => !c.identical && c.differences.length > 0).length;
+    const totalComparisons = comparisons.length;
+
+    console.log(`📊 Arrangement Consistency:`);
+    console.log(`   Identical arrangements: ${identicalCount}/${totalComparisons} (${(identicalCount/totalComparisons*100).toFixed(1)}%)`);
+    console.log(`   Different arrangements: ${differentCount}/${totalComparisons} (${(differentCount/totalComparisons*100).toFixed(1)}%)`);
+
+    if (differentCount > 0) {
+        console.log(`\n⚠️  ARRANGEMENT DIFFERENCES FOUND:`);
+        const differences = comparisons.filter(c => c.differences.length > 0);
+        differences.forEach(comp => {
+            console.log(`   Test ${comp.testId}:`);
+            comp.differences.forEach(diff => {
+                console.log(`     ${diff.methods}: ${diff.score1.toFixed(2)} vs ${diff.score2.toFixed(2)} points`);
+
+                // Show arrangement details if significantly different
+                const scoreDiff = Math.abs(diff.score1 - diff.score2);
+                if (scoreDiff > 1) {
+                    console.log(`       Back:   ${diff.arrangement1.back} vs ${diff.arrangement2.back}`);
+                    console.log(`       Middle: ${diff.arrangement1.middle} vs ${diff.arrangement2.middle}`);
+                    console.log(`       Front:  ${diff.arrangement1.front} vs ${diff.arrangement2.front}`);
+                }
+            });
+        });
+
+        console.log(`\n💡 Analysis: Different arrangements may indicate:`);
+        console.log(`   • Multiple equally-good solutions exist`);
+        console.log(`   • Different scoring methods prefer different arrangements`);
+        console.log(`   • Potential optimization differences between methods`);
+    } else {
+        console.log(`\n✅ PERFECT CONSISTENCY: All methods found identical optimal arrangements!`);
+    }
 }
 
 function calculateSummaryStats(results) {
@@ -181,17 +307,57 @@ function toCamelCase(str) {
     return str.replace(/-(\w)/g, (match, letter) => letter.toUpperCase()).replace(/^(.)/, match => match.toLowerCase());
 }
 
-// Quick test runner functions
-function quickTestNoWild() {
-    return testWildScenarioWithMethod({ name: 'No-Wild', start: 1, end: 10, wildCount: 0 }, 'tiered');
-}
+// Quick comparison functions
+function quickCompareArrangements(testId) {
+    console.log(`\n🔍 Quick Arrangement Comparison for Test ${testId}:`);
 
-function quickTestOneWild() {
-    return testWildScenarioWithMethod({ name: 'One-Wild', start: 1001, end: 1010, wildCount: 1 }, 'tiered');
-}
+    const methods = ['points', 'empirical', 'tiered'];
+    const results = {};
 
-function quickTestTwoWild() {
-    return testWildScenarioWithMethod({ name: 'Two-Wild', start: 2001, end: 2010, wildCount: 2 }, 'tiered');
+    methods.forEach(method => {
+        const cards = createFromCardsTestCase(testId);
+        gameConfig.config.winProbabilityMethod = method;
+        const setup = new FindBestSetup();
+        const result = setup.findBestSetup(cards);
+
+        results[method] = {
+            success: result.success,
+            score: result.score,
+            arrangement: serializeArrangement(result.arrangement)
+        };
+
+        console.log(`${method.padEnd(10)}: ${result.success ? '✅' : '❌'} Score: ${result.score.toFixed(2)}`);
+    });
+
+    // Compare arrangements
+    const pointsArr = results.points.arrangement;
+    const empiricalArr = results.empirical.arrangement;
+    const tieredArr = results.tiered.arrangement;
+
+    const allSame = JSON.stringify(pointsArr) === JSON.stringify(empiricalArr) &&
+                    JSON.stringify(empiricalArr) === JSON.stringify(tieredArr);
+
+    console.log(`\nArrangement Consistency: ${allSame ? '✅ IDENTICAL' : '⚠️ DIFFERENT'}`);
+
+    if (!allSame) {
+        console.log('Back hands:', {
+            points: pointsArr?.back,
+            empirical: empiricalArr?.back,
+            tiered: tieredArr?.back
+        });
+        console.log('Middle hands:', {
+            points: pointsArr?.middle,
+            empirical: empiricalArr?.middle,
+            tiered: tieredArr?.middle
+        });
+        console.log('Front hands:', {
+            points: pointsArr?.front,
+            empirical: empiricalArr?.front,
+            tiered: tieredArr?.front
+        });
+    }
+
+    return results;
 }
 
 // Export main function

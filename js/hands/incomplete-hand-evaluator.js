@@ -1,4 +1,4 @@
-// js/hands/incomplete-hand-evaluator.js v1
+q// js/hands/incomplete-hand-evaluator.js v1
 // Evaluates incomplete hands (1, 2, 4 cards) that need kickers
 // Keeps card-evaluation.js clean for complete hands only
 
