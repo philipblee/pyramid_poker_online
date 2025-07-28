@@ -88,7 +88,7 @@ function FindBestSetupTwoWild(cardObjects) {
 //            console.log(`  Cards created for combo ${index}`); // ADD THIS
 
             // ✅ Should read from game-config:
-            const flag = window.gameConfig?.config?.winProbabilityMethod || 'empirical';
+            const flag = window.gameConfig?.config?.winProbabilityMethod || 'tiered';
             const finder = createFindBestSetupNoWild(flag);
             const result = finder.findBestSetupNoWild(cards);
 

@@ -73,12 +73,6 @@ class FindBestSetup {
 
             this.logResult(result, wildCount);
 
-//            if (result.arrangement) {
-//                console.log('  Back:', result.arrangement.back?.handType);
-//                console.log('  Middle:', result.arrangement.middle?.handType);
-//                console.log('  Front:', result.arrangement.front?.handType);
-//            }
-
             return result;
 
         } catch (error) {

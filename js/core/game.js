@@ -133,25 +133,6 @@ class ChinesePokerGame {
             console.log(`\n🎴 Cards dealt to ${player.name}:`);
             console.log('Current format:', hand);
             const analysis = new Analysis(hand);
-//            console.log('Analysis sees:', analysis.cards);
-//            console.log('Analysis summary:', analysis.summary());
-//
-//            // ADD THIS NEW INSPECTION:
-//            console.log('\n🔍 CARD FORMAT ANALYSIS:');
-//            console.log('First card structure:', hand[0]);
-//            console.log('Card Model compliance check:');
-//            const requiredProps = ['id', 'rank', 'suit', 'value', 'isWild'];
-//            const firstCard = hand[0];
-//            requiredProps.forEach(prop => {
-//                const hasProperty = firstCard.hasOwnProperty(prop);
-//                console.log(`  ${prop}: ${hasProperty ? '✅' : '❌'} ${hasProperty ? firstCard[prop] : 'MISSING'}`);
-//            });
-//
-//            // Check if any cards have non-standard properties
-//            const extraProps = Object.keys(firstCard).filter(key => !['id', 'rank', 'suit', 'value', 'isWild', 'wasWild'].includes(key));
-//            if (extraProps.length > 0) {
-//                console.log('  Extra properties:', extraProps);
-//            }
 
             this.playerHands.set(player.name, {
                 cards: hand,
@@ -208,30 +189,6 @@ class ChinesePokerGame {
         // Deal new cards to all existing players
         for (let player of this.playerManager.players) {
             const hand = this.deckManager.dealCards(17);
-
-//            // ADD THE SAME LOGGING HERE:
-//            console.log(`\n🎴 Cards dealt to ${player.name}:`);
-//            console.log('Current format:', hand);
-//            const analysis = new Analysis(hand);
-//            console.log('Analysis sees:', analysis.cards);
-//            console.log('Analysis summary:', analysis.summary());
-//
-//            console.log('\n🔍 CARD FORMAT ANALYSIS:');
-//            console.log('First card structure:', hand[0]);
-//            console.log('Card Model compliance check:');
-//            const requiredProps = ['id', 'rank', 'suit', 'value', 'isWild'];
-//            const firstCard = hand[0];
-//            requiredProps.forEach(prop => {
-//                const hasProperty = firstCard.hasOwnProperty(prop);
-//                console.log(`  ${prop}: ${hasProperty ? '✅' : '❌'} ${hasProperty ? firstCard[prop] : 'MISSING'}`);
-//            });
-
-//            const extraProps = Object.keys(firstCard).filter(key => !['id', 'rank', 'suit', 'value', 'isWild', 'wasWild'].includes(key));
-//            if (extraProps.length > 0) {
-//                console.log('  Extra properties:', extraProps);
-//            }
-
-
 
             this.playerHands.set(player.name, {
                 cards: hand,
@@ -336,27 +293,6 @@ class ChinesePokerGame {
         const playerData = this.playerHands.get(currentPlayer.name);
 
         if (!playerData) return;
-
-//        // ADD THIS TEST HERE (where playerData exists):
-//        if (playerData.back.length === 5) {
-//            console.log('\n🧪 Testing HandDetector on 5 cards:');
-//            console.log('Input cards:', playerData.back);
-//
-//            const detector = new HandDetector(playerData.back);
-//            const results = detector.detectAllHands();
-//
-////            console.log('HandDetector results:');
-////            console.log('Total hands found:', results.total);
-////            console.log('All hands:', results.hands);
-//
-////            if (results.hands && results.hands.length > 0) {
-////                console.log('First hand (Hand Model):', results.hands[0]);
-////                console.log('Has validPositions?', !!results.hands[0].validPositions);
-////                console.log('Has isIncomplete?', !!results.hands[0].isIncomplete);
-////            } else {
-////                console.log('⚠️ No hands detected!');
-////            }
-//        }
 
 
         // After this line: const playerData = this.playerHands.get(currentPlayer.name);
@@ -633,12 +569,6 @@ class ChinesePokerGame {
         const playerData = this.playerHands.get(currentPlayer.name);
 
         if (!playerData) return;
-
-        // Before the hand evaluation section, add:
-//        console.log(`\n✅ ${currentPlayer.name} submitting hands:`);
-//        console.log('Back hand:', playerData.back);
-//        console.log('Middle hand:', playerData.middle);
-//        console.log('Front hand:', playerData.front);
 
         // Analyze each hand
         if (playerData.back.length > 0) {

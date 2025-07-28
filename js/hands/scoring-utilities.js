@@ -138,7 +138,7 @@ class ScoringUtilities {
         const actualMethod = method ||
                             window.WIN_PROB_OVERRIDE ||
                             window.gameConfig?.config?.winProbabilityMethod ||
-                            'empirical';
+                            'tiered';
 
         switch(actualMethod) {
             case 'empirical':

@@ -8,6 +8,7 @@ class FindBestSetupNoWildBase {
         this.bestArrangement = null;
         this.exploredNodes = 0;
         this.prunedNodes = 0;
+
     }
 
     /**
@@ -631,13 +632,6 @@ class FindBestSetupNoWildTiered extends FindBestSetupNoWildBase {
             const frontScore = this.getHandScore(arrangement.front, 'front');
 
             const score = backScore + middleScore + frontScore;
-
-            // Log what's already there:
-//            console.log('🔍 No-Wild Scores:');
-//            console.log('  backScore:', backScore);
-//            console.log('  middleScore:', middleScore);
-//            console.log('  frontScore:', frontScore);
-//            console.log('  total score:', score);
 
             if (score > this.bestScore) {
                 this.bestScore = score;

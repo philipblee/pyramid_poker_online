@@ -11,6 +11,12 @@ const TEST_CASES = [
     // =============================================================================
 
     {
+        id: 0,
+        name: "Four Aces + Two Kings at id=0 so TEST_CASE[0] ahd case.id=0 align",
+        cards: "A♠ A♥ A♦ A♣ K♠ Q♠ J♠ 10♠ 9♠ 8♠ 7♠ 6♠ 5♠ 4♠ 3♠ 2♠ K♥",
+    },
+
+    {
         id: 1,
         name: "Four Aces + Two Kings",
         cards: "A♠ A♥ A♦ A♣ K♠ Q♠ J♠ 10♠ 9♠ 8♠ 7♠ 6♠ 5♠ 4♠ 3♠ 2♠ K♥",

@@ -76,7 +76,7 @@ function FindBestSetupOneWild(cardObjects) {
             const handResults = detector.results;
 
             // Updated calling program
-            const flag = window.gameConfig?.config?.winProbabilityMethod || 'empirical';
+            const flag = window.gameConfig?.config?.winProbabilityMethod || 'tiered';
             const finder = createFindBestSetupNoWild(flag);
             finder.bestScore = globalBestScore; // 🔥 SEED with global best
 

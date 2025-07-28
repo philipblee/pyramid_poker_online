@@ -24,7 +24,6 @@ class TestHandDetector {
             // Run HandDetector
             const startTime = performance.now();
             const detector = new HandDetector(testCards);
-            const results = detector.detectAllHands();
             const endTime = performance.now();
 
             // Verify actual vs expected

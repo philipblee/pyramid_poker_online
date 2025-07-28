@@ -6,13 +6,33 @@
     Suit is "SHDC", "A23456789TJQK"
 - 3 wild and 4 wild solve by adding one wild at a time and calling find-best-setup-one-wild
 
-
-current data 2,000 round 12,000 hands - not enough
-next data set 12,000 rounds 72,000 hands
-better data will create better setups, better setups will improve data
-run again, to get better setups. etc.
+2025-07-20
+- current data 2,000 round 12,000 hands - not enough
+- next data set 12,000 rounds 72,000 hands
+- better data will create better setups, better setups will improve data
+- run again, to get better setups. etc.
 
 2025-07-22
 - time to fix hand model to include positionExpectedValue or EV
 - make the findbestsetup series all use arrangement for calling and returning
 - get rid of tiebreaker for empirical and tiered
+
+2025-07-25
+- ok got three methods sort of working - empirical, tiered, points
+- empirical based on 12,000 rounds/72,000 hands
+- tiered based on 3 tuple - estimated prob that is tiered by hand type, spread uniformly
+- points is just number of points for hand, flawed as hands of different ranks get same points
+- got it mostly working, testing with 90 hands
+- 10 cases each for nowild, onewild and two wild; each solved with empirical, tiered and points
+- only problem is no-wild points has a problem, not whole number final point total
+
+2025-07-27
+- created branch "explore-complete-hands-explosion"
+- did a lot of work, ended up with about 5097 hands, most were high card hands 5-cards
+- performance horrible, from 200ms to 5200ms.  not worth it
+- restored to main for next project.
+
+2025=07-27
+- I want to fix points
+- Maybe look for ways to refactor code for easier maintenance
+- evaluateHand and scoringUtilities needs improving

@@ -13,7 +13,7 @@
  */
 function createArrangement(back, middle, front, score, stagingCards, isValid = true) {
     // Read method from game-config automatically
-    const method = window.gameConfig?.config?.winProbabilityMethod || 'empirical';
+    const method = window.gameConfig?.config?.winProbabilityMethod || 'tiered';
 
     return {
         back,
@@ -35,6 +35,6 @@ function createFindBestSetupNoWild(flag) {
         return new FindBestSetupNoWildTiered();
     case 'empirical':
     default:
-        return new FindBestSetupNoWild();
+        return new FindBestSetupNoWildEmpirical();  // ← Fix this line
   }
 }

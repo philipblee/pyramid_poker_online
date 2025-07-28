@@ -24,8 +24,8 @@ function createFromCardsTestCase(caseId) {
     }
 
     // Log wild card count for verification
-    const wildCards = allCards.filter(c => c.isWild);
-    console.log(`✅ Created ${allCards.length} card objects (${wildCards.length} wilds)`);
+//    const wildCards = allCards.filter(c => c.isWild);
+//    console.log(`✅ Created ${allCards.length} card objects (${wildCards.length} wilds)`);
 
     return allCards;
 }
