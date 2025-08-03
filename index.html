@@ -113,6 +113,13 @@
 
     <!-- JavaScript Files -->
 
+
+<!--// Then anywhere you need method info:-->
+const methodConfig = METHODS[currentMethod];
+if (methodConfig.hasCSV) {
+    const winProb = methodConfig.loader.lookup(position, hand);
+}
+
 <!-- Near the bottom of index.html, before closing </body> -->
 <script>
 // Existing game initialization
@@ -135,8 +142,16 @@ window.addEventListener('DOMContentLoaded', async () => {
         console.log('⚠️ Tiered data failed to load');
     }
 
-    // Continue with existing game setup
-    // ... your existing initialization code
+    // Load tiered2 win probability data
+    const tiered2Loaded = await initializeTiered2WinProbability();
+    if (tiered2Loaded) {
+        console.log('✅ Tiered2 win probability data ready (2235 entries)');
+    } else {
+        console.log('⚠️ Tiered data failed to load');
+    }
+
+<!--    // Continue with existing game setup-->
+<!--    // ... your existing initialization code-->
 });
 </script>
 
@@ -147,6 +162,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     <script src="js/utilities/card-count.js"></script>
     <script src="js/utilities/empirical-win-probability.js"></script>
     <script src="js/utilities/tiered-win-probability.js"></script>
+    <script src="js/utilities/tiered2-win-probability.js"></script>
     <script src="js/utilities/convert-to-card-model.js"></script>
     <script src="js/hands/evaluate-hand.js"></script>
     <script src="js/hands/scoring-utilities.js"></script>

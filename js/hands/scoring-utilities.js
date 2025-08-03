@@ -130,38 +130,33 @@ class ScoringUtilities {
     // =============================================================================
 
     static getExpectedPoints(hand, cards, position, playerCount = 4, method = null) {
-        // Handle legacy boolean parameters for backward compatibility
-        if (method === true) method = 'empirical';
-        if (method === false) method = 'points';
-
-        // Priority: passed parameter > console override > config setting > default
         const actualMethod = method ||
                             window.WIN_PROB_OVERRIDE ||
                             window.gameConfig?.config?.winProbabilityMethod ||
                             'tiered';
 
-        switch(actualMethod) {
+        if (actualMethod === 'points') {
+            const pointsIfWin = hand.positionScores[position];
+            const strengthBonus = this.calculateTiebreaker(hand.hand_rank);
+            return pointsIfWin + strengthBonus;
+        } else {
+            // All probability-based methods (empirical, tiered, tiered2)
+            const winProb = this.getWinProbabilityForMethod(actualMethod, position, hand);
+            const pointsIfWin = this.getPointsForHand(hand, position, cards.length);
+            return winProb * pointsIfWin;
+        }
+    }
+
+    static getWinProbabilityForMethod(method, position, hand) {
+        switch(method) {
             case 'empirical':
-                return this.getExpectedPointsEmpirical(hand, cards, position, playerCount);
+                return lookupEmpiricalWinProbability(position, hand);
             case 'tiered':
-                return this.getExpectedPointsTiered(hand, cards, position, playerCount);
-            case 'points':
+                return lookupTieredWinProbability(position, hand);
+            case 'tiered2':
+                return lookupTiered2WinProbability(position, hand);
             default:
-//                console.log('🔍 Debug positionScores:');
-//                console.log('  hand.positionScores:', hand.positionScores);
-//                console.log('  position:', position);
-//                console.log('  hand.positionScores[position]:', hand.positionScores[position]);
-
-                const pointsIfWin = hand.positionScores[position];
-                const strengthBonus = this.calculateTiebreaker(hand.hand_rank);
-
-//                // Add logging here:
-//                console.log('🔍 Points breakdown:');
-//                console.log('  pointsIfWin:', pointsIfWin);
-//                console.log('  strengthBonus:', strengthBonus);
-//                console.log('  total:', pointsIfWin + strengthBonus);
-
-                return pointsIfWin + strengthBonus;
+                return 0.5; // fallback
         }
     }
 
@@ -188,95 +183,6 @@ class ScoringUtilities {
     static formatExpectedPoints(expectedPoints) {
         return expectedPoints.toFixed(2);
     }
-
-    static getExpectedPointsTiered(hand, cards, position, playerCount = 4) {
-
-//        console.log('🔍 Tiered method called:', { position, handType: hand.handType });
-
-        // Extract handStrength from the complete hand object
-        const handStrength = hand.handStrength;
-
-        // Get base points if win
-        const pointsIfWin = this.getPointsForHand(hand.handStrength, position, cards.length);
-
-        // Get tiered win probability from your range data
-        const tieredProbability = lookupTieredWinProbability(position, hand);
-
-//        console.log('  Tiered probability:', tieredProbability);
-
-        let winProbability;
-        if (tieredProbability !== null) {
-            // Use tiered data
-            winProbability = tieredProbability;
-        } else {
-            // Fallback to estimated probability for missing data
-            winProbability = this.estimateWinProbability(handStrength, position, playerCount);
-        }
-
-        // Expected points = probability × points
-        const expectedPoints = winProbability * pointsIfWin;
-
-        // Add tiny tiebreaker for same expected points
-        const tiebreaker = this.calculateTiebreaker(handStrength.hand_rank) * 0.0001;
-
-        return expectedPoints;
-    }
-
-    /**
-     * Get expected points using empirical win probability data from 6,000 hands
-     * @param {Object} handStrength - Hand strength object with hand_rank
-     * @param {Object} cards - Cards object with length property
-     * @param {string} position - Position (back/middle/front)
-     * @param {number} playerCount - Number of players (default 4)
-     * @returns {number} - Expected points (empirical_probability × points)
-     */
-    static getExpectedPointsEmpirical(hand, cards, position, playerCount = 4) {
-
-        // Extract handStrength from the complete hand object
-        const handStrength = hand.handStrength;
-
-        // Get base points if win
-        const pointsIfWin = this.getPointsForHand(hand.handStrength, position, cards.length);
-
-        // Get empirical win probability from your 6,000 hands data
-        const empiricalProbability = lookupEmpiricalWinProbability(position, hand);
-
-        let winProbability;
-        if (empiricalProbability !== null) {
-            // Use empirical data
-            winProbability = empiricalProbability;
-        } else {
-            // Fallback to estimated probability for missing data
-            winProbability = this.estimateWinProbability(handStrength, position, playerCount);
-        }
-
-        // Expected points = probability × points
-        const expectedPoints = winProbability * pointsIfWin;
-
-        return expectedPoints;
-    }
-
-        /**
-         * Get expected points using points only - no probability
-         * @param {Object} handStrength - Hand strength object with hand_rank
-         * @param {Object} cards - Cards object with length property
-         * @param {string} position - Position (back/middle/front)
-         * @param {number} playerCount - Number of players (default 4)
-         * @returns {number} - Expected points
-         */
-        static getExpectedPointsPoints(hand, cards, position, playerCount = 4) {
-
-            // Extract handStrength from the complete hand object
-            const handStrength = hand.handStrength;
-
-            // Get base points if win
-            const pointsIfWin = hand.positionScores[position];  // Use the correct pre-calculated value
-
-            // Expected points = probability × points
-            const expectedPoints = pointsIfWin;
-
-            return expectedPoints;
-        }
 
 
     // ========================================================================git =====

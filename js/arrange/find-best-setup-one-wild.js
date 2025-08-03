@@ -55,10 +55,10 @@ function FindBestSetupOneWild(cardObjects) {
     }
 
     const allCandidates = candidatesResult.wildCandidates;
-//    console.log(`✅ Generated ${allCandidates.length} smart candidates`);
+    console.log(`✅ Generated ${allCandidates.length} smart candidates`);
 
     // STEP 4: Process each smart candidate (same proven logic as brute force)
-//    console.log(`\n🔄 Step 4: Processing ${allCandidates.length} candidates (smart subset)...`);
+    console.log(`\n🔄 Step 4: Processing ${allCandidates.length} candidates (smart subset)...`);
     const results = [];
 
     let globalBestScore = -Infinity;
@@ -66,10 +66,10 @@ function FindBestSetupOneWild(cardObjects) {
     allCandidates.forEach((candidate, index) => {
 
         try {
-
             // Create substituted card (same as brute force)
             const substitutedCard = createCardFromString(candidate, wildCard.id);
             const cards = [...nonWildCards, substitutedCard];
+            console.log("After substitute card in 1-wild", cards)
 
             // Run HandDetector (auto-sorted)
             const detector = new HandDetector(cards);
@@ -77,10 +77,17 @@ function FindBestSetupOneWild(cardObjects) {
 
             // Updated calling program
             const flag = window.gameConfig?.config?.winProbabilityMethod || 'tiered';
-            const finder = createFindBestSetupNoWild(flag);
+            console.log("1 wild line 80")
+            const bestSetup = FindBestSetupNoWild(cards);
+            console.log("1 wild line 82")
+            const finder = bestSetup.findBestSetupNoWild(cards);
+            console.log("1 wild line 84")
+            console.log("After calling NoWild in 1-wild", finder)
             finder.bestScore = globalBestScore; // 🔥 SEED with global best
-
+            console.log("1 wild line 87")
             const arrangementResult = finder.findBestSetupNoWild(cards);
+            console.log("1 wild line 89")
+            console.log("find-best-setup-one-wild 90", arrangementResult)
 
             if (arrangementResult.success && arrangementResult.score > globalBestScore)
                 globalBestScore = arrangementResult.score;
@@ -133,12 +140,12 @@ function FindBestSetupOneWild(cardObjects) {
 
     if (successful.length > 0) {
         const best = successful[0];
-//        console.log(`\n🏆 Best Result (Smart):`);
-//        console.log(`   Wild card: ${best.wildCard}`);
-//        console.log(`   Score: ${best.score}`);
-//        console.log(`   Back: ${best.arrangement.back.handType}`);
-//        console.log(`   Middle: ${best.arrangement.middle.handType}`);
-//        console.log(`   Front: ${best.arrangement.front.handType}`);
+        console.log(`\n🏆 Best Result (Smart):`);
+        console.log(`   Wild card: ${best.wildCard}`);
+        console.log(`   Score: ${best.score}`);
+        console.log(`   Back: ${best.arrangement.back.handType}`);
+        console.log(`   Middle: ${best.arrangement.middle.handType}`);
+        console.log(`   Front: ${best.arrangement.front.handType}`);
 
         // Show top 5 results for smart approach
 //        console.log(`\n🥇 Top 5 Results (Smart):`);

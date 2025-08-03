@@ -8,7 +8,7 @@ class FindBestSetupNoWildBase {
         this.bestArrangement = null;
         this.exploredNodes = 0;
         this.prunedNodes = 0;
-
+        console.log("NoWild Constructor")
     }
 
     /**
@@ -87,13 +87,16 @@ class FindBestSetupNoWildBase {
         const remainingCards = unusedCards.slice(kickerIndex);
 
         // In completeArrangementWithKickers() - use factory
-        return createArrangement(
-            { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
-            { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
-            { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
-            null, // score calculated elsewhere
-            remainingCards  // stagingCards
-        );
+        return createArrangement ({
+            back: { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
+            middle: { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
+            front: { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
+            score: null, // score calculated elsewhere
+            stagingCards: remainingCards,  // stagingCards
+            scoreFront: null, /* calculate or set to null */
+            scoreMiddle: null, /* calculate or set to null */
+            scoreBack: null /* calculate or set to null */
+        });
     }
 
     /**
@@ -370,6 +373,14 @@ class FindBestSetupNoWildBase {
     }
 }
 
+// After: 1 class
+class FindBestSetupNoWild extends FindBestSetupNoWildBase {
+    getHandScore(hand, position) {
+        const method = gameConfig.config.winProbabilityMethod;
+        return ScoringUtilities.getExpectedPoints(hand, hand.cards, position, method);
+    }
+}
+
 
 // Points subclass
 class FindBestSetupNoWildPoints extends FindBestSetupNoWildBase {
@@ -543,199 +554,43 @@ class FindBestSetupNoWildPoints extends FindBestSetupNoWildBase {
         // After adding all kickers, calculate remaining staging cards
         const remainingCards = unusedCards.slice(kickerIndex);
 
-        // In completeArrangementWithKickers() - use factory
-        return createArrangement(
-            { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
-            { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
-            { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
-            null, // score calculated elsewhere
-            remainingCards  // stagingCards
-        );
-    }
-}
 
+        // Calculate position EVs with error checking
+        let scoreFront, scoreMiddle, scoreBack;
 
-// Tiered subclass
-class FindBestSetupNoWildTiered extends FindBestSetupNoWildBase {
-
-    /**
-     * Get score for a hand in a specific position
-     * @param {Object} hand - Hand object
-     * @param {string} position - Position ('back', 'middle', 'front')
-     * @returns {number} - Hand score for that position
-     */
-
-    getHandScore(hand, position) {
-    // Use expected value (probability × points) for better optimization
-    // FIXED: Pass all required parameters to getExpectedPointsTiered
-    return ScoringUtilities.getExpectedPointsTiered(hand, hand.cards, position, 4);
-    }
-
-    /**
-     * Calculate partial score for back + middle (for pruning)
-     * @param {Object} backHand - Back hand
-     * @param {Object} middleHand - Middle hand
-     * @returns {number} - Partial score using actual Pyramid Poker points
-     */
-    calculatePartialScore(backHand, middleHand) {
-        const backScore = ScoringUtilities.getExpectedPointsTiered(backHand, backHand.cards, 'back');
-        const middleScore = ScoringUtilities.getExpectedPointsTiered(middleHand, middleHand.cards, 'middle');
-        return backScore + middleScore;
-    }
-
-    /**
-     * Estimate maximum possible front score for pruning
-     * @param {Array} sortedHands - All hands
-     * @param {number} startIdx - Index to start searching from
-     * @returns {number} - Estimated maximum front score using actual Pyramid Poker points
-     */
-    estimateMaxFrontScore(sortedHands, startIdx) {
-        // Find strongest hand that could be front and calculate its actual points
-        for (let i = startIdx; i < Math.min(startIdx + 50, sortedHands.length); i++) {
-            const hand = sortedHands[i];
-            if (this.canUseInPosition(hand, 'front')) {
-                return ScoringUtilities.getExpectedPointsTiered(hand, hand.cards, 'front');
-            }
+        try {
+            scoreFront = ScoringUtilities.getExpectedPoints(arrangement.front, arrangement.front.cards, 'front', 6);
+            scoreMiddle = ScoringUtilities.getExpectedPoints(arrangement.middle, arrangement.middle.cards, 'middle', 6);
+            scoreBack = ScoringUtilities.getExpectedPoints(arrangement.back, arrangement.back.cards, 'back', 6);
+        } catch (error) {
+            console.error('Error calculating position EVs:', error);
+            // Fall back to original behavior
+            return createArrangement({
+                back: { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
+                middle: { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
+                front: { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
+                score: null,
+                stagingCards: remainingCards,
+                isValid: true,
+                scoreFront: null/* calculate or set to null */,
+                scoreMiddle: null/* calculate or set to null */,
+                scoreBack: null/* calculate or set to null */
+            });
         }
-        return 0;
-    }
-
-    /**
-     * Search for compatible front hands
-     * @param {Array} sortedHands - All hands
-     * @param {Object} backHand - Selected back hand
-     * @param {Object} middleHand - Selected middle hand
-     * @param {Set} backUsedCards - Cards used by back hand
-     * @param {number} middleIdx - Index of middle hand
-     */
-    searchFrontHands(sortedHands, backHand, middleHand, backUsedCards, middleIdx) {
-        const allUsedCards = new Set([
-            ...backUsedCards,
-            ...Analysis.getCardIds(middleHand.cards)
-        ]);
-
-
-        // Try front hands (same strength or weaker than middle)
-        for (let frontIdx = middleIdx; frontIdx < sortedHands.length; frontIdx++) {
-            const frontHand = sortedHands[frontIdx];
-
-            if (!this.canUseInPosition(frontHand, 'front')) continue;
-            if (this.hasCardOverlap(allUsedCards, frontHand.cards)) continue;
-
-            this.exploredNodes++;
-
-            // Calculate full arrangement score
-            const arrangement = { back: backHand, middle: middleHand, front: frontHand };
-
-            const backScore = this.getHandScore(arrangement.back, 'back');
-            const middleScore = this.getHandScore(arrangement.middle, 'middle');
-            const frontScore = this.getHandScore(arrangement.front, 'front');
-
-            const score = backScore + middleScore + frontScore;
-
-            if (score > this.bestScore) {
-                this.bestScore = score;
-                this.bestArrangement = arrangement;
-                this.logArrangement(arrangement);
-            }
-
-            if (score > this.bestScore) {
-                this.bestScore = score;
-                this.bestArrangement = arrangement;
-//                console.log(`🏆 New best arrangement found! Score: ${score}`);
-                this.logArrangement(arrangement);
-            }
-        }
-    }
-
-    /**
-     * Complete arrangement by adding kickers to incomplete hands
-     * @param {Object} arrangement - {back, middle, front} with hand objects
-     * @returns {Object} - Completed arrangement with card arrays
-     */
-    completeArrangementWithKickers(arrangement) {
-//        console.log('🔧 Completing arrangement with kickers...');
-
-        const usedCardIds = new Set([
-            ...Analysis.getCardIds(arrangement.back.cards),
-            ...Analysis.getCardIds(arrangement.middle.cards),
-            ...Analysis.getCardIds(arrangement.front.cards)
-        ]);
-
-
-        // Get unused cards sorted by strength (highest first)
-        const unusedCards = Analysis.sortCards(
-            this.allCards.filter(card => !usedCardIds.has(card.id))
-        );
-
-        let kickerIndex = 0;
-
-        // Complete back hand to 5 cards if needed
-        const backCards = [...arrangement.back.cards];
-        if (backCards.length < 5) {
-            const needed = 5 - backCards.length;
-            for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
-                backCards.push(unusedCards[kickerIndex++]);
-            }
-//            console.log(`🃏 Added ${needed} kickers to back hand`);
-        }
-
-        // Complete middle hand to 5 cards if needed
-        const middleCards = [...arrangement.middle.cards];
-        if (middleCards.length < 5) {
-            const needed = 5 - middleCards.length;
-            for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
-                middleCards.push(unusedCards[kickerIndex++]);
-            }
-//            console.log(`🃏 Added ${needed} kickers to middle hand`);
-        }
-
-        // Complete front hand to 3 cards if needed
-        const frontCards = [...arrangement.front.cards];
-        if (frontCards.length < 3) {
-            const needed = 3 - frontCards.length;
-            for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
-                frontCards.push(unusedCards[kickerIndex++]);
-            }
-//            console.log(`🃏 Added ${needed} kickers to front hand`);
-        }
-
-//        console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
-
-        // Re-evaluate hands with complete cards using card-evaluation.js functions
-        const reEvaluatedBack = evaluateHand(backCards);  // Always returns proper hand_rank
-        const reEvaluatedMiddle = evaluateHand(middleCards);
-        const reEvaluatedFront = evaluateThreeCardHand(frontCards);  // For 3-card front hands
-
-        // Update the arrangement objects with the new hand data
-        arrangement.back.handStrength = reEvaluatedBack;
-        arrangement.back.hand_rank = reEvaluatedBack.hand_rank;
-        arrangement.back.strength = reEvaluatedBack.rank;
-
-        arrangement.middle.handStrength = reEvaluatedMiddle;
-        arrangement.middle.hand_rank = reEvaluatedMiddle.hand_rank;
-        arrangement.middle.strength = reEvaluatedMiddle.rank;
-
-        arrangement.front.handStrength = reEvaluatedFront;
-        arrangement.front.hand_rank = reEvaluatedFront.hand_rank;
-        arrangement.front.strength = reEvaluatedFront.rank;
-
-        // After adding all kickers, calculate remaining staging cards
-        const remainingCards = unusedCards.slice(kickerIndex);
 
         // In completeArrangementWithKickers() - use factory
-        return createArrangement(
-            { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
-            { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
-            { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
-            null, // score calculated elsewhere
-            remainingCards  // stagingCards
-        );
+        return createArrangement({
+            back: { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
+            middle: { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
+            front: { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
+            score: scoreFront + scoreMiddle + scoreBack,
+            stagingCards: remainingCards,
+            isValid: true,
+            scoreFront: scoreFront,
+            scoreMiddle: scoreMiddle,
+            scoreBack: scoreBack
+        });
+
+
     }
-
 }
-
-class FindBestSetupNoWildEmpirical extends FindBestSetupNoWildBase {}
-
-// first step in refactor, this actually solves the empirical case
-class FindBestSetupNoWild extends FindBestSetupNoWildBase {}

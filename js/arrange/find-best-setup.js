@@ -4,6 +4,8 @@
 
 class FindBestSetup {
     constructor() {
+        console.log('🏗️ FindBestSetup constructor called');
+        console.log('🏗️ Current config method:', gameConfig.config.winProbabilityMethod);
         this.statistics = {
             totalCalls: 0,
             wildDistribution: {

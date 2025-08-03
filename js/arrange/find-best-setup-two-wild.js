@@ -89,7 +89,7 @@ function FindBestSetupTwoWild(cardObjects) {
 
             // ✅ Should read from game-config:
             const flag = window.gameConfig?.config?.winProbabilityMethod || 'tiered';
-            const finder = createFindBestSetupNoWild(flag);
+            const finder = FindBestSetupNoWild();
             const result = finder.findBestSetupNoWild(cards);
 
             finder.bestScore = globalBestScore; // 🔥 SEED with global best

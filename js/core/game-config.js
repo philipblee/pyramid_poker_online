@@ -14,7 +14,7 @@ class GameConfig {
             deckCount: 2,                   // Number of standard decks (1-3)
 
             // Win probability method
-            winProbabilityMethod: 'tiered',  // 'points', 'empirical', 'tiered'
+            winProbabilityMethod: 'tiered2',  // 'points', 'empirical', 'tiered', 'tiered2'
 
             // Future expansion options (commented out for now)
             // maxPlayers: 4,               // Maximum players (2-6)

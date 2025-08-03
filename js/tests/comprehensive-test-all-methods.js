@@ -31,7 +31,7 @@ function runComprehensiveTests() {
             console.log(`\n🔍 Test Case ${testId}:`);
 
             const caseResults = {};
-            const methods = ['points', 'empirical', 'tiered'];
+            const methods = ['points', 'empirical', 'tiered', 'tiered2'];
 
             // Run all three methods on same test case
             methods.forEach(method => {
@@ -75,6 +75,7 @@ function runComprehensiveTests() {
             results[toCamelCase(range.name)].points.push(caseResults.points);
             results[toCamelCase(range.name)].empirical.push(caseResults.empirical);
             results[toCamelCase(range.name)].tiered.push(caseResults.tiered);
+            results[toCamelCase(range.name)].tiered.push(caseResults.tiered2);
 
             // NEW: Compare arrangements between methods
             const comparison = compareArrangements(caseResults, testId);
@@ -265,7 +266,7 @@ function displayComprehensiveResults(results) {
 
     // Results by scenario and method
     const scenarios = ['noWild', 'oneWild', 'twoWild'];
-    const methods = ['points', 'empirical', 'tiered'];
+    const methods = ['points', 'empirical', 'tiered', 'tiered2'];
 
     scenarios.forEach(scenario => {
         const scenarioName = scenario.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
@@ -311,7 +312,7 @@ function toCamelCase(str) {
 function quickCompareArrangements(testId) {
     console.log(`\n🔍 Quick Arrangement Comparison for Test ${testId}:`);
 
-    const methods = ['points', 'empirical', 'tiered'];
+    const methods = ['points', 'empirical', 'tiered', 'tiered2'];
     const results = {};
 
     methods.forEach(method => {
@@ -333,6 +334,7 @@ function quickCompareArrangements(testId) {
     const pointsArr = results.points.arrangement;
     const empiricalArr = results.empirical.arrangement;
     const tieredArr = results.tiered.arrangement;
+    const tiered2Arr = results.tiered2.arrangement;
 
     const allSame = JSON.stringify(pointsArr) === JSON.stringify(empiricalArr) &&
                     JSON.stringify(empiricalArr) === JSON.stringify(tieredArr);
@@ -343,17 +345,20 @@ function quickCompareArrangements(testId) {
         console.log('Back hands:', {
             points: pointsArr?.back,
             empirical: empiricalArr?.back,
-            tiered: tieredArr?.back
+            tiered: tieredArr?.back,
+            tiered2: tiered2Arr?.back
         });
         console.log('Middle hands:', {
             points: pointsArr?.middle,
             empirical: empiricalArr?.middle,
-            tiered: tieredArr?.middle
+            tiered: tieredArr?.middle,
+            tiered2: tiered2Arr?.middle
         });
         console.log('Front hands:', {
             points: pointsArr?.front,
             empirical: empiricalArr?.front,
-            tiered: tieredArr?.front
+            tiered: tieredArr?.front,
+            tiered2: tiered2Arr?.front
         });
     }
 
