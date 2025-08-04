@@ -7,7 +7,7 @@
  * @returns {Array} Array of 17 card objects ready for testing
   */
 function createFromCardsTestCase(caseId) {
-    console.log(`🧪 Creating card objects from test case ${caseId}`);
+//    console.log(`🧪 Creating card objects from test case ${caseId}`);
     const testCase = getTestCase(caseId);
 
     if (!testCase) {
@@ -15,17 +15,13 @@ function createFromCardsTestCase(caseId) {
         return null;
     }
 
-    console.log(`✅ Found test case: ${testCase.name}`);
+//    console.log(`✅ Found test case: ${testCase.name}`);
     const allCards = Analysis.parseCardString(testCase.cards); // or CardParser.parseCardString
 
     if (!allCards || allCards.length !== 17) {
         console.error(`❌ Expected 17 cards, got ${allCards ? allCards.length : 0}`);
         return null;
     }
-
-    // Log wild card count for verification
-//    const wildCards = allCards.filter(c => c.isWild);
-//    console.log(`✅ Created ${allCards.length} card objects (${wildCards.length} wilds)`);
 
     return allCards;
 }

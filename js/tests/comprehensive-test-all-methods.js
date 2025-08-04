@@ -8,10 +8,10 @@ function runComprehensiveTests() {
     console.log('NEW: Comparing arrangements between methods for consistency');
 
     const results = {
-        noWild: { points: [], empirical: [], tiered: [] },
-        oneWild: { points: [], empirical: [], tiered: [] },
-        twoWild: { points: [], empirical: [], tiered: [] },
-        summary: { passed: 0, failed: 0, total: 90 },
+        noWild: { points: [], empirical: [], tiered: [] , tiered2: [] },
+        oneWild: { points: [], empirical: [], tiered: [] , tiered2: [] },
+        twoWild: { points: [], empirical: [], tiered: [] , tiered2: [] },
+        summary: { passed: 0, failed: 0, total: 120 },
         comparisons: [] // NEW: Track arrangement comparisons
     };
 

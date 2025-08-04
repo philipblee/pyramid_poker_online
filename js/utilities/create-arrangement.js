@@ -29,14 +29,14 @@ function createArrangement(back, middle, front, score, stagingCards, isValid = t
 
 function createFindBestSetupNoWild(flag) {
 
-      console.log('🏭 Factory creating optimizer for method:', flag);
+//      console.log('🏭 Factory creating optimizer for method:', flag);
       switch (flag) {
         case 'points':
             return new FindBestSetupNoWildPoints();
         case 'tiered':
             return new FindBestSetupNoWildTiered();
         case 'tiered2':
-            console.log('🎯 Creating Tiered2 in factory');
+//            console.log('🎯 Creating Tiered2 in factory');
             return new FindBestSetupNoWildTiered2();
         case 'empirical':
         default:
