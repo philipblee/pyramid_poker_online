@@ -11,6 +11,68 @@ class FindBestSetupNoWildBase {
 
     }
 
+
+    /**
+     * Find the best single arrangement using greedy branch-and-bound
+     * @param {Array} sortedHands - Hands sorted by strength (strongest first)
+     * @param {Array} allCards - All 17 cards for kicker completion
+     * @returns {Object} - Best arrangement with score and statistics
+     */
+    findBestSetupNoWild(allCards) {
+
+//        console.log(`🎯 FindBestSetupNoWild: Finding optimal setup from 17 cards...`);
+
+        // NEW: Call hand-detector first
+        const handDetector = new HandDetector(allCards);
+        const detectionResults = handDetector.results;
+        const sortedHands = detectionResults.hands;
+
+        // Rest of existing logic...
+        this.allCards = allCards;
+        this.resetSearch();
+        const startTime = performance.now();
+
+        // Try each valid back hand (strongest first)
+        for (let backIdx = 0; backIdx < sortedHands.length; backIdx++) {
+            const backHand = sortedHands[backIdx];
+
+            if (!this.canUseInPosition(backHand, 'back')) continue;
+
+            this.searchMiddleHands(sortedHands, backHand, backIdx);
+
+            // Early termination if we've found a very strong arrangement
+            if (this.shouldTerminateEarly()) break;
+        }
+
+        const endTime = performance.now();
+
+        // Complete the best arrangement with kickers if we have cards available
+        let finalArrangement = this.bestArrangement;
+        if (finalArrangement && this.allCards) {
+            finalArrangement = this.completeArrangementWithKickers(finalArrangement);
+
+//            // finalArrangement is set. We can calculate back, middle and front scores
+//            // finalArrangement.back is the back hand in Hand model
+//            const backHandScore = this.getHandScore(finalArrangement.back, 'back')
+//            const middleHandScore = this.getHandScore(finalArrangement.middle, 'middle')
+//            const frontHandScore = this.getHandScore(finalArrangement.front, 'front')
+//            const totalHandScore = backHandScore + middleHandScore + frontHandScore
+//            console.log ("findBestNoWild", backHandScore, middleHandScore, frontHandScore, totalHandScore)
+        }
+
+        return {
+            arrangement: finalArrangement,
+            score: this.bestScore,
+            success: finalArrangement !== null,
+            statistics: {
+                exploredNodes: this.exploredNodes,
+                prunedNodes: this.prunedNodes,
+                searchTime: endTime - startTime,
+                efficiency: this.prunedNodes / (this.exploredNodes + this.prunedNodes)
+            }
+        };
+    }
+
     /**
      * Complete arrangement by adding kickers to incomplete hands
      * @param {Object} arrangement - {back, middle, front} with hand objects
@@ -66,14 +128,15 @@ class FindBestSetupNoWildBase {
 //        console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
 
         // Re-evaluate hands with complete cards using card-evaluation.js functions
-        const reEvaluatedBack = evaluateHand(backCards);  // Always returns proper hand_rank
+        const reEvaluatedBack = evaluateHand(backCards);  // Always returns rank (handType, and hand_rank (called handStrength or hand_tuple sometimes)
         const reEvaluatedMiddle = evaluateHand(middleCards);
         const reEvaluatedFront = evaluateThreeCardHand(frontCards);  // For 3-card front hands
 
         // Update the arrangement objects with the new hand data
-        arrangement.back.handStrength = reEvaluatedBack;
-        arrangement.back.hand_rank = reEvaluatedBack.hand_rank;
-        arrangement.back.strength = reEvaluatedBack.rank;
+
+        arrangement.back.handStrength = reEvaluatedBack; // object returned from evaluateHand
+        arrangement.back.hand_rank = reEvaluatedBack.hand_rank; // hand_tuple
+        arrangement.back.strength = reEvaluatedBack.rank; // handType 1-16
 
         arrangement.middle.handStrength = reEvaluatedMiddle;
         arrangement.middle.hand_rank = reEvaluatedMiddle.hand_rank;
@@ -83,6 +146,13 @@ class FindBestSetupNoWildBase {
         arrangement.front.hand_rank = reEvaluatedFront.hand_rank;
         arrangement.front.strength = reEvaluatedFront.rank;
 
+        // calculate score for each hand?
+        const scoreBack = this.getHandScore(arrangement.back, 'back')
+        const scoreMiddle = this.getHandScore(arrangement.middle, 'middle')
+        const scoreFront = this.getHandScore(arrangement.front, 'front')
+        const totalScore = scoreBack + scoreMiddle + scoreFront
+//        console.log ("findBestNoWild", scoreBack, scoreMiddle, scoreFront, totalScore)
+
         // After adding all kickers, calculate remaining staging cards
         const remainingCards = unusedCards.slice(kickerIndex);
 
@@ -91,63 +161,15 @@ class FindBestSetupNoWildBase {
             { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
             { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
             { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
-            null, // score calculated elsewhere
-            remainingCards  // stagingCards
+            totalScore, // score calculated elsewhere
+            remainingCards,  // stagingCards
+            true,
+            scoreFront,
+            scoreMiddle,
+            scoreBack
         );
     }
 
-    /**
-     * Find the best single arrangement using greedy branch-and-bound
-     * @param {Array} sortedHands - Hands sorted by strength (strongest first)
-     * @param {Array} allCards - All 17 cards for kicker completion
-     * @returns {Object} - Best arrangement with score and statistics
-     */
-     findBestSetupNoWild(allCards) {
-
-//        console.log(`🎯 FindBestSetupNoWild: Finding optimal setup from 17 cards...`);
-
-        // NEW: Call hand-detector first
-        const handDetector = new HandDetector(allCards);
-        const detectionResults = handDetector.results;
-        const sortedHands = detectionResults.hands;
-
-        // Rest of existing logic...
-        this.allCards = allCards;
-        this.resetSearch();
-        const startTime = performance.now();
-
-        // Try each valid back hand (strongest first)
-        for (let backIdx = 0; backIdx < sortedHands.length; backIdx++) {
-            const backHand = sortedHands[backIdx];
-
-            if (!this.canUseInPosition(backHand, 'back')) continue;
-
-            this.searchMiddleHands(sortedHands, backHand, backIdx);
-
-            // Early termination if we've found a very strong arrangement
-            if (this.shouldTerminateEarly()) break;
-        }
-
-        const endTime = performance.now();
-
-        // Complete the best arrangement with kickers if we have cards available
-        let finalArrangement = this.bestArrangement;
-        if (finalArrangement && this.allCards) {
-            finalArrangement = this.completeArrangementWithKickers(finalArrangement);
-        }
-
-        return {
-            arrangement: finalArrangement,
-            score: this.bestScore,
-            success: finalArrangement !== null,
-            statistics: {
-                exploredNodes: this.exploredNodes,
-                prunedNodes: this.prunedNodes,
-                searchTime: endTime - startTime,
-                efficiency: this.prunedNodes / (this.exploredNodes + this.prunedNodes)
-            }
-        };
-    }
 
     searchMiddleHands(sortedHands, backHand, backIdx) {
         const backUsedCards = new Set(Analysis.getCardIds(backHand.cards));
