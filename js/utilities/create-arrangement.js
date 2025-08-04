@@ -11,7 +11,7 @@
  * @param {boolean} isValid - Whether arrangement follows game rules
  * @returns {Object} Standard Arrangement Model object
  */
-function createArrangement(back, middle, front, score, stagingCards, isValid = true, scoreFront = null, scoreMiddle = null, scoreBack = null) {
+function createArrangement(back, middle, front, score, stagingCards, isValid = true) {
     // Read method from game-config automatically
     const method = window.gameConfig?.config?.winProbabilityMethod || 'tiered';
 
@@ -20,9 +20,6 @@ function createArrangement(back, middle, front, score, stagingCards, isValid = t
         middle,
         front,
         score,
-        scoreFront,    // ADD
-        scoreMiddle,   // ADD
-        scoreBack,     // ADD
         isValid,
         stagingCards,
         method,
@@ -32,14 +29,14 @@ function createArrangement(back, middle, front, score, stagingCards, isValid = t
 
 function createFindBestSetupNoWild(flag) {
 
-//      console.log('🏭 Factory creating optimizer for method:', flag);
+      console.log('🏭 Factory creating optimizer for method:', flag);
       switch (flag) {
         case 'points':
             return new FindBestSetupNoWildPoints();
         case 'tiered':
             return new FindBestSetupNoWildTiered();
         case 'tiered2':
-//            console.log('🎯 Creating Tiered2 in factory');
+            console.log('🎯 Creating Tiered2 in factory');
             return new FindBestSetupNoWildTiered2();
         case 'empirical':
         default:

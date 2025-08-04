@@ -8,7 +8,7 @@ class FindBestSetupNoWildBase {
         this.bestArrangement = null;
         this.exploredNodes = 0;
         this.prunedNodes = 0;
-        console.log("NoWild Constructor")
+
     }
 
     /**
@@ -87,16 +87,13 @@ class FindBestSetupNoWildBase {
         const remainingCards = unusedCards.slice(kickerIndex);
 
         // In completeArrangementWithKickers() - use factory
-        return createArrangement ({
-            back: { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
-            middle: { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
-            front: { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
-            score: null, // score calculated elsewhere
-            stagingCards: remainingCards,  // stagingCards
-            scoreFront: null, /* calculate or set to null */
-            scoreMiddle: null, /* calculate or set to null */
-            scoreBack: null /* calculate or set to null */
-        });
+        return createArrangement(
+            { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
+            { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
+            { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
+            null, // score calculated elsewhere
+            remainingCards  // stagingCards
+        );
     }
 
     /**
@@ -554,43 +551,13 @@ class FindBestSetupNoWildPoints extends FindBestSetupNoWildBase {
         // After adding all kickers, calculate remaining staging cards
         const remainingCards = unusedCards.slice(kickerIndex);
 
-
-        // Calculate position EVs with error checking
-        let scoreFront, scoreMiddle, scoreBack;
-
-        try {
-            scoreFront = ScoringUtilities.getExpectedPoints(arrangement.front, arrangement.front.cards, 'front', 6);
-            scoreMiddle = ScoringUtilities.getExpectedPoints(arrangement.middle, arrangement.middle.cards, 'middle', 6);
-            scoreBack = ScoringUtilities.getExpectedPoints(arrangement.back, arrangement.back.cards, 'back', 6);
-        } catch (error) {
-            console.error('Error calculating position EVs:', error);
-            // Fall back to original behavior
-            return createArrangement({
-                back: { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
-                middle: { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
-                front: { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
-                score: null,
-                stagingCards: remainingCards,
-                isValid: true,
-                scoreFront: null/* calculate or set to null */,
-                scoreMiddle: null/* calculate or set to null */,
-                scoreBack: null/* calculate or set to null */
-            });
-        }
-
         // In completeArrangementWithKickers() - use factory
-        return createArrangement({
-            back: { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
-            middle: { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
-            front: { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
-            score: scoreFront + scoreMiddle + scoreBack,
-            stagingCards: remainingCards,
-            isValid: true,
-            scoreFront: scoreFront,
-            scoreMiddle: scoreMiddle,
-            scoreBack: scoreBack
-        });
-
-
+        return createArrangement(
+            { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
+            { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
+            { ...arrangement.front, cards: frontCards, cardCount: frontCards.length, isIncomplete: false },
+            null, // score calculated elsewhere
+            remainingCards  // stagingCards
+        );
     }
 }
