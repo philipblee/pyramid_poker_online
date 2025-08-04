@@ -142,7 +142,9 @@ class ScoringUtilities {
         } else {
             // All probability-based methods (empirical, tiered, tiered2)
             const winProb = this.getWinProbabilityForMethod(actualMethod, position, hand);
-            const pointsIfWin = this.getPointsForHand(hand, position, cards.length);
+//            console.log ("scoringUtilities.getExpectedPoints const winProb", winProb)
+            const pointsIfWin = hand.positionScores[position];
+//            console.log ("scoringUtilities.getExpectedPoints const winProb * points", winProb * pointsIfWin)
             return winProb * pointsIfWin;
         }
     }

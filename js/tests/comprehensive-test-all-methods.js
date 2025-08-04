@@ -35,7 +35,7 @@ function runComprehensiveTests() {
 
             // Run all three methods on same test case
             methods.forEach(method => {
-                console.log(`  ${method.padEnd(10)}: `, { endLine: false });
+                console.log(`  ${method.padEnd(10)}: `);
 
                 try {
                     const cards = createFromCardsTestCase(testId);
@@ -75,7 +75,7 @@ function runComprehensiveTests() {
             results[toCamelCase(range.name)].points.push(caseResults.points);
             results[toCamelCase(range.name)].empirical.push(caseResults.empirical);
             results[toCamelCase(range.name)].tiered.push(caseResults.tiered);
-            results[toCamelCase(range.name)].tiered.push(caseResults.tiered2);
+            results[toCamelCase(range.name)].tiered2.push(caseResults.tiered2);
 
             // NEW: Compare arrangements between methods
             const comparison = compareArrangements(caseResults, testId);
@@ -97,7 +97,7 @@ function runComprehensiveTests() {
 }
 
 function compareArrangements(caseResults, testId) {
-    const methods = ['points', 'empirical', 'tiered'];
+    const methods = ['points', 'empirical', 'tiered', 'tiered2'];
     const arrangements = {};
     const scores = {};
 
@@ -241,7 +241,7 @@ function calculateSummaryStats(results) {
     // Count results across all scenarios and methods
     Object.values(results).forEach(scenario => {
         if (typeof scenario === 'object' && scenario.points) {
-            [scenario.points, scenario.empirical, scenario.tiered].forEach(methodResults => {
+            [scenario.points, scenario.empirical, scenario.tiered, scenario.tiered2].forEach(methodResults => {
                 methodResults.forEach(result => {
                     if (result.success) totalPassed++;
                     else totalFailed++;
