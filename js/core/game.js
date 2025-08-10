@@ -130,8 +130,8 @@ class ChinesePokerGame {
         for (let player of this.playerManager.players) {
             const hand = this.deckManager.dealCards(17);
 
-            console.log(`\n🎴 Cards dealt to ${player.name}:`);
-            console.log('Current format:', hand);
+//            console.log(`\n🎴 Cards dealt to ${player.name}:`);
+//            console.log('Current format:', hand);
             const analysis = new Analysis(hand);
 
             this.playerHands.set(player.name, {
@@ -233,7 +233,7 @@ class ChinesePokerGame {
 
     handleAITurn() {
         const currentPlayer = this.playerManager.getCurrentPlayer();
-        console.log(`AI ${currentPlayer.name} is taking their turn...`);
+//        console.log(`AI ${currentPlayer.name} is taking their turn...`);
 
         // Add a small delay to make AI actions feel more natural
         setTimeout(() => {
@@ -287,7 +287,7 @@ class ChinesePokerGame {
 
     validateHands() {
         // Add this at the start of validateHands():
-        console.log('🔄 validateHands() called');
+//        console.log('🔄 validateHands() called');
 
         const currentPlayer = this.playerManager.getCurrentPlayer();
         const playerData = this.playerHands.get(currentPlayer.name);
@@ -298,8 +298,8 @@ class ChinesePokerGame {
         // After this line: const playerData = this.playerHands.get(currentPlayer.name);
         // Add:
         if (playerData && playerData.cards.length > 0) {
-            console.log(`\n🔍 Validating ${currentPlayer.name}'s cards:`);
-            const analysis = new Analysis(playerData.cards);
+//            console.log(`\n🔍 Validating ${currentPlayer.name}'s cards:`);
+//            const analysis = new Analysis(playerData.cards);
 //            analysis.debugInfo();
         }
 

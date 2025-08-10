@@ -17,11 +17,11 @@ class AutoArrangeManager {
         const allCards = this.getAllCards(playerData);
         if (!this.validateCardCount(allCards)) return false;
 
-        console.log('🧠 Auto-Arrange using find-best-setup...');
+//        console.log('🧠 Auto-Arrange using find-best-setup...');
         const result = findBestSetup(allCards);
 
         if (result?.success && result.arrangement) {
-            console.log(`✨ Setup found! Score: ${result.score}`);
+//            console.log(`✨ Setup found! Score: ${result.score}`);
             const arrangement = {
                 back: result.arrangement.back.cards,
                 middle: result.arrangement.middle.cards,
