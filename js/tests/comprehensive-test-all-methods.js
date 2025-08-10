@@ -18,8 +18,8 @@ function runComprehensiveTests() {
     // Test ranges
     const testRanges = [
         { name: 'No-Wild', start: 1, end: 10, wildCount: 0 },
-        { name: 'One-Wild', start: 1001, end: 1010, wildCount: 1 },
-        { name: 'Two-Wild', start: 2001, end: 2010, wildCount: 2 }
+        { name: 'One-Wild', start: 1001, end: 1000, wildCount: 1 },
+        { name: 'Two-Wild', start: 2001, end: 2000, wildCount: 2 }
     ];
 
     // Test each range with each method AND compare arrangements

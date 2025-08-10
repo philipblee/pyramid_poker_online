@@ -9,6 +9,11 @@ class FindBestSetupNoWildBase {
         this.exploredNodes = 0;
         this.prunedNodes = 0;
 
+        // ADD THESE:
+        this.topArrangements = [];  // Array to track top N arrangements
+        this.maxTopN = 20;          // Keep top 5
+        this.pruningBuffer = 5;    // Allow arrangements within 2 points of best
+
     }
 
 
@@ -26,6 +31,7 @@ class FindBestSetupNoWildBase {
         const handDetector = new HandDetector(allCards);
         const detectionResults = handDetector.results;
         const sortedHands = detectionResults.hands;
+        const completedTopArrangements = []
 
         // Rest of existing logic...
         this.allCards = allCards;
@@ -50,7 +56,6 @@ class FindBestSetupNoWildBase {
         let finalArrangement = this.bestArrangement;
         if (finalArrangement && this.allCards) {
             finalArrangement = this.completeArrangementWithKickers(finalArrangement);
-
 //            // finalArrangement is set. We can calculate back, middle and front scores
 //            // finalArrangement.back is the back hand in Hand model
 //            const backHandScore = this.getHandScore(finalArrangement.back, 'back')
@@ -64,6 +69,7 @@ class FindBestSetupNoWildBase {
             arrangement: finalArrangement,
             score: this.bestScore,
             success: finalArrangement !== null,
+            topArrangements: this.topArrangements,  // Your new field
             statistics: {
                 exploredNodes: this.exploredNodes,
                 prunedNodes: this.prunedNodes,
@@ -187,7 +193,7 @@ class FindBestSetupNoWildBase {
 
 //            console.log(`🔍 PRUNING CHECK: Partial=${partialScore.toFixed(2)}, MaxFront=${maxFrontScore.toFixed(2)}, Total=${estimatedTotal.toFixed(2)}, Best=${this.bestScore.toFixed(2)}`);
 
-            if (partialScore + maxFrontScore <= this.bestScore) {
+            if (partialScore + maxFrontScore <= this.bestScore - this.pruningBuffer) {
                 this.prunedNodes++;
 //                console.log(`✂️ PRUNED: ${estimatedTotal.toFixed(2)} <= ${this.bestScore.toFixed(2)}`);
                 continue;
@@ -230,25 +236,15 @@ class FindBestSetupNoWildBase {
 
             const score = backScore + middleScore + frontScore;
 
-            // Log what's already there:
-//            console.log('🔍 No-Wild Scores:');
-//            console.log('  backScore:', backScore);
-//            console.log('  middleScore:', middleScore);
-//            console.log('  frontScore:', frontScore);
-//            console.log('  total score:', score);
-
             if (score > this.bestScore) {
                 this.bestScore = score;
                 this.bestArrangement = arrangement;
                 this.logArrangement(arrangement);
             }
 
-            if (score > this.bestScore) {
-                this.bestScore = score;
-                this.bestArrangement = arrangement;
-//                console.log(`🏆 New best arrangement found! Score: ${score}`);
-                this.logArrangement(arrangement);
-            }
+            // ADD THIS LINE AFTER THE ABOVE BLOCK:
+            this.updateTopArrangements(arrangement, score);
+
         }
     }
 
@@ -390,6 +386,14 @@ class FindBestSetupNoWildBase {
             cardOverlap: cardIds.length !== uniqueCardIds.size
         };
     }
+
+    updateTopArrangements(arrangement, score) {
+    this.topArrangements.push({ arrangement, score });
+    this.topArrangements.sort((a, b) => b.score - a.score);
+    if (this.topArrangements.length > this.maxTopN) {
+        this.topArrangements = this.topArrangements.slice(0, this.maxTopN);
+    }
+}
 }
 
 
