@@ -27,6 +27,14 @@ class TestHandDetector {
             const results = detector.detectAllHands(); // ADD THIS LINE
             const endTime = performance.now();
 
+            // ADD THIS: Show hand_rank for all straights
+            console.log(`\n🔍 STRAIGHT ANALYSIS:`);
+            results.hands.filter(h => h.handType === 'Straight').forEach((hand, index) => {
+                console.log(`   Straight #${index + 1}: hand_rank=[${hand.hand_rank}] rank="${hand.rank}" cards=[${hand.cards.map(c => c.rank + c.suit).join(' ')}]`);
+            });
+
+
+
             // Verify actual vs expected
             const verification = this.verifyExpectations(results, expected);
 

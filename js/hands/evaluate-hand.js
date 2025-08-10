@@ -463,7 +463,7 @@ function getStraightInfo(values) {
 
     // Regular straight
     const sorted = [...values].sort((a, b) => b - a);
-    return { high: sorted[0], low: sorted[4] };
+    return { high: sorted[0], low: sorted[1] };
 }
 
 // Get straight info from straight array
@@ -474,7 +474,7 @@ function getStraightInfoFromArray(straightArray) {
     }
 
     // Regular straight
-    return { high: straightArray[0], low: straightArray[4] };
+    return { high: straightArray[0], low: straightArray[1] };
 }
 
 // Convert card suits to numeric values for tiebreaking
