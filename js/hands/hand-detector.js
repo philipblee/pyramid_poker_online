@@ -643,7 +643,7 @@ class HandDetector {
             cards: [...cards],
             handType,
             cardCount: cards.length,
-            rank: handStrength.hand_rank[1] || cards[0].rank,     // Keep for backward compatibility
+            rank: handStrength.hand_rank[1] || cards[0].rank,    // Keep for backward compatibility
             handStrength: handStrength,         // Full evaluation result
             hand_rank: handStrength.hand_rank,  // Proper ranking tuple
             strength: handStrength.rank,        // Numeric strength

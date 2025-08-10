@@ -469,15 +469,6 @@ class FindBestSetupNoWildTiered extends FindBestSetupNoWildBase {
 
 class FindBestSetupNoWildTiered2 extends FindBestSetupNoWildBase {
     getHandScore(hand, position) {
-
-        // In getHandScore() method, add this:
-        const winProbability = lookupWinProbability(hand, position); // or whatever the lookup call is
-        console.log(`🔍 Win probability lookup: ${hand.handType}(${hand.rank}) in ${position} = ${winProbability}`);
-
-        if (winProbability === 1.0) {
-            console.log(`⚠️ SUSPICIOUS: Perfect win rate for ${hand.handType} in ${position} - likely a default!`);
-        }
-
         const method = gameConfig.config.winProbabilityMethod;
         return ScoringUtilities.getExpectedPoints(hand, hand.cards, position, method);
     }
