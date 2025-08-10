@@ -11,7 +11,7 @@ class FindBestSetupNoWildBase {
 
         // ADD THESE:
         this.topArrangements = [];  // Array to track top N arrangements
-        this.maxTopN = 20;          // Keep top 5
+        this.maxTopN = 100;          // Keep top 5
         this.pruningBuffer = 5;    // Allow arrangements within 2 points of best
 
     }
@@ -236,6 +236,16 @@ class FindBestSetupNoWildBase {
 
             const score = backScore + middleScore + frontScore;
 
+            // DEBUG: Log the detailed scoring breakdown
+            console.log(`🔍 SCORING DEBUG: Total=${score} (Back=${backScore} + Middle=${middleScore} + Front=${frontScore})`);
+            console.log(`   Back: ${arrangement.back.handType}(${arrangement.back.rank}) - ${arrangement.back.cards?.length || 0} cards`);
+            console.log(`   Middle: ${arrangement.middle.handType}(${arrangement.middle.rank}) - ${arrangement.middle.cards?.length || 0} cards`);
+            console.log(`   Front: ${arrangement.front.handType}(${arrangement.front.rank}) - ${arrangement.front.cards?.length || 0} cards`);
+
+            console.log(`   Back hand_rank: ${arrangement.back.hand_rank}`);
+            console.log(`   Middle hand_rank: ${arrangement.middle.hand_rank}`);
+            console.log(`   Front hand_rank: ${arrangement.front.hand_rank}`);
+
             if (score > this.bestScore) {
                 this.bestScore = score;
                 this.bestArrangement = arrangement;
@@ -385,14 +395,50 @@ class FindBestSetupNoWildBase {
             totalCards: totalCards,
             cardOverlap: cardIds.length !== uniqueCardIds.size
         };
+
+
+
+    }
+
+    getStrategicallyDifferentArrangements(allArrangements) {
+        const uniqueArrangements = [];
+
+        for (const item of allArrangements) {
+            const arrangement = item.arrangement;
+
+            // Check if this arrangement strategy is already represented
+            const isDuplicate = uniqueArrangements.some(existing =>
+                this.areStrategicallySimilar(arrangement, existing.arrangement)
+            );
+
+            if (!isDuplicate) {
+                uniqueArrangements.push(item);
+            }
+        }
+
+        console.log(`🎯 Filtered ${allArrangements.length} arrangements down to ${uniqueArrangements.length} strategically unique ones`);
+        return uniqueArrangements;
+    }
+
+    areStrategicallySimilar(arr1, arr2) {
+        // Same hand types in same positions = strategically similar
+        return arr1.back.handType === arr2.back.handType &&
+               arr1.middle.handType === arr2.middle.handType &&
+               arr1.front.handType === arr2.front.handType &&
+               arr1.back.rank === arr2.back.rank &&  // Same primary rank (e.g., both K-high straights)
+               arr1.middle.rank === arr2.middle.rank &&
+               arr1.front.rank === arr2.front.rank;
     }
 
     updateTopArrangements(arrangement, score) {
-    this.topArrangements.push({ arrangement, score });
-    this.topArrangements.sort((a, b) => b.score - a.score);
-    if (this.topArrangements.length > this.maxTopN) {
-        this.topArrangements = this.topArrangements.slice(0, this.maxTopN);
-    }
+
+        const completedArrangement = this.completeArrangementWithKickers(arrangement);
+
+        this.topArrangements.push({ arrangement: completedArrangement, score });
+        this.topArrangements.sort((a, b) => b.score - a.score);
+        if (this.topArrangements.length > this.maxTopN) {
+            this.topArrangements = this.topArrangements.slice(0, this.maxTopN);
+        }
 }
 }
 
@@ -423,6 +469,15 @@ class FindBestSetupNoWildTiered extends FindBestSetupNoWildBase {
 
 class FindBestSetupNoWildTiered2 extends FindBestSetupNoWildBase {
     getHandScore(hand, position) {
+
+        // In getHandScore() method, add this:
+        const winProbability = lookupWinProbability(hand, position); // or whatever the lookup call is
+        console.log(`🔍 Win probability lookup: ${hand.handType}(${hand.rank}) in ${position} = ${winProbability}`);
+
+        if (winProbability === 1.0) {
+            console.log(`⚠️ SUSPICIOUS: Perfect win rate for ${hand.handType} in ${position} - likely a default!`);
+        }
+
         const method = gameConfig.config.winProbabilityMethod;
         return ScoringUtilities.getExpectedPoints(hand, hand.cards, position, method);
     }

@@ -24,6 +24,7 @@ class TestHandDetector {
             // Run HandDetector
             const startTime = performance.now();
             const detector = new HandDetector(testCards);
+            const results = detector.detectAllHands(); // ADD THIS LINE
             const endTime = performance.now();
 
             // Verify actual vs expected
@@ -44,6 +45,7 @@ class TestHandDetector {
             return testResult;
 
         } catch (error) {
+            console.log('🔍 Results variable:', typeof results, results);
             console.log(`❌ TEST FAILED: ${error.message}`);
             const errorResult = {
                 id: testCase.id,

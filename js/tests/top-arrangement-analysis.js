@@ -1,3 +1,5 @@
+// top-arrangement-analysis.js
+
 function topArrangementAnalysis(testCaseIds = [1, 2, 3, 4, 5, 6]) {
     console.log(`🎯 Running exhaustive analysis with test cases: ${testCaseIds.join(', ')}`);
 
@@ -9,11 +11,25 @@ function topArrangementAnalysis(testCaseIds = [1, 2, 3, 4, 5, 6]) {
         const optimizer = new FindBestSetupNoWild();
         const result = optimizer.findBestSetupNoWild(cards);
 
+        const uniqueArrangements = optimizer.getStrategicallyDifferentArrangements(optimizer.topArrangements);
+        optimizer.topArrangements = uniqueArrangements.slice(0, 20); // Keep top 20 unique
+
         // PUT THE DEBUG HERE:
         console.log(`🔍 Player ${i + 1} IMMEDIATE result:`, result);
         console.log(`  result.topArrangements exists:`, !!result.topArrangements);
         console.log(`  result.topArrangements length:`, result.topArrangements ? result.topArrangements.length : 'N/A');
         console.log(`  result keys:`, Object.keys(result));
+
+        // Right after: const bestSetup = findBestSetupNoWild(cards);
+
+        console.log(`\n📋 TOP 20 ARRANGEMENTS FOR TEST CASE ${testCaseId}:`);
+        optimizer.topArrangements.forEach((item, index) => {
+            console.log(`\n🏆 Rank #${index + 1} - Score: ${item.score}`);
+            console.log(`   🏆 Back:   ${item.arrangement.back.handType} - [${item.arrangement.back.cards.map(c => c.rank + c.suit).join(' ')}]`);
+            console.log(`   🥈 Middle: ${item.arrangement.middle.handType} - [${item.arrangement.middle.cards.map(c => c.rank + c.suit).join(' ')}]`);
+            console.log(`   🥉 Front:  ${item.arrangement.front.handType} - [${item.arrangement.front.cards.map(c => c.rank + c.suit).join(' ')}]`);
+        });
+        console.log(`\n🎯 Starting tournament with these ${optimizer.topArrangements.length} arrangements...\n`);
 
         playerData.push({
             playerId: i + 1,
@@ -88,7 +104,7 @@ function runSixPlayerGame(playerData, testPlayerIndex, arrangementIndex) {
             const player1 = gameSetup[i];
             const player2 = gameSetup[j];
 
-            const result = compareArrangementsHeadToHead(player1.arrangement, player2.arrangement);
+            const result = compareArrangementsHeadToHead(player1.arrangement, player2.arrangement, player1.score, player2.score, i+1, j+1);
 
             // Update scores
             playerScores.set(player1.playerName, playerScores.get(player1.playerName) + result.player1Score);
@@ -221,7 +237,8 @@ function runSixPlayerGame(playerData, testPlayerIndex, arrangementIndex) {
             const player1 = gameSetup[i];
             const player2 = gameSetup[j];
 
-            const result = compareArrangementsHeadToHead(player1.arrangement, player2.arrangement);
+            const result = compareArrangementsHeadToHead(player1.arrangement, player2.arrangement, player1.score, player2.score, i+1, j+1);
+
 
             // Update scores
             playerScores.set(player1.playerName, playerScores.get(player1.playerName) + result.player1Score);
@@ -305,7 +322,20 @@ function generateSummary(tournamentResults) {
  * @param {Object} arrangement2 - Second player's arrangement
  * @returns {Object} - Comparison result with scores and details
  */
-function compareArrangementsHeadToHead(arrangement1, arrangement2) {
+function compareArrangementsHeadToHead(arrangement1, arrangement2, score1, score2, rank1, rank2) {
+
+   // LOG ARRANGEMENT 1
+//    console.log(`\n👤 Arrangement #${rank1 || '?'} (Score: ${score1})`);
+//    console.log(`   🏆 Back:   ${arrangement1.back.handType} - [${arrangement1.back.cards.map(c => c.rank + c.suit).join(' ')}]`);
+//    console.log(`   🥈 Middle: ${arrangement1.middle.handType} - [${arrangement1.middle.cards.map(c => c.rank + c.suit).join(' ')}]`);
+//    console.log(`   🥉 Front:  ${arrangement1.front.handType} - [${arrangement1.front.cards.map(c => c.rank + c.suit).join(' ')}]`);
+//
+//    // LOG ARRANGEMENT 2
+//    console.log(`\n👤 Arrangement #${rank2 || '?'} (Score: ${score2})`);
+//    console.log(`   🏆 Back:   ${arrangement2.back.handType} - [${arrangement2.back.cards.map(c => c.rank + c.suit).join(' ')}]`);
+//    console.log(`   🥈 Middle: ${arrangement2.middle.handType} - [${arrangement2.middle.cards.map(c => c.rank + c.suit).join(' ')}]`);
+//    console.log(`   🥉 Front:  ${arrangement2.front.handType} - [${arrangement2.front.cards.map(c => c.rank + c.suit).join(' ')}]`);
+
     let player1Score = 0;
     let player2Score = 0;
     const details = [];
