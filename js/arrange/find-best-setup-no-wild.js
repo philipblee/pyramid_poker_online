@@ -13,7 +13,7 @@ class FindBestSetupNoWildBase {
         // Use these parameters to analyze multiple arrangements per hand
         this.topArrangements = [];  // Array to track top N arrangements
         this.maxTopN = 10;          // Keep top n arrangememts
-        this.pruningBuffer = 1;    // Allow arrangements within n points of best
+        this.pruningBuffer = 0;    // Allow arrangements within n points of best
 
     }
 
