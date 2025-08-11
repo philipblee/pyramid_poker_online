@@ -4,10 +4,11 @@
 function evaluateHand(cards) {
 
     // Initialize with enough zeros to prevent undefined
-    let hand_rank = [1, 0, 0, 0, 0, 0]; // 6 positions should cover all cases
+    let hand_rank = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; // 11 positions should cover all cases
 
     // Handle hands with 6, 7, 8 cards - basic evaluation for now
     if (cards.length > 5) {
+
 
     // Quick check: are all cards the same rank?
     const values = cards.map(c => c.value);
