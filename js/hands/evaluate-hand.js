@@ -1,7 +1,8 @@
 // Card evaluation functions for Pyramid Poker
 
 function evaluateHand(cards) {
-    if (cards.length !== 5) return { rank: 0, hand_rank: [70, 80], name: 'Invalid' };
+    if (cards.length === 3) { evaluateThreeCardHand };
+    if (cards.length !== 5 && cards.length !== 6 && cards.length !== 7 && cards.length !== 8) return { rank: 0, hand_rank: [70, 80], name: 'Invalid' };
     const analysis = new Analysis(cards);
     const handType = getHandType(analysis);
     return handType;

@@ -137,7 +137,7 @@ class FindBestSetupNoWildBase {
         // Re-evaluate hands with complete cards using card-evaluation.js functions
         const reEvaluatedBack = evaluateHand(backCards);  // Always returns rank (handType, and hand_rank (called handStrength or hand_tuple sometimes)
         const reEvaluatedMiddle = evaluateHand(middleCards);
-        const reEvaluatedFront = evaluateThreeCardHand(frontCards);  // For 3-card front hands
+        const reEvaluatedFront = evaluateHand(frontCards);  // For 3-card front hands
 
         // Update the arrangement objects with the new hand data
 
