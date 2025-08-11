@@ -2,10 +2,8 @@
 
 function evaluateHand(cards) {
     if (cards.length !== 5) return { rank: 0, hand_rank: [70, 80], name: 'Invalid' };
-
     const analysis = new Analysis(cards);
     const handType = getHandType(analysis);
-
     return handType;
 }
 
@@ -15,7 +13,7 @@ function getHandType(analysis) {
     const suits = analysis.getSuits();
     const valueCounts = analysis.getValueCounts();
     const numberOfCards = cards.length
-
+    const counts = Object.keys(valueCounts).map(Number).sort((a, b) => b - a);
     const isFlush = analysis.isAllSameSuit(suits);
     const isStraight = analysis.isSequentialValues(values);
 
@@ -35,7 +33,6 @@ function getHandType(analysis) {
         return getEightCardStraightFlushHand(analysis);
     }
 
-    const counts = Object.keys(valueCounts).map(Number).sort((a, b) => b - a);
 
     if (counts[0] === 4) {
         return getFourOfAKindHand(analysis, valueCounts);
@@ -87,7 +84,7 @@ function getHandType(analysis) {
 function getStraightFlushHand(analysis) {
     const straightInfo = analysis.getStraightInfo();
     const name = straightInfo.high === 14 && straightInfo.low === 13 ? 'Royal Flush' : 'Straight Flush';
-    return { rank: 8, hand_rank: [9, straightInfo.high, straightInfo.low], name: name };
+    return { rank: 9, hand_rank: [9, straightInfo.high, straightInfo.low], name: name };
 }
 
 function getSixCardStraightFlushHand(analysis) {
@@ -116,7 +113,7 @@ function getFourOfAKindHand(analysis, valueCounts) {
     const quadCards = analysis.cards.filter(c => c.value === quadRank);
     const kickerCard = analysis.cards.find(c => c.value === kicker);
     const suitValues = getSuitValues([...quadCards, kickerCard]);
-    return { rank: 7, hand_rank: [8, quadRank, kicker, ...suitValues], name: 'Four of a Kind' };
+    return { rank: 8, hand_rank: [8, quadRank, kicker, ...suitValues], name: 'Four of a Kind' };
 }
 
 function getFiveOfAKindHand(analysis, valueCounts) {
@@ -144,46 +141,46 @@ function getEightOfAKindHand(analysis, valueCounts) {
     const eightRank = valueCounts[8][0];
     const eightCards = analysis.cards.filter(c => c.value === eightRank);
     const suitValues = getSuitValues([...eightCards]);
-    return { rank: 18, hand_rank: [16, eightRank, ...suitValues], name: 'Eight of a Kind' };
+    return { rank: 16, hand_rank: [16, eightRank, ...suitValues], name: 'Eight of a Kind' };
 }
 
 function getFullHouseHand(analysis, valueCounts) {
     const tripsRank = valueCounts[3][0];
     const pairRank = valueCounts[2][0];
-    return { rank: 6, hand_rank: [7, tripsRank, pairRank], name: 'Full House' };
+    return { rank: 7, hand_rank: [7, tripsRank, pairRank], name: 'Full House' };
 }
 
 function getFlushHand(analysis) {
     const values = analysis.getSortedValues();
-    return { rank: 5, hand_rank: [6, ...values], name: 'Flush' };
+    return { rank: 6, hand_rank: [6, ...values], name: 'Flush' };
 }
 
 function getStraightHand(analysis) {
     const straightInfo = analysis.getStraightInfo();
-    return { rank: 4, hand_rank: [5, straightInfo.high, straightInfo.low], name: 'Straight' };
+    return { rank: 5, hand_rank: [5, straightInfo.high, straightInfo.low], name: 'Straight' };
 }
 
 function getThreeOfAKindHand(analysis, valueCounts) {
     const tripsRank = valueCounts[3][0];
     const kickers = valueCounts[1];
-    return { rank: 3, hand_rank: [4, tripsRank, ...kickers], name: 'Three of a Kind' };
+    return { rank: 4, hand_rank: [4, tripsRank, ...kickers], name: 'Three of a Kind' };
 }
 
 function getTwoPairHand(analysis, valueCounts) {
     const pairs = valueCounts[2];
     const kicker = valueCounts[1][0];
-    return { rank: 2, hand_rank: [3, Math.max(...pairs), Math.min(...pairs), kicker], name: 'Two Pair' };
+    return { rank: 3, hand_rank: [3, Math.max(...pairs), Math.min(...pairs), kicker], name: 'Two Pair' };
 }
 
 function getPairHand(analysis, valueCounts) {
     const pairRank = valueCounts[2][0];
     const kickers = valueCounts[1];
-    return { rank: 1, hand_rank: [2, pairRank, ...kickers], name: 'Pair' };
+    return { rank: 2, hand_rank: [2, pairRank, ...kickers], name: 'Pair' };
 }
 
 function getHighCardHand(analysis) {
     const values = analysis.getSortedValues();
-    return { rank: 0, hand_rank: [1, ...values], name: 'High Card' };
+    return { rank: 1, hand_rank: [1, ...values], name: 'High Card' };
 }
 
 // Evaluate hand with wild cards

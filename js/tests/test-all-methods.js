@@ -83,7 +83,7 @@ function testAllMethods() {
             // NEW: Compare arrangements between methods
             const comparison = compareArrangements(caseResults, testId);
             results.comparisons.push(comparison);
-            displayArrangementComparison(comparison);
+//            displayArrangementComparison(comparison);
         }
     });
 
