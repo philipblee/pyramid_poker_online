@@ -9,10 +9,11 @@ class FindBestSetupNoWildBase {
         this.exploredNodes = 0;
         this.prunedNodes = 0;
 
-        // ADD THESE:
+        // ADD THESE: The higher the maxTopN and pruningBuffer, the longer it takes
+        // Use these parameters to analyze multiple arrangements per hand
         this.topArrangements = [];  // Array to track top N arrangements
-        this.maxTopN = 100;          // Keep top 5
-        this.pruningBuffer = 5;    // Allow arrangements within 2 points of best
+        this.maxTopN = 10;          // Keep top n arrangememts
+        this.pruningBuffer = 1;    // Allow arrangements within n points of best
 
     }
 

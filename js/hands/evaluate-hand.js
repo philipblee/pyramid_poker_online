@@ -318,7 +318,7 @@ function tryForStraightFlushWithWilds(normalCards, wildCount) {
             for (const straight of possibleStraights) {
                 const needed = straight.filter(v => !uniqueValues.includes(v)).length;
                 if (needed <= wildCount) {
-                    const straightInfo = getStraightInfoFromArray(straight);
+                    const straightInfo = getStraightInfo(straight);
                     const name = straight[0] === 14 && straight[1] === 13 ? 'Royal Flush (Wild)' : 'Straight Flush (Wild)';
                     return { rank: 8, hand_rank: [9, straightInfo.high, straightInfo.low], name: name };
                 }
@@ -377,7 +377,7 @@ function tryForStraightWithWilds(normalCards, wildCount) {
     for (const straight of possibleStraights) {
         const needed = straight.filter(v => !values.includes(v)).length;
         if (needed <= wildCount) {
-            const straightInfo = getStraightInfoFromArray(straight);
+            const straightInfo = getStraightInfo(straight);
             return { rank: 4, hand_rank: [5, straightInfo.high, straightInfo.low], name: 'Straight (Wild)' };
         }
     }
@@ -454,27 +454,30 @@ function evaluateThreeCardHandWithWilds(normalCards, wildCount) {
     return { rank: 0, hand_rank: [1, ...allValues.slice(0, 3)], name: 'High Card' };
 }
 
-// Get straight info from sorted values (high to low)
-function getStraightInfo(values) {
+// Universal straight info - handles both value arrays and pre-sorted straight arrays
+function getStraightInfo(input) {
+    let values;
+
+    // Handle different input formats
+    if (Array.isArray(input) && input.length === 5) {
+        // If it's already a 5-element array, assume it's pre-sorted high-to-low
+        if (input[0] >= input[1] && input[1] >= input[2]) {
+            values = input; // Already sorted
+        } else {
+            values = [...input].sort((a, b) => b - a); // Sort if needed
+        }
+    } else {
+        // Handle Set, unsorted array, or other iterable
+        values = [...input].sort((a, b) => b - a);
+    }
+
     // Check for wheel straight (A-5-4-3-2)
     if (values.includes(14) && values.includes(5) && values.includes(4) && values.includes(3) && values.includes(2)) {
-        return { high: 14, low: 5 }; // Wheel: ace=14, five=5 (the two key cards)
+        return { high: 14, low: 5 }; // Wheel: ace=14, five=5
     }
 
-    // Regular straight
-    const sorted = [...values].sort((a, b) => b - a);
-    return { high: sorted[0], low: sorted[1] };
-}
-
-// Get straight info from straight array
-function getStraightInfoFromArray(straightArray) {
-    // Handle wheel straight
-    if (straightArray[0] === 14 && straightArray[1] === 5) {
-        return { high: 14, low: 5 };
-    }
-
-    // Regular straight
-    return { high: straightArray[0], low: straightArray[1] };
+    // Regular straight - return highest and second-highest
+    return { high: values[0], low: values[1] };
 }
 
 // Convert card suits to numeric values for tiebreaking

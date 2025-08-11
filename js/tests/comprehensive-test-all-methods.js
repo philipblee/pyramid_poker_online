@@ -1,6 +1,7 @@
 // js/tests/comprehensive-test-all-methods.js
 // Enhanced: Compare arrangements between methods to ensure same optimal results
 
+
 function runComprehensiveTests() {
     console.log('\n🧪 ======== COMPREHENSIVE TEST SUITE WITH ARRANGEMENT COMPARISON ========');
     console.log('Testing all wild scenarios × all optimization methods');
@@ -18,8 +19,8 @@ function runComprehensiveTests() {
     // Test ranges
     const testRanges = [
         { name: 'No-Wild', start: 1, end: 10, wildCount: 0 },
-        { name: 'One-Wild', start: 1001, end: 1000, wildCount: 1 },
-        { name: 'Two-Wild', start: 2001, end: 2000, wildCount: 2 }
+        { name: 'One-Wild', start: 1001, end: 1010, wildCount: 1 },
+        { name: 'Two-Wild', start: 2001, end: 2010, wildCount: 2 }
     ];
 
     // Test each range with each method AND compare arrangements
@@ -35,7 +36,7 @@ function runComprehensiveTests() {
 
             // Run all three methods on same test case
             methods.forEach(method => {
-                console.log(`  ${method.padEnd(10)}: `);
+//                console.log(`  ${method.padEnd(10)}: `);
 
                 try {
                     const cards = createFromCardsTestCase(testId);
@@ -59,8 +60,10 @@ function runComprehensiveTests() {
                         arrangement: result.arrangement,
                         cards: cards
                     };
-
-                    console.log(result.success ? '✅' : '❌', `(${result.score.toFixed(2)}, ${(endTime - startTime).toFixed(0)}ms)`);
+                console.log(
+                    `  ${method.padEnd(10)}: ${result.success ? '✅' : '❌'} ` +
+                    `(${result.score.toFixed(2)}, ${(endTime - startTime).toFixed(0)}ms)`
+                );
 
                 } catch (error) {
                     console.log(`❌ ERROR: ${error.message}`);
