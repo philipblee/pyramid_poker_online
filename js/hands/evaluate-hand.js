@@ -3,47 +3,33 @@
 // Main 5-card hand evaluation function
 function evaluateHand(cards) {
 
+    const startTime = performance.now();
+    const analysis = new Analysis(cards);
+    const analysisTime = performance.now();
+
+//    console.log(`Analysis creation: ${(analysisTime - startTime).toFixed(2)}ms`);
+
     // Initialize with enough zeros to prevent undefined
     let hand_rank = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; // 11 positions should cover all cases
 
-    // Handle hands with 6, 7, 8 cards - basic evaluation for now
     if (cards.length > 5) {
+        if (analysis.isAllSameRank()) {
+            const rank = Analysis.getRankValue(analysis.getOfAKindRank());
+            const rating = 10 + (cards.length - 5) * 2;
+            return { rank: rating - 1, hand_rank: [rating, rank], name: `${cards.length} of a Kind` };
+        }
 
+        else if (analysis.isAllSameSuit() && (analysis.isSequentialValues() || analysis.isWheelStraight())) {
+            const highCard = analysis.getStraightHigh();
+            const rating = 9 + (cards.length - 5) * 2;
+            return { rank: rating - 1, hand_rank: [rating, highCard], name: `${cards.length}-Card Straight Flush` };
+        }
 
-    // Quick check: are all cards the same rank?
-    const values = cards.map(c => c.value);
-    const uniqueValues = new Set(values);
-
-    if (uniqueValues.size === 1) {
-        // All same rank
-        const rank = values[0,0,0,0,0,0];
-        const sameRankRating = 10 + (cards.length - 5) * 2; // 6→12, 7→14, 8→16
-        return { rank: sameRankRating - 1, hand_rank: [sameRankRating, rank], name: `${cards.length} of a Kind` };
-    }
-
-    // Quick check: are all cards same suit and sequential?
-    const suits = cards.map(c => c.suit);
-    const uniqueSuits = new Set(suits);
-
-    if (uniqueSuits.size === 1) {
-        const sortedValues = [...uniqueValues].sort((a, b) => a - b);
-        // All same suit, must be Straight Flush
-        // Check for regular sequential
-        const isSequential = sortedValues.every((val, i) => i === 0 || val === sortedValues[i-1] + 1);
-
-        // Check for wheel pattern (Ace + low cards)
-        const isWheel = sortedValues.includes(14) && sortedValues[0] === 2;
-
-        if (isSequential || isWheel) {
-            const highCard = isWheel ? sortedValues[sortedValues.length - 2] : Math.max(...sortedValues); // For wheel, use second-highest
-            const straightFlushRating = 9 + (cards.length - 5) * 2;
-            return { rank: straightFlushRating - 1, hand_rank: [straightFlushRating, highCard], name: `${cards.length}-Card Straight Flush` };
+        else {
+            // If neither, return generic (this shouldn't happen if validation works)
+            return { rank: 0, hand_rank: [0, cards.length], name: `${cards.length}-Card Hand` };
         }
     }
-
-    // If neither, return generic (this shouldn't happen if validation works)
-    return { rank: 0, hand_rank: [0, cards.length], name: `${cards.length}-Card Hand` };
-}
 
     if (cards.length !== 5) return { rank: 0, hand_rank: [70, 80], name: 'Invalid' };
 
@@ -154,14 +140,6 @@ function evaluateHand(cards) {
             return { rank: 1, hand_rank: hand_rank.slice(), name: 'Pair' };
         }
     }
-
-    // High Card (already looks correct but make sure)
-    hand_rank[0] = 1;
-    for (let i = 0; i < 5 && i < values.length; i++) {
-        hand_rank[i + 1] = values[i];
-    }
-    return { rank: 0, hand_rank: hand_rank.slice(), name: 'High Card' };
-
 
     // High Card: [1, high, second, third, fourth, fifth]
     return { rank: 0, hand_rank: [1, ...values], name: 'High Card' };

@@ -13,7 +13,7 @@ class Analysis {
 
         // Pre-compute all analysis data
         this._computeBasicCounts();
-        this._computeHandCounts();
+//        this._computeHandCounts();
         this._computeUtilityData();
     }
 
@@ -208,6 +208,42 @@ class Analysis {
     }
 
     // =============================================================================
+    // STANDARD POKER HAND CHECKS
+    // =============================================================================
+
+    isAllSameRank() {
+        return Object.keys(this.rankCounts).length === 1;
+    }
+
+    isAllSameSuit() {
+        return Object.keys(this.suitCounts).length === 1;
+    }
+
+    isSequentialValues() {
+        const values = [...new Set(this.cards.map(c => c.value))].sort((a, b) => a - b);
+        return values.every((val, i) => i === 0 || val === values[i-1] + 1);
+    }
+
+    isWheelStraight() {
+        const values = new Set(this.cards.map(c => c.value));
+        return values.has(14) && values.has(2) && values.has(3) && values.has(4) && values.has(5);
+    }
+
+    getStraightHigh() {
+        if (this.isWheelStraight()) {
+            const values = [...new Set(this.cards.map(c => c.value))].sort((a, b) => b - a);
+            return values[1]; // Second highest for wheel
+        }
+        return Math.max(...this.cards.map(c => c.value));
+    }
+
+    getOfAKindRank() {
+        // Return the rank that appears most frequently
+        const maxCount = Math.max(...Object.values(this.rankCounts));
+        return Object.entries(this.rankCounts).find(([rank, count]) => count === maxCount)[0];
+    }
+
+    // =============================================================================
     // ANALYSIS METHODS - Higher-level insights
     // =============================================================================
 
@@ -347,22 +383,6 @@ class Analysis {
         };
     }
 
-//    debugInfo() {
-//        console.log(`\n🔍 ======== ANALYSIS DEBUG INFO ========`);
-//        console.log(`📊 ${this.totalCards} cards analyzed`);
-//        console.log(`📋 Rank counts:`, this.rankCounts);
-//        console.log(`🃏 Suit counts:`, this.suitCounts);
-//        console.log(`🎯 Total possible hands: ${this.total}`);
-//
-//        const relevant = this.getRelevantHandsForWildOptimization();
-//        console.log(`🔥 Relevant for wild optimization: ${relevant.total}`);
-//        Object.entries(relevant.categories).forEach(([type, count]) => {
-//            console.log(`   ${type}: ${count}`);
-//        });
-//
-//        console.log(`🏆 Summary:`, this.summary());
-//        console.log(`========================================`);
-//    }
 }
 
 // Export for use in other modules
