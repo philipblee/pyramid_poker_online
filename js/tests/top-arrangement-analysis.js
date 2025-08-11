@@ -15,37 +15,35 @@ function topArrangementAnalysis(testCaseIds = [1, 2, 3, 4, 5, 6]) {
         optimizer.topArrangements = uniqueArrangements.slice(0, 20); // Keep top 20 unique
 
         // PUT THE DEBUG HERE:
+        console.log(`----------------------------------------------`)
         console.log(`🔍 Player ${i + 1} IMMEDIATE result:`, result);
-        console.log(`  result.topArrangements exists:`, !!result.topArrangements);
-        console.log(`  result.topArrangements length:`, result.topArrangements ? result.topArrangements.length : 'N/A');
-        console.log(`  result keys:`, Object.keys(result));
+        console.log(`  optimizer.topArrangements exists:`, !!result.topArrangements);
+        console.log(`  optimizer.topArrangements length:`, result.topArrangements ? result.topArrangements.length : 'N/A');
 
-        // Right after: const bestSetup = findBestSetupNoWild(cards);
+        console.log(`✅ Player ${i + 1} (Case ${testCaseId}): ${optimizer.topArrangements.length} arrangements`);
 
-        console.log(`\n📋 TOP 20 ARRANGEMENTS FOR TEST CASE ${testCaseId}:`);
+        console.log(`\n📋 TOP 20 UNIQUE ARRANGEMENTS FOR TEST CASE ${testCaseId}:`);
         optimizer.topArrangements.forEach((item, index) => {
             console.log(`\n🏆 Rank #${index + 1} - Score: ${item.score}`);
             console.log(`   🏆 Back:   ${item.arrangement.back.handType} - [${item.arrangement.back.cards.map(c => c.rank + c.suit).join(' ')}]`);
             console.log(`   🥈 Middle: ${item.arrangement.middle.handType} - [${item.arrangement.middle.cards.map(c => c.rank + c.suit).join(' ')}]`);
             console.log(`   🥉 Front:  ${item.arrangement.front.handType} - [${item.arrangement.front.cards.map(c => c.rank + c.suit).join(' ')}]`);
         });
-        console.log(`\n🎯 Starting tournament with these ${optimizer.topArrangements.length} arrangements...\n`);
+//        console.log(`\n🎯 Starting tournament with these ${optimizer.topArrangements.length} arrangements...\n`);
 
         playerData.push({
             playerId: i + 1,
             testCaseId: testCaseId,
-            arrangements: result.topArrangements.slice(0, 20),
-            bestArrangement: result.topArrangements[0]
+            arrangements: optimizer.topArrangements.slice(0, 20),
+            bestArrangement: optimizer.topArrangements[0]
         });
 
-        console.log(`✅ Player ${i + 1} (Case ${testCaseId}): ${result.topArrangements.length} arrangements`);
     }
 
     // Step 2: Run tournament for each player testing all their arrangements
     const tournamentResults = [];
 
     for (let playerIndex = 0; playerIndex < playerData.length; playerIndex++) {
-        console.log(`\n🏆 Testing Player ${playerIndex + 1} arrangements...`);
 
         const playerResults = testPlayerArrangements(playerData, playerIndex);
         tournamentResults.push(playerResults);
@@ -62,13 +60,57 @@ function topArrangementAnalysis(testCaseIds = [1, 2, 3, 4, 5, 6]) {
 }
 
 /**
+ * Test all 20 arrangements for a specific player
+ * @param {Array} playerData - All player data
+ * @param {number} testPlayerIndex - Index of player to test arrangements for
+ * @returns {Object} - Results for this player's arrangements
+ */
+function testPlayerArrangements(playerData, testPlayerIndex) {
+    const testPlayer = playerData[testPlayerIndex];
+    const arrangementResults = [];
+
+    console.log(`  Testing arrangements 1-20 for Player ${testPlayer.playerId}...`);
+
+    // Test each of the 20 arrangements (now already completed!)
+    for (let arrangementIndex = 0; arrangementIndex < testPlayer.arrangements.length; arrangementIndex++) {
+        const gameResult = scoreRoundOfHands(playerData, testPlayerIndex, arrangementIndex);
+        arrangementResults.push(gameResult);
+
+        if ((arrangementIndex + 1) % 5 === 0) {
+            console.log(`    Completed ${arrangementIndex + 1}/20 arrangements`);
+        }
+    }
+
+    const wins = arrangementResults.filter(r => r.testPlayerWon).length;
+    const avgScore = arrangementResults.reduce((sum, r) => sum + r.testPlayerScore, 0) / arrangementResults.length;
+    const bestPerformingArrangement = arrangementResults.reduce((best, current) =>
+        current.testPlayerScore > best.testPlayerScore ? current : best
+    );
+
+    console.log(`    Player ${testPlayer.playerId} summary: ${wins}/20 wins, avg score: ${avgScore.toFixed(2)}`);
+    console.log(`    Best performer: Arrangement #${bestPerformingArrangement.arrangementIndex} (score: ${bestPerformingArrangement.testPlayerScore})`);
+
+    return {
+        playerId: testPlayer.playerId,
+        testCaseId: testPlayer.testCaseId,
+        arrangementResults,
+        summary: {
+            totalWins: wins,
+            averageScore: avgScore,
+            bestPerformingArrangement: bestPerformingArrangement.arrangementIndex,
+            bestPerformingScore: bestPerformingArrangement.testPlayerScore
+        }
+    };
+}
+
+/**
  * Run single 6-player game
  * @param {Array} playerData - All player data
  * @param {number} testPlayerIndex - Player testing arrangements
  * @param {number} arrangementIndex - Which arrangement (0-19) to test
  * @returns {Object} - Game result
  */
-function runSixPlayerGame(playerData, testPlayerIndex, arrangementIndex) {
+function scoreRoundOfHands(playerData, testPlayerIndex, arrangementIndex) {
     const gameSetup = [];
 
     for (let i = 0; i < playerData.length; i++) {
@@ -148,59 +190,11 @@ function runSixPlayerGame(playerData, testPlayerIndex, arrangementIndex) {
     };
 }
 
-/**
- * Test all 20 arrangements for a specific player
- * @param {Array} playerData - All player data
- * @param {number} testPlayerIndex - Index of player to test arrangements for
- * @returns {Object} - Results for this player's arrangements
- */
-
-/**
- * Test all 20 arrangements for a specific player (SIMPLIFIED)
- */
-function testPlayerArrangements(playerData, testPlayerIndex) {
-    const testPlayer = playerData[testPlayerIndex];
-    const arrangementResults = [];
-
-    console.log(`  Testing arrangements 1-20 for Player ${testPlayer.playerId}...`);
-
-    // Test each of the 20 arrangements (now already completed!)
-    for (let arrangementIndex = 0; arrangementIndex < testPlayer.arrangements.length; arrangementIndex++) {
-        const gameResult = runSixPlayerGame(playerData, testPlayerIndex, arrangementIndex);
-        arrangementResults.push(gameResult);
-
-        if ((arrangementIndex + 1) % 5 === 0) {
-            console.log(`    Completed ${arrangementIndex + 1}/20 arrangements`);
-        }
-    }
-
-    const wins = arrangementResults.filter(r => r.testPlayerWon).length;
-    const avgScore = arrangementResults.reduce((sum, r) => sum + r.testPlayerScore, 0) / arrangementResults.length;
-    const bestPerformingArrangement = arrangementResults.reduce((best, current) =>
-        current.testPlayerScore > best.testPlayerScore ? current : best
-    );
-
-    console.log(`    Player ${testPlayer.playerId} summary: ${wins}/20 wins, avg score: ${avgScore.toFixed(2)}`);
-    console.log(`    Best performer: Arrangement #${bestPerformingArrangement.arrangementIndex} (score: ${bestPerformingArrangement.testPlayerScore})`);
-
-    return {
-        playerId: testPlayer.playerId,
-        testCaseId: testPlayer.testCaseId,
-        arrangementResults,
-        summary: {
-            totalWins: wins,
-            averageScore: avgScore,
-            bestPerformingArrangement: bestPerformingArrangement.arrangementIndex,
-            bestPerformingScore: bestPerformingArrangement.testPlayerScore
-        }
-    };
-}
 
 /**
  * Run single 6-player game (SIMPLIFIED)
  */
- 
-function runSixPlayerGame(playerData, testPlayerIndex, arrangementIndex) {
+function scoreRoundOfHands(playerData, testPlayerIndex, arrangementIndex) {
     // Build 6-player game setup
     const gameSetup = [];
 
