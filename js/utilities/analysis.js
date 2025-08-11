@@ -243,6 +243,55 @@ class Analysis {
         return Object.entries(this.rankCounts).find(([rank, count]) => count === maxCount)[0];
     }
 
+    // from Meta ai (using Meta to fix for now
+    getSortedValues() {
+    return [...this.cards].sort((a, b) => b.value - a.value).map(c => c.value);
+    }
+
+    getSuits() {
+    return this.cards.map(c => c.suit);
+    }
+
+    getValueCounts() {
+        const valueCounts = {};
+        this.cards.forEach(c => {
+          valueCounts[c.value] = (valueCounts[c.value] || 0) + 1;
+        });
+
+        // Group values by count frequency
+        const valuesByCount = {};
+        for (const [value, count] of Object.entries(valueCounts)) {
+          if (!valuesByCount[count]) valuesByCount[count] = [];
+          valuesByCount[count].push(parseInt(value));
+        }
+
+        // Sort each group by descending value
+        for (const count in valuesByCount) {
+          valuesByCount[count].sort((a, b) => b - a);
+        }
+
+        return valuesByCount;
+    }
+
+    getStraightInfo() {
+        const values = this.getSortedValues();
+        const high = Math.max(...values);
+        const low = Math.min(...values);
+
+        // Check for wheel straight (A-2-3-4-5)
+        if (values.includes(14) && values.includes(2) && values.includes(3) && values.includes(4) && values.includes(5)) {
+          return { high: 5, low: 14 };
+        }
+
+        return { high: high, low: low };
+    }
+
+    isAllSameSuit(suits = this.getSuits()) {
+        return suits.every(suit => suit === suits[0]);
+    }
+
+
+
     // =============================================================================
     // ANALYSIS METHODS - Higher-level insights
     // =============================================================================
