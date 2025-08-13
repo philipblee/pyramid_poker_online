@@ -301,8 +301,8 @@ function compareArrangementsHeadToHead(arrangement1, arrangement2, score1, score
     const back1 = evaluateHand(arrangement1.back.cards);
     const back2 = evaluateHand(arrangement2.back.cards);
 
-    debugHandCorruption(back1, "After initial evaluation back1");
-    debugHandCorruption(back2, "After initial evaluation back2");
+//    debugHandCorruption(back1, "After initial evaluation back1");
+//    debugHandCorruption(back2, "After initial evaluation back2");
 
     // SET the hand names from evaluation results
     arrangement1.back.name = back1.name;
@@ -334,9 +334,9 @@ function compareArrangementsHeadToHead(arrangement1, arrangement2, score1, score
 
     // Middle hand comparison
     const middle1 = evaluateHand(arrangement1.middle.cards);
-    debugHandCorruption(middle1, "After initial evaluation middle1");
+//    debugHandCorruption(middle1, "After initial evaluation middle1");
     const middle2 = evaluateHand(arrangement2.middle.cards);
-    debugHandCorruption(middle2, "After initial evaluation middle2");
+//    debugHandCorruption(middle2, "After initial evaluation middle2");
     arrangement1.middle.name = middle1.name;
     arrangement2.middle.name = middle2.name;
 
@@ -365,11 +365,11 @@ function compareArrangementsHeadToHead(arrangement1, arrangement2, score1, score
     // Front hand comparison
     const front1 = evaluateThreeCardHand(arrangement1.front.cards);
 
-    debugHandCorruption(front1, "After initial evaluation front1");
+//    debugHandCorruption(front1, "After initial evaluation front1");
 
     const front2 = evaluateThreeCardHand(arrangement2.front.cards);
 
-    debugHandCorruption(front2, "After initial evaluation front2");
+//    debugHandCorruption(front2, "After initial evaluation front2");
 
     arrangement1.front.name = front1.name;
     arrangement2.front.name = front2.name;

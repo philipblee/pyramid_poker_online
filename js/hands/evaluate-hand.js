@@ -366,11 +366,11 @@ function tryForStraightWithWilds(normalCards, wildCount) {
 // Evaluate 3-card or 5-card front hands
 function evaluateThreeCardHand(cards) {
 
-    console.log(`🔍 evaluateThreeCardHand called with ${cards.length} cards`);
-    if (cards.length === 2) {
-        console.log("  🚨 Should return Invalid!");
-        console.trace(); // Show exactly where this is called from
-    }
+//    console.log(`🔍 evaluateThreeCardHand called with ${cards.length} cards`);
+//    if (cards.length === 2) {
+//        console.log("  🚨 Should return Invalid!");
+//        console.trace(); // Show exactly where this is called from
+//    }
     // Handle both 3-card and 5-card front hands
     if (cards.length === 5) {
         // Use the regular 5-card evaluation for 5-card front hands
