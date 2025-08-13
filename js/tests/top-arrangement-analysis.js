@@ -8,22 +8,22 @@ function topArrangementAnalysis(testCaseIds = [1, 2, 3, 4, 5, 6]) {
     for (let i = 0; i < testCaseIds.length; i++) {
         const testCaseId = testCaseIds[i];
         const cards = createFromCardsTestCase(testCaseId);
-        const optimizer = new FindBestSetupNoWild();
-        const result = optimizer.findBestSetupNoWild(cards);
+        const findBest = new FindBestSetupNoWild();
+        const result = findBest.findBestSetupNoWild(cards);
 
-        const uniqueArrangements = optimizer.getStrategicallyDifferentArrangements(optimizer.topArrangements);
-        optimizer.topArrangements = uniqueArrangements.slice(0, 20); // Keep top 20 unique
+        const uniqueArrangements = findBest.getStrategicallyDifferentArrangements(findBest.topArrangements);
+        findBest.topArrangements = uniqueArrangements.slice(0, 20); // Keep top 20 unique
 
         // PUT THE DEBUG HERE:
         console.log(`----------------------------------------------`)
         console.log(`🔍 Player ${i + 1} IMMEDIATE result:`, result);
-        console.log(`  optimizer.topArrangements exists:`, !!result.topArrangements);
-        console.log(`  optimizer.topArrangements length:`, result.topArrangements ? result.topArrangements.length : 'N/A');
+        console.log(`  findBest.topArrangements exists:`, !!result.topArrangements);
+        console.log(`  findBest.topArrangements length:`, result.topArrangements ? result.topArrangements.length : 'N/A');
 
-        console.log(`✅ Player ${i + 1} (Case ${testCaseId}): ${optimizer.topArrangements.length} arrangements`);
+        console.log(`✅ Player ${i + 1} (Case ${testCaseId}): ${findBest.topArrangements.length} arrangements`);
 
         console.log(`\n📋 TOP 20 UNIQUE ARRANGEMENTS FOR TEST CASE ${testCaseId}:`);
-        optimizer.topArrangements.forEach((item, index) => {
+        findBest.topArrangements.forEach((item, index) => {
             console.log(`\n🏆 Rank #${index + 1} - Score: ${item.score}`);
             console.log(`   🏆 Back:   ${item.arrangement.back.handType} - [${item.arrangement.back.cards.map(c => c.rank + c.suit).join(' ')}]`);
             const scoresBack = item.arrangement.back.positionScores;
@@ -35,29 +35,31 @@ function topArrangementAnalysis(testCaseIds = [1, 2, 3, 4, 5, 6]) {
             const scoresFront = item.arrangement.front.positionScores;
             console.log(`   🏆 Front:   ${item.arrangement.front.hand_rank} - scores front:${scoresFront.front}`);
         });
-//        console.log(`\n🎯 Starting tournament with these ${optimizer.topArrangements.length} arrangements...\n`);
+//        console.log(`\n🎯 Starting tournament with these ${findBest.topArrangements.length} arrangements...\n`);
 
         playerData.push({
             playerId: i + 1,
             testCaseId: testCaseId,
-            arrangements: optimizer.topArrangements.slice(0, 20),
-            bestArrangement: optimizer.topArrangements[0]
+            arrangements: findBest.topArrangements.slice(0, 20),
+            bestArrangement: findBest.topArrangements[0]
         });
 
     }
 
     // Step 2: Run tournament for each player testing all their arrangements
     const tournamentResults = [];
+    // Initialize at the start of your tournament analysis
+    const allPlayerResults = [];
 
     for (let playerIndex = 0; playerIndex < playerData.length; playerIndex++) {
-
         const playerResults = testPlayerArrangements(playerData, playerIndex);
         tournamentResults.push(playerResults);
+        addPlayerToSummary(playerIndex + 1, playerData, allPlayerResults )
     }
 
     // Step 3: Generate summary
     const summary = generateSummary(tournamentResults);
-
+//    const tournamentSummary = generateTournamentSummary(allPlayerResults)
     return {
         playerData,
         tournamentResults,
@@ -95,9 +97,12 @@ function testPlayerArrangements(playerData, testPlayerIndex) {
     const avgDelta = arrangementResults.reduce((sum, r) => sum + r.delta, 0) / arrangementResults.length;
 
     // ADD THE MISSING bestPerformingArrangement calculation
-    const bestPerformingArrangement = arrangementResults.reduce((best, current) =>
+    const bestPerformingArrangementTemp = arrangementResults.reduce((best, current) =>
         current.testPlayerScore > best.testPlayerScore ? current : best
     );
+
+    const bestPerformingArrangement = bestPerformingArrangementTemp;
+    bestPerformingArrangement.testPlayerScore = bestPerformingArrangementTemp.testPlayerScore/5
 
     // REMOVE DUPLICATE - Keep only the enhanced summary
     console.log(`\n✅ Player ${testPlayer.playerId} complete - ${wins}/20 wins, avg score: ${avgScore.toFixed(2)}, avg delta: ${avgDelta.toFixed(2)}`);
@@ -210,7 +215,7 @@ function scoreRoundOfHands(playerData, testPlayerIndex, arrangementIndex) {
     // At the end of scoreRoundOfHands function, before return:
     const testPlayer = gameSetup[testPlayerIndex];
     const expectedValue = testPlayer.arrangement.score;
-    const actualScore = testPlayerScore;
+    const actualScore = testPlayerScore/5;  //need to divide by number of players
     const delta = actualScore - expectedValue;
 
     // Clear performance logging
@@ -384,4 +389,120 @@ function compareArrangementsHeadToHead(arrangement1, arrangement2, score1, score
 
 //    console.log(` Net Scores: ${player1Score}    vs.   ${player2Score}`)
     return { player1Score, player2Score, details };
+}
+
+function generateTournamentSummary(playerResults) {
+    console.log('\n🏆 ======== TOURNAMENT RESULTS SUMMARY ========\n');
+
+    // Sort players by net points (descending)
+    const sortedPlayers = [...playerResults].sort((a, b) => b.avgScore - a.avgScore);
+
+    // Create the table header
+    console.log('┌─────────┬──────────────────────────────────┬──────┬───────────┬─────────┬──────────────────┐');
+    console.log('│ Rank    │ Hand Structure                   │  EV  │ Net Points│  Delta  │ Performance Tier │');
+    console.log('├─────────┼──────────────────────────────────┼──────┼───────────┼─────────┼──────────────────┤');
+
+    // Generate rows for each player
+    sortedPlayers.forEach((player, index) => {
+        const rank = getRankEmoji(index + 1);
+        const tier = getPerformanceTier(player.topArrangementEV, player.avgScore);
+        const handStructure = formatHandStructure(player.topArrangement);
+
+        console.log(`│ ${rank.padEnd(7)} │ ${handStructure.padEnd(32)} │ ${player.topArrangementEV.toFixed(2).padStart(4)} │ ${formatScore(player.avgScore).padStart(9)} │ ${formatDelta(player.avgDelta).padStart(7)} │ ${tier.padEnd(16)} │`);
+    });
+
+    console.log('└─────────┴──────────────────────────────────┴──────┴───────────┴─────────┴──────────────────┘');
+
+    // Summary insights
+    console.log('\n📊 KEY INSIGHTS:');
+    console.log(`🎯 EV Range: ${Math.min(...playerResults.map(p => p.topArrangementEV)).toFixed(2)} - ${Math.max(...playerResults.map(p => p.topArrangementEV)).toFixed(2)}`);
+    console.log(`⚡ Score Range: ${Math.min(...playerResults.map(p => p.avgScore)).toFixed(1)} - ${Math.max(...playerResults.map(p => p.avgScore)).toFixed(1)}`);
+    console.log(`🏆 Tournament Winner: Player ${sortedPlayers[0].playerId} (${formatScore(sortedPlayers[0].avgScore)} points)`);
+    console.log(`💸 Biggest Loser: Player ${sortedPlayers[sortedPlayers.length - 1].playerId} (${formatScore(sortedPlayers[sortedPlayers.length - 1].avgScore)} points)`);
+
+    // Calculate total points (should be close to zero)
+    const totalPoints = playerResults.reduce((sum, p) => sum + p.avgScore, 0);
+    console.log(`⚖️  Point Balance: ${totalPoints.toFixed(2)} (should be ~0.0)`);
+
+    console.log('\n' + '='.repeat(80));
+}
+
+function getRankEmoji(rank) {
+    switch(rank) {
+        case 1: return '🏆 #1';
+        case 2: return '🥈 #2';
+        case 3: return '🥉 #3';
+        default: return `#${rank}`;
+    }
+}
+
+function getPerformanceTier(ev, avgScore) {
+    if (ev >= 3.0 && avgScore > 0) return '🏆 Champion';
+    if (ev >= 3.0) return '🥈 Contender';
+    if (ev >= 2.0) return '⚖️ Competitive';
+    if (ev >= 1.0) return '📉 Struggling';
+    return '💸 Crushed';
+}
+
+function formatHandStructure(arrangement) {
+    // Extract hand types from arrangement
+    const front = getHandTypeShort(arrangement.front);
+    const middle = getHandTypeShort(arrangement.middle);
+    const back = getHandTypeShort(arrangement.back);
+
+    return `${front} + ${middle} + ${back}`;
+}
+
+function getHandTypeShort(hand) {
+    if (!hand || !hand.name) return 'Unknown';
+
+    const name = hand.name.toLowerCase();
+    if (name.includes('four of a kind')) return '**Quads**';
+    if (name.includes('full house')) return '**FH**';
+    if (name.includes('flush')) return '**Flush**';
+    if (name.includes('straight')) return 'Straight';
+    if (name.includes('three of a kind')) return 'Trips';
+    if (name.includes('two pair')) return '2-Pair';
+    if (name.includes('pair')) return 'Pair';
+    return 'High';
+}
+
+function formatScore(score) {
+    return score >= 0 ? `+${score.toFixed(1)}` : score.toFixed(1);
+}
+
+function formatDelta(delta) {
+    return delta >= 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1);
+}
+
+// Example usage:
+// Call this function after all players complete their analysis
+// generateTournamentSummary(allPlayerResults);
+
+// Example data structure expected:
+const examplePlayerResults = [
+    {
+        playerId: 6,
+        topArrangementEV: 3.32,
+        avgScore: 6.29,
+        avgDelta: -0.86,
+        topArrangement: {
+            front: { name: 'Pair' },
+            middle: { name: 'Straight' },
+            back: { name: 'Four of a Kind' }
+        }
+    },
+    // ... other players
+];
+
+// After EACH player completes (not just Player 6)
+function addPlayerToSummary(playerNum, playerData, allPlayerResults) {
+    allPlayerResults.push({
+        playerId: playerNum,
+        topArrangementEV: playerData.topArrangementEV,
+        avgScore: playerData.avgScore,
+        avgDelta: playerData.avgDelta,
+        wins: playerData.wins,
+        topArrangement: playerData.topArrangement
+    });
 }
