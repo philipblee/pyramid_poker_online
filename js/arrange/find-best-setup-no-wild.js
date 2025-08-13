@@ -59,11 +59,16 @@ class FindBestSetupNoWildBase {
             finalArrangement = this.completeArrangementWithKickers(finalArrangement);
 //            // finalArrangement is set. We can calculate back, middle and front scores
 //            // finalArrangement.back is the back hand in Hand model
-//            const backHandScore = this.getHandScore(finalArrangement.back, 'back')
-//            const middleHandScore = this.getHandScore(finalArrangement.middle, 'middle')
-//            const frontHandScore = this.getHandScore(finalArrangement.front, 'front')
-//            const totalHandScore = backHandScore + middleHandScore + frontHandScore
+            const backHandScore = this.getHandScore(finalArrangement.back, 'back')
+            const middleHandScore = this.getHandScore(finalArrangement.middle, 'middle')
+            const frontHandScore = this.getHandScore(finalArrangement.front, 'front')
+            const totalHandScore = backHandScore + middleHandScore + frontHandScore
 //            console.log ("findBestNoWild", backHandScore, middleHandScore, frontHandScore, totalHandScore)
+        }
+
+        // Before your return statement, add:
+        if (this.topArrangements && this.topArrangements.length > 0) {
+            this.topArrangements.sort((a, b) => b.score - a.score); // Sort by score descending (highest EV first)
         }
 
         return {
@@ -430,15 +435,19 @@ class FindBestSetupNoWildBase {
     }
 
     updateTopArrangements(arrangement, score) {
-
         const completedArrangement = this.completeArrangementWithKickers(arrangement);
 
-        this.topArrangements.push({ arrangement: completedArrangement, score });
+        // Use the completed arrangement's score, not the old score
+        this.topArrangements.push({
+            arrangement: completedArrangement,
+            score: completedArrangement.score  // Use NEW score from completed arrangement
+        });
+
         this.topArrangements.sort((a, b) => b.score - a.score);
         if (this.topArrangements.length > this.maxTopN) {
             this.topArrangements = this.topArrangements.slice(0, this.maxTopN);
         }
-}
+    }
 }
 
 

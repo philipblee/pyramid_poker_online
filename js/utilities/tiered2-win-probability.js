@@ -179,18 +179,32 @@ class Tiered2WinProbability {
      * @param {Array<number>} handRank - Hand rank array
      * @returns {number|null} - Win probability or null if not found
      */
-    getTiered2WinProbability(position, handRank) {
+     getTiered2WinProbability(position, handRank) {
         if (!this.isLoaded) {
             console.warn('⚠️  Tiered2 Win probability data not loaded yet');
             return null;
         }
 
+        // Try exact match first
         const key = this.createLookupKey(position, handRank);
-        const entry = this.probabilityMap.get(key);
+        let entry = this.probabilityMap.get(key);
 
-        return entry ? entry.probability : null;
+        if (entry) {
+            return entry.probability;
+        }
+
+        // If no exact match, try prefix matching
+        const prefix = key.replace(']', ','); // "back,[6,8]" → "back,[6,8,"
+
+        for (const [mapKey, mapValue] of this.probabilityMap) {
+            if (mapKey.startsWith(prefix)) {
+                // console.log(`🎯 Prefix match: ${key} → ${mapKey} = ${mapValue.probability}`);
+                return mapValue.probability;
+            }
+        }
+
+        return null;
     }
-
     /**
      * Get detailed data for position and hand rank
      * @param {string} position - Position (back/middle/front)
@@ -254,8 +268,6 @@ const tiered2WinProbability = new Tiered2WinProbability();
  */
 function lookupTiered2WinProbability(position, hand) {
     // console.log('🔍 Lookup tiered2 probability:', { position, handRank: hand.hand_rank });
-
-    // Extract hand_rank for compatibility
     const handRank = hand.hand_rank || hand;
 
     // SPECIAL HANDLING: Incomplete front hands
@@ -289,10 +301,6 @@ function lookupTiered2WinProbability(position, hand) {
 //            console.log(`🎯 Hierarchical match: level ${length}/${handRank.length} for ${position} [${handRank.join(',')}] → [${truncatedTuple.join(',')}] = ${probability}`);
             return probability;
         }
-
-        if (probability === null) {
-            return 001;
-        }
     }
 
     // Final fallback to hardcoded hand type probabilities
@@ -316,10 +324,20 @@ function lookupTiered2WinProbability(position, hand) {
         }
     }
 
-    console.log('❌ No match found at any level, returning null');
-    return null; // Let ScoringUtilities handle the final fallback
-}
 
+    console.log('❌ No match found at any level, returning null');
+    console.log(`   🔍 Position: ${position}`);
+    console.log(`   🔍 Hand rank tuple: [${handRank.join(', ')}]`);
+    console.log(`   🔍 Attempted lookups:`);
+
+    // Show exactly what tuples were tried
+    for (let length = Math.min(handRank.length, 3); length >= 2; length--) {
+        let truncatedTuple = handRank.slice(0, length);
+        console.log(`     Tried: [${truncatedTuple.join(', ')}] - No match`);
+    }
+
+    return null;
+}
 
 
 /**

@@ -75,13 +75,16 @@ function testPlayerArrangements(playerData, testPlayerIndex) {
     const testPlayer = playerData[testPlayerIndex];
     const arrangementResults = [];
 
-    console.log(`  Testing arrangements 1-20 for Player ${testPlayer.playerId}...`);
+    // ADD STEP 2 HERE - section header
+    console.log(`\n🎯 ===== TESTING PLAYER ${testPlayer.playerId} =====`);
 
-    // Test each of the 20 arrangements (now already completed!)
+    // Test each of the 20 arrangements
     for (let arrangementIndex = 0; arrangementIndex < testPlayer.arrangements.length; arrangementIndex++) {
+
         const gameResult = scoreRoundOfHands(playerData, testPlayerIndex, arrangementIndex);
         arrangementResults.push(gameResult);
 
+        // Progress every 5 (keep your existing progress logging)
         if ((arrangementIndex + 1) % 5 === 0) {
             console.log(`    Completed ${arrangementIndex + 1}/20 arrangements`);
         }
@@ -89,11 +92,15 @@ function testPlayerArrangements(playerData, testPlayerIndex) {
 
     const wins = arrangementResults.filter(r => r.testPlayerWon).length;
     const avgScore = arrangementResults.reduce((sum, r) => sum + r.testPlayerScore, 0) / arrangementResults.length;
+    const avgDelta = arrangementResults.reduce((sum, r) => sum + r.delta, 0) / arrangementResults.length;
+
+    // ADD THE MISSING bestPerformingArrangement calculation
     const bestPerformingArrangement = arrangementResults.reduce((best, current) =>
         current.testPlayerScore > best.testPlayerScore ? current : best
     );
 
-    console.log(`    Player ${testPlayer.playerId} summary: ${wins}/20 wins, avg score: ${avgScore.toFixed(2)}`);
+    // REMOVE DUPLICATE - Keep only the enhanced summary
+    console.log(`\n✅ Player ${testPlayer.playerId} complete - ${wins}/20 wins, avg score: ${avgScore.toFixed(2)}, avg delta: ${avgDelta.toFixed(2)}`);
     console.log(`    Best performer: Arrangement #${bestPerformingArrangement.arrangementIndex} (score: ${bestPerformingArrangement.testPlayerScore})`);
 
     return {
@@ -119,6 +126,14 @@ function testPlayerArrangements(playerData, testPlayerIndex) {
 function scoreRoundOfHands(playerData, testPlayerIndex, arrangementIndex) {
     const gameSetup = [];
 
+    // In scoreRoundOfHands, log the arrangement details:
+//    console.log(`🔍 Debug - Player ${testPlayerIndex + 1}, Arrangement #${arrangementIndex + 1}:`);
+//    console.log(`   EV: ${playerData[testPlayerIndex].arrangements[arrangementIndex].arrangement.score}`);
+//    console.log(`   Back: ${playerData[testPlayerIndex].arrangements[arrangementIndex].arrangement.hand.back}`);
+//    console.log(`   Middle: ${playerData[testPlayerIndex].arrangements[arrangementIndex].arrangement.hand.middle}`);
+//    console.log(`   Front: ${playerData[testPlayerIndex].arrangements[arrangementIndex].arrangement.hand.front}`);
+
+    // Debug the full arrangement structure:
     for (let i = 0; i < playerData.length; i++) {
         if (i === testPlayerIndex) {
             gameSetup.push({
@@ -159,8 +174,8 @@ function scoreRoundOfHands(playerData, testPlayerIndex, arrangementIndex) {
                 arr2,
                 arr1.score,
                 arr2.score,
-                i+1,
-                j+1
+                `Player ${i+1} Arrangement #${player1.theoreticalRank}`,
+                `Player ${j+1} Arrangement #${player2.theoreticalRank}`
             );
 
             // Update scores
@@ -192,112 +207,31 @@ function scoreRoundOfHands(playerData, testPlayerIndex, arrangementIndex) {
     const testPlayerScore = playerScores.get(testPlayerName);
     const testPlayerWon = winner === testPlayerName;
 
-    return {
-        testPlayerIndex,
-        arrangementIndex: arrangementIndex + 1, // 1-based ranking
-        testPlayerName,
-        testPlayerScore,
-        testPlayerWon,
-        winner,
-        highestScore,
-        allScores: Object.fromEntries(playerScores),
-        detailedResults
-    };
-}
+    // At the end of scoreRoundOfHands function, before return:
+    const testPlayer = gameSetup[testPlayerIndex];
+    const expectedValue = testPlayer.arrangement.score;
+    const actualScore = testPlayerScore;
+    const delta = actualScore - expectedValue;
 
-
-/**
- * Run single 6-player game (SIMPLIFIED)
- */
-function scoreRoundOfHands(playerData, testPlayerIndex, arrangementIndex) {
-    // Build 6-player game setup
-    const gameSetup = [];
-
-    for (let i = 0; i < playerData.length; i++) {
-        if (i === testPlayerIndex) {
-            gameSetup.push({
-                playerId: i + 1,
-                playerName: `Player${i + 1}`,
-                arrangement: playerData[i].arrangements[arrangementIndex].arrangement,
-                theoreticalRank: arrangementIndex + 1
-            });
-        } else {
-            gameSetup.push({
-                playerId: i + 1,
-                playerName: `Player${i + 1}`,
-                arrangement: playerData[i].bestArrangement.arrangement,  // ADD .arrangement here too!
-                theoreticalRank: 1
-            });
-        }
-    }
-
-    // MISSING: Actually run the game!
-    const detailedResults = [];
-    const playerScores = new Map();
-
-    // Initialize scores
-    gameSetup.forEach(player => {
-        playerScores.set(player.playerName, 0);
-    });
-
-    // Round-robin comparisons (15 matchups)
-    for (let i = 0; i < gameSetup.length; i++) {
-        for (let j = i + 1; j < gameSetup.length; j++) {
-            const player1 = gameSetup[i];
-            const player2 = gameSetup[j];
-            const arr1 = player1.arrangement;
-            const arr2 = player2.arrangement;
-
-            const result = compareArrangementsHeadToHead(
-                arr1,
-                arr2,
-                arr1.score,
-                arr2.score,
-                i+1,
-                j+1
-            );
-
-
-            // Update scores
-            playerScores.set(player1.playerName, playerScores.get(player1.playerName) + result.player1Score);
-            playerScores.set(player2.playerName, playerScores.get(player2.playerName) + result.player2Score);
-
-            detailedResults.push({
-                player1: player1.playerName,
-                player2: player2.playerName,
-                player1Score: result.player1Score,
-                player2Score: result.player2Score,
-                details: result.details
-            });
-        }
-    }
-
-    // Find winner
-    let winner = null;
-    let highestScore = -Infinity;
-    playerScores.forEach((score, playerName) => {
-        if (score > highestScore) {
-            highestScore = score;
-            winner = playerName;
-        }
-    });
-
-    // Get test player results
-    const testPlayerName = gameSetup[testPlayerIndex].playerName;
-    const testPlayerScore = playerScores.get(testPlayerName);
-    const testPlayerWon = winner === testPlayerName;
+    // Clear performance logging
+    console.log(`Player ${testPlayerIndex + 1}, Arrangement #${arrangementIndex + 1} - EV: ${expectedValue.toFixed(2)}; Actual: ${actualScore.toFixed(1)}; Delta: ${delta > 0 ? '+' : ''}${delta.toFixed(1)} ${testPlayerWon ? '🏆' : ''}`);
 
     return {
         testPlayerIndex,
         arrangementIndex: arrangementIndex + 1,
+        testPlayerName,
         testPlayerScore,
         testPlayerWon,
+        expectedValue,
+        actualScore,
+        delta,
         winner,
         highestScore,
         allScores: Object.fromEntries(playerScores),
         detailedResults
     };
 }
+
 
 /**
  * Generate overall summary of tournament results
@@ -343,16 +277,16 @@ function generateSummary(tournamentResults) {
 function compareArrangementsHeadToHead(arrangement1, arrangement2, score1, score2, rank1, rank2) {
 
    // LOG ARRANGEMENT 1
-    console.log(`\n👤 Arrangement #${rank1 || '?'} (Score: ${score1})`);
-    console.log(`   🏆 Back:   ${arrangement1.back.handType} - [${arrangement1.back.cards.map(c => c.rank + c.suit).join(' ')}]`);
-    console.log(`   🥈 Middle: ${arrangement1.middle.handType} - [${arrangement1.middle.cards.map(c => c.rank + c.suit).join(' ')}]`);
-    console.log(`   🥉 Front:  ${arrangement1.front.handType} - [${arrangement1.front.cards.map(c => c.rank + c.suit).join(' ')}]`);
+//    console.log(`\n👤 ${rank1 || '?'} (Score: ${score1})`);
+//    console.log(`   🏆 Back:   ${arrangement1.back.handType} - [${arrangement1.back.cards.map(c => c.rank + c.suit).join(' ')}]`);
+//    console.log(`   🥈 Middle: ${arrangement1.middle.handType} - [${arrangement1.middle.cards.map(c => c.rank + c.suit).join(' ')}]`);
+//    console.log(`   🥉 Front:  ${arrangement1.front.handType} - [${arrangement1.front.cards.map(c => c.rank + c.suit).join(' ')}]`);
 //
 //    // LOG ARRANGEMENT 2
-    console.log(`\n👤 Arrangement #${rank2 || '?'} (Score: ${score2})`);
-    console.log(`   🏆 Back:   ${arrangement2.back.handType} - [${arrangement2.back.cards.map(c => c.rank + c.suit).join(' ')}]`);
-    console.log(`   🥈 Middle: ${arrangement2.middle.handType} - [${arrangement2.middle.cards.map(c => c.rank + c.suit).join(' ')}]`);
-    console.log(`   🥉 Front:  ${arrangement2.front.handType} - [${arrangement2.front.cards.map(c => c.rank + c.suit).join(' ')}]`);
+//    console.log(`\n👤 ${rank2 || '?'} (Score: ${score2})`);
+//    console.log(`   🏆 Back:   ${arrangement2.back.handType} - [${arrangement2.back.cards.map(c => c.rank + c.suit).join(' ')}]`);
+//    console.log(`   🥈 Middle: ${arrangement2.middle.handType} - [${arrangement2.middle.cards.map(c => c.rank + c.suit).join(' ')}]`);
+//    console.log(`   🥉 Front:  ${arrangement2.front.handType} - [${arrangement2.front.cards.map(c => c.rank + c.suit).join(' ')}]`);
 
     let player1Score = 0;
     let player2Score = 0;
@@ -361,15 +295,22 @@ function compareArrangementsHeadToHead(arrangement1, arrangement2, score1, score
     // Back hand comparison
     const back1 = evaluateHand(arrangement1.back.cards);
     const back2 = evaluateHand(arrangement2.back.cards);
+
+    // SET the hand names from evaluation results
+    arrangement1.back.name = back1.name;
+    arrangement2.back.name = back2.name;
+
     const backComparison = compareTuples(back1.hand_rank, back2.hand_rank);
     let backResult = 'tie';
 
     if (backComparison > 0) {
+        // Now arrangement1.back.name has the correct hand name
         const points = ScoringUtilities.getPointsForHand(arrangement1.back, 'back', arrangement1.back.cards.length);
         player1Score += points;
         player2Score -= points;
         backResult = 'player1';
     } else if (backComparison < 0) {
+        // Now arrangement2.back.name has the correct hand name
         const points = ScoringUtilities.getPointsForHand(arrangement2.back, 'back', arrangement2.back.cards.length);
         player2Score += points;
         player1Score -= points;
@@ -386,6 +327,10 @@ function compareArrangementsHeadToHead(arrangement1, arrangement2, score1, score
     // Middle hand comparison
     const middle1 = evaluateHand(arrangement1.middle.cards);
     const middle2 = evaluateHand(arrangement2.middle.cards);
+
+    arrangement1.middle.name = middle1.name;
+    arrangement2.middle.name = middle2.name;
+
     const middleComparison = compareTuples(middle1.hand_rank, middle2.hand_rank);
     let middleResult = 'tie';
 
@@ -411,6 +356,10 @@ function compareArrangementsHeadToHead(arrangement1, arrangement2, score1, score
     // Front hand comparison
     const front1 = evaluateThreeCardHand(arrangement1.front.cards);
     const front2 = evaluateThreeCardHand(arrangement2.front.cards);
+
+    arrangement1.front.name = front1.name;
+    arrangement2.front.name = front2.name;
+
     const frontComparison = compareTuples(front1.hand_rank, front2.hand_rank);
     let frontResult = 'tie';
 
@@ -433,5 +382,6 @@ function compareArrangementsHeadToHead(arrangement1, arrangement2, score1, score
         winner: frontResult
     });
 
+//    console.log(` Net Scores: ${player1Score}    vs.   ${player2Score}`)
     return { player1Score, player2Score, details };
 }
