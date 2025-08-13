@@ -91,7 +91,7 @@ class FindBestSetupNoWildBase {
      * @returns {Object} - Completed arrangement with card arrays
      */
     completeArrangementWithKickers(arrangement) {
-//        console.log('🔧 Completing arrangement with kickers...');
+        console.log('🔧 Completing arrangement with kickers...');
 
         const usedCardIds = new Set([
             ...Analysis.getCardIds(arrangement.back.cards),
@@ -134,10 +134,10 @@ class FindBestSetupNoWildBase {
             for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
                 frontCards.push(unusedCards[kickerIndex++]);
             }
-//            console.log(`🃏 Added ${needed} kickers to front hand`);
+            console.log(`🃏 Added ${needed} kickers to front hand`);
         }
 
-//        console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
+        console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
 
         // Re-evaluate hands with complete cards using card-evaluation.js functions
         const reEvaluatedBack = evaluateHand(backCards);  // Always returns rank (handType, and hand_rank (called handStrength or hand_tuple sometimes)
@@ -156,15 +156,22 @@ class FindBestSetupNoWildBase {
         arrangement.front.hand_rank = reEvaluatedFront.hand_rank;
         arrangement.front.strength = reEvaluatedFront.rank;
 
+        console.log(`    FindBestSetupNoWild Line 159: {arrangement.front.hand_rank}`)
+
         // calculate score for each hand?
         const scoreBack = this.getHandScore(arrangement.back, 'back')
         const scoreMiddle = this.getHandScore(arrangement.middle, 'middle')
         const scoreFront = this.getHandScore(arrangement.front, 'front')
         const totalScore = scoreBack + scoreMiddle + scoreFront
-//        console.log ("findBestNoWild", scoreBack, scoreMiddle, scoreFront, totalScore)
+        console.log ("findBestNoWild", scoreBack, scoreMiddle, scoreFront, totalScore)
 
         // After adding all kickers, calculate remaining staging cards
         const remainingCards = unusedCards.slice(kickerIndex);
+
+        // After completeArrangementWithKickers
+        debugHandCorruption(arrangement.front, "After kicker completion - Front");
+        debugHandCorruption(arrangement.middle, "After kicker completion - Middle");
+        debugHandCorruption(arrangement.back, "After kicker completion - Back");
 
         // In completeArrangementWithKickers() - use factory
         return createArrangement(
