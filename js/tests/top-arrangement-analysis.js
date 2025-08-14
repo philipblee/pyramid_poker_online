@@ -6,6 +6,7 @@ function topArrangementAnalysis(testCaseIds = [1, 2, 3, 4, 5, 6]) {
     // Step 1: Get top-20 arrangements for each test case
     const playerData = [];
     for (let i = 0; i < testCaseIds.length; i++) {
+        console.log(`------------🔍 Player ${i + 1}  --------------`);
         const testCaseId = testCaseIds[i];
         const cards = createFromCardsTestCase(testCaseId);
         const findBest = new FindBestSetupNoWild();
@@ -15,21 +16,17 @@ function topArrangementAnalysis(testCaseIds = [1, 2, 3, 4, 5, 6]) {
         findBest.topArrangements = uniqueArrangements.slice(0, 20); // Keep top 20 unique
 
         // PUT THE DEBUG HERE:
-        console.log(`----------------------------------------------`)
         console.log(`🔍 Player ${i + 1} IMMEDIATE result:`, result);
         console.log(`✅ Player ${i + 1} (Case ${testCaseId}): ${findBest.topArrangements.length} arrangements`);
         console.log(`\n📋 TOP 20 UNIQUE ARRANGEMENTS FOR TEST CASE ${testCaseId}:`);
         findBest.topArrangements.forEach((item, index) => {
-            console.log(`\n🏆 Rank #${index + 1} - Score: ${item.score}`);
-            console.log(`   🏆 Back:   ${item.arrangement.back.handType} - [${item.arrangement.back.cards.map(c => c.rank + c.suit).join(' ')}]`);
             const scoresBack = item.arrangement.back.positionScores;
-            console.log(`   🏆 Back:   ${item.arrangement.back.hand_rank} - scores back:${scoresBack.back}`);
-            console.log(`   🥈 Middle: ${item.arrangement.middle.handType} - [${item.arrangement.middle.cards.map(c => c.rank + c.suit).join(' ')}]`);
             const scoresMiddle = item.arrangement.middle.positionScores;
-            console.log(`   🏆 Middle:   ${item.arrangement.middle.hand_rank} - scores middle: ${scoresMiddle.middle}`);
-            console.log(`   🥉 Front:  ${item.arrangement.front.handType} - [${item.arrangement.front.cards.map(c => c.rank + c.suit).join(' ')}]`);
             const scoresFront = item.arrangement.front.positionScores;
-            console.log(`   🏆 Front:   ${item.arrangement.front.hand_rank} - scores front:${scoresFront.front}`);
+            console.log(`\n🏆 Rank #${index + 1} - Score: ${item.score}`);
+            console.log(`   🥉 Front:  ${item.arrangement.front.handType} - [${item.arrangement.front.cards.map(c => c.rank + c.suit).join(' ')}] - ${item.arrangement.front.hand_rank} - points:${scoresFront.front}`);
+            console.log(`   🥈 Middle: ${item.arrangement.middle.handType} - [${item.arrangement.middle.cards.map(c => c.rank + c.suit).join(' ')}] - ${item.arrangement.middle.hand_rank} - points: ${scoresMiddle.middle}`);
+            console.log(`   🏆 Back:   ${item.arrangement.back.handType} - [${item.arrangement.back.cards.map(c => c.rank + c.suit).join(' ')}] - ${item.arrangement.back.hand_rank} - points:${scoresBack.back}`);
         });
 //        console.log(`\n🎯 Starting tournament with these ${findBest.topArrangements.length} arrangements...\n`);
 
@@ -215,7 +212,7 @@ function scoreRoundOfHands(playerData, testPlayerIndex, arrangementIndex) {
     const delta = actualScore - expectedValue;
 
     // Clear performance logging
-    console.log(`Player ${testPlayerIndex + 1}, Arrangement #${arrangementIndex + 1} - EV: ${expectedValue.toFixed(2)}; Actual: ${actualScore.toFixed(1)}; Delta: ${delta > 0 ? '+' : ''}${delta.toFixed(1)} ${testPlayerWon ? '🏆' : ''}`);
+    console.log(`Player ${testPlayerIndex + 1}, Arrangement #${arrangementIndex + 1} - EV: ${expectedValue.toFixed(2)}; Actual: ${actualScore.toFixed(1)}} ${testPlayerWon ? '🏆' : ''}`);
 
     return {
         testPlayerIndex,

@@ -55,7 +55,7 @@ class FindBestSetupNoWildBase {
         // Complete the best arrangement with kickers if we have cards available
         let finalArrangement = this.bestArrangement;
         if (finalArrangement && this.allCards) {
-            finalArrangement = this.completeArrangementWithKickers(finalArrangement);
+            finalArrangement = this.addKickersToArrangement(finalArrangement);
 //            // finalArrangement is set. We can calculate back, middle and front scores
 //            // finalArrangement.back is the back hand in Hand model
             const backHandScore = this.getHandScore(finalArrangement.back, 'back')
@@ -89,7 +89,7 @@ class FindBestSetupNoWildBase {
      * @param {Object} arrangement - {back, middle, front} with hand objects
      * @returns {Object} - Completed arrangement with card arrays
      */
-    completeArrangementWithKickers(arrangement) {
+    addKickersToArrangement(arrangement) {
 //        console.log('🔧 Completing arrangement with kickers...');
 
         const usedCardIds = new Set([
@@ -163,7 +163,7 @@ class FindBestSetupNoWildBase {
         // After adding all kickers, calculate remaining staging cards
         const remainingCards = unusedCards.slice(kickerIndex);
 
-        // In completeArrangementWithKickers() - use factory
+        // In addKickersToArrangement() - use factory
         return createArrangement(
             { ...arrangement.back, cards: backCards, cardCount: backCards.length, isIncomplete: false },
             { ...arrangement.middle, cards: middleCards, cardCount: middleCards.length, isIncomplete: false },
@@ -257,7 +257,7 @@ class FindBestSetupNoWildBase {
 //            this.updateTopArrangements(arrangement, score);
             // In searchFrontHands (or wherever you call updateTopArrangements):
             const clonedArrangement = JSON.parse(JSON.stringify(arrangement));
-            const completedArrangement = this.completeArrangementWithKickers(clonedArrangement);
+            const completedArrangement = this.addKickersToArrangement(clonedArrangement);
             this.updateTopArrangements(completedArrangement, completedArrangement.score);
 
         }
@@ -431,7 +431,7 @@ class FindBestSetupNoWildBase {
     }
 
     updateTopArrangements(arrangement, score) {
-        const completedArrangement = this.completeArrangementWithKickers(arrangement);
+        const completedArrangement = this.addKickersToArrangement(arrangement);
 
         this.topArrangements.push({
             arrangement: completedArrangement,
