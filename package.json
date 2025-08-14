@@ -1,6 +1,6 @@
 {
   "name": "pyramid-poker-online",
-  "version": "2.4.0",
+  "version": "3.0.0",
   "description": "Chinese Poker variant game",
   "main": "game.js",
   "scripts": {

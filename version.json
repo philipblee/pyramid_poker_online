@@ -1,8 +1,7 @@
 {
-  "version": "v2.5.0",
-  "commit": "1586768",
-  "branch": "fix-tiered-expected-points",
-  "buildDate": "2025-07-22",
-  "lastCommit": "2025-07-22 16:09:29 -0400",
-  "description": "Inheritance pattern for scoring methods"
+  "version": "v2.5.0-45-gbff4382",
+  "commit": "bff4382",
+  "branch": "integrate-login-system",
+  "buildDate": "2025-08-14T20:18:31.694Z",
+  "lastCommit": "2025-08-14 16:08:23 -0400"
 }
