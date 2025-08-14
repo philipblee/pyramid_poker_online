@@ -12,11 +12,10 @@ class FindBestSetupNoWildBase {
         // ADD THESE: The higher the maxTopN and pruningBuffer, the longer it takes
         // Use these parameters to analyze multiple arrangements per hand
         this.topArrangements = [];  // Array to track top N arrangements
-        this.maxTopN = 1;          // Keep top n arrangememts
-        this.pruningBuffer = 0;    // Allow arrangements within n points of best
+        this.maxTopN = 2;          // Keep top n arrangememts
+        this.pruningBuffer = 1;    // Allow arrangements within n points of best
 
     }
-
 
     /**
      * Find the best single arrangement using greedy branch-and-bound
@@ -99,7 +98,6 @@ class FindBestSetupNoWildBase {
             ...Analysis.getCardIds(arrangement.front.cards)
         ]);
 
-
         // Get unused cards sorted by strength (highest first)
         const unusedCards = Analysis.sortCards(
             this.allCards.filter(card => !usedCardIds.has(card.id))
@@ -161,15 +159,9 @@ class FindBestSetupNoWildBase {
         const scoreMiddle = this.getHandScore(arrangement.middle, 'middle')
         const scoreFront = this.getHandScore(arrangement.front, 'front')
         const totalScore = scoreBack + scoreMiddle + scoreFront
-//        console.log ("findBestNoWild", scoreBack, scoreMiddle, scoreFront, totalScore)
 
         // After adding all kickers, calculate remaining staging cards
         const remainingCards = unusedCards.slice(kickerIndex);
-
-        // After completeArrangementWithKickers
-//        debugHandCorruption(arrangement.front, "After kicker completion - Front");
-//        debugHandCorruption(arrangement.middle, "After kicker completion - Middle");
-//        debugHandCorruption(arrangement.back, "After kicker completion - Back");
 
         // In completeArrangementWithKickers() - use factory
         return createArrangement(
@@ -257,12 +249,16 @@ class FindBestSetupNoWildBase {
 
             if (score > this.bestScore) {
                 this.bestScore = score;
-                this.bestArrangement = arrangement;
+                this.bestArrangement = arrangement;  // Keep as reference for now
                 this.logArrangement(arrangement);
             }
 
-            // ADD THIS LINE AFTER THE ABOVE BLOCK:
-            this.updateTopArrangements(arrangement, score);
+//            // ADD THIS LINE AFTER THE ABOVE BLOCK:
+//            this.updateTopArrangements(arrangement, score);
+            // In searchFrontHands (or wherever you call updateTopArrangements):
+            const clonedArrangement = JSON.parse(JSON.stringify(arrangement));
+            const completedArrangement = this.completeArrangementWithKickers(clonedArrangement);
+            this.updateTopArrangements(completedArrangement, completedArrangement.score);
 
         }
     }
@@ -353,9 +349,6 @@ class FindBestSetupNoWildBase {
      * @param {Object} arrangement - Arrangement to log
      */
     logArrangement(arrangement) {
-//        console.log(`   Back: ${arrangement.back.handType} (${arrangement.back.cards.length} cards)`);
-//        console.log(`   Middle: ${arrangement.middle.handType} (${arrangement.middle.cards.length} cards)`);
-//        console.log(`   Front: ${arrangement.front.handType} (${arrangement.front.cards.length} cards)`);
 
         // Show cards used
         const totalCards = arrangement.back.cards.length +
@@ -405,8 +398,6 @@ class FindBestSetupNoWildBase {
             cardOverlap: cardIds.length !== uniqueCardIds.size
         };
 
-
-
     }
 
     getStrategicallyDifferentArrangements(allArrangements) {
@@ -442,10 +433,9 @@ class FindBestSetupNoWildBase {
     updateTopArrangements(arrangement, score) {
         const completedArrangement = this.completeArrangementWithKickers(arrangement);
 
-        // Use the completed arrangement's score, not the old score
         this.topArrangements.push({
             arrangement: completedArrangement,
-            score: completedArrangement.score  // Use NEW score from completed arrangement
+            score: completedArrangement.score
         });
 
         this.topArrangements.sort((a, b) => b.score - a.score);

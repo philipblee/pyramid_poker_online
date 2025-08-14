@@ -17,11 +17,7 @@ function topArrangementAnalysis(testCaseIds = [1, 2, 3, 4, 5, 6]) {
         // PUT THE DEBUG HERE:
         console.log(`----------------------------------------------`)
         console.log(`🔍 Player ${i + 1} IMMEDIATE result:`, result);
-        console.log(`  findBest.topArrangements exists:`, !!result.topArrangements);
-        console.log(`  findBest.topArrangements length:`, result.topArrangements ? result.topArrangements.length : 'N/A');
-
         console.log(`✅ Player ${i + 1} (Case ${testCaseId}): ${findBest.topArrangements.length} arrangements`);
-
         console.log(`\n📋 TOP 20 UNIQUE ARRANGEMENTS FOR TEST CASE ${testCaseId}:`);
         findBest.topArrangements.forEach((item, index) => {
             console.log(`\n🏆 Rank #${index + 1} - Score: ${item.score}`);
