@@ -12,8 +12,8 @@ class FindBestSetupNoWildBase {
         // ADD THESE: The higher the maxTopN and pruningBuffer, the longer it takes
         // Use these parameters to analyze multiple arrangements per hand
         this.topArrangements = [];  // Array to track top N arrangements
-        this.maxTopN = 2;          // Keep top n arrangememts
-        this.pruningBuffer = 1;    // Allow arrangements within n points of best
+        this.maxTopN = 50;          // Keep top n arrangememts
+        this.pruningBuffer = 2;    // Allow arrangements within n points of best
 
     }
 
@@ -109,21 +109,55 @@ class FindBestSetupNoWildBase {
         const backCards = [...arrangement.back.cards];
         if (backCards.length < 5) {
             const needed = 5 - backCards.length;
-            for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
-                backCards.push(unusedCards[kickerIndex++]);
+
+            for (let i = 0; i < needed && kickerIndex < unusedCards.length; ) {
+                // Get current counts of back hand
+                const beforeCounts = this.countSameRanks(backCards);
+
+                // Create test hand with candidate card (don't modify original yet)
+                const candidateCard = unusedCards[kickerIndex++];
+                const testHand = [...backCards, candidateCard];
+
+                // Check counts of test hand
+                const afterCounts = this.countSameRanks(testHand);
+
+                // If counts would change, skip this card
+                if (JSON.stringify(beforeCounts) !== JSON.stringify(afterCounts)) {
+                    continue; // Try next card without adding this one
+                }
+
+                // Safe to add - counts don't change
+                backCards.push(candidateCard);
+                i++; // Move to next needed card
             }
-//            console.log(`🃏 Added ${needed} kickers to back hand`);
         }
 
-        // Complete middle hand to 5 cards if needed
-        const middleCards = [...arrangement.middle.cards];
-        if (middleCards.length < 5) {
-            const needed = 5 - middleCards.length;
-            for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
-                middleCards.push(unusedCards[kickerIndex++]);
+            // Complete middle hand to 5 cards if needed
+            const middleCards = [...arrangement.middle.cards];
+            if (middleCards.length < 5) {
+                const needed = 5 - middleCards.length;
+
+                for (let i = 0; i < needed && kickerIndex < unusedCards.length; ) {
+                    // Get current counts of middle hand
+                    const beforeCounts = this.countSameRanks(middleCards);
+
+                    // Create test hand with candidate card (don't modify original yet)
+                    const candidateCard = unusedCards[kickerIndex++];
+                    const testHand = [...middleCards, candidateCard];
+
+                    // Check counts of test hand
+                    const afterCounts = this.countSameRanks(testHand);
+
+                    // If counts would change, skip this card
+                    if (JSON.stringify(beforeCounts) !== JSON.stringify(afterCounts)) {
+                        continue; // Try next card without adding this one
+                    }
+
+                    // Safe to add - counts don't change
+                    middleCards.push(candidateCard);
+                    i++; // Move to next needed card
+                }
             }
-//            console.log(`🃏 Added ${needed} kickers to middle hand`);
-        }
 
         // Complete front hand to 3 cards if needed
         const frontCards = [...arrangement.front.cards];
@@ -175,6 +209,27 @@ class FindBestSetupNoWildBase {
             scoreMiddle,
             scoreBack
         );
+    }
+
+    countSameRanks(cards) {
+        const ranks = {};
+        cards.forEach(card => {
+            ranks[card.value] = (ranks[card.value] || 0) + 1;
+        });
+
+        let pairs = 0;
+        let trips = 0;
+        let quads = 0;
+        let fives = 0;
+
+        Object.values(ranks).forEach(count => {
+            if (count === 2) pairs++;
+            else if (count === 3) trips++;
+            else if (count === 4) quads++;
+            else if (count === 5) fives++;
+        });
+
+        return { pairs, trips, quads, fives };
     }
 
 
