@@ -136,27 +136,3 @@ function getRankTypeName(rankValue) {
     };
     return names[rankValue] || "Unknown";
 }
-
-// Usage in your code:
-// Add this after hand evaluation but before it gets corrupted:
-// debugHandCorruption(hand, "After initial evaluation");
-//
-// Add this when you detect corruption:
-// debugHandCorruption(hand, "When corruption detected");
-
-console.log("Hand corruption debugging tool ready!");
-console.log("Usage: debugHandCorruption(handObject, 'context description')");
-
-// Example test with your corrupted hand
-//const corruptedExample = {
-//    cards: [
-//        { rank: "A", suit: "♣", value: 14 },
-//        { rank: "A", suit: "♥", value: 14 }
-//    ],
-//    handType: "Pair",
-//    handStrength: { name: "Two Pair" },
-//    hand_rank: [3, 14, 13, 12, 0, 0, 0, 0, 0, 0, 0]
-//};
-//
-//console.log("\n🧪 Testing with your corrupted example:");
-//debugHandCorruption(corruptedExample, "Corrupted Pair/Two Pair example");

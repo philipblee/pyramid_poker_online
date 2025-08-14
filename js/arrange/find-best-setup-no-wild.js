@@ -105,6 +105,30 @@ class FindBestSetupNoWildBase {
 
         let kickerIndex = 0;
 
+        // Complete front hand to 3 cards if needed
+        const frontCards = [...arrangement.front.cards];
+        if (frontCards.length < 3) {
+            const needed = 3 - frontCards.length;
+            // Skip candidate if it matches any existing card rank in front
+
+            for (let i = 0; i < needed && kickerIndex < unusedCards.length; ) {
+                const candidateCard = unusedCards[kickerIndex++];
+
+                // Check if this card would make trips
+                const wouldMakeTrips = frontCards.some(card => card.value === candidateCard.value);
+
+                if (wouldMakeTrips) {
+                    continue; // Skip this card, don't increment i
+                }
+
+                // Safe to add
+                else {
+                    frontCards.push(candidateCard);
+                    i++; // Only increment i when we actually add a card
+                }
+            }
+        }
+
         // Complete back hand to 5 cards if needed
         const backCards = [...arrangement.back.cards];
         if (backCards.length < 5) {
@@ -159,15 +183,6 @@ class FindBestSetupNoWildBase {
                 }
             }
 
-        // Complete front hand to 3 cards if needed
-        const frontCards = [...arrangement.front.cards];
-        if (frontCards.length < 3) {
-            const needed = 3 - frontCards.length;
-            for (let i = 0; i < needed && kickerIndex < unusedCards.length; i++) {
-                frontCards.push(unusedCards[kickerIndex++]);
-            }
-//            console.log(`🃏 Added ${needed} kickers to front hand`);
-        }
 
 //        console.log(`✅ Completed arrangement: Back(${backCards.length}), Middle(${middleCards.length}), Front(${frontCards.length})`);
 

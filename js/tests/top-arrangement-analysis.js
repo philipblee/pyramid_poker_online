@@ -80,7 +80,7 @@ function testPlayerArrangements(playerData, testPlayerIndex) {
         arrangementResults.push(gameResult);
 
         // Progress every 5 (keep your existing progress logging)
-        if ((arrangementIndex + 1) % 5 === 0) {
+        if ((arrangementIndex + 1) % 20 === 0) {
             console.log(`    Completed ${arrangementIndex + 1}/20 arrangements`);
         }
     }
