@@ -5,7 +5,255 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pyramid Poker Online</title>
     <link rel="stylesheet" href="css/styles.css">
+
+    <!-- ================================================================ -->
+    <!-- STEP 1: ADD THIS CSS TO YOUR <head> section (after the existing <link> tag) -->
+    <!-- ================================================================ -->
+
+    <style id="loginModalStyles">
+        /* Login Modal Styles - matching config modal */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-content {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            border-radius: 15px;
+            border: 2px solid #4ecdc4;
+            max-width: 400px;
+            width: 90%;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .login-header h2 {
+            margin: 0;
+            color: #ffd700;
+        }
+
+        .login-close {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-close:hover {
+            background: rgba(255, 107, 107, 0.2);
+        }
+
+        .login-body {
+            padding: 20px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #ecf0f1;
+        }
+
+        .form-group input {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #4ecdc4;
+            background: rgba(52, 73, 94, 0.8);
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+
+        .form-group input::placeholder {
+            color: #95a5a6;
+        }
+
+        .passcode-input {
+            text-align: center;
+            letter-spacing: 8px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .login-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .login-btn-modal {
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            background: #4ecdc4;
+            color: white;
+            font-size: 16px;
+        }
+
+        .login-btn-modal:hover {
+            background: #45b7aa;
+        }
+
+        .login-btn-modal:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .mode-switch {
+            text-align: center;
+            color: #95a5a6;
+            font-size: 14px;
+        }
+
+        .mode-switch a {
+            color: #4ecdc4;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .mode-switch a:hover {
+            color: #ffd700;
+            text-decoration: underline;
+        }
+
+        /* Modal internal status area */
+        .modal-status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+            border: 1px solid transparent;
+        }
+
+        .modal-status.success {
+            background: rgba(46, 204, 113, 0.2);
+            border-color: #2ecc71;
+            color: #2ecc71;
+        }
+
+        .modal-status.error {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+        .modal-status.info {
+            background: rgba(52, 152, 219, 0.2);
+            border-color: #3498db;
+            color: #3498db;
+        }
+
+        /* Custom checkbox styling */
+        .checkbox-label {
+            display: flex !important;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: #ecf0f1 !important;
+            font-weight: normal !important;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 8px;
+            width: 16px;
+            height: 16px;
+            accent-color: #4ecdc4;
+        }
+
+        .checkbox-label:hover {
+            color: #4ecdc4 !important;
+        }
+    </style>
+
+
 </head>
+
+<script>
+// Basic login state management
+let isLoggedIn = false;
+
+// Initialize login button
+document.addEventListener('DOMContentLoaded', function() {
+    const loginButton = document.getElementById('loginButton');
+
+    // Check if user is already logged in (from localStorage)
+    const userData = localStorage.getItem('pyramidPokerUser');
+    if (userData) {
+        isLoggedIn = true;
+        updateLoginButton();
+    }
+
+    // Add click handler
+    loginButton.addEventListener('click', handleLoginClick);
+});
+
+function updateLoginButton() {
+    const loginButton = document.getElementById('loginButton');
+    loginButton.textContent = isLoggedIn ? 'Logout' : 'Login';
+}
+
+function handleLoginClick() {
+    console.log('Login button clicked, current state:', isLoggedIn ? 'logged in' : 'logged out');
+
+    if (isLoggedIn) {
+        // Handle logout
+        localStorage.removeItem('pyramidPokerUser');
+        isLoggedIn = false;
+        console.log('User logged out');
+    } else {
+        // Handle login (placeholder for now)
+        console.log('Show login modal (to be implemented next)');
+    }
+
+    updateLoginButton();
+}
+</script>
+
 <body>
     <!-- Animated background -->
     <div class="bg-particles" id="bgParticles"></div>
@@ -18,8 +266,11 @@
 
 
     <div class="header">
-        <h1>🔺 Pyramid Poker Online</h1>
-        <div class="version-tag" id="version-info" title="Click for build details">Version Loading...</div>
+        <div class="header-content">
+            <h1>🔺 Pyramid Poker Online</h1>
+            <div class="version-tag" id="version-info" title="Click for build details">Enhanced Edition - Loading...</div>
+            <button id="loginButton" class="btn btn-secondary login-btn">Login</button>
+        </div>
     </div>
 
         <div class="game-controls">
@@ -52,7 +303,7 @@
                 <div class="hand-section">
                     <div class="hand-label">
                         <span class="hand-icon">🏆</span>
-                        Back Hand (5 cards) - Strongest
+                        Back Hand (5-8 cards)
                         <span class="hand-strength" id="backStrength"></span>
                     </div>
                     <div class="hand-area" id="backHand" data-hand="back"></div>
@@ -61,7 +312,7 @@
                 <div class="hand-section">
                     <div class="hand-label">
                         <span class="hand-icon">🥈</span>
-                        Middle Hand (5 cards) - Medium
+                        Middle Hand (5-7 cards)
                         <span class="hand-strength" id="middleStrength"></span>
                     </div>
                     <div class="hand-area" id="middleHand" data-hand="middle"></div>
@@ -70,7 +321,7 @@
                 <div class="hand-section">
                     <div class="hand-label">
                         <span class="hand-icon">🥉</span>
-                        Front Hand (3 cards) - Weakest
+                        Front Hand (3-5 cards)
                         <span class="hand-strength" id="frontStrength"></span>
                     </div>
                     <div class="hand-area" id="frontHand" data-hand="front"></div>
@@ -110,6 +361,49 @@
             </div>
         </div>
         <script src="js/arrange/two-wild-strategy-one.js"></script></div>
+
+    <!-- ================================================================ -->
+    <!-- STEP 2: ADD THIS HTML right after your Scoring Popup (before the JavaScript Files comment) -->
+    <!-- ================================================================ -->
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="login-modal" style="display: none;">
+        <div class="login-content">
+            <div class="login-header">
+                <h2 id="modalTitle">🔐 Login</h2>
+                <button class="login-close" onclick="closeLoginModal()">×</button>
+            </div>
+            <div class="login-body">
+                <form class="login-form" id="loginForm">
+                    <div class="form-group">
+                        <label for="emailInput">Email Address:</label>
+                        <input type="email" id="emailInput" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="passcodeInput">4-Digit Passcode:</label>
+                        <input type="text" id="passcodeInput" class="passcode-input" placeholder="••••" maxlength="4" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="rememberEmail" checked>
+                            <span class="checkmark"></span>
+                            Remember my email address
+                        </label>
+                    </div>
+                    <!-- Internal status area -->
+                    <div id="modalStatus" class="modal-status" style="display: none;"></div>
+                </form>
+            </div>
+            <div class="login-footer">
+                <button class="login-btn-modal" id="submitBtn" onclick="handleLoginSubmit()">Login</button>
+                <div class="mode-switch">
+                    <span id="switchText">Don't have an account?</span>
+                    <a id="switchLink" onclick="switchLoginMode()">Register here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- JavaScript Files -->
 
@@ -190,8 +484,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     <script src="js/ui/rules.js"></script>
 
     <!-- Only load tests in development -->
-    <script src="js/tests/test-cases.js"></script>
-    <script src="js/tests/test-evaluate-hand.js"></script>
     <script src="js/tests/auto-arrange-tests.js"></script>
     <script src="js/hands/hand-detector-metadata-reporter.js"></script>
 
@@ -215,6 +507,377 @@ window.addEventListener('DOMContentLoaded', async () => {
     <script src="js/tests/test-all-methods.js"></script>
     <script src="js/utilities/analyze-cards.js"></script>
     <script src="js/arrange/one-wild-candidates.js"></script>
+
+    <!-- ================================================================ -->
+    <!-- STEP 3: REPLACE your existing login JavaScript (the whole <script> block at the bottom) with this: -->
+    <!-- ================================================================ -->
+
+    <script>
+        // Login Modal Management
+        let currentLoginMode = 'login'; // 'login' or 'register'
+        let userLoggedIn = false;
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginButton = document.getElementById('loginButton');
+
+            // Check if user is already logged in
+            const currentUser = getCurrentUser();
+            if (currentUser) {
+                userLoggedIn = true;
+                updateLoginButton();
+                updateLoginStatus('Welcome back, ' + currentUser.email + '!', 'success');
+            }
+
+            // Set up login button click handler
+            if (loginButton) {
+                loginButton.onclick = handleLoginClick;
+            }
+
+            // Set up modal event listeners
+            setupModalEventListeners();
+        });
+
+        // Handle login button click
+        function handleLoginClick() {
+            console.log('Login button clicked, current state:', userLoggedIn ? 'logged in' : 'logged out');
+
+            if (userLoggedIn) {
+                // Handle logout
+                handleLogout();
+            } else {
+                // Open login modal
+                openLoginModal();
+            }
+        }
+
+        // Open login modal
+        function openLoginModal() {
+            console.log('Opening login modal...');
+            document.getElementById('loginModal').style.display = 'flex';
+
+            // Pre-fill remembered email if available
+            const rememberedEmail = getRememberedEmail();
+            if (rememberedEmail) {
+                document.getElementById('emailInput').value = rememberedEmail;
+                document.getElementById('rememberEmail').checked = true;
+                document.getElementById('passcodeInput').focus();
+            } else {
+                document.getElementById('emailInput').focus();
+            }
+        }
+
+        // Close login modal
+        function closeLoginModal() {
+            console.log('Closing login modal...');
+            document.getElementById('loginModal').style.display = 'none';
+            clearLoginForm();
+        }
+
+        // Switch between login and register modes
+        function switchLoginMode() {
+            console.log('Switching mode from:', currentLoginMode);
+            if (currentLoginMode === 'login') {
+                currentLoginMode = 'register';
+                document.getElementById('modalTitle').textContent = '📝 Register';
+                document.getElementById('submitBtn').textContent = 'Register';
+                document.getElementById('switchText').textContent = 'Already have an account?';
+                document.getElementById('switchLink').textContent = 'Login here';
+            } else {
+                currentLoginMode = 'login';
+                document.getElementById('modalTitle').textContent = '🔐 Login';
+                document.getElementById('submitBtn').textContent = 'Login';
+                document.getElementById('switchText').textContent = "Don't have an account?";
+                document.getElementById('switchLink').textContent = 'Register here';
+            }
+            clearLoginForm();
+        }
+
+        // Handle form submission
+        function handleLoginSubmit() {
+            console.log('handleLoginSubmit called!');
+            const email = document.getElementById('emailInput').value.trim();
+            const passcode = document.getElementById('passcodeInput').value.trim();
+
+            console.log('Email:', email, 'Passcode:', passcode);
+
+            // Clear any previous status
+            clearModalStatus();
+
+            // Validate inputs
+            if (!email || !passcode) {
+                showModalStatus('Please fill in all fields', 'error');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showModalStatus('Please enter a valid email address', 'error');
+                return;
+            }
+
+            if (!isValidPasscode(passcode)) {
+                showModalStatus('Passcode must be exactly 4 digits', 'error');
+                return;
+            }
+
+            // Handle login vs register
+            if (currentLoginMode === 'login') {
+                handleLogin(email, passcode);
+            } else {
+                handleRegister(email, passcode);
+            }
+        }
+
+        // Handle user login
+        function handleLogin(email, passcode) {
+            const users = getUsersFromStorage();
+            const user = users.find(u => u.email === email);
+
+            if (!user) {
+                showModalStatus('Email not found. Please register first.', 'error');
+                return;
+            }
+
+            if (user.passcode !== passcode) {
+                showModalStatus('Incorrect passcode. Please try again.', 'error');
+                return;
+            }
+
+            // Save email if remember checkbox is checked
+            saveRememberedEmail(email);
+
+            // Login successful
+            setCurrentUser(user);
+            userLoggedIn = true;
+            showModalStatus('✅ Login successful! Welcome back, ' + user.email, 'success');
+
+            // Close modal and update UI
+            setTimeout(() => {
+                closeLoginModal();
+                updateLoginButton();
+                updateLoginStatus('Logged in as: ' + user.email, 'success');
+            }, 2000);
+        }
+
+        // Handle user registration
+        function handleRegister(email, passcode) {
+            const users = getUsersFromStorage();
+
+            if (users.find(u => u.email === email)) {
+                showModalStatus('Email already registered. Please login instead.', 'error');
+                return;
+            }
+
+            // Create new user
+            const newUser = {
+                email: email,
+                passcode: passcode,
+                registeredDate: new Date().toISOString(),
+                stats: {
+                    gamesPlayed: 0,
+                    tournamentsWon: 0,
+                    totalScore: 0,
+                    bestScore: 0,
+                    ranking: 'Beginner'
+                }
+            };
+
+            // Save email if remember checkbox is checked
+            saveRememberedEmail(email);
+
+            // Save new user
+            users.push(newUser);
+            saveUsersToStorage(users);
+            setCurrentUser(newUser);
+            userLoggedIn = true;
+
+            showModalStatus('✅ Registration successful! Welcome, ' + email, 'success');
+
+            // Close modal and update UI
+            setTimeout(() => {
+                closeLoginModal();
+                updateLoginButton();
+                updateLoginStatus('Registered and logged in as: ' + email, 'success');
+            }, 2000);
+        }
+
+        // Handle logout
+        function handleLogout() {
+            clearCurrentUser();
+            userLoggedIn = false;
+            updateLoginButton();
+            updateLoginStatus('You have been logged out.', 'info');
+            console.log('User logged out');
+        }
+
+        // Update login button text
+        function updateLoginButton() {
+            const loginButton = document.getElementById('loginButton');
+            if (loginButton) {
+                loginButton.textContent = userLoggedIn ? 'Logout' : 'Login';
+            }
+        }
+
+        // Validation functions
+        function isValidEmail(email) {
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            return emailRegex.test(email);
+        }
+
+        function isValidPasscode(passcode) {
+            return /^\d{4}$/.test(passcode);
+        }
+
+        // Modal status functions
+        function showModalStatus(message, type) {
+            type = type || 'info';
+            const modalStatus = document.getElementById('modalStatus');
+            modalStatus.className = 'modal-status';
+            modalStatus.classList.add(type);
+            modalStatus.textContent = message;
+            modalStatus.style.display = 'block';
+            console.log('Modal status:', message, '(' + type + ')');
+        }
+
+        function clearModalStatus() {
+            const modalStatus = document.getElementById('modalStatus');
+            if (modalStatus) {
+                modalStatus.style.display = 'none';
+                modalStatus.textContent = '';
+            }
+        }
+
+        // Form management
+        function clearLoginForm() {
+            const rememberCheckbox = document.getElementById('rememberEmail');
+            if (!rememberCheckbox || !rememberCheckbox.checked) {
+                document.getElementById('emailInput').value = '';
+            }
+            document.getElementById('passcodeInput').value = '';
+            clearModalStatus();
+        }
+
+        // localStorage functions
+        function getUsersFromStorage() {
+            const stored = localStorage.getItem('pyramidPokerUsers');
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        function saveUsersToStorage(users) {
+            localStorage.setItem('pyramidPokerUsers', JSON.stringify(users));
+        }
+
+        function setCurrentUser(user) {
+            localStorage.setItem('pyramidPokerCurrentUser', JSON.stringify(user));
+        }
+
+        function getCurrentUser() {
+            const stored = localStorage.getItem('pyramidPokerCurrentUser');
+            return stored ? JSON.parse(stored) : null;
+        }
+
+        function clearCurrentUser() {
+            localStorage.removeItem('pyramidPokerCurrentUser');
+        }
+
+        function saveRememberedEmail(email) {
+            const rememberCheckbox = document.getElementById('rememberEmail');
+            if (rememberCheckbox && rememberCheckbox.checked) {
+                localStorage.setItem('pyramidPokerRememberedEmail', email);
+            } else {
+                localStorage.removeItem('pyramidPokerRememberedEmail');
+            }
+        }
+
+        function getRememberedEmail() {
+            return localStorage.getItem('pyramidPokerRememberedEmail') || '';
+        }
+
+        // Set up modal event listeners
+        function setupModalEventListeners() {
+            // Close modal when clicking outside
+            const modal = document.getElementById('loginModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeLoginModal();
+                    }
+                });
+            }
+
+            // Close modal on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.getElementById('loginModal').style.display === 'flex') {
+                    closeLoginModal();
+                }
+            });
+
+            // Format passcode input and real-time validation
+            const passcodeInput = document.getElementById('passcodeInput');
+            if (passcodeInput) {
+                passcodeInput.addEventListener('input', function(e) {
+                    let value = this.value.replace(/\D/g, '');
+                    if (value.length > 4) {
+                        value = value.substring(0, 4);
+                    }
+                    this.value = value;
+
+                    // Visual feedback
+                    if (value.length > 0 && value.length < 4) {
+                        this.style.borderColor = '#f39c12';
+                    } else if (value.length === 4) {
+                        this.style.borderColor = '#2ecc71';
+                    } else {
+                        this.style.borderColor = '#4ecdc4';
+                    }
+                });
+            }
+
+            // Email validation on blur
+            const emailInput = document.getElementById('emailInput');
+            if (emailInput) {
+                emailInput.addEventListener('blur', function(e) {
+                    const email = this.value.trim();
+                    if (email.length > 0) {
+                        if (isValidEmail(email)) {
+                            this.style.borderColor = '#2ecc71';
+                        } else {
+                            this.style.borderColor = '#e74c3c';
+                        }
+                    } else {
+                        this.style.borderColor = '#4ecdc4';
+                    }
+                });
+            }
+
+            // Form submit on Enter
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    handleLoginSubmit();
+                });
+            }
+        }
+
+
+function updateLoginStatus(message, type) {
+    const statusElement = document.getElementById('status');
+    if (statusElement) {
+        statusElement.textContent = message;
+        // Optional: add styling based on type
+        if (type === 'success') {
+            statusElement.style.color = '#2ecc71';
+        } else if (type === 'error') {
+            statusElement.style.color = '#e74c3c';
+        } else {
+            statusElement.style.color = '';
+        }
+    }
+    console.log('Status:', message);
+}
+
+    </script>
     <script src="js/tests/batch.js"></script>
     <script src="js/tests/top-arrangement-analysis.js"></script>
     <script src="js/tests/debug-head-to-head.js"></script>
