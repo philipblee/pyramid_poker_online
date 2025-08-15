@@ -38,6 +38,49 @@ function getCardCountFromSubmittedHands(game, playerName, position) {
 
 // Enhanced showScoringPopup with proper large hand support
 function showScoringPopup(game, detailedResults, roundScores, specialPoints, roundNumber = null) {
+    console.log('🔍 showScoringPopup called with:', {
+        game,
+        detailedResults,
+        roundScores,
+        specialPoints,
+        roundNumber
+    });
+
+    // CAPTURE SCORES FOR STATS - Check all possible score sources
+    window.lastGameDetailedResults = detailedResults;
+    window.lastGameRoundScores = roundScores;
+    window.lastGameScores = {};
+
+    // Try detailedResults first
+    if (detailedResults && detailedResults.length > 0) {
+        console.log('🔍 Using detailedResults:', detailedResults);
+        detailedResults.forEach(result => {
+            window.lastGameScores[result.player1] = (window.lastGameScores[result.player1] || 0) + result.player1Score;
+            window.lastGameScores[result.player2] = (window.lastGameScores[result.player2] || 0) + result.player2Score;
+        });
+    }
+
+    // Try roundScores if detailedResults didn't work
+    if (Object.keys(window.lastGameScores).length === 0 && roundScores) {
+        console.log('🔍 Using roundScores:', roundScores);
+        // roundScores might be an object like {Player1: 15, Player2: -3}
+        if (typeof roundScores === 'object') {
+            window.lastGameScores = {...roundScores};
+        }
+    }
+
+    // Try specialPoints if nothing else worked
+    if (Object.keys(window.lastGameScores).length === 0 && specialPoints) {
+        console.log('🔍 Using specialPoints:', specialPoints);
+        if (typeof specialPoints === 'object') {
+            window.lastGameScores = {...specialPoints};
+        }
+    }
+
+    console.log('🔍 Final captured scores:', window.lastGameScores);
+    // In showScoringPopup, after line 80, add:
+    console.log('🔍 Final captured scores DETAILS:', JSON.stringify(window.lastGameScores, null, 2));
+
     const popup = document.getElementById('scoringPopup');
     const allPlayerHands = document.getElementById('allPlayerHands');
     const roundRobinResults = document.getElementById('roundRobinResults');
@@ -297,7 +340,7 @@ function clearAllHandAreas() {
 
 }
 
-// Save game statistics to Firebase
+// ADD THIS FUNCTION - Save game statistics to Firebase
 function saveGameStats() {
     // Only save if user is logged in
     if (!window.firebaseAuth || !window.firebaseAuth.currentUser) {
@@ -313,43 +356,33 @@ function saveGameStats() {
     try {
         // Calculate final scores and rankings
         const playerScores = calculateFinalScores();
+        console.log('🔍 DEBUG - All player scores:', playerScores);
+
         const playerName = getPlayerName();
+        console.log('🔍 DEBUG - Player name:', playerName);
+
         const playerScore = playerScores[playerName] || 0;
+        console.log('🔍 DEBUG - Player score:', playerScore);
+
         const playerRank = calculatePlayerRank(playerScores, playerName);
+        console.log('🔍 DEBUG - Player rank:', playerRank);
 
         // Get game configuration
         const gameConfig = window.gameConfig ? window.gameConfig.getConfig() : {};
 
-        // Get final hands for the human player
-        const finalHands = getFinalPlayerHands(playerName);
-
         // Create game data object
         const gameData = {
-            // Game Settings
             gameMode: gameConfig.gameMode || 'multiplayer',
             wildCardCount: gameConfig.wildCardCount || 0,
             playerCount: Object.keys(playerScores).length,
-
-            // Player Performance
             playerScore: playerScore,
             playerRank: playerRank,
-
-            // Hand Details
-            finalHands: finalHands,
-
-            // All Players Results
             allPlayerScores: playerScores,
-
-            // Game Timing
-            gameLength: getGameLength(), // seconds
-
-            // Opponents
+            gameLength: getGameLength(),
             opponents: Object.keys(playerScores).filter(name => name !== playerName)
         };
 
         console.log('📊 Saving game stats:', gameData);
-
-        // Save to Firebase
         window.userStatsManager.saveGameResult(gameData);
 
     } catch (error) {
@@ -357,46 +390,53 @@ function saveGameStats() {
     }
 }
 
-// Helper function to calculate final scores from the game state
+// Helper functions (add these too if they don't exist)
 function calculateFinalScores() {
-    const scores = {};
+    console.log('🔍 Calculating final scores...');
 
-    // Initialize all player scores
-    if (window.game && window.game.players) {
-        window.game.players.forEach(player => {
-            scores[player.name] = 0;
-        });
+    // FIRST: Use captured scores from popup (this is the correct data!)
+    if (window.lastGameScores && Object.keys(window.lastGameScores).length > 0) {
+        console.log('🔍 Using captured scores from popup:', window.lastGameScores);
+        return window.lastGameScores;
     }
 
-    // Add up scores from the latest round results
-    // This depends on how your scoring system stores results
-    if (window.game && window.game.latestDetailedResults) {
-        window.game.latestDetailedResults.forEach(result => {
-            scores[result.player1] = (scores[result.player1] || 0) + result.player1Score;
-            scores[result.player2] = (scores[result.player2] || 0) + result.player2Score;
-        });
-    }
-
-    return scores;
+    // Remove or comment out the rest of this function since it creates empty scores
+    console.log('🔍 No captured scores available - this should not happen!');
+    return {};
 }
 
-// Helper function to get the human player's name
 function getPlayerName() {
-    // Check different ways the player name might be stored
+    // Check if there's a human player in the game
     if (window.game && window.game.players) {
         const humanPlayer = window.game.players.find(p => !p.isAI);
-        if (humanPlayer) return humanPlayer.name;
+        if (humanPlayer) {
+            console.log('🔍 Found human player:', humanPlayer.name);
+            return humanPlayer.name;
+        }
     }
 
-    // Default fallback
-    return 'Human Player';
+    // Fallback: assume first player is human
+    if (window.game && window.game.playerManager && window.game.playerManager.players) {
+        const firstPlayer = window.game.playerManager.players[0];
+        if (firstPlayer) {
+            console.log('🔍 Using first player:', firstPlayer.name);
+            return firstPlayer.name;
+        }
+    }
+
+    // Last resort
+    console.log('🔍 Last resort using Player 1:');
+    return 'Player 1';
 }
 
-// Helper function to calculate player rank
 function calculatePlayerRank(playerScores, playerName) {
     const scores = Object.values(playerScores).sort((a, b) => b - a);
     const playerScore = playerScores[playerName];
     return scores.indexOf(playerScore) + 1;
+}
+
+function getGameLength() {
+    return 60; // placeholder - replace with actual timing
 }
 
 // Helper function to get final hands

@@ -139,7 +139,7 @@ class LoginModal {
             statsButton.onclick = () => window.userStatsDisplay.show();
 
             // ADD THIS LINE - Move button 1 inch left
-            statsButton.style.marginLeft = '+370px';
+            statsButton.style.marginLeft = '+250px';
 
             // Insert stats button after login button
             loginButton.parentNode.insertBefore(statsButton, loginButton);
