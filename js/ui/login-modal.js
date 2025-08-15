@@ -35,6 +35,16 @@ class LoginModal {
                                 <label for="passcodeInput">4-Digit Passcode:</label>
                                 <input type="text" id="passcodeInput" class="passcode-input" placeholder="••••" maxlength="4" required>
                             </div>
+
+                            <!-- ADD THIS NEW MESSAGE -->
+                            <div class="login-info-message">
+                                <div class="info-icon">ℹ️</div>
+                                <div class="info-text">
+                                    <strong>New users:</strong> Your email and passcode will automatically create a new account on first login.
+                                </div>
+                            </div>
+
+
                             <div class="form-group">
                                 <label class="checkbox-label">
                                     <input type="checkbox" id="rememberEmail" checked>
@@ -126,23 +136,43 @@ class LoginModal {
     }
 
     showStatsButton(user) {
-        // Remove existing stats button if any
+        // Remove existing buttons if any
         this.hideStatsButton();
 
         // Add stats button next to login button
         const loginButton = document.getElementById('loginButton');
         if (loginButton) {
+            // Stats button
             const statsButton = document.createElement('button');
             statsButton.id = 'statsButton';
             statsButton.className = 'btn btn-info';
             statsButton.textContent = '📊 Stats';
             statsButton.onclick = () => window.userStatsDisplay.show();
+            statsButton.style.marginRight = '-50px'; // Your positioning
 
-            // ADD THIS LINE - Move button 1 inch left
-            statsButton.style.marginLeft = '+250px';
+            // Leaderboard button
+            const leaderboardButton = document.createElement('button');
+            leaderboardButton.id = 'leaderboardButton';
+            leaderboardButton.className = 'btn btn-warning';
+            leaderboardButton.textContent = '🏆 Leaderboard';
+            leaderboardButton.onclick = () => window.leaderboardDisplay.show();
+            leaderboardButton.style.marginLeft = '10px';
 
-            // Insert stats button after login button
+            // Insert buttons
             loginButton.parentNode.insertBefore(statsButton, loginButton);
+            loginButton.parentNode.insertBefore(leaderboardButton, loginButton);
+        }
+    }
+
+    hideStatsButton() {
+        const existingStatsButton = document.getElementById('statsButton');
+        const existingLeaderboardButton = document.getElementById('leaderboardButton');
+
+        if (existingStatsButton) {
+            existingStatsButton.remove();
+        }
+        if (existingLeaderboardButton) {
+            existingLeaderboardButton.remove();
         }
     }
 
