@@ -116,9 +116,40 @@ class LoginModal {
         // Update any existing UI elements based on login state
         if (user) {
             console.log('🔑 User logged in:', user.email);
-            // You can update game UI here if needed
+
+            // Show stats button for logged-in users
+            this.showStatsButton(user);
         } else {
             console.log('🔑 User logged out');
+            this.hideStatsButton();
+        }
+    }
+
+    showStatsButton(user) {
+        // Remove existing stats button if any
+        this.hideStatsButton();
+
+        // Add stats button next to login button
+        const loginButton = document.getElementById('loginButton');
+        if (loginButton) {
+            const statsButton = document.createElement('button');
+            statsButton.id = 'statsButton';
+            statsButton.className = 'btn btn-info';
+            statsButton.textContent = '📊 Stats';
+            statsButton.onclick = () => window.userStatsDisplay.show();
+
+            // ADD THIS LINE - Move button 1 inch left
+            statsButton.style.marginLeft = '+370px';
+
+            // Insert stats button after login button
+            loginButton.parentNode.insertBefore(statsButton, loginButton);
+        }
+    }
+
+    hideStatsButton() {
+        const existingStatsButton = document.getElementById('statsButton');
+        if (existingStatsButton) {
+            existingStatsButton.remove();
         }
     }
 
@@ -260,12 +291,6 @@ function openLoginModal() {
     }
 
 }
-//
-//function closeLoginModal() {
-//    if (window.loginModal) {
-//        window.loginModal.hide();
-//    }
-//}
 
 function handleLoginSubmit() {
     // This gets called by your existing onclick

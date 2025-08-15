@@ -21,131 +21,154 @@ class UserStatsDisplay {
     }
 
     createStatsModal() {
-        const modalHTML = `
-            <div id="statsModal" class="stats-modal" style="display: none;">
-                <div class="stats-modal-content">
-                    <div class="stats-header">
-                        <h2>📊 Your Statistics</h2>
-                        <button class="stats-close" onclick="userStatsDisplay.hide()">×</button>
+        console.log('📊 Creating stats modal...');
+
+        // Create the main modal container
+        const modal = document.createElement('div');
+        modal.id = 'statsModal';
+        modal.className = 'stats-modal';
+        modal.style.display = 'none';
+
+        // Create the modal content
+        modal.innerHTML = `
+            <div class="stats-modal-content">
+                <div class="stats-header">
+                    <h2>📊 Your Statistics</h2>
+                    <button class="stats-close" onclick="userStatsDisplay.hide()">×</button>
+                </div>
+
+                <div class="stats-body">
+                    <div id="statsLoading" class="stats-loading">
+                        Loading your statistics...
                     </div>
 
-                    <div class="stats-body">
-                        <div id="statsLoading" class="stats-loading">
-                            Loading your statistics...
-                        </div>
-
-                        <div id="statsContent" class="stats-content" style="display: none;">
-                            <!-- Overview Stats -->
-                            <div class="stats-section">
-                                <h3>🎮 Game Overview</h3>
-                                <div class="stats-grid">
-                                    <div class="stat-item">
-                                        <div class="stat-value" id="gamesPlayed">--</div>
-                                        <div class="stat-label">Games Played</div>
-                                    </div>
-                                    <div class="stat-item">
-                                        <div class="stat-value" id="winRate">--%</div>
-                                        <div class="stat-label">Win Rate</div>
-                                    </div>
-                                    <div class="stat-item">
-                                        <div class="stat-value" id="currentStreak">--</div>
-                                        <div class="stat-label">Current Streak</div>
-                                    </div>
-                                    <div class="stat-item">
-                                        <div class="stat-value" id="bestStreak">--</div>
-                                        <div class="stat-label">Best Streak</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Scoring Stats -->
-                            <div class="stats-section">
-                                <h3>🏆 Scoring Performance</h3>
-                                <div class="stats-grid">
-                                    <div class="stat-item">
-                                        <div class="stat-value" id="highScore">--</div>
-                                        <div class="stat-label">High Score</div>
-                                    </div>
-                                    <div class="stat-item">
-                                        <div class="stat-value" id="averageScore">--</div>
-                                        <div class="stat-label">Average Score</div>
-                                    </div>
-                                    <div class="stat-item">
-                                        <div class="stat-value" id="totalScore">--</div>
-                                        <div class="stat-label">Total Score</div>
-                                    </div>
-                                    <div class="stat-item">
-                                        <div class="stat-value" id="lowScore">--</div>
-                                        <div class="stat-label">Low Score</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Game Mode Stats -->
-                            <div class="stats-section">
-                                <h3>🎯 Game Modes</h3>
-                                <div class="stats-grid">
-                                    <div class="stat-item">
-                                        <div class="stat-value" id="multiPlayerGames">--</div>
-                                        <div class="stat-label">Multiplayer Games</div>
-                                    </div>
-                                    <div class="stat-item">
-                                        <div class="stat-value" id="singlePlayerGames">--</div>
-                                        <div class="stat-label">Singleplayer Games</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Wild Card Stats -->
-                            <div class="stats-section">
-                                <h3>🃏 Wild Card Performance</h3>
-                                <div class="stats-grid">
-                                    <div class="stat-item">
-                                        <div class="stat-value" id="noWildGames">--</div>
-                                        <div class="stat-label">No Wild Cards</div>
-                                    </div>
-                                    <div class="stat-item">
-                                        <div class="stat-value" id="oneWildGames">--</div>
-                                        <div class="stat-label">One Wild Card</div>
-                                    </div>
-                                    <div class="stat-item">
-                                        <div class="stat-value" id="twoWildGames">--</div>
-                                        <div class="stat-label">Two Wild Cards</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Recent Activity -->
-                            <div class="stats-section">
-                                <h3>🕒 Activity</h3>
-                                <div class="stats-info">
-                                    <div class="info-row">
-                                        <span>Last Game:</span>
-                                        <span id="lastGameAt">--</span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span>Member Since:</span>
-                                        <span id="memberSince">--</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="statsError" class="stats-error" style="display: none;">
-                            Failed to load statistics. Please try again.
-                        </div>
+                    <div id="statsContent" class="stats-content" style="display: none;">
+                        ${this.createStatsContentHTML()}
                     </div>
 
-                    <div class="stats-footer">
-                        <button class="btn btn-primary" onclick="userStatsDisplay.refreshStats()">Refresh</button>
-                        <button class="btn btn-secondary" onclick="userStatsDisplay.hide()">Close</button>
+                    <div id="statsError" class="stats-error" style="display: none;">
+                        Failed to load statistics. Please try again.
                     </div>
+                </div>
+
+                <div class="stats-footer">
+                    <button class="btn btn-primary" onclick="userStatsDisplay.refreshStats()">Refresh</button>
+                    <button class="btn btn-secondary" onclick="userStatsDisplay.hide()">Close</button>
                 </div>
             </div>
         `;
 
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        // Add to document
+        document.body.appendChild(modal);
+
+        // Verify creation
+        const testElement = document.getElementById('gamesPlayed');
+        if (testElement) {
+            console.log('✅ Stats modal created successfully with all elements');
+        } else {
+            console.error('❌ Stats modal created but missing inner elements');
+        }
     }
+
+    createStatsContentHTML() {
+        return `
+            <!-- Overview Stats -->
+            <div class="stats-section">
+                <h3>🎮 Game Overview</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="gamesPlayed">--</div>
+                        <div class="stat-label">Games Played</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="winRate">--%</div>
+                        <div class="stat-label">Win Rate</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="currentStreak">--</div>
+                        <div class="stat-label">Current Streak</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="bestStreak">--</div>
+                        <div class="stat-label">Best Streak</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scoring Stats -->
+            <div class="stats-section">
+                <h3>🏆 Scoring Performance</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="highScore">--</div>
+                        <div class="stat-label">High Score</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="averageScore">--</div>
+                        <div class="stat-label">Average Score</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalScore">--</div>
+                        <div class="stat-label">Total Score</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="lowScore">--</div>
+                        <div class="stat-label">Low Score</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Mode Stats -->
+            <div class="stats-section">
+                <h3>🎯 Game Modes</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="multiPlayerGames">--</div>
+                        <div class="stat-label">Multiplayer Games</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="singlePlayerGames">--</div>
+                        <div class="stat-label">Singleplayer Games</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wild Card Stats -->
+            <div class="stats-section">
+                <h3>🃏 Wild Card Performance</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="noWildGames">--</div>
+                        <div class="stat-label">No Wild Cards</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="oneWildGames">--</div>
+                        <div class="stat-label">One Wild Card</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="twoWildGames">--</div>
+                        <div class="stat-label">Two Wild Cards</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="stats-section">
+                <h3>🕒 Activity</h3>
+                <div class="stats-info">
+                    <div class="info-row">
+                        <span>Last Game:</span>
+                        <span id="lastGameAt">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span>Member Since:</span>
+                        <span id="memberSince">--</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
 
     attachEventListeners() {
         // Close modal when clicking outside

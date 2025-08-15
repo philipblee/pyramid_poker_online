@@ -335,7 +335,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Load empirical win probability data
     const empiricalLoaded = await initializeEmpiricalWinProbability();
     if (empiricalLoaded) {
-        console.log('✅ Empirical win probability data ready (30,868 entries)');
+        console.log('✅ Empirical win prob loaded (30,868 entries)');
     } else {
         console.log('⚠️ Empirical data failed to load');
     }
@@ -343,7 +343,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Load tiered win probability data
     const tieredLoaded = await initializeTieredWinProbability();
     if (tieredLoaded) {
-        console.log('✅ Tiered win probability data ready (1978 entries)');
+        console.log('✅ Tiered win prob loaded (1978 entries)');
     } else {
         console.log('⚠️ Tiered data failed to load');
     }
@@ -351,7 +351,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Load tiered2 win probability data
     const tiered2Loaded = await initializeTiered2WinProbability();
     if (tiered2Loaded) {
-        console.log('✅ Tiered2 win probability data ready (2235 entries)');
+        console.log('✅ Tiered2 win prob loaded (2235 entries)');
     } else {
         console.log('⚠️ Tiered data failed to load');
     }
@@ -410,6 +410,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     <script src="js/core/game-config.js"></script>
     <script src="js/ui/config.js"></script>
     <script src="js/ui/rules.js"></script>
+
+    <!-- Add these lines -->
+    <link rel="stylesheet" href="css/user-stats.css">
+    <script src="js/ui/user-stats-display.js"></script>
+
 
     <!-- Only load tests in development -->
     <script src="js/tests/test-cases.js"></script>
