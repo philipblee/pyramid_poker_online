@@ -822,7 +822,7 @@ class ChinesePokerGame {
     this.gameState = 'waiting';
     this.currentRound = 0;
     updateDisplay(this);
-}
+    }
 
     compareHands(hand1, hand2) {
         let player1Score = 0;
@@ -930,6 +930,51 @@ class ChinesePokerGame {
 
         // Don't return anything - this is just for comparison
     }
+
+    // Enhance existing game completion
+    // In js/core/game.js (modify existing endRound method)
+    async endRound() {
+        // ... existing game logic ...
+
+        // NEW: Save game results to Firebase
+        if (this.authManager.currentUser) {
+            await this.saveGameToFirebase(finalScores);
+            await this.updateUserStats(this.authManager.currentUser.uid, myScore);
+        } else {
+            // Fallback: save to localStorage
+            this.saveGameToLocalStorage(finalScores);
+        }
+    }
+
+    async saveGameToFirebase(scores) {
+        const gameDoc = doc(collection(db, 'gameHistory'));
+        await setDoc(gameDoc, {
+            userId: this.authManager.currentUser.uid,
+            gameMode: this.config.gameMode,
+            finalScore: scores.humanPlayer,
+            wildCardCount: this.config.wildCardCount,
+            opponents: scores.aiPlayers,
+            playedAt: new Date()
+        });
+    }
+
+    async updateUserStats(userId, gameScore) {
+        const userStatsRef = doc(db, 'userStats', userId);
+        const userStats = await getDoc(userStatsRef);
+
+        if (userStats.exists()) {
+            const current = userStats.data();
+            await updateDoc(userStatsRef, {
+                gamesPlayed: current.gamesPlayed + 1,
+                totalScore: current.totalScore + gameScore,
+                averageScore: (current.totalScore + gameScore) / (current.gamesPlayed + 1),
+                highScore: Math.max(current.highScore, gameScore),
+                updatedAt: new Date()
+            });
+        }
+    }
+
+
 
 }
 

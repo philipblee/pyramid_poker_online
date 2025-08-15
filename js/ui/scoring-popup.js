@@ -271,4 +271,24 @@ function clearAllHandAreas() {
     });
 
     console.log('🧹 Cleared all hand areas for next round');
+
+    setTimeout(() => {
+        const newRoundButton = document.querySelector('button[onclick*="newRound"]') ||
+                              document.getElementById('newRoundButton') ||
+                              document.querySelector('.new-round-btn');
+
+        if (newRoundButton) {
+            console.log('🎮 Auto-starting new round...');
+            newRoundButton.click();
+        } else {
+            console.log('🎮 New round button not found, trying direct function call...');
+            // Try calling the function directly if button not found
+            if (typeof newRound === 'function') {
+                newRound();
+            } else if (typeof game !== 'undefined' && game.startNewRound) {
+                game.startNewRound();
+            }
+        }
+    }, 200); // Small delay to let popup close and hands clear
+
 }

@@ -15,7 +15,7 @@ class TieredWinProbability {
      */
     async loadData() {
         try {
-            console.log('🔍 Loading Tiered Win Probability from CSV...');
+//            console.log('🔍 Loading Tiered Win Probability from CSV...');
 
             // Fetch the CSV file
             const response = await fetch('data/tiered_win_probability.csv');
@@ -26,7 +26,7 @@ class TieredWinProbability {
             const csvText = await response.text();
             this.parseCSV(csvText);
 
-            console.log(`✅ Loaded ${this.probabilityMap.size} probability entries`);
+//            console.log(`✅ Loaded ${this.probabilityMap.size} probability entries`);
             this.isLoaded = true;
             return true;
 
@@ -92,7 +92,7 @@ class TieredWinProbability {
             }
         });
 
-        console.log(`📊 CSV parsing complete: ${parseCount} entries parsed, ${errorCount} errors`);
+//        console.log(`📊 CSV parsing complete: ${parseCount} entries parsed, ${errorCount} errors`);
 
         if (parseCount === 0) {
             throw new Error('No valid data entries found in CSV');
