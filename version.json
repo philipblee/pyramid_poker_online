@@ -1,7 +1,7 @@
 {
-  "version": "v3.0",
-  "commit": "6b662cf",
+  "version": "v3.0-2-g95725cf-dirty",
+  "commit": "95725cf",
   "branch": "main",
-  "buildDate": "2025-08-14T20:31:08.862Z",
-  "lastCommit": "2025-08-14 16:27:13 -0400"
+  "buildDate": "2025-08-15T14:41:19.146Z",
+  "lastCommit": "2025-08-15 10:03:16 -0400"
 }

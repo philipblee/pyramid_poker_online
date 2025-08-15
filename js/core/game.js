@@ -95,6 +95,10 @@ class ChinesePokerGame {
     }
 
     startNewGame() {
+
+            // Add this when a new game starts
+            resetGameTimer();
+
             // Ensure we have players
             const playersAdded = this.playerManager.ensurePlayersExist();
             if (playersAdded) {

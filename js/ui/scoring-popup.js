@@ -244,6 +244,10 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
 
 // Close scoring popup and clear all hands for next round (unchanged)
 function closeScoringPopup() {
+
+    // Save game stats before closing popup
+    saveGameStats();
+
     document.getElementById('scoringPopup').style.display = 'none';
 
     // Clear all hand areas for next round
@@ -291,4 +295,131 @@ function clearAllHandAreas() {
         }
     }, 200); // Small delay to let popup close and hands clear
 
+}
+
+// Save game statistics to Firebase
+function saveGameStats() {
+    // Only save if user is logged in
+    if (!window.firebaseAuth || !window.firebaseAuth.currentUser) {
+        console.log('📊 No user logged in, skipping stats save');
+        return;
+    }
+
+    if (!window.userStatsManager) {
+        console.log('📊 User stats manager not available');
+        return;
+    }
+
+    try {
+        // Calculate final scores and rankings
+        const playerScores = calculateFinalScores();
+        const playerName = getPlayerName();
+        const playerScore = playerScores[playerName] || 0;
+        const playerRank = calculatePlayerRank(playerScores, playerName);
+
+        // Get game configuration
+        const gameConfig = window.gameConfig ? window.gameConfig.getConfig() : {};
+
+        // Get final hands for the human player
+        const finalHands = getFinalPlayerHands(playerName);
+
+        // Create game data object
+        const gameData = {
+            // Game Settings
+            gameMode: gameConfig.gameMode || 'multiplayer',
+            wildCardCount: gameConfig.wildCardCount || 0,
+            playerCount: Object.keys(playerScores).length,
+
+            // Player Performance
+            playerScore: playerScore,
+            playerRank: playerRank,
+
+            // Hand Details
+            finalHands: finalHands,
+
+            // All Players Results
+            allPlayerScores: playerScores,
+
+            // Game Timing
+            gameLength: getGameLength(), // seconds
+
+            // Opponents
+            opponents: Object.keys(playerScores).filter(name => name !== playerName)
+        };
+
+        console.log('📊 Saving game stats:', gameData);
+
+        // Save to Firebase
+        window.userStatsManager.saveGameResult(gameData);
+
+    } catch (error) {
+        console.error('❌ Error saving game stats:', error);
+    }
+}
+
+// Helper function to calculate final scores from the game state
+function calculateFinalScores() {
+    const scores = {};
+
+    // Initialize all player scores
+    if (window.game && window.game.players) {
+        window.game.players.forEach(player => {
+            scores[player.name] = 0;
+        });
+    }
+
+    // Add up scores from the latest round results
+    // This depends on how your scoring system stores results
+    if (window.game && window.game.latestDetailedResults) {
+        window.game.latestDetailedResults.forEach(result => {
+            scores[result.player1] = (scores[result.player1] || 0) + result.player1Score;
+            scores[result.player2] = (scores[result.player2] || 0) + result.player2Score;
+        });
+    }
+
+    return scores;
+}
+
+// Helper function to get the human player's name
+function getPlayerName() {
+    // Check different ways the player name might be stored
+    if (window.game && window.game.players) {
+        const humanPlayer = window.game.players.find(p => !p.isAI);
+        if (humanPlayer) return humanPlayer.name;
+    }
+
+    // Default fallback
+    return 'Human Player';
+}
+
+// Helper function to calculate player rank
+function calculatePlayerRank(playerScores, playerName) {
+    const scores = Object.values(playerScores).sort((a, b) => b - a);
+    const playerScore = playerScores[playerName];
+    return scores.indexOf(playerScore) + 1;
+}
+
+// Helper function to get final hands
+function getFinalPlayerHands(playerName) {
+    if (window.game && window.game.submittedHands) {
+        const playerHands = window.game.submittedHands.get(playerName);
+        if (playerHands) {
+            return {
+                back: playerHands.back ? playerHands.back.map(card => ({rank: card.rank, suit: card.suit})) : [],
+                middle: playerHands.middle ? playerHands.middle.map(card => ({rank: card.rank, suit: card.suit})) : [],
+                front: playerHands.front ? playerHands.front.map(card => ({rank: card.rank, suit: card.suit})) : []
+            };
+        }
+    }
+    return { back: [], middle: [], front: [] };
+}
+
+// Helper function to track game timing
+let gameStartTime = Date.now();
+function resetGameTimer() {
+    gameStartTime = Date.now();
+}
+
+function getGameLength() {
+    return Math.round((Date.now() - gameStartTime) / 1000); // seconds
 }
