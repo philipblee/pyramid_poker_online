@@ -1,7 +1,7 @@
 {
-  "version": "v2.5.0-45-gbff4382",
-  "commit": "bff4382",
-  "branch": "integrate-login-system",
-  "buildDate": "2025-08-14T20:18:31.694Z",
-  "lastCommit": "2025-08-14 16:08:23 -0400"
+  "version": "v3.0",
+  "commit": "6b662cf",
+  "branch": "main",
+  "buildDate": "2025-08-14T20:31:08.862Z",
+  "lastCommit": "2025-08-14 16:27:13 -0400"
 }
