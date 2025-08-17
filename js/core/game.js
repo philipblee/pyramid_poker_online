@@ -96,33 +96,45 @@ class ChinesePokerGame {
 
     startNewGame() {
 
-            // Add this when a new game starts
-            resetGameTimer();
+        // Add this when a new game starts
+        resetGameTimer();
 
-            // Ensure we have players
-            const playersAdded = this.playerManager.ensurePlayersExist();
-            if (playersAdded) {
-                updateDisplay(this);
-                console.log('Added default players for testing');
-            }
+        // Ensure we have players
+        const playersAdded = this.playerManager.ensurePlayersExist();
+        if (playersAdded) {
+            updateDisplay(this);
+            console.log('Added default players for testing');
+        }
 
-            try {
-                this.playerManager.validateMinimumPlayers();
-            } catch (error) {
-                alert(error.message);
-                return;
-            }
+        try {
+            this.playerManager.validateMinimumPlayers();
+        } catch (error) {
+            alert(error.message);
+            return;
+        }
 
-            // NEW: Initialize tournament
-            console.log('🏆 Starting new tournament...');
-            this.currentRound = 1;
-            this.roundHistory = [];
-            this.tournamentScores.clear();
+        // In startNewGame(), after ensurePlayersExist() but before the tournament setup:
 
-            // Initialize tournament scores for all players
-            for (let player of this.playerManager.players) {
-                this.tournamentScores.set(player.name, 0);
-            }
+        // Configure players based on GameConfig
+        if (window.gameConfig) {
+            const targetPlayerCount = 1 + window.gameConfig.config.computerPlayers; // 1 human + N AI
+
+//            // Ensure we have the right number of players
+//            this.playerManager.setPlayerCount(targetPlayerCount, window.gameConfig.config.computerPlayers);
+
+            console.log(`🎮 Configured for ${targetPlayerCount} players (1 human + ${window.gameConfig.config.computerPlayers} AI)`);
+        }
+
+        // NEW: Initialize tournament
+        console.log('🏆 Starting new tournament...');
+        this.currentRound = 1;
+        this.roundHistory = [];
+        this.tournamentScores.clear();
+
+        // Initialize tournament scores for all players
+        for (let player of this.playerManager.players) {
+            this.tournamentScores.set(player.name, 0);
+        }
 
         // Setup first round
         this.deckManager.createNewDeck();
