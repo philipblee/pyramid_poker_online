@@ -49,28 +49,3 @@ if (require.main === module) {
 }
 
 module.exports = generateVersion;
-
-// Add to your game.js or create version-display.js:
-//
-// async function loadVersionInfo() {
-//     try {
-//         const response = await fetch('./version.json');
-//         const versionInfo = await response.json();
-//
-//         // Display in footer or sidebar
-//         const versionElement = document.getElementById('version-info');
-//         if (versionElement) {
-//             versionElement.textContent = `v${versionInfo.version}`;
-//             versionElement.title = `Branch: ${versionInfo.branch}\nCommit: ${versionInfo.commit}\nBuilt: ${versionInfo.buildDate}`;
-//         }
-//
-//         // Also log for debugging
-//         console.log('Game Version:', versionInfo);
-//
-//     } catch (error) {
-//         console.warn('Could not load version info:', error);
-//     }
-// }
-//
-// // Call when game loads
-// document.addEventListener('DOMContentLoaded', loadVersionInfo);

@@ -173,7 +173,8 @@ class ChinesePokerGame {
 
         // Check if tournament is complete
         if (this.currentRound >= this.maxRounds) {
-            alert(`Tournament complete! All ${this.maxRounds} rounds have been played. Click "New Game" to start a new tournament.`);
+//            alert(`Tournament complete! All ${this.maxRounds} rounds have been played. Click "New Game" to start a new tournament.`);
+            this.showTournamentSummary();
             return;
         }
 

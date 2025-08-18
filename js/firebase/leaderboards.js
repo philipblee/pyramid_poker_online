@@ -171,22 +171,36 @@ class LeaderboardManager {
     processLeaderboardResults(snapshot, category) {
         return snapshot.docs.map((doc, index) => {
             const data = doc.data();
+            // Check if email is saved under different name
+            console.log('All Firebase fields:', data);
+            console.log('Looking for email-like fields:', Object.keys(data).filter(key =>
+                key.includes('email') || key.includes('Email') || key.includes('user')
+            ));
+
+            // Calculate missing fields from available data
+            const winRate = data.gamesPlayed > 0 ? Math.round((data.wins / data.gamesPlayed) * 100) : 0;
+            const lastActive = data.lastPlayed && data.lastPlayed.toDate ? data.lastPlayed.toDate() : new Date();
+
             return {
                 rank: index + 1,
                 userId: doc.id,
-                email: data.email,
-                displayName: this.getDisplayName(data.email),
-                value: data[category],
-                gamesPlayed: data.gamesPlayed,
-                winRate: data.winRate,
-                highScore: data.highScore,
-                lastActive: data.lastGameAt ? data.lastGameAt.toDate() : data.createdAt.toDate()
+                email: doc.id + '@firebase.local', // Generate fake email from userId
+//                displayName: `Player_${doc.id.substring(0, 8)}`, // Short player ID
+                digit splayName: data.email ? this.getDisplayName(data.email) : 'Anonymous',
+                value: data[category] || 0,
+                gamesPlayed: data.gamesPlayed || 0,
+                winRate: winRate,
+                highScore: data.totalScore || 0, // Use totalScore as proxy for highScore
+                lastActive: lastActive
             };
         });
     }
 
     getDisplayName(email) {
         // Extract username from email for display
+        if (!email || typeof email !== 'string') {
+            return 'Anonymous';
+        }
         return email.split('@')[0];
     }
 

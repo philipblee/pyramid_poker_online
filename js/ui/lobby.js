@@ -235,7 +235,7 @@ function launchGameInterface() {
     if (typeof startNewGame === 'function') {
         startNewGame();
     } else {
-        console.warn('startNewGame function not found');
+//        console.warn('startNewGame function not found');
     }
 }
 

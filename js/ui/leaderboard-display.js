@@ -188,8 +188,8 @@ class LeaderboardDisplay {
                         <span class="rank-number">${medal || player.rank}</span>
                     </div>
                     <div class="player-info">
-                        <div class="player-name">${player.displayName}</div>
-                        <div class="player-stats">${player.gamesPlayed} games • Last active ${this.formatDate(player.lastActive)}</div>
+                        <div class="player-name">${player.displayName || player.email?.split('@')[0] || player.name || 'Anonymous'}</div>
+                        <div class="player-stats">${player.gamesPlayed || 0} games • Last active ${this.formatDate(player.lastActive)}</div>
                     </div>
                     <div class="player-value">
                         ${this.formatValue(player.value, category)}

@@ -22,10 +22,12 @@ class ArrangementValidator {
             return false;
         }
 
-        // Check hand sizes are legal
-        if (!this.validateHandSizes(arrangement)) {
-            return false;
-        }
+        // Replace with delayed validation:
+        setTimeout(() => {
+            if (!this.validateHandSizes(arrangement)) {
+                // show popup
+            }
+        }, 150); // Small delay to let arrangement update complete
 
         // Check large hands follow special rules
         if (!this.validateLargeHands(arrangement)) {
@@ -65,6 +67,15 @@ class ArrangementValidator {
         const backCount = arrangement.back.length;
         const middleCount = arrangement.middle.length;
         const frontCount = arrangement.front.length;
+
+        // ADD: Check DOM state too
+        const domBackCount = document.getElementById('backHand').children.length;
+        const domMiddleCount = document.getElementById('middleHand').children.length;
+        const domFrontCount = document.getElementById('frontHand').children.length;
+
+        console.log('Arrangement object counts:', { backCount, middleCount, frontCount });
+        console.log('DOM visual counts:', { domBackCount, domMiddleCount, domFrontCount });
+        console.log('Arrangement object:', arrangement);
 
         const isValidBackSize = [5, 6, 7, 8].includes(backCount);
         const isValidMiddleSize = [5, 6, 7].includes(middleCount);

@@ -229,34 +229,43 @@ class UserStatsDisplay {
     }
 
     displayStats(stats) {
+        // Helper function to safely set text content
+        const setTextSafely = (id, value) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+            } else {
+                console.warn(`Element with id '${id}' not found for stats display`);
+            }
+        };
+
         // Overview Stats
-        document.getElementById('gamesPlayed').textContent = stats.gamesPlayed || 0;
-        document.getElementById('winRate').textContent = `${stats.winRate || 0}%`;
-        document.getElementById('currentStreak').textContent = stats.currentStreak || 0;
-        document.getElementById('bestStreak').textContent = stats.bestStreak || 0;
+        setTextSafely('gamesPlayed', stats.gamesPlayed || 0);
+        setTextSafely('winRate', `${stats.winRate || 0}%`);
+        setTextSafely('currentStreak', stats.currentStreak || 0);
+        setTextSafely('bestStreak', stats.bestStreak || 0);
 
         // Scoring Stats
-        document.getElementById('highScore').textContent = stats.highScore || 0;
-        document.getElementById('averageScore').textContent = stats.averageScore || 0;
-        document.getElementById('totalScore').textContent = stats.totalScore || 0;
-        document.getElementById('lowScore').textContent = stats.lowScore ?? '--';
+        setTextSafely('highScore', stats.highScore || 0);
+        setTextSafely('averageScore', stats.averageScore || 0);
+        setTextSafely('totalScore', stats.totalScore || 0);
+        setTextSafely('lowScore', stats.lowScore ?? '--');
 
         // Game Mode Stats
-        document.getElementById('multiPlayerGames').textContent = stats.multiPlayerGames || 0;
-        document.getElementById('singlePlayerGames').textContent = stats.singlePlayerGames || 0;
+        setTextSafely('multiPlayerGames', stats.multiPlayerGames || 0);
+        setTextSafely('singlePlayerGames', stats.singlePlayerGames || 0);
 
         // Wild Card Stats
-        document.getElementById('noWildGames').textContent = stats.noWildGames || 0;
-        document.getElementById('oneWildGames').textContent = stats.oneWildGames || 0;
-        document.getElementById('twoWildGames').textContent = stats.twoWildGames || 0;
+        setTextSafely('noWildGames', stats.noWildGames || 0);
+        setTextSafely('oneWildGames', stats.oneWildGames || 0);
+        setTextSafely('twoWildGames', stats.twoWildGames || 0);
 
         // Activity
-        document.getElementById('lastGameAt').textContent = stats.lastGameAt ?
-            this.formatDate(stats.lastGameAt.toDate()) : 'Never';
-        document.getElementById('memberSince').textContent = stats.createdAt ?
-            this.formatDate(stats.createdAt.toDate()) : 'Unknown';
+        setTextSafely('lastGameAt', stats.lastGameAt ?
+            this.formatDate(stats.lastGameAt.toDate()) : 'Never');
+        setTextSafely('memberSince', stats.createdAt ?
+            this.formatDate(stats.createdAt.toDate()) : 'Unknown');
     }
-
     showNoStats() {
         const contentElement = document.getElementById('statsContent');
         contentElement.innerHTML = `
