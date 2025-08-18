@@ -963,6 +963,47 @@ class ChinesePokerGame {
         }
     }
 
+    saveGameToLocalStorage(finalScores) {
+        try {
+            // Get existing stats or create new
+            const existingStats = JSON.parse(localStorage.getItem('userStats') || '{}');
+
+            // Convert finalScores to Firebase-compatible format
+            const myScore = finalScores.find(player => player.name === 'You')?.score || 0;
+            const won = myScore > 0; // Simple win logic
+
+            // Update stats using same structure as Firebase
+            const updatedStats = {
+                email: existingStats.email || 'local@player.com',
+                gamesPlayed: (existingStats.gamesPlayed || 0) + 1,
+                totalScore: (existingStats.totalScore || 0) + myScore,
+                highScore: Math.max(existingStats.highScore || 0, myScore),
+                wins: (existingStats.wins || 0) + (won ? 1 : 0),
+                winRate: 0, // Will calculate below
+                currentStreak: won ? (existingStats.currentStreak || 0) + 1 : 0,
+                bestStreak: 0, // Will calculate below
+                lastGameAt: new Date().toISOString(),
+                createdAt: existingStats.createdAt || new Date().toISOString(),
+                // Add other Firebase fields as needed
+                averageScore: 0, // Will calculate below
+                lowScore: existingStats.lowScore === undefined ? myScore : Math.min(existingStats.lowScore, myScore)
+            };
+
+            // Calculate derived fields
+            updatedStats.averageScore = Math.round(updatedStats.totalScore / updatedStats.gamesPlayed);
+            updatedStats.winRate = Math.round((updatedStats.wins / updatedStats.gamesPlayed) * 100);
+            updatedStats.bestStreak = Math.max(updatedStats.bestStreak || 0, updatedStats.currentStreak);
+
+            // Save to localStorage
+            localStorage.setItem('userStats', JSON.stringify(updatedStats));
+
+            console.log('💾 Game saved to localStorage:', updatedStats);
+
+        } catch (error) {
+            console.error('❌ Failed to save game to localStorage:', error);
+        }
+    }
+
     async saveGameToFirebase(scores) {
         const gameDoc = doc(collection(db, 'gameHistory'));
         await setDoc(gameDoc, {

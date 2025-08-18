@@ -27,7 +27,7 @@ class ArrangementValidator {
             if (!this.validateHandSizes(arrangement)) {
                 // show popup
             }
-        }, 150); // Small delay to let arrangement update complete
+        }, 250); // Small delay to let arrangement update complete
 
         // Check large hands follow special rules
         if (!this.validateLargeHands(arrangement)) {

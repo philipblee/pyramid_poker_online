@@ -186,7 +186,7 @@ class LeaderboardManager {
                 userId: doc.id,
                 email: doc.id + '@firebase.local', // Generate fake email from userId
 //                displayName: `Player_${doc.id.substring(0, 8)}`, // Short player ID
-                digit splayName: data.email ? this.getDisplayName(data.email) : 'Anonymous',
+                displayName: data.email ? this.getDisplayName(data.email) : 'Anonymous',
                 value: data[category] || 0,
                 gamesPlayed: data.gamesPlayed || 0,
                 winRate: winRate,
