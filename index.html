@@ -233,7 +233,52 @@
         </div>
     </div>
 
+
+    <!-- Add this section to your existing index.html -->
+
+    <!-- Lobby Screen -->
+    <div class="lobby-screen" id="lobbyScreen" style="display: none;">
+        <div class="lobby-header">
+            <h2 class="lobby-title">🏛️ Game Lobby</h2>
+            <div class="user-info">
+                👤 <span id="currentUser">Loading...</span>
+            </div>
+        </div>
+
+        <div class="table-grid" id="tableGrid">
+            <!-- Tables will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Sitting at Table Screen -->
+    <div class="table-screen" id="tableScreen" style="display: none;">
+        <div class="table-info">
+            <h2 id="tableTitle">🪑 Sitting at Table 1</h2>
+
+            <div class="current-settings">
+                <div class="settings-title">Current Table Settings</div>
+                <div class="settings-list" id="settingsDisplay">
+                    <!-- Settings will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="table-actions">
+                <button class="btn btn-warning" onclick="editSettings()">⚙️ Edit Settings</button>
+                <button class="btn btn-primary" onclick="startGame()">🎯 Start Game</button>
+                <button class="btn btn-danger" onclick="leaveTable()">🚪 Leave Table</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="game-area" id="gameArea" style="display: none;">
+    <!-- Your existing game content -->
+
+        <!-- Your existing game area - add style="display: none;" -->
         <div class="game-controls">
+            <button id="cloudGameButton" class="btn btn-primary" onclick="cloudNewGame()">
+                    GO ONLINE
+                </button>
             <button id="newGame" class="btn btn-primary">New Game</button>
             <button id="newRound" class="btn btn-secondary">New Round</button>
             <button id="autoArrange" class="btn btn-secondary">Auto</button>
@@ -242,9 +287,11 @@
             <button id="submitHand" class="btn btn-primary" disabled>Submit</button>
             <button id="gameSettings" class="btn btn-secondary">Settings</button>
             <button id="helpButton" class="btn btn-secondary">Rules</button>
-
         </div>
-            <!-- Remove the config button - it will be accessible via New Game -->
+
+
+
+    <!-- Remove the config button - it will be accessible via New Game -->
 
 
         <div class="status" id="status">
@@ -323,7 +370,7 @@
         </div>
 
 
-
+    </div>
     <!-- JavaScript Files -->
 
 <!-- Near the bottom of index.html, before closing </body> -->
@@ -370,6 +417,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     <script src="js/firebase/user-stats.js"></script>
 
     <!-- Login Modal -->
+    <script src="js/ui/lobby.js"></script>
     <script src="js/ui/login-modal.js"></script>
 
     <!-- Core dependencies first -->
@@ -457,6 +505,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     <script src="js/multiplayer/tournament-sync.js"></script>
     <script src="js/multiplayer/game-integration.js"></script>
     <script src="js/multiplayer/multi-device-integration.js"></script>
+    <script src="js/multiplayer/cloud-new-game.js"></script>
 
     // Add to index.html (after existing scripts)
     <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app.js"></script>

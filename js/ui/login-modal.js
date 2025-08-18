@@ -13,6 +13,10 @@ class LoginModal {
         if (this.firebaseAuth) {
             window.firebaseAuth.onAuthStateChanged((user) => {
                 this.updateLoginState(user);
+                // Initialize lobby when user is logged in
+                if (user) {
+                    PyramidPokerLobby.initializeLobby(user.displayName || user.email || 'Player');
+                }
             });
         }
     }
