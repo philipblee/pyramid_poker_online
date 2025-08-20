@@ -403,6 +403,15 @@ window.addEventListener('DOMContentLoaded', async () => {
         console.log('⚠️ Tiered data failed to load');
     }
 
+    // Load netEV_lookup_table
+    const netEVLoaded = await initializeNetEVLookup();
+    if (netEVLoaded) {
+        console.log('✅ netEV Lookup Table loaded (1462 entries)');
+    } else {
+        console.log('⚠️ netEV Lookup Table failed to load');
+    }
+
+
 });
 </script>
 
@@ -427,6 +436,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     <script src="js/utilities/empirical-win-probability.js"></script>
     <script src="js/utilities/tiered-win-probability.js"></script>
     <script src="js/utilities/tiered2-win-probability.js"></script>
+    <script src="js/utilities/netEV-lookup-table.js"></script>
     <script src="js/utilities/convert-to-card-model.js"></script>
     <script src="js/hands/evaluate-hand.js"></script>
     <script src="js/hands/evaluate-hand-new.js"></script>
