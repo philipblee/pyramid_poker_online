@@ -5,13 +5,13 @@
 function testAllMethods() {
     console.log('\n🧪 ======== COMPREHENSIVE TEST SUITE WITH ARRANGEMENT COMPARISON ========');
     console.log('Testing all wild scenarios × all optimization methods');
-    console.log('Total tests: 90 (10 cases × 3 wild scenarios × 3 methods)');
+    console.log('Total tests: 150 (10 cases × 3 wild scenarios × 5 methods)');
     console.log('NEW: Comparing arrangements between methods for consistency');
 
     const results = {
-        noWild: { points: [], empirical: [], tiered: [] , tiered2: [] },
-        oneWild: { points: [], empirical: [], tiered: [] , tiered2: [] },
-        twoWild: { points: [], empirical: [], tiered: [] , tiered2: [] },
+        noWild: { points: [], empirical: [], tiered: [] , tiered2: [], netEV:[] },
+        oneWild:{ points: [], empirical: [], tiered: [] , tiered2: [], netEV:[] },
+        twoWild: { points: [], empirical: [], tiered: [] , tiered2: [], netEV:[] },
         summary: { passed: 0, failed: 0, total: 120 },
         comparisons: [] // NEW: Track arrangement comparisons
     };
@@ -32,9 +32,9 @@ function testAllMethods() {
             console.log(`\n🔍 Test Case ${testId}:`);
 
             const caseResults = {};
-            const methods = ['points', 'empirical', 'tiered', 'tiered2'];
+            const methods = ['points', 'empirical', 'tiered', 'tiered2', 'netEV'];
 
-            // Run all three methods on same test case
+            // Run all five methods on same test case
             methods.forEach(method => {
 //                console.log(`  ${method.padEnd(10)}: `);
 
@@ -100,7 +100,7 @@ function testAllMethods() {
 }
 
 function compareArrangements(caseResults, testId) {
-    const methods = ['points', 'empirical', 'tiered', 'tiered2'];
+    const methods = ['points', 'empirical', 'tiered', 'tiered2', 'netEV'];
     const arrangements = {};
     const scores = {};
 
@@ -269,7 +269,7 @@ function displayComprehensiveResults(results) {
 
     // Results by scenario and method
     const scenarios = ['noWild', 'oneWild', 'twoWild'];
-    const methods = ['points', 'empirical', 'tiered', 'tiered2'];
+    const methods = ['points', 'empirical', 'tiered', 'tiered2', 'netEV'];
 
     scenarios.forEach(scenario => {
         const scenarioName = scenario.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
@@ -315,7 +315,7 @@ function toCamelCase(str) {
 function quickCompareArrangements(testId) {
     console.log(`\n🔍 Quick Arrangement Comparison for Test ${testId}:`);
 
-    const methods = ['points', 'empirical', 'tiered', 'tiered2'];
+    const methods = ['points', 'empirical', 'tiered', 'tiered2', 'netEV'];
     const results = {};
 
     methods.forEach(method => {
