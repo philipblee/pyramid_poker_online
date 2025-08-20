@@ -554,3 +554,11 @@ class FindBestSetupNoWildPoints extends FindBestSetupNoWildBase {
         return ScoringUtilities.getExpectedPoints(hand, hand.cards, position, method);
     }
 }
+
+class FindBestSetupNoWildNetEV extends FindBestSetupNoWildBase {
+    getHandScore(hand, position) {
+        const method = gameConfig.config.winProbabilityMethod;
+        return ScoringUtilities.getExpectedPoints(hand, hand.cards, position, method);
+    }
+}
+

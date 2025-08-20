@@ -129,6 +129,8 @@ class ScoringUtilities {
     // EXPECTED VALUE CALCULATION
     // =============================================================================
 
+    // Updated ScoringUtilities.getExpectedPoints method
+
     static getExpectedPoints(hand, cards, position, playerCount = 4, method = null) {
         const actualMethod = method ||
                             window.WIN_PROB_OVERRIDE ||
@@ -139,15 +141,35 @@ class ScoringUtilities {
             const pointsIfWin = hand.positionScores[position];
             const strengthBonus = this.calculateTiebreaker(hand.hand_rank);
             return pointsIfWin + strengthBonus;
+        } else if (actualMethod === 'netEV') {
+            // NEW: Net EV method - uses corrected EV calculations
+            const netEV = lookupNetEV(position, hand);
+
+            if (netEV !== null) {
+                // Found Net EV in lookup table
+                return netEV;
+            } else {
+                // NOT found - fallback to corrected Pure EV
+                const winProb = this.getWinProbabilityForMethod('tiered', position, hand);
+                const pointsIfWin = hand.positionScores[position];
+                const pureEV = winProb * pointsIfWin;
+                const correctionFactor = 0.65; // Apply reduction to Pure EV fallback
+                return pureEV * correctionFactor;
+            }
+
         } else {
-            // All probability-based methods (empirical, tiered, tiered2)
+            // All existing probability-based methods (empirical, tiered, tiered2)
             const winProb = this.getWinProbabilityForMethod(actualMethod, position, hand);
-//            console.log ("scoringUtilities.getExpectedPoints const winProb", winProb)
             const pointsIfWin = hand.positionScores[position];
-//            console.log ("scoringUtilities.getExpectedPoints const winProb * points", winProb * pointsIfWin)
             return winProb * pointsIfWin;
         }
     }
+
+// Also add the import at the top of your file:
+// import { lookupNetEV, initializeNetEVLookup } from './net-ev-lookup.js';
+
+// And initialize in your startup code:
+// await initializeNetEVLookup();
 
     static getWinProbabilityForMethod(method, position, hand) {
         switch(method) {
@@ -157,6 +179,8 @@ class ScoringUtilities {
                 return lookupTieredWinProbability(position, hand);
             case 'tiered2':
                 return lookupTiered2WinProbability(position, hand);
+            case 'netEV':
+                return lookupNetEVLookup(position, hand);
             default:
                 return 0.5; // fallback
         }

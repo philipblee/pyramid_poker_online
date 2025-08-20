@@ -261,12 +261,12 @@ function lookupNetEV(position, hand) {
     const handRank = hand.hand_rank || hand;
 
     // SPECIAL HANDLING: Incomplete hands - use your existing fallback logic
-    if (hand.isIncomplete) {
-        // For incomplete hands, fall back to Pure EV calculation
-        // (You can implement specific incomplete hand logic here if needed)
-        console.log(`🔄 Incomplete hand detected for Net EV, using Pure EV fallback`);
-        return null; // Let calling code fall back to Pure EV
-    }
+//    if (hand.isIncomplete) {
+//        // For incomplete hands, fall back to Pure EV calculation
+//        // (You can implement specific incomplete hand logic here if needed)
+//        console.log(`🔄 Incomplete hand detected for Net EV, using Pure EV fallback`);
+//        return null; // Let calling code fall back to Pure EV
+//    }
 
     // Try hierarchical fallback - progressively truncate tuple (same as your logic)
     for (let length = handRank.length; length >= 1; length--) {
@@ -275,16 +275,16 @@ function lookupNetEV(position, hand) {
 
         if (netEV !== null) {
             // Optional: Log fallback level for debugging
-            if (length < handRank.length) {
-                console.log(`🎯 Net EV hierarchical match: level ${length}/${handRank.length} for ${position} [${handRank.join(',')}] → [${truncatedTuple.join(',')}] = ${netEV.toFixed(2)}`);
-            }
+//            if (length < handRank.length) {
+//                console.log(`🎯 Net EV hierarchical match: level ${length}/${handRank.length} for ${position} [${handRank.join(',')}] → [${truncatedTuple.join(',')}] = ${netEV.toFixed(2)}`);
+//            }
 
             return netEV;
         }
     }
 
     // No match found at any level
-    console.warn('🚨 No Net EV hierarchical match found for:', position, handRank);
+//    console.warn('🚨 No Net EV hierarchical match found for:', position, handRank);
     return null; // Let calling code fall back to Pure EV
 }
 
