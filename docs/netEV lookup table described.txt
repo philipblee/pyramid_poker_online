@@ -1,0 +1,206 @@
+firebase-config.js:25 🔥 Firebase initialized successfully
+firebase-auth.js:117 🔥 Firebase Auth Manager initialized
+user-stats.js:240 📊 User Stats Manager initialized
+game-config.js:118 ⚙️ Loaded game configuration: {gameMode: 'singleplayer', computerPlayers: 5, wildCardCount: 2, deckCount: 2, winProbabilityMethod: 'netEV'}
+leaderboards.js:262 🏆 Leaderboard Manager initialized
+firebase-auth.js:62 🔥 User signed in: test4@test.gmail.com
+firebase-auth.js:108 🔥 Should update UI to show logged-in state
+login-modal.js:73 🔧 Setting up event listeners...
+login-modal.js:77 🔧 Login button found: button#loginButton.btn.btn-secondary.login-btn
+login-modal.js:84 🔧 Login button connected!
+login-modal.js:339 🔑 Login Modal initialized with existing HTML
+login-modal.js:132 🔑 User logged in: test4@test.gmail.com
+player.js:36 Auto-added single player mode: 1 human + 5 AI players (6 total)
+rules.js:416 🎯 Game Rules modal ready
+user-stats-display.js:24 📊 Creating stats modal...
+user-stats-display.js:67 ✅ Stats modal created successfully with all elements
+user-stats-display.js:298 📊 User Stats Display initialized
+user-stats-display.js:282 🔄 Refreshing user stats...
+leaderboard-display.js:296 🏆 Leaderboard Display initialized
+index.html?_ijt=hm6i8v4b86ad7jfqimak0s1m8g&_ij_reload=RELOAD_ON_SAVE:380 🚀 Initializing Pyramid Poker...
+version.js:36 🎮 Pyramid Poker Online Version Info: {version: 'v3.0-2-g95725cf-dirty', commit: '95725cf', branch: 'main', buildDate: '2025-08-15T14:41:19.146Z', lastCommit: '2025-08-15 10:03:16 -0400'}
+index.html?_ijt=hm6i8v4b86ad7jfqimak0s1m8g&_ij_reload=RELOAD_ON_SAVE:385 ✅ Empirical win prob loaded (30,868 entries)
+index.html?_ijt=hm6i8v4b86ad7jfqimak0s1m8g&_ij_reload=RELOAD_ON_SAVE:393 ✅ Tiered win prob loaded (1978 entries)
+index.html?_ijt=hm6i8v4b86ad7jfqimak0s1m8g&_ij_reload=RELOAD_ON_SAVE:401 ✅ Tiered2 win prob loaded (2235 entries)
+netEV-lookup-table.js:17 🎯 Loading Net EV Lookup from CSV...
+netEV-lookup-table.js:106 📊 CSV parsing complete: 1180 entries parsed, 0 errors
+netEV-lookup-table.js:28 ✅ Loaded 1180 Net EV entries
+index.html?_ijt=hm6i8v4b86ad7jfqimak0s1m8g&_ij_reload=RELOAD_ON_SAVE:409 ✅ netEV Lookup Table loaded (1181 entries)
+// Create corrected table with hand type numbers and sorted in descending order
+console.log("📊 CORRECTED TABLE - SORTED BY HAND TYPE # (DESCENDING)");
+console.log("========================================================");
+
+// Define the corrected strategic framework with hand type numbers
+const correctedMatrix = [
+    // FRONT POSITION (Strategic - 3-element with kickers)
+    { position: "Front", handType: "Four of a Kind", handTypeNum: 8, elements: 3, format: "(8, quad_rank, kicker_rank)", estimatedRows: 156, reasoning: "Strategic: kickers matter" },
+    { position: "Front", handType: "Full House", handTypeNum: 7, elements: 3, format: "(7, trip_rank, pair_rank)", estimatedRows: 156, reasoning: "Strategic: trip/pair combos matter" },
+    { position: "Front", handType: "Flush", handTypeNum: 6, elements: 3, format: "(6, highest, second_highest)", estimatedRows: 156, reasoning: "Strategic: sequence matters" },
+    { position: "Front", handType: "Straight", handTypeNum: 5, elements: 3, format: "(5, highest, highest-1) or (5,14,5)", estimatedRows: 10, reasoning: "Strategic: wheel + regular sequences" },
+    { position: "Front", handType: "Three of a Kind", handTypeNum: 4, elements: 3, format: "(4, trip_rank, kicker_rank)", estimatedRows: 156, reasoning: "Strategic: kickers matter in front" },
+    { position: "Front", handType: "Two Pair", handTypeNum: 3, elements: 3, format: "(3, higher_pair, lower_pair)", estimatedRows: 78, reasoning: "Strategic: pair combinations matter" },
+    { position: "Front", handType: "Pair", handTypeNum: 2, elements: 3, format: "(2, pair_rank, kicker_rank)", estimatedRows: 156, reasoning: "Strategic: kickers create competitive deltas" },
+    { position: "Front", handType: "High Card", handTypeNum: 1, elements: 3, format: "(1, highest, second_highest)", estimatedRows: 156, reasoning: "Strategic: can be viable in front" },
+    { position: "Front", handType: "Straight Flush", handTypeNum: 9, elements: 3, format: "(9, highest, highest-1) or (9,14,5)", estimatedRows: 10, reasoning: "Strategic: wheel + regular sequences" },
+    
+    // MIDDLE POSITION (Mixed - strategic hands get 3-element)
+    { position: "Middle", handType: "8 of a Kind", handTypeNum: 16, elements: 2, format: "(16, primary_rank)", estimatedRows: 13, reasoning: "Same rank: no kickers possible" },
+    { position: "Middle", handType: "8-card Straight Flush", handTypeNum: 15, elements: 3, format: "(15, highest, highest-1) or (15,14,8)", estimatedRows: 8, reasoning: "Strategic: wheel + sequences" },
+    { position: "Middle", handType: "7 of a Kind", handTypeNum: 14, elements: 2, format: "(14, primary_rank)", estimatedRows: 13, reasoning: "Same rank: no kickers possible" },
+    { position: "Middle", handType: "7-card Straight Flush", handTypeNum: 13, elements: 3, format: "(13, highest, highest-1) or (13,14,7)", estimatedRows: 8, reasoning: "Strategic: wheel + sequences" },
+    { position: "Middle", handType: "6 of a Kind", handTypeNum: 12, elements: 2, format: "(12, primary_rank)", estimatedRows: 13, reasoning: "Same rank: no kickers possible" },
+    { position: "Middle", handType: "6-card Straight Flush", handTypeNum: 11, elements: 3, format: "(11, highest, highest-1) or (11,14,6)", estimatedRows: 8, reasoning: "Strategic: wheel + sequences" },
+    { position: "Middle", handType: "5 of a Kind", handTypeNum: 10, elements: 2, format: "(10, primary_rank)", estimatedRows: 13, reasoning: "Same rank: no kickers possible" },
+    { position: "Middle", handType: "Straight Flush", handTypeNum: 9, elements: 3, format: "(9, highest, highest-1) or (9,14,5)", estimatedRows: 10, reasoning: "Strategic: sequences matter" },
+    { position: "Middle", handType: "Four of a Kind", handTypeNum: 8, elements: 3, format: "(8, quad_rank, kicker_rank)", estimatedRows: 156, reasoning: "Strategic: kickers matter" },
+    { position: "Middle", handType: "Full House", handTypeNum: 7, elements: 3, format: "(7, trip_rank, pair_rank)", estimatedRows: 156, reasoning: "Strategic: combinations matter" },
+    { position: "Middle", handType: "Flush", handTypeNum: 6, elements: 3, format: "(6, highest, second_highest)", estimatedRows: 156, reasoning: "Strategic: sequences matter" },
+    { position: "Middle", handType: "Straight", handTypeNum: 5, elements: 3, format: "(5, highest, highest-1) or (5,14,5)", estimatedRows: 10, reasoning: "Strategic: sequences matter" },
+    { position: "Middle", handType: "Three of a Kind", handTypeNum: 4, elements: 3, format: "(4, trip_rank, kicker_rank)", estimatedRows: 156, reasoning: "Strategic: kickers matter" },
+    { position: "Middle", handType: "Two Pair", handTypeNum: 3, elements: 3, format: "(3, higher_pair, lower_pair)", estimatedRows: 78, reasoning: "Strategic: pair combinations matter" },
+    { position: "Middle", handType: "Pair", handTypeNum: 2, elements: 2, format: "(2, pair_rank)", estimatedRows: 13, reasoning: "Algorithmic: rarely strategic" },
+    { position: "Middle", handType: "High Card", handTypeNum: 1, elements: 2, format: "(1, highest_rank)", estimatedRows: 13, reasoning: "Algorithmic: never strategic" },
+    
+    // BACK POSITION (Mixed - large hands strategic, small hands algorithmic)
+    { position: "Back", handType: "8 of a Kind", handTypeNum: 16, elements: 2, format: "(16, primary_rank)", estimatedRows: 13, reasoning: "Same rank: no kickers possible" },
+    { position: "Back", handType: "8-card Straight Flush", handTypeNum: 15, elements: 3, format: "(15, highest, highest-1) or (15,14,8)", estimatedRows: 8, reasoning: "Strategic: wheel + sequences" },
+    { position: "Back", handType: "7 of a Kind", handTypeNum: 14, elements: 2, format: "(14, primary_rank)", estimatedRows: 13, reasoning: "Same rank: no kickers possible" },
+    { position: "Back", handType: "7-card Straight Flush", handTypeNum: 13, elements: 3, format: "(13, highest, highest-1) or (13,14,7)", estimatedRows: 8, reasoning: "Strategic: wheel + sequences" },
+    { position: "Back", handType: "6 of a Kind", handTypeNum: 12, elements: 2, format: "(12, primary_rank)", estimatedRows: 13, reasoning: "Same rank: no kickers possible" },
+    { position: "Back", handType: "6-card Straight Flush", handTypeNum: 11, elements: 3, format: "(11, highest, highest-1) or (11,14,6)", estimatedRows: 8, reasoning: "Strategic: wheel + sequences" },
+    { position: "Back", handType: "5 of a Kind", handTypeNum: 10, elements: 2, format: "(10, primary_rank)", estimatedRows: 13, reasoning: "Same rank: no kickers possible" },
+    { position: "Back", handType: "Straight Flush", handTypeNum: 9, elements: 3, format: "(9, highest, highest-1) or (9,14,5)", estimatedRows: 10, reasoning: "Strategic: sequences matter" },
+    { position: "Back", handType: "Four of a Kind", handTypeNum: 8, elements: 3, format: "(8, quad_rank, kicker_rank)", estimatedRows: 156, reasoning: "Strategic: kickers matter" },
+    { position: "Back", handType: "Full House", handTypeNum: 7, elements: 3, format: "(7, trip_rank, pair_rank)", estimatedRows: 156, reasoning: "Strategic: combinations matter" },
+    { position: "Back", handType: "Flush", handTypeNum: 6, elements: 3, format: "(6, highest, second_highest)", estimatedRows: 156, reasoning: "Strategic: sequences matter" },
+    { position: "Back", handType: "Straight", handTypeNum: 5, elements: 3, format: "(5, highest, highest-1) or (5,14,5)", estimatedRows: 10, reasoning: "Strategic: sequences matter" },
+    { position: "Back", handType: "Three of a Kind", handTypeNum: 4, elements: 2, format: "(4, trip_rank)", estimatedRows: 13, reasoning: "Algorithmic: never strategic in back" },
+    { position: "Back", handType: "Two Pair", handTypeNum: 3, elements: 2, format: "(3, higher_pair_rank)", estimatedRows: 13, reasoning: "Algorithmic: never strategic in back" },
+    { position: "Back", handType: "Pair", handTypeNum: 2, elements: 2, format: "(2, pair_rank)", estimatedRows: 13, reasoning: "Algorithmic: never strategic in back" },
+    { position: "Back", handType: "High Card", handTypeNum: 1, elements: 2, format: "(1, highest_rank)", estimatedRows: 13, reasoning: "Algorithmic: never strategic in back" }
+];
+
+// Sort by hand type number descending, then by position
+const sortedMatrix = correctedMatrix.sort((a, b) => {
+    if (b.handTypeNum !== a.handTypeNum) return b.handTypeNum - a.handTypeNum;
+    // If same hand type, sort by position: Front, Middle, Back
+    const posOrder = { "Front": 1, "Middle": 2, "Back": 3 };
+    return posOrder[a.position] - posOrder[b.position];
+});
+
+// Display the table
+console.log("\nType# | Position | Hand Type               | Elements | Est.Rows | Format");
+console.log("------|----------|-------------------------|----------|----------|--------");
+
+let currentHandType = null;
+sortedMatrix.forEach(item => {
+    // Add separator for new hand types
+    if (currentHandType !== null && currentHandType !== item.handTypeNum) {
+        console.log("------|----------|-------------------------|----------|----------|--------");
+    }
+    currentHandType = item.handTypeNum;
+    
+    const typeNum = item.handTypeNum.toString().padEnd(5);
+    const pos = item.position.padEnd(8);
+    const hand = item.handType.padEnd(23);
+    const elem = item.elements.toString().padEnd(8);
+    const rows = item.estimatedRows.toString().padEnd(8);
+    console.log(`${typeNum} | ${pos} | ${hand} | ${elem} | ${rows} | ${item.format}`);
+});
+
+// Calculate totals
+const totalRows = correctedMatrix.reduce((sum, item) => sum + item.estimatedRows, 0);
+console.log(`\n📊 TOTAL ESTIMATED ROWS: ${totalRows}`);
+
+// Group by position
+const byPosition = {};
+correctedMatrix.forEach(item => {
+    if (!byPosition[item.position]) byPosition[item.position] = 0;
+    byPosition[item.position] += item.estimatedRows;
+});
+
+console.log("\n📍 ROWS BY POSITION:");
+Object.entries(byPosition).forEach(([pos, count]) => {
+    console.log(`${pos}: ${count} rows`);
+});
+
+// Check for missing hand types
+console.log("\n🔍 HAND TYPE COVERAGE CHECK:");
+const handTypesPresent = [...new Set(sortedMatrix.map(item => item.handTypeNum))].sort((a,b) => b-a);
+console.log(`Present hand types: ${handTypesPresent.join(', ')}`);
+
+// Check for gaps in sequence
+for (let i = 16; i >= 1; i--) {
+    if (!handTypesPresent.includes(i)) {
+        console.log(`⚠️  Missing hand type ${i}`);
+    }
+}
+VM1673:2 📊 CORRECTED TABLE - SORTED BY HAND TYPE # (DESCENDING)
+VM1673:3 ========================================================
+VM1673:64 
+          Type# | Position | Hand Type               | Elements | Est.Rows | Format
+VM1673:65 ------|----------|-------------------------|----------|----------|--------
+VM1673:80 16    | Back     | 8 of a Kind             | 2        | 13       | (16, primary_rank)
+VM1673:71 ------|----------|-------------------------|----------|----------|--------
+VM1673:80 15    | Back     | 8-card Straight Flush   | 3        | 8        | (15, highest, highest-1) or (15,14,8)
+VM1673:71 ------|----------|-------------------------|----------|----------|--------
+VM1673:80 14    | Middle   | 7 of a Kind             | 2        | 13       | (14, primary_rank)
+VM1673:80 14    | Back     | 7 of a Kind             | 2        | 13       | (14, primary_rank)
+VM1673:71 ------|----------|-------------------------|----------|----------|--------
+VM1673:80 13    | Middle   | 7-card Straight Flush   | 3        | 8        | (13, highest, highest-1) or (13,14,7)
+VM1673:80 13    | Back     | 7-card Straight Flush   | 3        | 8        | (13, highest, highest-1) or (13,14,7)
+VM1673:71 ------|----------|-------------------------|----------|----------|--------
+VM1673:80 12    | Middle   | 6 of a Kind             | 2        | 13       | (12, primary_rank)
+VM1673:80 12    | Back     | 6 of a Kind             | 2        | 13       | (12, primary_rank)
+VM1673:71 ------|----------|-------------------------|----------|----------|--------
+VM1673:80 11    | Middle   | 6-card Straight Flush   | 3        | 8        | (11, highest, highest-1) or (11,14,6)
+VM1673:80 11    | Back     | 6-card Straight Flush   | 3        | 8        | (11, highest, highest-1) or (11,14,6)
+VM1673:71 ------|----------|-------------------------|----------|----------|--------
+VM1673:80 10    | Middle   | 5 of a Kind             | 2        | 13       | (10, primary_rank)
+VM1673:80 10    | Back     | 5 of a Kind             | 2        | 13       | (10, primary_rank)
+VM1673:71 ------|----------|-------------------------|----------|----------|--------
+VM1673:80 9     | Front    | Straight Flush          | 3        | 10       | (9, highest, highest-1) or (9,14,5)
+VM1673:80 9     | Middle   | Straight Flush          | 3        | 10       | (9, highest, highest-1) or (9,14,5)
+VM1673:80 9     | Back     | Straight Flush          | 3        | 10       | (9, highest, highest-1) or (9,14,5)
+VM1673:71 ------|----------|-------------------------|----------|----------|--------
+VM1673:80 8     | Front    | Four of a Kind          | 3        | 156      | (8, quad_rank, kicker_rank)
+VM1673:80 8     | Middle   | Four of a Kind          | 3        | 156      | (8, quad_rank, kicker_rank)
+VM1673:80 8     | Back     | Four of a Kind          | 3        | 156      | (8, quad_rank, kicker_rank)
+VM1673:71 ------|----------|-------------------------|----------|----------|--------
+VM1673:80 7     | Front    | Full House              | 3        | 156      | (7, trip_rank, pair_rank)
+VM1673:80 7     | Middle   | Full House              | 3        | 156      | (7, trip_rank, pair_rank)
+VM1673:80 7     | Back     | Full House              | 3        | 156      | (7, trip_rank, pair_rank)
+VM1673:71 ------|----------|-------------------------|----------|----------|--------
+VM1673:80 6     | Front    | Flush                   | 3        | 156      | (6, highest, second_highest)
+VM1673:80 6     | Middle   | Flush                   | 3        | 156      | (6, highest, second_highest)
+VM1673:80 6     | Back     | Flush                   | 3        | 156      | (6, highest, second_highest)
+VM1673:71 ------|----------|-------------------------|----------|----------|--------
+VM1673:80 5     | Front    | Straight                | 3        | 10       | (5, highest, highest-1) or (5,14,5)
+VM1673:80 5     | Middle   | Straight                | 3        | 10       | (5, highest, highest-1) or (5,14,5)
+VM1673:80 5     | Back     | Straight                | 3        | 10       | (5, highest, highest-1) or (5,14,5)
+VM1673:71 ------|----------|-------------------------|----------|----------|--------
+VM1673:80 4     | Front    | Three of a Kind         | 3        | 156      | (4, trip_rank, kicker_rank)
+VM1673:80 4     | Middle   | Three of a Kind         | 3        | 156      | (4, trip_rank, kicker_rank)
+VM1673:80 4     | Back     | Three of a Kind         | 2        | 13       | (4, trip_rank)
+VM1673:71 ------|----------|-------------------------|----------|----------|--------
+VM1673:80 3     | Middle   | Two Pair                | 3        | 78       | (3, higher_pair, lower_pair)
+VM1673:80 3     | Back     | Two Pair                | 2        | 13       | (3, higher_pair_rank)
+VM1673:71 ------|----------|-------------------------|----------|----------|--------
+VM1673:80 2     | Front    | Pair                    | 3        | 156      | (2, pair_rank, kicker_rank)
+VM1673:80 2     | Middle   | Pair                    | 2        | 13       | (2, pair_rank)
+VM1673:80 2     | Back     | Pair                    | 2        | 13       | (2, pair_rank)
+VM1673:71 ------|----------|-------------------------|----------|----------|--------
+VM1673:80 1     | Front    | High Card               | 3        | 156      | (1, highest, second_highest)
+VM1673:80 1     | Middle   | High Card               | 2        | 13       | (1, highest_rank)
+VM1673:80 1     | Back     | High Card               | 2        | 13       | (1, highest_rank)
+VM1673:85 
+📊 TOTAL ESTIMATED ROWS: 2474
+VM1673:94 
+📍 ROWS BY POSITION:
+VM1673:96 Middle: 824 rows
+VM1673:96 Back: 616 rows
+VM1673:96 Front: 1034 rows
+VM1673:100 
+🔍 HAND TYPE COVERAGE CHECK:
+VM1673:102 Present hand types: 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+undefined

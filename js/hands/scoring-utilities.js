@@ -143,10 +143,12 @@ class ScoringUtilities {
             return pointsIfWin + strengthBonus;
         } else if (actualMethod === 'netEV') {
             // NEW: Net EV method - uses corrected EV calculations
+            console.log(`scoringUtilities lookup: ${position}  ${hand.hand_rank}`)
             const netEV = lookupNetEV(position, hand);
 
             if (netEV !== null) {
                 // Found Net EV in lookup table
+                console.log (`   netEV: ${hand.hand_rank} ${position} ${netEV}`)
                 return netEV;
             } else {
                 // NOT found - fallback to corrected Pure EV

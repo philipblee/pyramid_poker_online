@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pyramid Poker Dataset Comparison Report</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: white;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            background: #f5f5f5;
+            color: #333;
+            padding: 30px;
+            border: 2px solid #ddd;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.2em;
+            font-weight: 300;
+        }
+        .header .subtitle {
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+        .section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid #ddd;
+        }
+        .section h2 {
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+        th {
+            background: #f5f5f5;
+            color: #333;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid #ddd;
+        }
+        td {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .key-insights {
+            background: #f5f5f5;
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin: 20px 0;
+        }
+        .key-insights h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .methodology {
+            background: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #333;
+            margin: 15px 0;
+        }
+        .sample-size {
+            font-size: 0.85em;
+            color: #666;
+        }
+        .position-icon {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+        .significant-diff {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔺 Pyramid Poker Dataset Comparison</h1>
+        <div class="subtitle">Three-Method Optimization Analysis: Points → Empirical → Tiered</div>
+        <div class="subtitle">Generated: January 28, 2025</div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Dataset Overview</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method (Chronological Order)</th>
+                    <th>Rounds</th>
+                    <th>Total Hands</th>
+                    <th>Optimization Function</th>
+                    <th>Expected Value Calculation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>1. Points (2024)</strong></td>
+                    <td>12,000</td>
+                    <td>72,000</td>
+                    <td>Direct point maximization</td>
+                    <td>Sum of point values (High Card = 1, Pair = 1)</td>
+                </tr>
+                <tr>
+                    <td><strong>2. Empirical (2024)</strong></td>
+                    <td>10,000</td>
+                    <td>60,000</td>
+                    <td>Win probability × point value</td>
+                    <td>EV = Points × Win Rate (learned from Points data)</td>
+                </tr>
+                <tr>
+                    <td><strong>3. Tiered (2025)</strong></td>
+                    <td>11,000</td>
+                    <td>66,000</td>
+                    <td>Win probability × point value</td>
+                    <td>EV = Points × Win Rate (mathematical hierarchy)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2><span class="position-icon">🥉</span>Front Position Comparison (Ordered by Hand Strength)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Hand Type</th>
+                    <th>Points 12K</th>
+                    <th>Empirical 10K</th>
+                    <th>Tiered 11K</th>
+                    <th>Key Pattern</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Straight Flush</td>
+                    <td>100.0% <span class="sample-size">(1)</span></td>
+                    <td>100.0% <span class="sample-size">(1)</span></td>
+                    <td>- <span class="sample-size">(0)</span></td>
+                    <td>Extremely rare hand</td>
+                </tr>
+                <tr>
+                    <td>Four of a Kind</td>
+                    <td>100.0% <span class="sample-size">(58)</span></td>
+                    <td>100.0% <span class="sample-size">(56)</span></td>
+                    <td>100.0% <span class="sample-size">(87)</span></td>
+                    <td>Consistent elite performance</td>
+                </tr>
+                <tr>
+                    <td>Full House</td>
+                    <td>97.6% <span class="sample-size">(3,136)</span></td>
+                    <td>97.7% <span class="sample-size">(2,529)</span></td>
+                    <td>97.5% <span class="sample-size">(2,627)</span></td>
+                    <td>Very consistent across methods</td>
+                </tr>
+                <tr>
+                    <td>Flush</td>
+                    <td>88.3% <span class="sample-size">(10,348)</span></td>
+                    <td>87.2% <span class="sample-size">(10,073)</span></td>
+                    <td>88.6% <span class="sample-size">(9,537)</span></td>
+                    <td>Consistent strong performance</td>
+                </tr>
+                <tr>
+                    <td>Straight</td>
+                    <td>67.0% <span class="sample-size">(18,331)</span></td>
+                    <td>65.8% <span class="sample-size">(14,279)</span></td>
+                    <td class="significant-diff">63.3% <span class="sample-size">(21,613)</span></td>
+                    <td>Tiered optimization uses stronger cards elsewhere</td>
+                </tr>
+                <tr>
+                    <td>Three of a Kind</td>
+                    <td>51.5% <span class="sample-size">(6,103)</span></td>
+                    <td>50.7% <span class="sample-size">(5,472)</span></td>
+                    <td class="significant-diff">43.6% <span class="sample-size">(6,396)</span></td>
+                    <td class="significant-diff">Tiered: Lower-ranking trips remain after optimization</td>
+                </tr>
+                <tr>
+                    <td>Pair</td>
+                    <td>26.9% <span class="sample-size">(28,625)</span></td>
+                    <td>22.5% <span class="sample-size">(27,590)</span></td>
+                    <td class="significant-diff">19.2% <span class="sample-size">(25,740)</span></td>
+                    <td class="significant-diff">Tiered: Lower-ranking pairs remain after optimization</td>
+                </tr>
+                <tr>
+                    <td>High Card</td>
+                    <td>3.9% <span class="sample-size">(5,398)</span></td>
+                    <td>0.0% <span class="sample-size">(0)</span></td>
+                    <td>0.0% <span class="sample-size">(0)</span></td>
+                    <td class="significant-diff">Points: EV same as pairs (1 point each). Empirical/Tiered: Much lower EV</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2><span class="position-icon">🥈</span>Middle Position Comparison (Ordered by Hand Strength)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Hand Type</th>
+                    <th>Points 12K</th>
+                    <th>Empirical 10K</th>
+                    <th>Tiered 11K</th>
+                    <th>Key Pattern</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>6-card Straight Flush</td>
+                    <td>- <span class="sample-size">(0)</span></td>
+                    <td>- <span class="sample-size">(0)</span></td>
+                    <td>100.0% <span class="sample-size">(10)</span></td>
+                    <td class="significant-diff">Tiered: Superior cross-position optimization</td>
+                </tr>
+                <tr>
+                    <td>5 of a Kind</td>
+                    <td>100.0% <span class="sample-size">(70)</span></td>
+                    <td>100.0% <span class="sample-size">(66)</span></td>
+                    <td>100.0% <span class="sample-size">(29)</span></td>
+                    <td>Elite hands consistent</td>
+                </tr>
+                <tr>
+                    <td>Straight Flush</td>
+                    <td>99.9% <span class="sample-size">(243)</span></td>
+                    <td>99.9% <span class="sample-size">(218)</span></td>
+                    <td>100.0% <span class="sample-size">(135)</span></td>
+                    <td>Very consistent elite performance</td>
+                </tr>
+                <tr>
+                    <td>Four of a Kind</td>
+                    <td>97.4% <span class="sample-size">(4,074)</span></td>
+                    <td>97.4% <span class="sample-size">(3,593)</span></td>
+                    <td>97.3% <span class="sample-size">(4,309)</span></td>
+                    <td>Extremely consistent</td>
+                </tr>
+                <tr>
+                    <td>Full House</td>
+                    <td>76.7% <span class="sample-size">(24,252)</span></td>
+                    <td>77.7% <span class="sample-size">(18,356)</span></td>
+                    <td>78.8% <span class="sample-size">(18,066)</span></td>
+                    <td>Consistent performance range</td>
+                </tr>
+                <tr>
+                    <td>Flush</td>
+                    <td>40.4% <span class="sample-size">(28,771)</span></td>
+                    <td>43.2% <span class="sample-size">(23,826)</span></td>
+                    <td class="significant-diff">50.0% <span class="sample-size">(21,095)</span></td>
+                    <td class="significant-diff">Tiered: Higher-ranking flushes after optimization</td>
+                </tr>
+                <tr>
+                    <td>Straight</td>
+                    <td>14.0% <span class="sample-size">(8,358)</span></td>
+                    <td>15.8% <span class="sample-size">(8,231)</span></td>
+                    <td class="significant-diff">19.3% <span class="sample-size">(17,747)</span></td>
+                    <td class="significant-diff">Tiered: More strategic middle straight usage</td>
+                </tr>
+                <tr>
+                    <td>Two Pair</td>
+                    <td>4.6% <span class="sample-size">(5,349)</span></td>
+                    <td>5.1% <span class="sample-size">(4,938)</span></td>
+                    <td>3.8% <span class="sample-size">(3,904)</span></td>
+                    <td>Consistently weak performance</td>
+                </tr>
+                <tr>
+                    <td>Pair</td>
+                    <td>1.5% <span class="sample-size">(489)</span></td>
+                    <td>1.5% <span class="sample-size">(772)</span></td>
+                    <td>1.1% <span class="sample-size">(705)</span></td>
+                    <td>Very weak in middle position</td>
+                </tr>
+                <tr>
+                    <td>High Card</td>
+                    <td>0.2% <span class="sample-size">(394)</span></td>
+                    <td>0.0% <span class="sample-size">(0)</span></td>
+                    <td>0.0% <span class="sample-size">(0)</span></td>
+                    <td>Points only: Same logic as front position</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2><span class="position-icon">🏆</span>Back Position Comparison (Ordered by Hand Strength)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Hand Type</th>
+                    <th>Points 12K</th>
+                    <th>Empirical 10K</th>
+                    <th>Tiered 11K</th>
+                    <th>Key Pattern</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>8-card Straight Flush</td>
+                    <td>99.9% <span class="sample-size">(150)</span></td>
+                    <td>100.0% <span class="sample-size">(77)</span></td>
+                    <td>100.0% <span class="sample-size">(89)</span></td>
+                    <td>Elite large hand performance</td>
+                </tr>
+                <tr>
+                    <td>7 of a Kind</td>
+                    <td>100.0% <span class="sample-size">(2)</span></td>
+                    <td>100.0% <span class="sample-size">(3)</span></td>
+                    <td class="significant-diff">100.0% <span class="sample-size">(22)</span></td>
+                    <td class="significant-diff">Tiered: Much better rare hand sampling</td>
+                </tr>
+                <tr>
+                    <td>7-card Straight Flush</td>
+                    <td>99.8% <span class="sample-size">(589)</span></td>
+                    <td>99.9% <span class="sample-size">(429)</span></td>
+                    <td>99.8% <span class="sample-size">(421)</span></td>
+                    <td>Very consistent elite performance</td>
+                </tr>
+                <tr>
+                    <td>6 of a Kind</td>
+                    <td>99.0% <span class="sample-size">(439)</span></td>
+                    <td>99.0% <span class="sample-size">(348)</span></td>
+                    <td>99.6% <span class="sample-size">(298)</span></td>
+                    <td>Consistent elite performance</td>
+                </tr>
+                <tr>
+                    <td>6-card Straight Flush</td>
+                    <td>97.9% <span class="sample-size">(2,142)</span></td>
+                    <td>97.8% <span class="sample-size">(1,669)</span></td>
+                    <td>97.9% <span class="sample-size">(1,904)</span></td>
+                    <td>Very consistent strong performance</td>
+                </tr>
+                <tr>
+                    <td>5 of a Kind</td>
+                    <td>93.9% <span class="sample-size">(2,773)</span></td>
+                    <td>94.6% <span class="sample-size">(1,996)</span></td>
+                    <td>94.9% <span class="sample-size">(1,907)</span></td>
+                    <td>Consistent strong performance</td>
+                </tr>
+                <tr>
+                    <td>Straight Flush</td>
+                    <td>88.6% <span class="sample-size">(6,426)</span></td>
+                    <td>89.8% <span class="sample-size">(5,118)</span></td>
+                    <td>89.9% <span class="sample-size">(6,016)</span></td>
+                    <td>Consistent strong performance</td>
+                </tr>
+                <tr>
+                    <td>Four of a Kind</td>
+                    <td>68.8% <span class="sample-size">(21,098)</span></td>
+                    <td>69.5% <span class="sample-size">(18,458)</span></td>
+                    <td class="significant-diff">71.5% <span class="sample-size">(16,833)</span></td>
+                    <td class="significant-diff">Tiered: Higher-ranking 4Ks after optimization</td>
+                </tr>
+                <tr>
+                    <td>Full House</td>
+                    <td>35.6% <span class="sample-size">(23,221)</span></td>
+                    <td>35.0% <span class="sample-size">(19,921)</span></td>
+                    <td class="significant-diff">41.5% <span class="sample-size">(20,886)</span></td>
+                    <td class="significant-diff">Tiered: Better resource allocation to back</td>
+                </tr>
+                <tr>
+                    <td>Flush</td>
+                    <td>11.2% <span class="sample-size">(14,177)</span></td>
+                    <td>10.4% <span class="sample-size">(11,482)</span></td>
+                    <td class="significant-diff">15.9% <span class="sample-size">(14,144)</span></td>
+                    <td class="significant-diff">Tiered: Strategic back flush allocation</td>
+                </tr>
+                <tr>
+                    <td>Straight</td>
+                    <td>1.0% <span class="sample-size">(555)</span></td>
+                    <td>0.7% <span class="sample-size">(442)</span></td>
+                    <td class="significant-diff">2.1% <span class="sample-size">(3,474)</span></td>
+                    <td class="significant-diff">Tiered: More strategic straight usage in back</td>
+                </tr>
+                <tr>
+                    <td>Two Pair</td>
+                    <td>0.4% <span class="sample-size">(428)</span></td>
+                    <td>0.0% <span class="sample-size">(57)</span></td>
+                    <td>0.0% <span class="sample-size">(6)</span></td>
+                    <td>Very poor back position performance</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="key-insights">
+        <h3>🎯 Optimization Function Analysis</h3>
+        
+        <h4>📊 Expected Value Calculation Differences:</h4>
+        <ul>
+            <li><strong>Points Method:</strong> EV = Point Value (High Card = 1, Pair = 1 → Same EV)</li>
+            <li><strong>Empirical Method:</strong> EV = Point Value × Win Rate (High Card = 1 × 0% = 0, Pair = 1 × 22.5% = 0.225)</li>
+            <li><strong>Tiered Method:</strong> EV = Point Value × Win Rate (High Card = 1 × 0% = 0, Pair = 1 × 19.2% = 0.192)</li>
+        </ul>
+
+        <h4>🔍 Why Hand Distributions Differ:</h4>
+        <ul>
+            <li><strong>Lower win rates don't mean "avoidance":</strong> Methods optimize total arrangement EV across all three positions</li>
+            <li><strong>Tiered front pairs have lower win rates:</strong> Higher-ranking pairs were allocated to stronger positions for better total EV</li>
+            <li><strong>Resource allocation differences:</strong> Each method finds different optimal ways to distribute the same 17 cards</li>
+        </ul>
+
+        <h4>🎯 Cross-Position Optimization:</h4>
+        <ul>
+            <li><strong>Tiered unique patterns:</strong> 6-card SF in middle, higher back hand win rates suggest sophisticated position value calculations</li>
+            <li><strong>Points flexibility:</strong> Uses High Card arrangements when total point value is optimized</li>
+            <li><strong>Empirical limitations:</strong> Learned relationships may not capture all strategic possibilities</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>📈 Method Evolution Summary</h2>
+        
+        <div class="methodology">
+            <h3>1. Points Method (2024) - Foundation:</h3>
+            <ul>
+                <li><strong>Direct Optimization:</strong> Sum of point values across three positions</li>
+                <li><strong>Complete Coverage:</strong> Uses all hand types when mathematically optimal</li>
+                <li><strong>No Bias:</strong> Treats equal-point hands equally (High Card = Pair = 1 point)</li>
+                <li><strong>Baseline Performance:</strong> Established optimization framework</li>
+            </ul>
+        </div>
+
+        <div class="methodology">
+            <h3>2. Empirical Method (2024) - Learning Approach:</h3>
+            <ul>
+                <li><strong>Probability Integration:</strong> EV = Points × Win Rate (learned from Points data)</li>
+                <li><strong>Small Sample Issues:</strong> Win rates corrupted by limited rare hand samples</li>
+                <li><strong>Strategic Gaps:</strong> Missing arrangements due to 0% learned win rates</li>
+                <li><strong>Performance:</strong> Consistently 15-20% behind optimal in test cases</li>
+            </ul>
+        </div>
+
+        <div class="methodology">
+            <h3>3. Tiered Method (2025) - Mathematical Hierarchy:</h3>
+            <ul>
+                <li><strong>Probability Integration:</strong> EV = Points × Win Rate (mathematical hierarchy)</li>
+                <li><strong>Immune to Sample Size:</strong> Win rates based on logical hand strength ordering</li>
+                <li><strong>Cross-Position Optimization:</strong> Sophisticated resource allocation across positions</li>
+                <li><strong>Superior Performance:</strong> Best strategic decisions in complex scenarios</li>
+            </ul>
+        </div>
+    </div>
+
+    <div style="margin-top: 40px; text-align: center; color: #666; font-size: 0.9em;">
+        <p><strong>Dataset Analysis:</strong> Three optimization methods applied to Pyramid Poker arrangements</p>
+        <p>Points: 72,000 hands | Empirical: 60,000 hands | Tiered: 66,000 hands</p>
+        <p><strong>Key Finding:</strong> Different optimization functions produce measurably different hand distributions, revealing distinct strategic approaches to the same mathematical problem</p>
+    </div>
+</body>
+</html>

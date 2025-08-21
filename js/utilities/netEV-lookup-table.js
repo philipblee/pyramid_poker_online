@@ -1,5 +1,5 @@
 // js/utilities/net-ev-lookup.js
-// Net EV Lookup with hierarchical fallback (adapted from empirical-win-probability.js)
+// Net EV Lookup with hierarchical fallback (adapted from empirical-win-netev.js)
 
 class NetEVLookup {
     constructor() {
@@ -53,24 +53,24 @@ class NetEVLookup {
             try {
                 // Parse CSV line (handle quoted fields)
                 const fields = this.parseCSVLine(line);
+//                console.log(`${fields[0]}, ${fields[1]}, ${fields[2]}, ${fields[3]}, ${fields[4]}`)
 
-                if (fields.length >= 11) { // Expecting many fields in EV CSV
-                    const handRankStr = fields[0].trim();
-                    const position = fields[1].trim();
-                    const handType = fields[2].trim();
-                    const primaryRank = parseInt(fields[3]);
-                    const winRate = parseFloat(fields[4]);
-                    const winPoints = parseFloat(fields[5]);
-                    const positiveEV = parseFloat(fields[6]);
-                    const higherTypesLossEV = parseFloat(fields[7]);
-                    const sameTypeLossEV = parseFloat(fields[8]);
-                    const totalNegativeEV = parseFloat(fields[9]);
-                    const finalEV = parseFloat(fields[10]);
+//                console.log(`Raw line: "${line}"`);
+////                const fields = this.parseCSVLine(line);
+//                console.log(`Parsed fields:`, fields);
+//                console.log(`Field 4: "${fields[4]}" (exists: ${fields[4] !== undefined})`);
+
+                if (fields.length >= 5) {
+                    const position = fields[0].trim();
+                    const handRankStr = fields[1].trim();
+                    const wins = parseInt(fields[2]);
+                    const total = parseInt(fields[3]);
+                    const netev = parseFloat(fields[4]);
 
                     // Convert hand rank string "(10, 10)" to array [10, 10]
                     const handRank = this.parseHandRank(handRankStr);
 
-                    if (handRank && !isNaN(finalEV)) {
+                    if (handRank && !isNaN(netev) && total > 0) {
                         // Create lookup key
                         const key = this.createLookupKey(position, handRank);
 
@@ -78,27 +78,26 @@ class NetEVLookup {
                         this.evMap.set(key, {
                             position,
                             handRank,
-                            handType,
-                            primaryRank,
-                            winRate,
-                            winPoints,
-                            positiveEV,
-                            higherTypesLossEV,
-                            sameTypeLossEV,
-                            totalNegativeEV,
-                            finalEV
+                            wins,
+                            total,
+                            netev
                         });
+
+                        // Verify what we just stored
+                        const storedData = this.evMap.get(key);
+//                        console.log(`✅ Stored for key "${key}":`, storedData);
+//                        console.log(`✅ netev field: ${storedData.netev} (type: ${typeof storedData.netev})`);
 
                         parseCount++;
                     } else {
                         throw new Error(`Invalid data values`);
                     }
                 } else {
-                    throw new Error(`Expected 11+ fields, got ${fields.length}`);
+                    throw new Error(`Expected 5 fields, got ${fields.length}`);
                 }
 
             } catch (error) {
-                console.warn(`⚠️ Line ${index + 2}: ${error.message} - "${line}"`);
+                console.warn(`⚠️  Line ${index + 2}: ${error.message} - "${line}"`);
                 errorCount++;
             }
         });
@@ -195,7 +194,17 @@ class NetEVLookup {
         }
 
         const key = this.createLookupKey(position, handRank);
+
+//        console.log(`🔍 Looking for key: "${key}"`);
+//        console.log(`🔍 evMap has this key: ${this.evMap.has(key)}`);
+
         const entry = this.evMap.get(key);
+
+//        if (entry) {
+//            console.log(`🔍 Found data:`, entry);
+//            console.log(`🔍 entry.netev = ${entry.netev} (type: ${typeof entry.netev})`);
+//            return entry.netev;
+//        }
 
         return entry ? entry.finalEV : null;
     }
@@ -251,41 +260,121 @@ class NetEVLookup {
 const netEVLookup = new NetEVLookup();
 
 /**
- * Get Net EV with hierarchical fallback (mirrors your empirical win probability logic)
+ * Get Net EV with hierarchical fallback (mirrors your empirical win netev logic)
  * @param {string} position - Position (back/middle/front)
  * @param {Object} hand - Complete hand object with hand_rank, isIncomplete, etc.
  * @returns {number|null} - Net EV or null if no fallback found
  */
+//function lookupNetEV(position, hand) {
+//    // Extract hand_rank for compatibility
+//    const handRank = hand.hand_rank || hand;
+//
+//    // Try hierarchical fallback - progressively truncate tuple (same as your logic)
+//    for (let length = handRank.length; length >= 1; length--) {
+//        let truncatedTuple = handRank.slice(0, length);
+//        console.log(`🔍 Trying truncated tuple: [${truncatedTuple.join(',')}]`);
+//
+//        let netEV = netEVLookup.getNetEV(position, truncatedTuple);
+//        console.log(`🔍 Result: ${netEV}`);
+//
+//        if (netEV !== null) {
+//            return netEV;
+//        }
+//    }
+//
+//    // No match found at any level
+////    console.warn('🚨 No Net EV hierarchical match found for:', position, handRank);
+//    return null; // Let calling code fall back to Pure EV
+//}
+
+
+
+/**
+ * Get tiered2 win probability with complete hand model
+ * @param {string} position - Position (back/middle/front)
+ * @param {Object} hand - Complete hand object with isIncomplete, hand_rank, etc.
+ * @returns {number|null} - Win probability or null if no fallback found
+ */
 function lookupNetEV(position, hand) {
-    // Extract hand_rank for compatibility
+    console.log('🔍 Lookup netEV:', { position, handRank: hand.hand_rank });
     const handRank = hand.hand_rank || hand;
 
-    // SPECIAL HANDLING: Incomplete hands - use your existing fallback logic
-//    if (hand.isIncomplete) {
-//        // For incomplete hands, fall back to Pure EV calculation
-//        // (You can implement specific incomplete hand logic here if needed)
-//        console.log(`🔄 Incomplete hand detected for Net EV, using Pure EV fallback`);
-//        return null; // Let calling code fall back to Pure EV
+//    // SPECIAL HANDLING: Incomplete front hands
+//    if (position.toLowerCase() === 'front' && hand.isIncomplete) {
+//        const incompleteProbability = handleIncompleteFrontHand(handRank);
+//        if (incompleteProbability !== null) {
+//            return incompleteProbability;
+//        }
 //    }
 
-    // Try hierarchical fallback - progressively truncate tuple (same as your logic)
-    for (let length = handRank.length; length >= 1; length--) {
+//    // SPECIAL HANDLING: Incomplete middle/back hands - use tiered2 data for middle
+//    if ((position.toLowerCase() === 'middle' || position.toLowerCase() === 'back') && hand.isIncomplete) {
+//        if (position.toLowerCase() === 'middle') {
+//            // Try tiered2 incomplete middle hand lookup
+//            const tiered2Probability = handleIncompleteMiddleHand(hand.hand_rank);
+//            if (tiered2Probability !== null) {
+//                return tiered2Probability;
+//            }
+//        }
+//
+//        // Fall back to low probability for back position or if middle lookup fails
+//        return 0.001;
+//    }
+
+    // Try hierarchical fallback - 3 elements, then 2 elements only
+    for (let length = Math.min(handRank.length, 3); length >= 2; length--) {
         let truncatedTuple = handRank.slice(0, length);
+        console.log(`     Truncated Tuple: ${truncatedTuple}`)
+
         let netEV = netEVLookup.getNetEV(position, truncatedTuple);
 
         if (netEV !== null) {
-            // Optional: Log fallback level for debugging
-//            if (length < handRank.length) {
-//                console.log(`🎯 Net EV hierarchical match: level ${length}/${handRank.length} for ${position} [${handRank.join(',')}] → [${truncatedTuple.join(',')}] = ${netEV.toFixed(2)}`);
-//            }
-
+            console.log(`🎯 Hierarchical match: level ${length}/${handRank.length} for ${position} [${handRank.join(',')}] → [${truncatedTuple.join(',')}] = ${netEV}`);
             return netEV;
         }
     }
 
-    // No match found at any level
-//    console.warn('🚨 No Net EV hierarchical match found for:', position, handRank);
-    return null; // Let calling code fall back to Pure EV
+    // Final fallback to hardcoded hand type probabilities
+    if (handRank.length >= 2) {
+        const handType = handRank[0];
+        const primaryRank = handRank[1];
+
+        // Use existing hardcoded fallback functions
+        if (position.toLowerCase() === 'front') {
+            const frontFallback = handleIncompleteFrontHand(handRank);
+            if (frontFallback !== null) {
+                console.log(`🎯 Front hardcoded fallback: ${frontFallback}`);
+                return frontFallback;
+            }
+        } else if (position.toLowerCase() === 'middle') {
+            const middleFallback = handleIncompleteMiddleHand(handRank);
+            if (middleFallback !== null) {
+                console.log(`🎯 Middle hardcoded fallback: ${middleFallback}`);
+                return middleFallback;
+            }
+        }
+    }
+
+
+    console.log('❌ No match found at any level, returning null');
+    console.log(`   🔍 Position: ${position}`);
+    console.log(`   🔍 Hand rank tuple: [${handRank.join(', ')}]`);
+    console.log(`   🔍 Attempted lookups:`);
+
+    // In your lookup code where it fails
+//    debugHandCorruption(hand, "When lookup fails");
+//
+//    console.log (`     netEVLookup: position, hand: ${position}`)
+//    // Pretty-printed JSON
+//    console.log("Hand (formatted):", JSON.stringify(hand, null, 2));
+
+    // Show exactly what tuples were tried
+    for (let length = Math.min(handRank.length, 3); length >= 2; length--) {
+        let truncatedTuple = handRank.slice(0, length);
+        console.log(`     Tried: [${truncatedTuple.join(', ')}] - No match`);
+    }
+
+    return null;
 }
 
 /**

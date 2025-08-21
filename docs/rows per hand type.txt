@@ -1,0 +1,149 @@
+// Let's systematically calculate valid row counts by hand type
+
+console.log("=== NetEV Hand Type Valid Row Estimation ===\n");
+
+// Hand type definitions based on our conversation
+const handTypes = {
+    1: "High Card",
+    2: "Pair", 
+    3: "Three of a Kind",
+    4: "Two Pair",
+    5: "Straight",
+    6: "Flush",
+    7: "Full House", 
+    8: "Four of a Kind",
+    9: "Straight Flush (5-card)",
+    10: "Five of a Kind",
+    11: "Straight Flush (6-card)",
+    12: "Six of a Kind", 
+    13: "Straight Flush (7-card)",
+    14: "Seven of a Kind",
+    15: "Straight Flush (8-card)",
+    16: "Eight of a Kind"
+};
+
+// Calculate for each hand type
+let totalRows = 0;
+
+console.log("2-ELEMENT HAND TYPES (no kickers):");
+console.log("===================================");
+
+// Same rank hands: 10, 12, 14, 16 (2 elements each)
+[10, 12, 14, 16].forEach(type => {
+    const ranks = 13; // 2-A, each rank possible
+    const positions = 3; // front, middle, back
+    const rows = ranks * positions;
+    totalRows += rows;
+    console.log(`Type ${type} (${handTypes[type]}): ${ranks} ranks × 3 positions = ${rows} rows`);
+});
+
+// Front position trips (2 elements)
+const frontTrips = 13 * 1; // 13 ranks × 1 position (front only)
+totalRows += frontTrips;
+console.log(`Type 3 (Trips - Front only): 13 ranks × 1 position = ${frontTrips} rows`);
+
+console.log("\n3-ELEMENT HAND TYPES:");
+console.log("=====================");
+
+// Straights (type 5) - valid sequences only
+const straightSequences = [
+    "(5,9,8)", "(5,10,9)", "(5,11,10)", "(5,12,11)", "(5,13,12)", "(5,14,13)", // regular
+    "(5,14,5)" // wheel
+];
+const straightRows = straightSequences.length * 3; // 3 positions
+totalRows += straightRows;
+console.log(`Type 5 (Straight): ${straightSequences.length} valid sequences × 3 positions = ${straightRows} rows`);
+
+// Straight Flushes: 9, 11, 13, 15 (same pattern as straights)
+[9, 11, 13, 15].forEach(type => {
+    const sequences = 7; // same as straights
+    const positions = 3;
+    const rows = sequences * positions;
+    totalRows += rows;
+    console.log(`Type ${type} (${handTypes[type]}): ${sequences} sequences × 3 positions = ${rows} rows`);
+});
+
+console.log("\nRANK-BASED 3-ELEMENT TYPES:");
+console.log("============================");
+
+// Trips (middle/back positions only)
+const tripsMiddleBack = 13 * 12 * 2; // 13 trip ranks × 12 kicker ranks × 2 positions
+totalRows += tripsMiddleBack;
+console.log(`Type 3 (Trips - Middle/Back): 13 trip ranks × 12 kicker ranks × 2 positions = ${tripsMiddleBack} rows`);
+
+// Four of a Kind
+const fourKind = 13 * 12 * 3; // 13 quad ranks × 12 kicker ranks × 3 positions
+totalRows += fourKind;
+console.log(`Type 8 (Four of a Kind): 13 quad ranks × 12 kicker ranks × 3 positions = ${fourKind} rows`);
+
+// Full House
+const fullHouse = 13 * 12 * 3; // 13 trip ranks × 12 pair ranks × 3 positions
+totalRows += fullHouse;
+console.log(`Type 7 (Full House): 13 trip ranks × 12 pair ranks × 3 positions = ${fullHouse} rows`);
+
+// Pairs
+const pairs = 13 * 12 * 3; // 13 pair ranks × 12 kicker ranks × 3 positions
+totalRows += pairs;
+console.log(`Type 2 (Pair): 13 pair ranks × 12 kicker ranks × 3 positions = ${pairs} rows`);
+
+// High Card
+const highCard = 13 * 12 * 3; // 13 high ranks × 12 second ranks × 3 positions
+totalRows += highCard;
+console.log(`Type 1 (High Card): 13 high ranks × 12 second ranks × 3 positions = ${highCard} rows`);
+
+// Flushes (simplified to 3 elements)
+const flushes = 13 * 12 * 3; // 13 high ranks × 12 second ranks × 3 positions
+totalRows += flushes;
+console.log(`Type 6 (Flush): 13 high ranks × 12 second ranks × 3 positions = ${flushes} rows`);
+
+console.log("\nCOMPLEX TYPES (need detailed analysis):");
+console.log("======================================");
+
+// Two Pair - more complex (can't appear in front, need 2 different pair ranks)
+const twoPairRanks = 13 * 12 / 2; // combinations of 2 different ranks
+const twoPair = twoPairRanks * 2; // middle and back only
+totalRows += twoPair;
+console.log(`Type 4 (Two Pair): ~${twoPairRanks} rank combinations × 2 positions = ~${twoPair} rows`);
+
+console.log("\n=== SUMMARY ===");
+console.log(`Estimated total valid rows: ${totalRows}`);
+console.log(`Current rows in table: 640`);
+console.log(`Estimated missing rows: ${totalRows - 640}`);
+console.log(`Current coverage: ${(640/totalRows*100).toFixed(1)}%`);
+VM1356:3 === NetEV Hand Type Valid Row Estimation ===
+
+VM1356:28 2-ELEMENT HAND TYPES (no kickers):
+VM1356:29 ===================================
+VM1356:37 Type 10 (Five of a Kind): 13 ranks × 3 positions = 39 rows
+VM1356:37 Type 12 (Six of a Kind): 13 ranks × 3 positions = 39 rows
+VM1356:37 Type 14 (Seven of a Kind): 13 ranks × 3 positions = 39 rows
+VM1356:37 Type 16 (Eight of a Kind): 13 ranks × 3 positions = 39 rows
+VM1356:43 Type 3 (Trips - Front only): 13 ranks × 1 position = 13 rows
+VM1356:45 
+3-ELEMENT HAND TYPES:
+VM1356:46 =====================
+VM1356:55 Type 5 (Straight): 7 valid sequences × 3 positions = 21 rows
+VM1356:63 Type 9 (Straight Flush (5-card)): 7 sequences × 3 positions = 21 rows
+VM1356:63 Type 11 (Straight Flush (6-card)): 7 sequences × 3 positions = 21 rows
+VM1356:63 Type 13 (Straight Flush (7-card)): 7 sequences × 3 positions = 21 rows
+VM1356:63 Type 15 (Straight Flush (8-card)): 7 sequences × 3 positions = 21 rows
+VM1356:66 
+RANK-BASED 3-ELEMENT TYPES:
+VM1356:67 ============================
+VM1356:72 Type 3 (Trips - Middle/Back): 13 trip ranks × 12 kicker ranks × 2 positions = 312 rows
+VM1356:77 Type 8 (Four of a Kind): 13 quad ranks × 12 kicker ranks × 3 positions = 468 rows
+VM1356:82 Type 7 (Full House): 13 trip ranks × 12 pair ranks × 3 positions = 468 rows
+VM1356:87 Type 2 (Pair): 13 pair ranks × 12 kicker ranks × 3 positions = 468 rows
+VM1356:92 Type 1 (High Card): 13 high ranks × 12 second ranks × 3 positions = 468 rows
+VM1356:97 Type 6 (Flush): 13 high ranks × 12 second ranks × 3 positions = 468 rows
+VM1356:99 
+COMPLEX TYPES (need detailed analysis):
+VM1356:100 ======================================
+VM1356:106 Type 4 (Two Pair): ~78 rank combinations × 2 positions = ~156 rows
+VM1356:108 
+=== SUMMARY ===
+VM1356:109 Estimated total valid rows: 3082
+VM1356:110 Current rows in table: 640
+VM1356:111 Estimated missing rows: 2442
+VM1356:112 Current coverage: 20.8%
+undefined
