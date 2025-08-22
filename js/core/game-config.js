@@ -4,8 +4,8 @@ class GameConfig {
     constructor() {
         this.config = {
             // Game mode settings
-            gameMode: 'multiplayer',        // 'multiplayer' or 'singleplayer'
-            computerPlayers: 3,             // Number of computer opponents (1-5)
+            gameMode: 'singleplayer',        // 'multiplayer' or 'singleplayer'
+            computerPlayers: 5,             // Number of computer opponents (1-5)
 
             // Wild card settings
             wildCardCount: 2,               // Number of wild cards (0-4)
@@ -14,7 +14,7 @@ class GameConfig {
             deckCount: 2,                   // Number of standard decks (1-3)
 
             // Win probability method
-            winProbabilityMethod: 'netEV',  // 'points', 'empirical', 'tiered', 'tiered2', "netEV"
+            winProbabilityMethod: 'tiered2',  // 'points', 'empirical', 'tiered', 'tiered2', "netEV"
 
             // Future expansion options (commented out for now)
             // maxPlayers: 4,               // Maximum players (2-6)

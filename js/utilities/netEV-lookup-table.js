@@ -188,31 +188,22 @@ class NetEVLookup {
      * @returns {number|null} - Net EV or null if not found
      */
     getNetEV(position, handRank) {
-
-    // In getNetEV() method, add this:
-    console.log(`🔧 DEBUG: Looking for key "${position.toLowerCase()}_${tuple.join('_')}"`);
-    console.log(`🔧 Data exists: ${this.lookupData ? 'YES' : 'NO'}`);
-    if (this.lookupData) {
-        const totalKeys = Object.keys(this.lookupData).length;
-        const sampleKeys = Object.keys(this.lookupData).slice(0, 5);
-        console.log(`🔧 Total entries: ${totalKeys}, Sample keys: ${sampleKeys}`);
-    }
-
         if (!this.isLoaded) {
             console.warn('⚠️ Net EV data not loaded yet');
             return null;
         }
 
         const key = this.createLookupKey(position, handRank);
-
-//        console.log(`🔍 Looking for key: "${key}"`);
-//        console.log(`🔍 evMap has this key: ${this.evMap.has(key)}`);
-
         const entry = this.evMap.get(key);
 
+        // ✅ LIGHT DEBUG: Only log failures and first few successes
+        if (!entry) {
+//            console.log(`❌ Missing: ${key}`);
+        } else if (Math.random() < 0.01) {  // Only log 1% of successes
+//            console.log(`✅ Found: ${key} = ${entry.netev}`);
+        }
+
         if (entry) {
-//            console.log(`🔍 Found data:`, entry);
-//            console.log(`🔍 entry.netev = ${entry.netev} (type: ${typeof entry.netev})`);
             return entry.netev;
         }
 
@@ -267,68 +258,51 @@ class NetEVLookup {
 
     // Add this method to your NetEV lookup class
     getNetEVByPrefix(position, partialTuple) {
-        if (!this.lookupData) {
-            console.log(`❌ NetEV lookup data is null/undefined`);
+        // ✅ FIXED: Check the right property
+        if (!this.evMap) {
+            console.log(`❌ NetEV evMap is null/undefined`);
+            return null;
+        }
+
+        if (!partialTuple || partialTuple.length === 0) {
+            console.log(`❌ Invalid partial tuple: ${partialTuple}`);
             return null;
         }
 
         const handType = partialTuple[0];
-        console.log(`🔍 DEBUG Prefix search: ${position} handType=${handType} prefix=[${partialTuple.join(',')}]`);
+//        console.log(`🔍 Prefix search for ${position} handType ${handType} with prefix [${partialTuple.join(',')}]`);
 
-        // Show what entries we actually have for this position/handType
-        const allKeys = Object.keys(this.lookupData);
-        const relevantKeys = allKeys.filter(key => {
-            const keyParts = key.split('_');
-            return keyParts.length >= 3 &&
-                   keyParts[0].toLowerCase() === position.toLowerCase() &&
-                   parseInt(keyParts[1]) === handType;
-        });
-
-        console.log(`🔍 Found ${relevantKeys.length} relevant entries for ${position}_${handType}:`);
-        relevantKeys.slice(0, 5).forEach(key => {
-            console.log(`   ${key} = ${this.lookupData[key]}`);
-        });
-        if (relevantKeys.length > 5) {
-            console.log(`   ... and ${relevantKeys.length - 5} more`);
-        }
-
-        // Try the matching logic
+        // ✅ SEARCH THROUGH evMap, not lookupData
         const matchingEntries = [];
 
-        for (const [key, value] of Object.entries(this.lookupData)) {
-            const keyParts = key.split('_');
-            if (keyParts.length < 3) continue;
+        for (const [key, entry] of this.evMap.entries()) {
+            // Parse the key using your actual createLookupKey format
+            // We need to reverse-engineer the key format
+            if (key.startsWith(`${position.toLowerCase()}:`)) {
+                const keyParts = key.split(':')[1].split(',').map(x => parseInt(x));
 
-            const keyPosition = keyParts[0];
-            const keyTuple = keyParts.slice(1).map(x => parseInt(x));
+                // Check if this key matches our prefix
+                let isMatch = true;
+                for (let i = 0; i < partialTuple.length; i++) {
+                    if (i >= keyParts.length || keyParts[i] !== partialTuple[i]) {
+                        isMatch = false;
+                        break;
+                    }
+                }
 
-            // Debug each step
-            const positionMatch = keyPosition.toLowerCase() === position.toLowerCase();
-            if (!positionMatch) continue;
-
-            let prefixMatch = true;
-            for (let i = 0; i < partialTuple.length; i++) {
-                if (i >= keyTuple.length || keyTuple[i] !== partialTuple[i]) {
-                    prefixMatch = false;
-                    break;
+                if (isMatch) {
+                    matchingEntries.push({ key, value: entry.netev, tuple: keyParts });
                 }
             }
-
-            if (prefixMatch) {
-                console.log(`✅ Prefix match found: ${key} = ${value}`);
-                matchingEntries.push({ key, value, tuple: keyTuple });
-            }
         }
-
-        console.log(`🔍 Total prefix matches found: ${matchingEntries.length}`);
 
         if (matchingEntries.length > 0) {
             const bestMatch = matchingEntries[0];
-            console.log(`🎯 Returning first match: [${bestMatch.tuple.join(',')}] = ${bestMatch.value}`);
+//            console.log(`✅ Prefix match found: [${bestMatch.tuple.join(',')}] = ${bestMatch.value}`);
             return bestMatch.value;
         }
 
-        console.log(`❌ No prefix matches found despite having ${relevantKeys.length} relevant entries!`);
+        console.log(`❌ No prefix matches found for [${partialTuple.join(',')}]`);
         return null;
     }
 
@@ -346,51 +320,61 @@ const netEVLookup = new NetEVLookup();
 
 function lookupNetEV(position, hand) {
     const handRank = hand.hand_rank || hand;
+    const truncatedHandRank = handRank.slice(0, 3);
+
+//    console.log(`🔍 Original: [${handRank.join(',')}] → Truncated: [${truncatedHandRank.join(',')}]`);
 
     // Step 1: Try exact match first
-    let netEV = netEVLookup.getNetEV(position, handRank);
+    let netEV = netEVLookup.getNetEV(position, truncatedHandRank);
     if (netEV !== null) {
-        console.log(`🎯 Exact match: ${position} [${handRank.join(',')}] = ${netEV}`);
+//        console.log(`🎯 Exact match: ${position} [${truncatedHandRank.join(',')}] = ${netEV}`);
         return netEV;
     }
 
+    // ✅ DEBUG: Check if we enter the prefix loop
+//    console.log(`🔧 Entering prefix loop for [${truncatedHandRank.join(',')}], length=${truncatedHandRank.length}`);
+
     // Step 2: Try prefix matching fallback
-    for (let length = Math.min(handRank.length - 1, 2); length >= 2; length--) {
-        let prefixTuple = handRank.slice(0, length);
-        console.log(`🔍 Trying prefix match: ${position} [${prefixTuple.join(',')}]`);
+    // ✅ NEW:
+    for (let length = Math.min(truncatedHandRank.length, 2); length >= 2; length--) {
+        let prefixTuple = truncatedHandRank.slice(0, length);
+//        console.log(`🔍 Trying prefix match: ${position} [${prefixTuple.join(',')}] (length=${length})`);
 
         netEV = netEVLookup.getNetEVByPrefix(position, prefixTuple);
 
         if (netEV !== null) {
-            console.log(`🎯 Prefix match: ${position} level ${length}/${handRank.length} [${handRank.join(',')}] → [${prefixTuple.join(',')}] = ${netEV}`);
+//            console.log(`🎯 Prefix match: ${position} level ${length}/${truncatedHandRank.length} [${truncatedHandRank.join(',')}] → [${prefixTuple.join(',')}] = ${netEV}`);
             return netEV;
         }
     }
 
-    // Step 3: Final hardcoded fallback
-    if (handRank.length >= 2) {
+//    console.log(`🔧 Prefix loop completed, moving to hardcoded fallback`);
+
+
+    // Step 3: Final hardcoded fallback (using truncated hand rank)
+    if (truncatedHandRank.length >= 2) {
         if (position.toLowerCase() === 'front') {
-            const frontFallback = handleIncompleteFrontHand(handRank);
+            const frontFallback = handleIncompleteFrontHand(truncatedHandRank);
             if (frontFallback !== null) {
-                console.log(`🎯 Front hardcoded fallback: ${position} [${handRank.join(',')}] = ${frontFallback}`);
+                console.log(`🎯 Front hardcoded fallback: ${position} [${truncatedHandRank.join(',')}] = ${frontFallback}`);
                 return frontFallback;
             }
         } else if (position.toLowerCase() === 'middle') {
-            const middleFallback = handleIncompleteMiddleHand(handRank);
+            const middleFallback = handleIncompleteMiddleHand(truncatedHandRank);
             if (middleFallback !== null) {
-                console.log(`🎯 Middle hardcoded fallback: ${position} [${handRank.join(',')}] = ${middleFallback}`);
+                console.log(`🎯 Middle hardcoded fallback: ${position} [${truncatedHandRank.join(',')}] = ${middleFallback}`);
                 return middleFallback;
             }
         } else if (position.toLowerCase() === 'back') {
-            const backFallback = handleIncompleteBackHand(handRank);
+            const backFallback = handleIncompleteBackHand(truncatedHandRank);
             if (backFallback !== null) {
-                console.log(`🎯 Back hardcoded fallback: ${position} [${handRank.join(',')}] = ${backFallback}`);
+                console.log(`🎯 Back hardcoded fallback: ${position} [${truncatedHandRank.join(',')}] = ${backFallback}`);
                 return backFallback;
             }
         }
     }
 
-    console.log(`❌ Complete lookup failure: ${position} [${handRank.join(',')}]`);
+    console.log(`❌ Complete lookup failure: ${position} [${truncatedHandRank.join(',')}]`);
     return null;
 }
 
