@@ -143,20 +143,38 @@ class ScoringUtilities {
             return pointsIfWin + strengthBonus;
         } else if (actualMethod === 'netEV') {
             // NEW: Net EV method - uses corrected EV calculations
-            console.log(`scoringUtilities lookup: ${position}  ${hand.hand_rank}`)
+//            console.log(`scoringUtilities lookup: ${position}  ${hand.hand_rank}`)
             const netEV = lookupNetEV(position, hand);
 
             if (netEV !== null) {
-                // Found Net EV in lookup table
-                console.log (`   netEV: ${hand.hand_rank} ${position} ${netEV}`)
                 return netEV;
             } else {
-                // NOT found - fallback to corrected Pure EV
+                // ✅ FIXED: Proper NetEV fallback calculation
                 const winProb = this.getWinProbabilityForMethod('tiered', position, hand);
+                const lossProb = 1 - winProb;
                 const pointsIfWin = hand.positionScores[position];
-                const pureEV = winProb * pointsIfWin;
-                const correctionFactor = 0.65; // Apply reduction to Pure EV fallback
-                return pureEV * correctionFactor;
+
+                // Estimate loss penalty based on position and hand strength
+                let lossPenalty;
+                const handType = hand.hand_rank[0];
+
+                if (position.toLowerCase() === 'front') {
+                    // Front position loss penalties
+                    lossPenalty = handType >= 3 ? 1 : 2;  // Trips lose 1, pairs/high card lose 2
+                } else if (position.toLowerCase() === 'middle') {
+                    // Middle position loss penalties
+                    lossPenalty = handType >= 5 ? 2 : 4;  // Straights+ lose 2, others lose 4
+                } else {
+                    // Back position loss penalties
+                    lossPenalty = handType >= 7 ? 4 : 6;  // Full house+ lose 4, others lose 6
+                }
+
+                // Proper NetEV calculation
+                const netEV = (winProb * pointsIfWin) - (lossProb * lossPenalty);
+
+                console.log(`🎯 NetEV fallback: ${position} winProb=${winProb.toFixed(3)} pointsIfWin=${pointsIfWin} lossPenalty=${lossPenalty} → netEV=${netEV.toFixed(3)}`);
+
+                return netEV;
             }
 
         } else {

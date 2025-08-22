@@ -639,6 +639,12 @@ class HandDetector {
         // Calculate position-specific scores
         const positionScores = this.calculatePositionScores(handStrength, validPositions, cards.length);
 
+
+//        if (handType === 'Straight' || handType === 'Straight Flush') {
+//        console.log(`🎯 HAND-DETECTOR: ${handType} → [${handStrength.hand_rank.join(',')}]`);
+//        console.log(`🎯 HAND-DETECTOR: Card values: [${cards.map(c => c.value).join(',')}]`);
+//        }
+
         this.allHands.push({
             cards: [...cards],
             handType,
