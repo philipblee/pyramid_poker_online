@@ -1,40 +1,38 @@
-// js/ui/lobby.js
-// Pyramid Poker Lobby System
+// In lobby.js, update the tableSettings object (around line 4):
 
-// Game state
-let currentTable = null;
 let tableSettings = {
     gameMode: 'offline',
     aiPlayers: 4,
-    totalRounds: 3,
-    wildCards: 2
+    rounds: 3,           // NEW - changed from totalRounds
+    wildCards: 2,
+    aiMethod: 'tiered2'  // NEW - added AI method
 };
 
-// Default tables available in lobby
+// Update defaultTables array to use new structure:
 const defaultTables = [
     {
         id: 1,
         name: 'Quick Play',
-        settings: { gameMode: 'offline', aiPlayers: 4, totalRounds: 3, wildCards: 2 },
-        icon: '📱'
+        settings: { gameMode: 'offline', aiPlayers: 4, rounds: 3, wildCards: 2, aiMethod: 'tiered2' },
+        icon: '🏓'
     },
     {
         id: 2,
         name: 'Practice Table',
-        settings: { gameMode: 'offline', aiPlayers: 2, totalRounds: 5, wildCards: 1 },
-        icon: '📱'
+        settings: { gameMode: 'offline', aiPlayers: 2, rounds: 5, wildCards: 1, aiMethod: 'points' },
+        icon: '🏓'
     },
     {
         id: 3,
         name: 'Cloud Ranked',
-        settings: { gameMode: 'online', aiPlayers: 5, totalRounds: 3, wildCards: 2 },
+        settings: { gameMode: 'online', aiPlayers: 5, rounds: 3, wildCards: 2, aiMethod: 'netEV' },
         icon: '☁️'
     },
     {
         id: 4,
         name: 'Challenge Mode',
-        settings: { gameMode: 'offline', aiPlayers: 5, totalRounds: 10, wildCards: 0 },
-        icon: '📱'
+        settings: { gameMode: 'offline', aiPlayers: 5, rounds: 10, wildCards: 0, aiMethod: 'tiered2' },
+        icon: '🏓'
     }
 ];
 
@@ -148,7 +146,7 @@ function createNewTable() {
     }
 }
 
-// Update table display
+// Update table display (replace existing function)
 function updateTableDisplay() {
     if (!currentTable) return;
 
@@ -158,21 +156,17 @@ function updateTableDisplay() {
     const settingsHtml = `
         Mode: ${modeText}<br>
         AI Players: ${tableSettings.aiPlayers}<br>
-        Total Rounds: ${tableSettings.totalRounds}<br>
-        Wild Cards: ${tableSettings.wildCards}
+        Rounds: ${tableSettings.rounds}<br>          <!-- NEW -->
+        Wild Cards: ${tableSettings.wildCards}<br>
+        AI Method: ${tableSettings.aiMethod}         <!-- NEW -->
     `;
 
     document.getElementById('settingsDisplay').innerHTML = settingsHtml;
 }
 
-// Edit settings (use your existing modal)
+// Replace the editSettings function (around line 125):
 function editSettings() {
-    // Call your existing game config function
-    if (typeof openGameConfig === 'function') {
-        openGameConfig();
-    } else {
-        console.warn('openGameConfig function not found');
-    }
+    openTableSettings();
 }
 
 // Function to call when your settings modal saves
@@ -261,6 +255,233 @@ function returnToTable() {
     }
 }
 
+// Create table settings modal HTML (add this function to lobby.js)
+function createTableSettingsModal() {
+    const modal = document.createElement('div');
+    modal.id = 'tableSettingsModal';
+    modal.className = 'modal';
+    modal.style.display = 'none';
+
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎯 Table Settings</h2>
+                <span class="close" onclick="closeTableSettings()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label for="tableRounds">Rounds (3-20):</label>
+                    <input type="range" id="tableRounds" min="3" max="20" value="3" oninput="updateRoundsDisplay(this.value)">
+                    <span id="roundsValue">3</span>
+                </div>
+
+                <div class="setting-group">
+                    <label for="tableAiMethod">AI Method:</label>
+                    <select id="tableAiMethod">
+                        <option value="points">Points</option>
+                        <option value="tiered2">Tiered2</option>
+                        <option value="netEV">NetEV</option>
+                    </select>
+                </div>
+
+                <div class="setting-group">
+                    <label for="tableWildCards">Wild Cards (0-4):</label>
+                    <input type="range" id="tableWildCards" min="0" max="4" value="2" oninput="updateWildCardsDisplay(this.value)">
+                    <span id="wildCardsValue">2</span>
+                </div>
+
+                <div class="setting-group">
+                    <label for="tableAiPlayers">AI Players (1-5):</label>
+                    <input type="range" id="tableAiPlayers" min="1" max="5" value="4" oninput="updateAiPlayersDisplay(this.value)">
+                    <span id="aiPlayersValue">4</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeTableSettings()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTableSettings()">Save Settings</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+// Open table settings modal
+function openTableSettings() {
+    // Create modal if it doesn't exist
+    if (!document.getElementById('tableSettingsModal')) {
+        createTableSettingsModal();
+    }
+
+    // Populate current settings
+    document.getElementById('tableRounds').value = tableSettings.rounds || 3;
+    document.getElementById('tableAiMethod').value = tableSettings.aiMethod || 'tiered2';
+    document.getElementById('tableWildCards').value = tableSettings.wildCards || 2;
+    document.getElementById('tableAiPlayers').value = tableSettings.aiPlayers || 4;
+
+    // Update displays
+    updateRoundsDisplay(tableSettings.rounds || 3);
+    updateAiPlayersDisplay(tableSettings.aiPlayers || 4);
+    updateWildCardsDisplay(tableSettings.wildCards || 2);
+
+    // Show modal
+    document.getElementById('tableSettingsModal').style.display = 'block';
+}
+
+// Close table settings modal
+function closeTableSettings() {
+    document.getElementById('tableSettingsModal').style.display = 'none';
+}
+
+// Save table settings
+function saveTableSettings() {
+    // Get values from modal
+    tableSettings.rounds = parseInt(document.getElementById('tableRounds').value);
+    tableSettings.aiMethod = document.getElementById('tableAiMethod').value;
+    tableSettings.wildCards = parseInt(document.getElementById('tableWildCards').value);
+    tableSettings.aiPlayers = parseInt(document.getElementById('tableAiPlayers').value);
+
+    // Update current table if we have one
+    if (currentTable) {
+        currentTable.settings = { ...tableSettings };
+    }
+
+    // Update the display
+    updateTableDisplay();
+
+    // Close modal
+    closeTableSettings();
+
+    console.log('Table settings saved:', tableSettings);
+}
+
+// Update display functions for sliders
+function updateRoundsDisplay(value) {
+    document.getElementById('roundsValue').textContent = value;
+}
+
+function updateAiPlayersDisplay(value) {
+    document.getElementById('aiPlayersValue').textContent = value;
+}
+
+function updateWildCardsDisplay(value) {
+    document.getElementById('wildCardsValue').textContent = value;
+}
+
+// Table Settings Modal Functions - Add to lobby.js
+
+// Table Settings Modal Functions - Add to end of lobby.js
+
+// Open table settings modal
+function openTableSettings() {
+    // Create modal if it doesn't exist
+    if (!document.getElementById('tableSettingsModal')) {
+        createTableSettingsModal();
+    }
+
+    // Populate current settings
+    document.getElementById('tableRounds').value = tableSettings.rounds || 3;
+    document.getElementById('tableAiMethod').value = tableSettings.aiMethod || 'tiered2';
+    document.getElementById('tableWildCards').value = tableSettings.wildCards || 2;
+    document.getElementById('tableAiPlayers').value = tableSettings.aiPlayers || 4;
+
+    // Update displays
+    updateRoundsDisplay(tableSettings.rounds || 3);
+    updateAiPlayersDisplay(tableSettings.aiPlayers || 4);
+    updateWildCardsDisplay(tableSettings.wildCards || 2);
+
+    // Show modal
+    document.getElementById('tableSettingsModal').style.display = 'block';
+}
+
+// Create modal dynamically (matches your scoring popup style)
+function createTableSettingsModal() {
+    const modal = document.createElement('div');
+    modal.id = 'tableSettingsModal';
+    modal.className = 'scoring-popup'; // Reuse existing popup CSS
+
+    modal.innerHTML = `
+        <div class="scoring-content">
+            <button class="close-popup" onclick="closeTableSettings()">&times;</button>
+            <h2 style="text-align: center; margin-bottom: 30px; color: #ffd700;">⚙️ Table Settings</h2>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #ffd700; display: block; margin-bottom: 8px;">Rounds (3-20):</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="range" id="tableRounds" min="3" max="20" value="3"
+                           oninput="updateRoundsDisplay(this.value)" style="flex: 1;">
+                    <span id="roundsValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">3</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #ffd700; display: block; margin-bottom: 8px;">AI Method:</label>
+                <select id="tableAiMethod" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
+                    <option value="points">Points</option>
+                    <option value="tiered2">Tiered2</option>
+                    <option value="netEV">NetEV</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #ffd700; display: block; margin-bottom: 8px;">Wild Cards (0-4):</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="range" id="tableWildCards" min="0" max="4" value="2"
+                           oninput="updateWildCardsDisplay(this.value)" style="flex: 1;">
+                    <span id="wildCardsValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">2</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #ffd700; display: block; margin-bottom: 8px;">AI Players (1-5):</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="range" id="tableAiPlayers" min="1" max="5" value="4"
+                           oninput="updateAiPlayersDisplay(this.value)" style="flex: 1;">
+                    <span id="aiPlayersValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">4</span>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-secondary" onclick="closeTableSettings()" style="margin-right: 15px;">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTableSettings()">Save Settings</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+// Close, save, and update functions
+function closeTableSettings() {
+    document.getElementById('tableSettingsModal').style.display = 'none';
+}
+
+function saveTableSettings() {
+    tableSettings.rounds = parseInt(document.getElementById('tableRounds').value);
+    tableSettings.aiMethod = document.getElementById('tableAiMethod').value;
+    tableSettings.wildCards = parseInt(document.getElementById('tableWildCards').value);
+    tableSettings.aiPlayers = parseInt(document.getElementById('tableAiPlayers').value);
+
+    if (currentTable) {
+        currentTable.settings = { ...tableSettings };
+    }
+
+    updateTableDisplay();
+    closeTableSettings();
+    console.log('✅ Table settings saved:', tableSettings);
+}
+
+function updateRoundsDisplay(value) {
+    document.getElementById('roundsValue').textContent = value;
+}
+
+function updateAiPlayersDisplay(value) {
+    document.getElementById('aiPlayersValue').textContent = value;
+}
+
+function updateWildCardsDisplay(value) {
+    document.getElementById('wildCardsValue').textContent = value;
+}
 // Export functions for integration
 window.PyramidPokerLobby = {
     initializeLobby,

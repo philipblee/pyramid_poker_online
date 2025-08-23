@@ -608,26 +608,30 @@ class ChinesePokerGame {
         const isValidBackHand = backCount < 6 || this.validateLargeHand(playerData.back);
         const isValidMiddleHand = middleCount < 6 || this.validateLargeHand(playerData.middle);
 
-        if (!isValidBackSize || !isValidMiddleSize || !isValidFrontSize || !isValidBackHand || !isValidMiddleHand) {
+        setTimeout(() => {
+          if (!isValidBackSize || !isValidMiddleSize || !isValidFrontSize || !isValidBackHand || !isValidMiddleHand) {
             let errorMsg = 'Invalid hand configuration:\n';
             if (!isValidBackSize) errorMsg += `- Back hand must have 5-8 cards (has ${backCount})\n`;
             if (!isValidMiddleSize) errorMsg += `- Middle hand must have 5-7 cards (has ${middleCount})\n`;
             if (!isValidFrontSize) errorMsg += `- Front hand must have 3 or 5 cards (has ${frontCount})\n`;
             if (!isValidBackHand) errorMsg += `- Back hand with 6+ cards must be all same rank or straight flush\n`;
             if (!isValidMiddleHand) errorMsg += `- Middle hand with 6+ cards must be all same rank or straight flush\n`;
-            
+
             alert(errorMsg);
             return;
-        }
+          }
+        }, 1000); // delay by 1 second
 
         // Calculate expected total based on actual hand sizes
         const minExpected = 5 + 5 + 3; // 13 cards minimum
         const maxExpected = 8 + 7 + 5; // 20 cards maximum
         
-        if (totalPlaced < minExpected || totalPlaced > maxExpected) {
+        setTimeout(() => {
+          if (totalPlaced < minExpected || totalPlaced > maxExpected) {
             alert(`Invalid total cards placed: ${totalPlaced}. Must be between ${minExpected} and ${maxExpected} cards.`);
             return;
-        }
+          }
+        }, 2000); // delay by 1 second
 
         const backStrength = evaluateHand(playerData.back);
         const middleStrength = evaluateHand(playerData.middle);
