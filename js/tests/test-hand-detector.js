@@ -13,6 +13,7 @@ class TestHandDetector {
         console.log(`\n🧪 TEST ${testCase.id}: ${testCase.name}`);
         console.log(`Cards: ${testCase.cards}`);
 
+
         try {
             // Get expected counts using CountValidHands
             const counter = new CountValidHands();
@@ -27,13 +28,29 @@ class TestHandDetector {
             const results = detector.detectAllHands(); // ADD THIS LINE
             const endTime = performance.now();
 
-            // ADD THIS: Show hand_rank for all straights
-            console.log(`\n🔍 STRAIGHT ANALYSIS:`);
-            results.hands.filter(h => h.handType === 'Straight').forEach((hand, index) => {
-                console.log(`   Straight #${index + 1}: hand_rank=[${hand.hand_rank}] rank="${hand.rank}" cards=[${hand.cards.map(c => c.rank + c.suit).join(' ')}]`);
+
+
+//            // ADD THIS: Show hand_rank for all straights
+//            console.log(`\n🔍 STRAIGHT ANALYSIS:`);
+//            results.hands.filter(h => h.handType === 'Straight').forEach((hand, index) => {
+//                console.log(`   Straight #${index + 1}: hand_rank=[${hand.hand_rank}] rank="${hand.rank}" cards=[${hand.cards.map(c => c.rank + c.suit).join(' ')}]`);
+//            });
+
+
+            // 🔥 ADD THIS: Show preCalculateScore for all hands
+            // 🔥 SAFER VERSION - Add checks to prevent errors
+            console.log(`\n🎯 In testHandDetector preCalculate SCORES:`);
+            results.hands.forEach((hand, index) => {
+                if (hand.preCalculateScore) {
+                    const front = hand.preCalculateScore.front !== null ? hand.preCalculateScore.front?.toFixed(2) : 'invalid';
+                    const middle = hand.preCalculateScore.middle !== null ? hand.preCalculateScore.middle?.toFixed(2) : 'invalid';
+                    const back = hand.preCalculateScore.back !== null ? hand.preCalculateScore.back?.toFixed(2) : 'invalid';
+
+                    console.log(`   ${index + 1}. ${hand.handType} [${hand.hand_rank.join(',')}]: F=${front} M=${middle} B=${back}`);
+                } else {
+                    console.log(`   ${index + 1}. ${hand.handType} [${hand.hand_rank.join(',')}]: preCalculateScore not found`);
+                }
             });
-
-
 
             // Verify actual vs expected
             const verification = this.verifyExpectations(results, expected);

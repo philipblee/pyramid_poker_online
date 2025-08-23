@@ -1,11 +1,9 @@
 // Card evaluation functions for Pyramid Poker
 
 function evaluateHand(cards) {
-    if (cards.length !== 5 && cards.length !== 6 && cards.length !== 7 && cards.length !== 8) return { rank: 0, hand_rank: [70, 80], name: 'Invalid' };
+    if (cards.length !== 5 && cards.length !== 6 && cards.length !== 7 && cards.length !== 8) return { rank: 1, hand_rank: [1, 7], name: 'High Card' };
     const analysis = new Analysis(cards);
-//    console.log (`${JSON.stringify(cards)}`)
     const handType = getHandType(analysis);
-//    console.log (`${JSON.stringify(handType)}`)
     return handType;
 }
 
@@ -406,13 +404,11 @@ function tryForStraightWithWilds(normalCards, wildCount) {
 
 // Evaluate 3-card or 5-card front hands
 function evaluateThreeCardHand(cards) {
-    // Handle both 3-card and 5-card front hands
+    // Handle 5-card front hands
     if (cards.length === 5) {
         // Use the regular 5-card evaluation for 5-card front hands
         return evaluateHand(cards);
     }
-
-    if (cards.length !== 3) return { rank: 0, hand_rank: [0, 0], name: 'Invalid' };
 
     // Handle wild cards in 3-card hands
     const wildCards = cards.filter(c => c.isWild);
@@ -438,19 +434,28 @@ function evaluateThreeCardHand(cards) {
         valuesByCount[count].sort((a, b) => b - a);
     }
 
+    if (cards.length === 1) return { rank: 1, hand_rank: [1, 7], name: 'High Card' };
+
+    if (cards.length === 2) return { rank: 1, hand_rank: [1, 8, 7], name: 'High Card' };
+
+    if (cards.length !== 3) return { rank: 1, hand_rank: [1, 7], name: 'Invalid' };
+
     const counts = Object.keys(valuesByCount).map(Number).sort((a, b) => b - a);
 
+    // Found trip
     if (counts[0] === 3) {
         const tripsRank = valuesByCount[3][0];
         return { rank: 4, hand_rank: [4, tripsRank], name: 'Three of a Kind' };
     }
 
+    // found pair
     if (counts[0] === 2) {
         const pairRank = valuesByCount[2][0];
         const kicker = valuesByCount[1][0];
         return { rank: 2, hand_rank: [2, pairRank, kicker], name: 'Pair' };
     }
 
+    // else it's a high card
     return { rank: 1, hand_rank: [1, ...values], name: 'High Card' };
 }
 

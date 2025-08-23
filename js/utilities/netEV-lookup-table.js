@@ -319,6 +319,11 @@ const netEVLookup = new NetEVLookup();
  */
 
 function lookupNetEV(position, hand) {
+
+    if (hand.preCalculatedScore && hand.preCalculatedScore[position] !== null && hand.preCalculatedScore[position] !== undefined) {
+        return hand.preCalculatedScore[position];
+    }
+
     const handRank = hand.hand_rank || hand;
     const truncatedHandRank = handRank.slice(0, 3);
 
@@ -330,9 +335,6 @@ function lookupNetEV(position, hand) {
 //        console.log(`🎯 Exact match: ${position} [${truncatedHandRank.join(',')}] = ${netEV}`);
         return netEV;
     }
-
-    // ✅ DEBUG: Check if we enter the prefix loop
-//    console.log(`🔧 Entering prefix loop for [${truncatedHandRank.join(',')}], length=${truncatedHandRank.length}`);
 
     // Step 2: Try prefix matching fallback
     // ✅ NEW:
@@ -347,9 +349,6 @@ function lookupNetEV(position, hand) {
             return netEV;
         }
     }
-
-//    console.log(`🔧 Prefix loop completed, moving to hardcoded fallback`);
-
 
     // Step 3: Final hardcoded fallback (using truncated hand rank)
     if (truncatedHandRank.length >= 2) {

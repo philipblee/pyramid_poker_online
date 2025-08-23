@@ -12,7 +12,7 @@ function evaluateIncompleteHand(cards, handType) {
     console.log(`🔧 Evaluating incomplete hand: ${handType} with ${cards.length} cards`);
 
     if (!cards || cards.length === 0) {
-        return { rank: 0, hand_rank: [0, 0], name: 'Invalid' };
+        return { rank: 0, hand_rank: [0, 0], name: 'No Cards' };
     }
 
     // Handle wild cards if present
@@ -55,7 +55,7 @@ function evaluateOneCardHand(values, handType) {
     const highCard = values[0];
 
     return {
-        rank: 0,                    // High Card base rank
+        rank: 1,                    // High Card base rank
         hand_rank: [1, highCard],   // [1=High Card type, high card value]
         name: 'High Card'
     };
@@ -72,7 +72,7 @@ function evaluateTwoCardHand(values, handType) {
         console.warn(`⚠️ Unexpected hand type for 2-card hand: ${handType}`);
         // Handle as high card if not a pair
         return {
-            rank: 0,
+            rank: 1,
             hand_rank: [1, values[0], values[1] || 0],
             name: 'High Card'
         };
@@ -110,7 +110,7 @@ function evaluateFourCardHand(values, handType, cards) {
         return evaluateTwoPair(values, valueCounts);
     } else {
         console.warn(`⚠️ Unexpected hand type for 4-card hand: ${handType}`);
-        return { rank: 0, hand_rank: [0, 0], name: 'Invalid' };
+        return { rank: 1, hand_rank: [1, 0], name: 'High Card' };
     }
 }
 
@@ -161,7 +161,7 @@ function evaluateTwoPair(values, valueCounts) {
     const lowerPair = pairs[1];
 
     return {
-        rank: 2,                                      // Two Pair base rank
+        rank: 3,                                      // Two Pair base rank
         hand_rank: [3, higherPair, lowerPair],        // [3=Two Pair type, higher pair, lower pair] - kicker added later
         name: 'Two Pair'
     };

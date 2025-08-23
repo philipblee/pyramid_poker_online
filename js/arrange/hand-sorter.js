@@ -20,8 +20,8 @@ class HandSorter {
             };
         }
 
-        // Sort by hand_rank tuples (descending = strongest first)
-        const sorted = [...hands].sort((a, b) => {
+        // TO THIS (preserve all properties explicitly):
+        const sorted = hands.map(hand => ({ ...hand })).sort((a, b) => {
             return this.compareHandRanks(b.hand_rank, a.hand_rank);
         });
 
@@ -52,6 +52,8 @@ class HandSorter {
             metadata: metadata
         };
     }
+
+
 
     /**
      * Compare hand_rank tuples element by element

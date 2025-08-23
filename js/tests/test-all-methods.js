@@ -338,32 +338,49 @@ function quickCompareArrangements(testId) {
     const empiricalArr = results.empirical.arrangement;
     const tieredArr = results.tiered.arrangement;
     const tiered2Arr = results.tiered2.arrangement;
+    const netEV = results.netEV.arrangement;
 
     const allSame = JSON.stringify(pointsArr) === JSON.stringify(empiricalArr) &&
                     JSON.stringify(empiricalArr) === JSON.stringify(tieredArr);
 
     console.log(`\nArrangement Consistency: ${allSame ? '✅ IDENTICAL' : '⚠️ DIFFERENT'}`);
 
+    // Then modify your logging section:
     if (!allSame) {
         console.log('Back hands:', {
-            points: pointsArr?.back,
-            empirical: empiricalArr?.back,
-            tiered: tieredArr?.back,
-            tiered2: tiered2Arr?.back
+            points: formatHandForDisplay(pointsArr?.back),
+            empirical: formatHandForDisplay(empiricalArr?.back),
+            tiered: formatHandForDisplay(tieredArr?.back),
+            tiered2: formatHandForDisplay(tiered2Arr?.back),
+            netEV: formatHandForDisplay(netEV?.back)
         });
         console.log('Middle hands:', {
-            points: pointsArr?.middle,
-            empirical: empiricalArr?.middle,
-            tiered: tieredArr?.middle,
-            tiered2: tiered2Arr?.middle
+            points: formatHandForDisplay(pointsArr?.middle),
+            empirical: formatHandForDisplay(empiricalArr?.middle),
+            tiered: formatHandForDisplay(tieredArr?.middle),
+            tiered2: formatHandForDisplay(tiered2Arr?.middle),
+            netEV: formatHandForDisplay(netEV?.middle)
         });
         console.log('Front hands:', {
-            points: pointsArr?.front,
-            empirical: empiricalArr?.front,
-            tiered: tieredArr?.front,
-            tiered2: tiered2Arr?.front
+            points: formatHandForDisplay(pointsArr?.front),
+            empirical: formatHandForDisplay(empiricalArr?.front),
+            tiered: formatHandForDisplay(tieredArr?.front),
+            tiered2: formatHandForDisplay(tiered2Arr?.front),
+            netEV: formatHandForDisplay(netEV?.front)
         });
     }
 
     return results;
 }
+
+// Add this helper function at the top of your file:
+function formatHandForDisplay(hand) {
+    if (!hand || !hand.cards) return hand;
+
+    // Create a copy with sorted cards for display only
+    return {
+        ...hand,
+        cards: [...hand.cards].sort((a, b) => b.value - a.value) // High to low
+    };
+}
+

@@ -299,6 +299,7 @@ class HandDetectorMetadataReporter {
 // Helper function to generate report for HandDetector results
 function reportHandDetectorMetadata(results, originalCards) {
     const reporter = new HandDetectorMetadataReporter();
+
     reporter.generateReport(results, originalCards);
 }
 

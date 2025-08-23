@@ -1,7 +1,6 @@
 // Debug function to track hand corruption
 function debugHandCorruption(hand, context = "Unknown") {
     console.log(`\n🔍 HAND DEBUG: ${context}`);
-    console.log("=" * 50);
 
     // Check for inconsistencies
     const cards = hand.cards || [];
@@ -70,6 +69,8 @@ function findPairs(cards) {
 
 function determineExpectedHandType(cards) {
     if (!cards || cards.length === 0) return "No Cards";
+
+    if (cards.length === 1) return "High Card";
 
     // Check flush first (all same suit)
     const suits = [...new Set(cards.map(c => c.suit))];

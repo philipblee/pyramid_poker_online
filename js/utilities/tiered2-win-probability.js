@@ -267,7 +267,7 @@ const tiered2WinProbability = new Tiered2WinProbability();
  * @returns {number|null} - Win probability or null if no fallback found
  */
 function lookupTiered2WinProbability(position, hand) {
-    // console.log('🔍 Lookup tiered2 probability:', { position, handRank: hand.hand_rank });
+//     console.log('🔍 Lookup tiered2 probability:', { position, handRank: hand.hand_rank });
     const handRank = hand.hand_rank || hand;
 
     // SPECIAL HANDLING: Incomplete front hands
@@ -325,23 +325,23 @@ function lookupTiered2WinProbability(position, hand) {
     }
 
 
-    console.log('❌ No match found at any level, returning null');
-    console.log(`   🔍 Position: ${position}`);
-    console.log(`   🔍 Hand rank tuple: [${handRank.join(', ')}]`);
-    console.log(`   🔍 Attempted lookups:`);
+//    console.log('❌ No match found at any level, returning null');
+//    console.log(`   🔍 Position: ${position}`);
+//    console.log(`   🔍 Hand rank tuple: [${handRank.join(', ')}]`);
+//    console.log(`   🔍 Attempted lookups:`);
 
     // In your lookup code where it fails
-    debugHandCorruption(hand, "When lookup fails");
-
-    console.log (`     lookupTiered2WinProbability: position, hand: ${position}`)
+//    debugHandCorruption(hand, "When lookup fails");
+//
+//    console.log (`     lookupTiered2WinProbability: position, hand: ${position}`)
     // Pretty-printed JSON
-    console.log("Hand (formatted):", JSON.stringify(hand, null, 2));
+//    console.log("Hand (formatted):", JSON.stringify(hand, null, 2));
 
     // Show exactly what tuples were tried
-    for (let length = Math.min(handRank.length, 3); length >= 2; length--) {
-        let truncatedTuple = handRank.slice(0, length);
-        console.log(`     Tried: [${truncatedTuple.join(', ')}] - No match`);
-    }
+//    for (let length = Math.min(handRank.length, 3); length >= 2; length--) {
+//        let truncatedTuple = handRank.slice(0, length);
+//        console.log(`     Tried: [${truncatedTuple.join(', ')}] - No match`);
+//    }
 
     return null;
 }
