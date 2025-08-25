@@ -1,7 +1,7 @@
 {
-  "version": "v3.0-19-g6c04c1e-dirty",
-  "commit": "6c04c1e",
-  "branch": "multi-user-lobby-v2",
-  "buildDate": "2025-08-25T13:58:39.288Z",
-  "lastCommit": "2025-08-25 09:38:38 -0400"
+  "version": "v3.5.0",
+  "commit": "65ac4ba",
+  "branch": "main",
+  "buildDate": "2025-08-25T20:52:06.742Z",
+  "lastCommit": "2025-08-25 15:29:21 -0400"
 }
