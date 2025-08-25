@@ -274,18 +274,35 @@ class PyramidPokerGame {
 
     handleAITurn() {
         const currentPlayer = this.playerManager.getCurrentPlayer();
-//        console.log(`AI ${currentPlayer.name} is taking their turn...`);
+        console.log(`🤖 AI ${currentPlayer.name} is thinking...`);
 
-        // Add a small delay to make AI actions feel more natural
+        // Step 1: Show AI is thinking (1 second)
         setTimeout(() => {
-
+            console.log(`🧠 AI ${currentPlayer.name} running auto-arrange...`);
             this.autoArrangeManager.autoArrangeHand();
-            
-            // Add another delay before submitting
+
+            // Step 2: Let player see the AI's arranged hand (3 seconds)
             setTimeout(() => {
-                this.submitCurrentHand();
-            }, 2000);
-        }, 1000);
+                console.log(`👀 AI ${currentPlayer.name} displaying final arrangement...`);
+                // Update display so human can see AI's hand
+                this.validateHands(); // This updates the UI with hand strengths and colors
+
+                // Step 3: Let player read the hand details (2 more seconds)
+                setTimeout(() => {
+                    console.log(`✅ AI ${currentPlayer.name} submitting hand...`);
+                    this.submitAIPlayerHand();
+                }, 2000); // 2 seconds to read the hand details
+
+            }, 3000); // 3 seconds to see the arranged cards
+
+        }, 1000); // 1 second thinking time
+    }
+
+    submitAIPlayerHand() {
+        // For AI players, add a small delay to let DOM update after auto-arrange
+        setTimeout(() => {
+            this.submitCurrentHand(); // Uses validateHands() + working flow
+        }, 150); // Small delay for DOM updates
     }
 
     moveCard(cardData, sourceId, targetHand) {
@@ -327,17 +344,12 @@ class PyramidPokerGame {
     }
 
     validateHands() {
-        // Add this at the start of validateHands():
-//        console.log('🔄 validateHands() called');
 
         const currentPlayer = this.playerManager.getCurrentPlayer();
         const playerData = this.playerHands.get(currentPlayer.name);
 
         if (!playerData) return;
 
-
-        // After this line: const playerData = this.playerHands.get(currentPlayer.name);
-        // Add:
         if (playerData && playerData.cards.length > 0) {
 //            console.log(`\n🔍 Validating ${currentPlayer.name}'s cards:`);
 //            const analysis = new Analysis(playerData.cards);
@@ -501,6 +513,9 @@ class PyramidPokerGame {
 
             statusDiv.innerHTML = `${currentPlayer.name}'s turn - <span style="color: #ffd700; font-weight: bold;">⚠ INCOMPLETE</span> - Need ${expectedCards} cards in play (${totalPlaced}/${expectedCards} placed) (${readyCount}/${this.playerManager.players.length} players ready)`;
         }
+
+    return !submitBtn.disabled; // Use the existing submitBtn variable
+
     }
 
     validateLargeHand(cards) {
@@ -648,79 +663,16 @@ class PyramidPokerGame {
     // Insert after the resetAndSortBySuit() method
 
     submitCurrentHand() {
+
+        // Replace validation with the good function
+        if (!this.validateHands()) {
+            return; // Don't submit if validation failed
+        }
+
         const currentPlayer = this.playerManager.getCurrentPlayer();
         const playerData = this.playerHands.get(currentPlayer.name);
 
         if (!playerData) return;
-
-        // Analyze each hand
-        if (playerData.back.length > 0) {
-            const backAnalysis = new Analysis(playerData.back);
-//            console.log('Back analysis:', backAnalysis.summary());
-        }
-
-        delay()
-
-        const backCount = playerData.back.length;
-        const middleCount = playerData.middle.length;
-        const frontCount = playerData.front.length;
-        const totalPlaced = backCount + middleCount + frontCount;
-
-        // Validate hand sizes (allow variable sizes)
-        const isValidBackSize = [5, 6, 7, 8].includes(backCount);
-        const isValidMiddleSize = [5, 6, 7].includes(middleCount);
-        const isValidFrontSize = frontCount === 3 || frontCount === 5;
-
-        // Validate 6+ card hands follow special rules
-        const isValidBackHand = backCount < 6 || this.validateLargeHand(playerData.back);
-        const isValidMiddleHand = middleCount < 6 || this.validateLargeHand(playerData.middle);
-
-        delay()
-
-        setTimeout(() => {
-          if (!isValidBackSize || !isValidMiddleSize || !isValidFrontSize || !isValidBackHand || !isValidMiddleHand) {
-            let errorMsg = 'Invalid hand configuration:\n';
-            if (!isValidBackSize) errorMsg += `- Back hand must have 5-8 cards (has ${backCount})\n`;
-            if (!isValidMiddleSize) errorMsg += `- Middle hand must have 5-7 cards (has ${middleCount})\n`;
-            if (!isValidFrontSize) errorMsg += `- Front hand must have 3 or 5 cards (has ${frontCount})\n`;
-            if (!isValidBackHand) errorMsg += `- Back hand with 6+ cards must be all same rank or straight flush\n`;
-            if (!isValidMiddleHand) errorMsg += `- Middle hand with 6+ cards must be all same rank or straight flush\n`;
-
-            alert(errorMsg);
-            return;
-          }
-        }, 200); // delay by 200 millisecond
-
-        // Calculate expected total based on actual hand sizes
-        const minExpected = 5 + 5 + 3; // 13 cards minimum
-        const maxExpected = 8 + 7 + 5; // 20 cards maximum
-        
-//        setTimeout(() => {
-//          if (totalPlaced < minExpected || totalPlaced > maxExpected) {
-//            alert(`Invalid total cards placed: ${totalPlaced}. Must be between ${minExpected} and ${maxExpected} cards.`);
-//            return;
-//          }
-//        }, 1000); // delay by 1 second
-
-        const backStrength = evaluateHand(playerData.back);
-        const middleStrength = evaluateHand(playerData.middle);
-        const frontStrength = evaluateThreeCardHand(playerData.front);
-
-        const isValidOrder = compareTuples(backStrength.hand_rank, middleStrength.hand_rank) >= 0 &&
-                           compareTuples(middleStrength.hand_rank, frontStrength.hand_rank) >= 0;
-
-        if (!isValidOrder) {
-            const message = `INVALID HAND ORDER!\n\n` +
-                `Back Hand: ${backStrength.name} (${backStrength.hand_rank.join(', ')})\n` +
-                `Middle Hand: ${middleStrength.name} (${middleStrength.hand_rank.join(', ')})\n` +
-                `Front Hand: ${frontStrength.name} (${frontStrength.hand_rank.join(', ')})\n\n` +
-                `Rule: Back ≥ Middle ≥ Front`;
-
-            if (confirm(message + '\n\nWould you like to reset your cards and try again?')) {
-                this.resetCards();
-            }
-            return;
-        }
 
         this.submittedHands.set(currentPlayer.name, {
             back: [...playerData.back],
@@ -898,12 +850,10 @@ class PyramidPokerGame {
 
     html += `
         </div>
-        <div style="display: flex; gap: 15px;">
-            <button onclick="this.parentElement.parentElement.remove(); game.gameState='waiting'; game.currentRound=0; updateDisplay(game);"
-                    style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
-                Start New Tournament
-            </button>
-        </div>
+        <button onclick="this.parentElement.parentElement.remove(); game.gameState='waiting'; game.currentRound=0; updateDisplay(game);"
+                style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
+            Start New Tournament
+        </button>
     `;
 
     content.innerHTML = html;
