@@ -123,4 +123,57 @@ async function main() {
   console.log("After delay");
 }
 
+// Add to your auto-arrange function (or wherever auto-arrange is triggered)
+function showLoadingSpinner() {
+    const loadingHtml = `
+        <div id="auto-arrange-loading" style="
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            z-index: 1000;
+            font-family: Arial, sans-serif;
+        ">
+            <div class="spinner" style="
+                width: 40px;
+                height: 40px;
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #4ecdc4;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 15px auto;
+            "></div>
+            <div style="font-size: 16px; font-weight: bold;">Auto-Arranging Cards...</div>
+            <div style="font-size: 14px; color: #ccc; margin-top: 8px;">This may take a few seconds</div>
+        </div>
+    `;
+
+    // Add CSS animation if not already present
+    if (!document.querySelector('#spinner-style')) {
+        const style = document.createElement('style');
+        style.id = 'spinner-style';
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    document.body.insertAdjacentHTML('beforeend', loadingHtml);
+}
+
+function hideLoadingSpinner() {
+    const loading = document.getElementById('auto-arrange-loading');
+    if (loading) {
+        loading.remove();
+    }
+}
+
 main();

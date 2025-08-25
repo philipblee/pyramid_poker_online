@@ -62,22 +62,46 @@ class PyramidPokerGame {
         return playerName;
     }
 
-    handleAutoArrangeToggle() {
-        if (this.autoArrangeUsed) {
-            // Undo auto-arrange
-            this.restoreToDealtState();
-            this.autoArrangeUsed = false;
-            document.getElementById('autoArrange').textContent = 'Auto';
-            console.log('🔄 Undid auto-arrange');
-        } else {
-            // Run auto-arrange
-            this.autoArrangeManager.autoArrangeHand();
-            this.autoArrangeUsed = true;
-            document.getElementById('autoArrange').textContent = 'Undo Auto';
-            console.log('🧠 Auto-arrange applied');
-        }
-    }
+  handleAutoArrangeToggle() {
+    if (this.autoArrangeUsed) {
+        // Undo auto-arrange (instant, no spinner needed)
+        this.restoreToDealtState();
+        this.autoArrangeUsed = false;
+        document.getElementById('autoArrange').textContent = 'Auto';
+        console.log('🔄 Undid auto-arrange');
+    } else {
+        // Run auto-arrange (this needs the spinner)
 
+        // Count wild cards for time estimate
+        const currentCards = this.loadCurrentPlayerHand(); // Replace with your method to get cards
+        const wildCount = currentCards ? currentCards.filter(card => card.isWild).length : 0;
+
+        // Show spinner immediately
+        showLoadingSpinner(wildCount);
+
+        // Use setTimeout to allow UI to update before computation
+        setTimeout(() => {
+            try {
+                console.log('🧠 Starting auto-arrange optimization...');
+
+                // Your existing auto-arrange logic
+                this.autoArrangeManager.autoArrangeHand();
+                this.autoArrangeUsed = true;
+                document.getElementById('autoArrange').textContent = 'Undo Auto';
+
+                // Hide spinner when done
+                hideLoadingSpinner();
+
+                console.log('✅ Auto-arrange applied successfully');
+
+            } catch (error) {
+                console.error('❌ Auto-arrange failed:', error);
+                hideLoadingSpinner();
+                alert('Auto-arrange failed. Please try manually.');
+            }
+        }, 100); // Small delay ensures spinner shows
+    }
+}
     restoreToDealtState() {
         const currentPlayer = this.playerManager.getCurrentPlayer();
         const playerData = this.playerHands.get(currentPlayer.name);
@@ -409,10 +433,34 @@ class PyramidPokerGame {
 
             const isValidOrder = backVsMiddle >= 0 && middleVsFront >= 0 && frontIsValid;
 
+            const backStrengthEl = document.getElementById('backStrength');
+            const middleStrengthEl = document.getElementById('middleStrength');
+            const frontStrengthEl = document.getElementById('frontStrength');
+
+            // Set content and styling
+            backStrengthEl.textContent = `${backStrength.name}   -   ${backPoints} Points`;
+            backStrengthEl.style.color = '#4ecdc4';
+            backStrengthEl.style.fontWeight = 'bold';
+            backStrengthEl.style.fontSize = '20px';
+
+            middleStrengthEl.textContent = `${middleStrength.name}  -  ${middlePoints} Points`;
+            middleStrengthEl.style.color = '#4ecdc4';
+            middleStrengthEl.style.fontWeight = 'bold';
+            middleStrengthEl.style.fontSize = '20px';
+
+            frontStrengthEl.textContent = `${frontStrength.name}  -  ${frontPoints} Points`;
+            frontStrengthEl.style.color = '#4ecdc4';
+            frontStrengthEl.style.fontWeight = 'bold';
+            frontStrengthEl.style.fontSize = '20px';
+
             // Display hand strengths
-            document.getElementById('backStrength').textContent = `${backStrength.name}   -   ${backPoints} Points`;
-            document.getElementById('middleStrength').textContent = `${middleStrength.name}  -  ${middlePoints} Points`;
-            document.getElementById('frontStrength').textContent = `${frontStrength.name}  -  ${frontPoints} Points`;
+            document.getElementById('backStrength');
+            document.getElementById('middleStrength');
+            document.getElementById('frontStrength');
+
+//            document.getElementById('backStrength').textContent = `${backStrength.name}   -   ${backPoints} Points`;
+//            document.getElementById('middleStrength').textContent = `${middleStrength.name}  -  ${middlePoints} Points`;
+//            document.getElementById('frontStrength').textContent = `${frontStrength.name}  -  ${frontPoints} Points`;
 
 //            document.getElementById('backStrength').textContent = `${backStrength.name}  (${backStrength.hand_rank.join(', ')})    ${backPoints} Points`;
 //            document.getElementById('middleStrength').textContent = `${middleStrength.name}  (${middleStrength.hand_rank.join(', ')})   ${middlePoints} Points`;
@@ -851,10 +899,6 @@ class PyramidPokerGame {
     html += `
         </div>
         <div style="display: flex; gap: 15px;">
-            <button onclick="this.parentElement.parentElement.style.display='none';"
-                    style="background: #95a5a6; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
-                Close Results
-            </button>
             <button onclick="this.parentElement.parentElement.remove(); game.gameState='waiting'; game.currentRound=0; updateDisplay(game);"
                     style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
                 Start New Tournament
