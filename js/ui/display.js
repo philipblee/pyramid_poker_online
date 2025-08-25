@@ -93,7 +93,7 @@ function updateStatus(game) {
     const status = document.getElementById('status');
 
     if (game.gameState === 'waiting') {
-        status.textContent = `Players: ${game.playerManager.players.length}/4 - Add players and click "New Game" to start!`;
+        status.textContent = `Players: ${game.playerManager.players.length} - Add players and click "New Game" to start!`;
     } else if (game.gameState === 'playing') {
         const currentPlayer = game.playerManager.getCurrentPlayer();
         const readyCount = game.playerManager.getReadyCount();
