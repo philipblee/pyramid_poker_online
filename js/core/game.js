@@ -1,7 +1,7 @@
 // js/core/game.js
 // Main game orchestration - much cleaner!
 
-class ChinesePokerGame {
+class PyramidPokerGame {
     constructor() {
         // Initialize managers
         this.playerManager = new PlayerManager();
@@ -260,8 +260,8 @@ class ChinesePokerGame {
             // Add another delay before submitting
             setTimeout(() => {
                 this.submitCurrentHand();
-            }, 1000);
-        }, 500);
+            }, 2000);
+        }, 1000);
     }
 
     moveCard(cardData, sourceId, targetHand) {
@@ -593,6 +593,7 @@ class ChinesePokerGame {
 //            console.log('Back analysis:', backAnalysis.summary());
         }
 
+        delay()
 
         const backCount = playerData.back.length;
         const middleCount = playerData.middle.length;
@@ -620,18 +621,18 @@ class ChinesePokerGame {
             alert(errorMsg);
             return;
           }
-        }, 1000); // delay by 1 second
+        }, 200); // delay by 200 millisecond
 
         // Calculate expected total based on actual hand sizes
         const minExpected = 5 + 5 + 3; // 13 cards minimum
         const maxExpected = 8 + 7 + 5; // 20 cards maximum
         
-        setTimeout(() => {
-          if (totalPlaced < minExpected || totalPlaced > maxExpected) {
-            alert(`Invalid total cards placed: ${totalPlaced}. Must be between ${minExpected} and ${maxExpected} cards.`);
-            return;
-          }
-        }, 2000); // delay by 1 second
+//        setTimeout(() => {
+//          if (totalPlaced < minExpected || totalPlaced > maxExpected) {
+//            alert(`Invalid total cards placed: ${totalPlaced}. Must be between ${minExpected} and ${maxExpected} cards.`);
+//            return;
+//          }
+//        }, 1000); // delay by 1 second
 
         const backStrength = evaluateHand(playerData.back);
         const middleStrength = evaluateHand(playerData.middle);
@@ -1035,13 +1036,10 @@ class ChinesePokerGame {
             });
         }
     }
-
-
-
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    game = new ChinesePokerGame();
+    game = new PyramidPokerGame();
 
     // Add safety check for loadVersionInfo
     if (typeof loadVersionInfo === 'function') {

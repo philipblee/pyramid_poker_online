@@ -22,12 +22,10 @@ class ArrangementValidator {
             return false;
         }
 
-        // Replace with delayed validation:
-        setTimeout(() => {
-            if (!this.validateHandSizes(arrangement)) {
-                // show popup
-            }
-        }, 350); // Small delay to let arrangement update complete
+
+        if (!this.validateHandSizes(arrangement)) {
+            // show popup
+        }
 
         // Check large hands follow special rules
         if (!this.validateLargeHands(arrangement)) {

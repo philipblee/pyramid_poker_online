@@ -1,5 +1,5 @@
 // js/hands/auto-arrange.js
-// Streamlined version using find-best-setup universal dispatcher
+// Streamlined version using find-best-setup
 
 class AutoArrangeManager {
     constructor(game) {
@@ -8,7 +8,7 @@ class AutoArrangeManager {
     }
 
     /**
-     * Main auto-arrange - uses universal find-best-setup
+     * Main auto-arrange - uses find-best-setup
      */
     autoArrangeHand() {
         const playerData = this.getPlayerData();
@@ -17,11 +17,12 @@ class AutoArrangeManager {
         const allCards = this.getAllCards(playerData);
         if (!this.validateCardCount(allCards)) return false;
 
-//        console.log('🧠 Auto-Arrange using find-best-setup...');
+        console.log('🧠 Auto-Arrange using find-best-setup...');
         const result = findBestSetup(allCards);
 
         if (result?.success && result.arrangement) {
-//            console.log(`✨ Setup found! Score: ${result.score}`);
+            console.log(`✨ Setup found! Score: ${result.score}`);
+            console.log(`✨ Setup found! aiMethod: ${gameConfig.config.winProbabilityMethod}`);
             const arrangement = {
                 back: result.arrangement.back.cards,
                 middle: result.arrangement.middle.cards,
@@ -44,6 +45,7 @@ class AutoArrangeManager {
         playerData.front = arrangement.front;
         playerData.cards = arrangement.staging;
         this.game.loadCurrentPlayerHand();
+        delay() // .5 second delay
         return true;
     }
 
@@ -107,3 +109,15 @@ class AutoArrangeManager {
         CardUtilities.logCardList(arrangement.staging, 'Staging');
     }
 }
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function main() {
+  console.log("Before delay");
+  await delay(2000);
+  console.log("After delay");
+}
+
+main();

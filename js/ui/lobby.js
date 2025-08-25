@@ -1,3 +1,5 @@
+// lobby.js
+
 // In lobby.js, update the tableSettings object (around line 4):
 
 let tableSettings = {
@@ -13,21 +15,21 @@ const defaultTables = [
     {
         id: 1,
         name: 'Quick Play',
-        settings: { gameMode: 'offline', aiPlayers: 4, rounds: 3, wildCards: 2, aiMethod: 'tiered2' },
+        settings: { gameMode: 'offline', aiPlayers: 5, rounds: 3, wildCards: 2, aiMethod: 'tiered2' },
         icon: '🏓'
     },
-    {
-        id: 2,
-        name: 'Practice Table',
-        settings: { gameMode: 'offline', aiPlayers: 2, rounds: 5, wildCards: 1, aiMethod: 'points' },
-        icon: '🏓'
-    },
-    {
-        id: 3,
-        name: 'Cloud Ranked',
-        settings: { gameMode: 'online', aiPlayers: 5, rounds: 3, wildCards: 2, aiMethod: 'netEV' },
-        icon: '☁️'
-    },
+//    {
+//        id: 2,
+//        name: 'Practice Table',
+//        settings: { gameMode: 'offline', aiPlayers: 1, rounds: 5, wildCards: 1, aiMethod: 'points' },
+//        icon: '🏓'
+//    },
+//    {
+//        id: 3,
+//        name: 'Cloud Ranked',
+//        settings: { gameMode: 'online', aiPlayers: 5, rounds: 3, wildCards: 2, aiMethod: 'netEV' },
+//        icon: '☁️'
+//    },
     {
         id: 4,
         name: 'Challenge Mode',
@@ -78,7 +80,6 @@ function createTableCard(table) {
     const card = document.createElement('div');
     card.className = 'table-card';
     card.onclick = () => joinTable(table);
-
     const settings = table.settings;
     const modeText = settings.gameMode === 'online' ? 'Online' : 'Offline';
 
@@ -90,7 +91,7 @@ function createTableCard(table) {
         <div class="table-settings">
             Mode: ${modeText}<br>
             AI Players: ${settings.aiPlayers}<br>
-            Rounds: ${settings.totalRounds}<br>
+            Rounds: ${settings.rounds}<br>
             Wild Cards: ${settings.wildCards}
         </div>
         <div class="table-status">Join Table</div>
@@ -227,7 +228,8 @@ function launchGameInterface() {
 
     // Call your existing startNewGame function
     if (typeof startNewGame === 'function') {
-        startNewGame();
+//        startNewGame();
+          window.game.startNewGame();
     } else {
 //        console.warn('startNewGame function not found');
     }

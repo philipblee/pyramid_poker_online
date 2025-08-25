@@ -357,7 +357,7 @@ class GameIntegration {
     showMultiplayerStatus() {
         const statusElement = document.getElementById('status');
         if (statusElement) {
-            statusElement.innerHTML = '🌐 Multiplayer Tournament - Round 1 of 3';
+            statusElement.innerHTML = '🌐 Multiplayer Tournament - Round 1';
         }
     }
 
