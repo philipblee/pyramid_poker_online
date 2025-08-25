@@ -16,13 +16,13 @@ function evaluateHand(cards) {
         if (analysis.isAllSameRank()) {
             const rank = Analysis.getRankValue(analysis.getOfAKindRank());
             const rating = 10 + (cards.length - 5) * 2;
-            return { rank: rating - 1, hand_rank: [rating, rank], name: `${cards.length} of a Kind` };
+            return { rank: rating, hand_rank: [rating, rank], name: `${cards.length} of a Kind` };
         }
 
         else if (analysis.isAllSameSuit() && (analysis.isSequentialValues() || analysis.isWheelStraight())) {
             const highCard = analysis.getStraightHigh();
             const rating = 9 + (cards.length - 5) * 2;
-            return { rank: rating - 1, hand_rank: [rating, highCard], name: `${cards.length}-Card Straight Flush` };
+            return { rank: rating, hand_rank: [rating, highCard], name: `${cards.length}-Card Straight Flush` };
         }
 
         else {
@@ -68,13 +68,13 @@ function evaluateHand(cards) {
     // Check for five of a kind (only possible with two decks + wilds)
     if (counts[0] === 5) {
         const fiveRank = valuesByCount[5][0];
-        return { rank: 9, hand_rank: [10, fiveRank], name: 'Five of a Kind' };
+        return { rank: 10, hand_rank: [10, fiveRank], name: 'Five of a Kind' };
     }
 
     if (isStraightHand && isFlush) {
         const straightInfo = getStraightInfo(values);
         const name = straightInfo.high === 14 && straightInfo.low === 10 ? 'Royal Flush' : 'Straight Flush';
-        return { rank: 8, hand_rank: [9, straightInfo.high, straightInfo.low], name: name };
+        return { rank: 9, hand_rank: [9, straightInfo.high, straightInfo.low], name: name };
     }
 
     if (counts[0] === 4) {
@@ -86,24 +86,24 @@ function evaluateHand(cards) {
         const kickerCard = cards.find(c => c.value === kicker);
         const suitValues = getSuitValues([...quadCards, kickerCard]);
 
-        return { rank: 7, hand_rank: [8, quadRank, kicker, ...suitValues], name: 'Four of a Kind' };
+        return { rank: 8, hand_rank: [8, quadRank, kicker, ...suitValues], name: 'Four of a Kind' };
     }
 
     if (counts[0] === 3 && counts[1] === 2) {
         // Full House: [7, trips_rank, pair_rank]
         const tripsRank = valuesByCount[3][0];
         const pairRank = valuesByCount[2][0];
-        return { rank: 6, hand_rank: [7, tripsRank, pairRank], name: 'Full House' };
+        return { rank: 7, hand_rank: [7, tripsRank, pairRank], name: 'Full House' };
     }
 
     if (isFlush) {
         // Flush: [6, high, second, third, fourth, fifth]
-        return { rank: 5, hand_rank: [6, ...values], name: 'Flush' };
+        return { rank: 6, hand_rank: [6, ...values], name: 'Flush' };
     }
 
     if (isStraightHand) {
         const straightInfo = getStraightInfo(values);
-        return { rank: 4, hand_rank: [5, straightInfo.high, straightInfo.low], name: 'Straight' };
+        return { rank: 5, hand_rank: [5, straightInfo.high, straightInfo.low], name: 'Straight' };
     }
 
     // Three of a Kind
@@ -112,7 +112,7 @@ function evaluateHand(cards) {
         hand_rank[1] = valuesByCount[3][0]; // trips rank
         hand_rank[2] = valuesByCount[1] ? valuesByCount[1][0] : 0; // first kicker
         hand_rank[3] = valuesByCount[1] && valuesByCount[1][1] ? valuesByCount[1][1] : 0; // second kicker
-        return { rank: 3, hand_rank: hand_rank.slice(), name: 'Three of a Kind' };
+        return { rank: 4, hand_rank: hand_rank.slice(), name: 'Three of a Kind' };
     }
 
 //    console.log('Two Pair debug 1:', { valuesByCount, pairs: valuesByCount[2] });
@@ -129,7 +129,7 @@ function evaluateHand(cards) {
 
 //            console.log('Two Pair debug 2:', { pairs, higherPair, lowerPair, kicker });
 
-            return { rank: 2, hand_rank: hand_rank.slice(), name: 'Two Pair' };
+            return { rank: 3, hand_rank: hand_rank.slice(), name: 'Two Pair' };
         } else {
             // Single Pair: [2, pair_rank, kicker1, kicker2, kicker3]
             hand_rank[0] = 2;
@@ -137,12 +137,12 @@ function evaluateHand(cards) {
             hand_rank[2] = valuesByCount[1] ? valuesByCount[1][0] : 0;
             hand_rank[3] = valuesByCount[1] && valuesByCount[1][1] ? valuesByCount[1][1] : 0;
             hand_rank[4] = valuesByCount[1] && valuesByCount[1][2] ? valuesByCount[1][2] : 0;
-            return { rank: 1, hand_rank: hand_rank.slice(), name: 'Pair' };
+            return { rank: 2, hand_rank: hand_rank.slice(), name: 'Pair' };
         }
     }
 
     // High Card: [1, high, second, third, fourth, fifth]
-    return { rank: 0, hand_rank: [1, ...values], name: 'High Card' };
+    return { rank: 1, hand_rank: [1, ...values], name: 'High Card' };
 }
 
 // Evaluate hand with wild cards

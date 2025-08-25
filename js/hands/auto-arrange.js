@@ -20,6 +20,8 @@ class AutoArrangeManager {
         console.log('🧠 Auto-Arrange using find-best-setup...');
         const result = findBestSetup(allCards);
 
+        delay()
+
         if (result?.success && result.arrangement) {
             console.log(`✨ Setup found! Score: ${result.score}`);
             console.log(`✨ Setup found! aiMethod: ${gameConfig.config.winProbabilityMethod}`);
@@ -45,7 +47,8 @@ class AutoArrangeManager {
         playerData.front = arrangement.front;
         playerData.cards = arrangement.staging;
         this.game.loadCurrentPlayerHand();
-        delay() // .5 second delay
+        delay()
+        delay()
         return true;
     }
 
@@ -116,7 +119,7 @@ function delay(ms) {
 
 async function main() {
   console.log("Before delay");
-  await delay(2000);
+  await delay(3000);
   console.log("After delay");
 }
 

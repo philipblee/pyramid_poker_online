@@ -378,6 +378,21 @@ class PyramidPokerGame {
             const middleStrength = evaluateHand(playerData.middle);
             const frontStrength = evaluateThreeCardHand(playerData.front);
 
+            const handUtils = handUtilities();
+
+            console.log(`back hand rank ${backStrength.rank}`);
+            console.log(`middle hand rank ${middleStrength.rank}`);
+            console.log(`front hand rank ${frontStrength.rank}`);
+
+            // Four of a Kind in different positions
+            console.log(`back points ${handUtils.getPointValue(backStrength.rank, 'back')}`);
+            console.log(`middle points ${handUtils.getPointValue(middleStrength.rank, 'middle')}`);
+            console.log(`front points ${handUtils.getPointValue(frontStrength.rank, 'front')}`);
+
+            const backPoints = handUtils.getPointValue(backStrength.rank, 'back');
+            const middlePoints = handUtils.getPointValue(middleStrength.rank, 'middle');
+            const frontPoints = handUtils.getPointValue(frontStrength.rank, 'front');
+
             // Validate hand order (Back >= Middle >= Front)
             const backTuple = backStrength.hand_rank;
             const middleTuple = middleStrength.hand_rank;
@@ -395,10 +410,13 @@ class PyramidPokerGame {
             const isValidOrder = backVsMiddle >= 0 && middleVsFront >= 0 && frontIsValid;
 
             // Display hand strengths
-            document.getElementById('backStrength').textContent = `${backStrength.name} (${backStrength.hand_rank.join(', ')})`;
-            document.getElementById('middleStrength').textContent = `${middleStrength.name} (${middleStrength.hand_rank.join(', ')})`;
-            document.getElementById('frontStrength').textContent = `${frontStrength.name} (${frontStrength.hand_rank.join(', ')})`;
+            document.getElementById('backStrength').textContent = `${backStrength.name}   -   ${backPoints} Points`;
+            document.getElementById('middleStrength').textContent = `${middleStrength.name}  -  ${middlePoints} Points`;
+            document.getElementById('frontStrength').textContent = `${frontStrength.name}  -  ${frontPoints} Points`;
 
+//            document.getElementById('backStrength').textContent = `${backStrength.name}  (${backStrength.hand_rank.join(', ')})    ${backPoints} Points`;
+//            document.getElementById('middleStrength').textContent = `${middleStrength.name}  (${middleStrength.hand_rank.join(', ')})   ${middlePoints} Points`;
+//            document.getElementById('frontStrength').textContent = `${frontStrength.name}  (${frontStrength.hand_rank.join(', ')})   ${frontPoints} Points`;
             if (isValidOrder) {
                 // Valid setup
                 backHand.classList.add('valid');
@@ -608,6 +626,8 @@ class PyramidPokerGame {
         // Validate 6+ card hands follow special rules
         const isValidBackHand = backCount < 6 || this.validateLargeHand(playerData.back);
         const isValidMiddleHand = middleCount < 6 || this.validateLargeHand(playerData.middle);
+
+        delay()
 
         setTimeout(() => {
           if (!isValidBackSize || !isValidMiddleSize || !isValidFrontSize || !isValidBackHand || !isValidMiddleHand) {
@@ -830,10 +850,16 @@ class PyramidPokerGame {
 
     html += `
         </div>
-        <button onclick="this.parentElement.parentElement.remove(); game.gameState='waiting'; game.currentRound=0; updateDisplay(game);"
-                style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
-            Start New Tournament
-        </button>
+        <div style="display: flex; gap: 15px;">
+            <button onclick="this.parentElement.parentElement.style.display='none';"
+                    style="background: #95a5a6; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
+                Close Results
+            </button>
+            <button onclick="this.parentElement.parentElement.remove(); game.gameState='waiting'; game.currentRound=0; updateDisplay(game);"
+                    style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
+                Start New Tournament
+            </button>
+        </div>
     `;
 
     content.innerHTML = html;
