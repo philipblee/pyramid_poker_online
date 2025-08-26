@@ -10,6 +10,9 @@ class FirebaseAuthManager {
             auth.onAuthStateChanged((user) => {
                 this.currentUser = user;
                 this.isInitialized = true;
+
+                this.updateLoginButtonText();
+
                 resolve(user);
             });
         });

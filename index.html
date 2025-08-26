@@ -3,526 +3,951 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pyramid Poker Online</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Pyramid Poker Online - The Fastest Growing Poker Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <!-- ================================================================ -->
-    <!-- STEP 1: ADD THIS CSS TO YOUR <head> section (after the existing <link> tag) -->
-    <!-- ================================================================ -->
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #ffd700;
+            --success-color: #4ecdc4;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
 
-    <style id="loginModalStyles">
-        /* Login Modal Styles - matching config modal */
-        .login-modal {
+        [data-theme="dark"] {
+            --text-primary: #ecf0f1;
+            --text-secondary: #bdc3c7;
+            --bg-primary: #2c3e50;
+            --bg-secondary: #34495e;
+            --card-bg: rgba(52, 73, 94, 0.95);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        /* Navigation */
+        .navbar {
             position: fixed;
             top: 0;
-            left: 0;
             width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
             z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
         }
 
-        .login-content {
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            border-radius: 15px;
-            border: 2px solid #4ecdc4;
-            max-width: 400px;
-            width: 90%;
-            color: white;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .login-header {
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0 2rem;
         }
 
-        .login-header h2 {
-            margin: 0;
-            color: #ffd700;
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .login-close {
-            background: none;
-            border: none;
-            color: #ff6b6b;
-            font-size: 24px;
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 500;
+            transition: all 0.3s ease;
             cursor: pointer;
-            padding: 5px;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Page Sections */
+        .page-section {
+            display: none;
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        /* Home Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 6rem 0 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="50,10 90,90 10,90" fill="rgba(255,255,255,0.05)"/></svg>') repeat;
+            background-size: 100px 100px;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .hero .subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: var(--text-primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 5rem 0;
+            background: var(--bg-secondary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        /* How to Play Section */
+        .how-to-play {
+            padding: 5rem 0;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .step-card::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             border-radius: 50%;
-            width: 35px;
-            height: 35px;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .login-close:hover {
-            background: rgba(255, 107, 107, 0.2);
-        }
-
-        .login-body {
-            padding: 20px;
-        }
-
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-group label {
-            font-weight: bold;
-            color: #ecf0f1;
-        }
-
-        .form-group input {
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #4ecdc4;
-            background: rgba(52, 73, 94, 0.8);
             color: white;
-            font-size: 14px;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #ffd700;
-            box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
-        }
-
-        .form-group input::placeholder {
-            color: #95a5a6;
-        }
-
-        .passcode-input {
-            text-align: center;
-            letter-spacing: 8px;
-            font-size: 18px;
             font-weight: bold;
         }
 
-        .login-footer {
-            padding: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        .step-card:nth-child(1)::before { content: '1'; }
+        .step-card:nth-child(2)::before { content: '2'; }
+        .step-card:nth-child(3)::before { content: '3'; }
+        .step-card:nth-child(4)::before { content: '4'; }
+
+        .step-card:hover {
+            transform: scale(1.05);
+        }
+
+        /* Hero Images */
+        .hero-images {
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
         }
 
-        .login-btn-modal {
-            padding: 12px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
+        .hero-image {
+            width: 200px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            background-size: cover;
+            background-position: center;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .hero-image:hover {
+            transform: scale(1.05);
+        }
+
+        .hero-image.poker-table {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150"><rect width="200" height="150" fill="%23228B22"/><circle cx="100" cy="75" r="60" fill="%23006400" stroke="%23FFD700" stroke-width="3"/><text x="100" y="80" text-anchor="middle" fill="white" font-size="14">POKER TABLE</text></svg>');
+        }
+
+        .hero-image.cards {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150"><rect width="200" height="150" fill="%23000080"/><rect x="50" y="40" width="40" height="60" fill="white" rx="5"/><rect x="70" y="50" width="40" height="60" fill="white" rx="5"/><rect x="90" y="60" width="40" height="60" fill="white" rx="5"/></svg>');
+        }
+
+        .hero-image.friends {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150"><rect width="200" height="150" fill="%23FF6B6B"/><circle cx="70" cy="60" r="15" fill="white"/><circle cx="100" cy="60" r="15" fill="white"/><circle cx="130" cy="60" r="15" fill="white"/><rect x="55" y="75" width="30" height="40" fill="white"/><rect x="85" y="75" width="30" height="40" fill="white"/><rect x="115" y="75" width="30" height="40" fill="white"/></svg>');
+        }
+
+        /* Feature Images */
+        .feature-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: var(--shadow);
             transition: all 0.3s ease;
-            background: #4ecdc4;
-            color: white;
-            font-size: 16px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .login-btn-modal:hover {
-            background: #45b7aa;
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: 1;
         }
 
-        .login-btn-modal:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
+        .feature-card.ai-feature::before {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 120"><rect width="300" height="120" fill="%234ECDC4"/><circle cx="150" cy="60" r="30" fill="white"/><circle cx="140" cy="50" r="5" fill="%234ECDC4"/><circle cx="160" cy="50" r="5" fill="%234ECDC4"/><path d="M135 70 Q150 80 165 70" stroke="%234ECDC4" stroke-width="3" fill="none"/></svg>');
         }
 
-        .mode-switch {
-            text-align: center;
-            color: #95a5a6;
-            font-size: 14px;
+        .feature-card.cards-feature::before {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 120"><rect width="300" height="120" fill="%23FFD700"/><rect x="100" y="20" width="30" height="45" fill="white" rx="3"/><rect x="120" y="30" width="30" height="45" fill="white" rx="3"/><rect x="140" y="40" width="30" height="45" fill="white" rx="3"/></svg>');
         }
 
-        .mode-switch a {
-            color: #4ecdc4;
-            text-decoration: none;
-            cursor: pointer;
+        /* About Section */
+        .about {
+            padding: 5rem 0;
+            background: var(--bg-secondary);
         }
 
-        .mode-switch a:hover {
-            color: #ffd700;
-            text-decoration: underline;
-        }
-
-        /* Modal internal status area */
-        .modal-status {
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 15px;
-            text-align: center;
-            font-weight: bold;
-            border: 1px solid transparent;
-        }
-
-        .modal-status.success {
-            background: rgba(46, 204, 113, 0.2);
-            border-color: #2ecc71;
-            color: #2ecc71;
-        }
-
-        .modal-status.error {
-            background: rgba(231, 76, 60, 0.2);
-            border-color: #e74c3c;
-            color: #e74c3c;
-        }
-
-        .modal-status.info {
-            background: rgba(52, 152, 219, 0.2);
-            border-color: #3498db;
-            color: #3498db;
-        }
-
-        /* Custom checkbox styling */
-        .checkbox-label {
-            display: flex !important;
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
             align-items: center;
-            cursor: pointer;
-            font-size: 14px;
-            color: #ecf0f1 !important;
-            font-weight: normal !important;
         }
 
-        .checkbox-label input[type="checkbox"] {
-            margin-right: 8px;
-            width: 16px;
-            height: 16px;
-            accent-color: #4ecdc4;
+        .about-text {
+            font-size: 1.1rem;
         }
 
-        .checkbox-label:hover {
-            color: #4ecdc4 !important;
+        .about-image {
+            width: 100%;
+            height: 400px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            background-size: cover;
+            background-position: center;
+            box-shadow: var(--shadow);
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect width="400" height="400" fill="%23667EEA"/><circle cx="200" cy="150" r="50" fill="white"/><rect x="150" y="220" width="100" height="80" fill="white" rx="10"/><polygon points="200,300 160,350 240,350" fill="white"/><text x="200" y="320" text-anchor="middle" fill="%23667EEA" font-size="16">PYRAMID POKER</text></svg>');
+        }
+
+        .about-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Testimonial Section */
+        .testimonials {
+            padding: 5rem 0;
+            background: var(--bg-primary);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .testimonial-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            font-size: 4rem;
+            color: var(--primary-color);
+            opacity: 0.3;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            margin-right: 1rem;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .author-info h4 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .author-info p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Play Now Section */
+        .play-now {
+            padding: 5rem 0;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .login-options {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            min-width: 250px;
+        }
+
+        .login-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--text-primary);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+
+            .login-options {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Game Cards Decoration */
+        .card-decoration {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.1;
+            animation: cardFloat 15s ease-in-out infinite;
+        }
+
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(10deg); }
         }
     </style>
-
-
 </head>
-
-
-<body>
-    <!-- Animated background -->
-    <div class="bg-particles" id="bgParticles"></div>
-
-    <!-- Sidebar Toggle Button -->
-    <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
-        <span id="toggleIcon">◀</span>
-        <span id="toggleText">Hide</span>
-    </button>
-
-
-    <div class="header">
-        <div class="header-content">
-            <h1>🔺 Pyramid Poker Online</h1>
-            <div class="version-tag" id="version-info" title="Click for build details"> Loading...</div>
-            <button id="loginButton" class="btn btn-secondary login-btn">Login</button>
-        </div>
-    </div>
-
-
-    <!-- Add this section to your existing index.html -->
-
-    <!-- Lobby Screen -->
-    <div class="lobby-screen" id="lobbyScreen" style="display: none;">
-        <div class="lobby-header">
-            <h2 class="lobby-title">🏛️ Game Lobby</h2>
-            <div class="user-info">
-                👤 <span id="currentUser">Loading...</span>
+<body data-theme="light">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🔺 Pyramid Poker</div>
+            <div class="nav-links">
+                <a onclick="showSection('home')">Home</a>
+                <a onclick="showSection('how-to-play')">How to Play</a>
+                <a onclick="showSection('features')">Features</a>
+                <a onclick="showSection('about')">About</a>
+                <a onclick="showSection('play-now')">Play Now</a>
+                <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
             </div>
         </div>
+    </nav>
 
-        <div class="table-grid" id="tableGrid">
-            <!-- Tables will be populated by JavaScript -->
-        </div>
-    </div>
+    <!-- Home Section -->
+    <section id="home" class="page-section active">
+        <div class="hero">
+            <div class="card-decoration" style="top: 20%; left: 10%;">🂡</div>
+            <div class="card-decoration" style="top: 30%; right: 15%;">🂮</div>
+            <div class="card-decoration" style="bottom: 25%; left: 20%;">🃁</div>
+            <div class="card-decoration" style="bottom: 35%; right: 10%;">🃎</div>
 
-    <!-- Sitting at Table Screen -->
-    <div class="table-screen" id="tableScreen" style="display: none;">
-        <div class="table-info">
-            <h2 id="tableTitle">🪑 Sitting at Table 1</h2>
+            <div class="hero-content">
+                <h1>The Fastest Growing Poker Game in the World</h1>
+                <p class="subtitle">Master the art of card arrangement in this exciting new poker variant that combines strategy, skill, and the perfect touch of luck!</p>
 
-            <div class="current-settings">
-                <div class="settings-title">Current Table Settings</div>
-                <div class="settings-list" id="settingsDisplay">
-                    <!-- Settings will be populated by JavaScript -->
+                <div class="cta-buttons">
+                    <a href="#" class="btn btn-primary" onclick="showSection('play-now')">🎮 Play Now - Free!</a>
+                    <a href="#" class="btn btn-secondary" onclick="showSection('how-to-play')">📖 Learn the Rules</a>
+                </div>
+
+                <p style="margin-top: 2rem; font-size: 1.1rem; opacity: 0.8;">
+                    Join thousands of players discovering this revolutionary poker experience
+                </p>
+                <div class="hero-images">
+                    <div class="hero-image poker-table" title="Professional poker environment"></div>
+                    <div class="hero-image cards" title="Strategic card arrangements"></div>
+                    <div class="hero-image friends" title="Social gaming experience"></div>
                 </div>
             </div>
-
-            <div class="table-actions">
-                <button class="btn btn-warning" onclick="editSettings()">⚙️ Edit Settings</button>
-                <button class="btn btn-primary" onclick="startGame()">🎯 Start Game</button>
-                <button class="btn btn-danger" onclick="leaveTable()">🚪 Leave Table</button>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="game-area" id="gameArea" style="display: none;">
-    <!-- Your existing game content -->
-
-        <!-- Your existing game area - add style="display: none;" -->
-        <div class="game-controls">
-<!--            <button id="cloudGameButton" class="btn btn-primary" onclick="cloudNewGame()">-->
-<!--                    ONLINE-->
-<!--            </button>-->
-            <button id="newGame" class="btn btn-primary">New Game</button>
-            <button id="newRound" class="btn btn-secondary">New Round</button>
-            <button id="autoArrange" class="btn btn-secondary">Auto</button>
-            <button id="sortByRank" class="btn btn-secondary">Rank</button>
-            <button id="sortBySuit" class="btn btn-secondary">Suit</button>
-            <button id="submitHand" class="btn btn-primary" disabled>Submit</button>
-            <button id="gameSettings" class="btn btn-secondary">Settings</button>
-            <button id="helpButton" class="btn btn-secondary">Rules</button>
         </div>
 
-
-
-    <!-- Remove the config button - it will be accessible via New Game -->
-
-
-        <div class="status" id="status">
-            Click "New Game" to configure a new game, or "New Round" to deal new hands!
-        </div>
-
-        <div class="game-area" id="gameArea">
-            <div class="main-game">
-                <div class="hand-section">
-                    <div class="hand-label">
-                        <span class="hand-icon">🎴</span>
-                        Your Cards - Staging Area
+        <!-- Quick Features Preview -->
+        <div class="features">
+            <div class="container">
+                <h2 class="section-title">Why Players Love Pyramid Poker</h2>
+                <div class="features-grid">
+                    <div class="feature-card ai-feature">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Easy to Learn</h3>
+                        <p>If you know poker, you can learn Pyramid Poker in minutes. The basic rules are simple, but the strategy runs deep!</p>
                     </div>
-                    <div class="hand-area staging-area" id="playerHand" data-hand="player"></div>
-                </div>
-
-                <div class="hand-section">
-                    <div class="hand-label">
-                        <span class="hand-icon">🏆</span>
-                        Back Hand (5-8 cards)
-                        <span class="hand-strength" id="backStrength"></span>
+                    <div class="feature-card cards-feature">
+                        <div class="feature-icon">🎲</div>
+                        <h3>Perfect Balance</h3>
+                        <p>Strategy matters, but luck keeps every game exciting. No hand is unwinnable, no player invincible!</p>
                     </div>
-                    <div class="hand-area" id="backHand" data-hand="back"></div>
-                </div>
-
-                <div class="hand-section">
-                    <div class="hand-label">
-                        <span class="hand-icon">🥈</span>
-                        Middle Hand (5-7 cards)
-                        <span class="hand-strength" id="middleStrength"></span>
+                    <div class="feature-card">
+                        <div class="feature-icon">🏠</div>
+                        <h3>Host Local Games</h3>
+                        <p>Perfect for game nights! Learn online, then become the expert who teaches friends and hosts tournaments.</p>
                     </div>
-                    <div class="hand-area" id="middleHand" data-hand="middle"></div>
-                </div>
-
-                <div class="hand-section">
-                    <div class="hand-label">
-                        <span class="hand-icon">🥉</span>
-                        Front Hand (3-5 cards)
-                        <span class="hand-strength" id="frontStrength"></span>
-                    </div>
-                    <div class="hand-area" id="frontHand" data-hand="front"></div>
-                </div>
-            </div>
-
-            <div class="sidebar" id="sidebar">
-                <h3>Players</h3>
-                <div class="player-list" id="playerList"></div>
-
-                <div class="scoring" id="scoring" style="display: none;">
-                    <h3>Current Scores</h3>
-                    <div id="scoreList"></div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Scoring Popup -->
-    <div class="scoring-popup" id="scoringPopup">
-        <div class="scoring-content">
-            <button class="close-popup" onclick="game.closeScoringPopup()">×</button>
-            <h2 style="text-align: center; margin-bottom: 30px; color: #ffd700;">🏆 Round Results</h2>
-
-            <div class="player-hands-section">
-                <h3 style="color: #ffd700; margin-bottom: 20px;">All Players' Hands</h3>
-                <div id="allPlayerHands"></div>
-            </div>
-
-            <div class="round-robin-section">
-                <h3 style="color: #ffd700; margin-bottom: 20px;">Round-Robin Scoring</h3>
-                <div id="roundRobinResults"></div>
-            </div>
-
-            <div style="text-align: center; margin-top: 30px;">
-                <button class="btn btn-primary" onclick="game.closeScoringPopup()">Continue</button>
+        <!-- Testimonials Section -->
+        <div class="testimonials">
+            <div class="container">
+                <h2 class="section-title">What Players Are Saying</h2>
+                <div class="testimonials-grid">
+                    <div class="testimonial-card">
+                        <p>I've been playing poker for 15 years, and Pyramid Poker is the most exciting variant I've discovered. The strategic depth is incredible!</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar"></div>
+                            <div class="author-info">
+                                <h4>Mike Thompson</h4>
+                                <p>Tournament Player, Las Vegas</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <p>Perfect for our weekly game night. Easy to teach new players, but keeps experienced players engaged. Everyone loves it!</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar"></div>
+                            <div class="author-info">
+                                <h4>Sarah Chen</h4>
+                                <p>Game Night Host, Seattle</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <p>The AI is surprisingly challenging. Great way to practice before playing with friends. The auto-arrange feature taught me so much!</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar"></div>
+                            <div class="author-info">
+                                <h4>David Rodriguez</h4>
+                                <p>Software Engineer, Austin</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    </section>
 
+    <!-- How to Play Section -->
+    <section id="how-to-play" class="page-section">
+        <div class="how-to-play">
+            <div class="container">
+                <h2 class="section-title">How to Play Pyramid Poker</h2>
+                <p style="text-align: center; font-size: 1.2rem; margin-bottom: 3rem; color: var(--text-secondary);">
+                    Learn the basics in 4 simple steps
+                </p>
 
-    </div>
-    <!-- JavaScript Files -->
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <h3 style="margin-top: 1.5rem;">Get Your Cards</h3>
+                        <p>Receive 17 cards from a deck that includes wild cards. Every hand is a new puzzle to solve!</p>
+                    </div>
+                    <div class="step-card">
+                        <h3 style="margin-top: 1.5rem;">Arrange Into 3 Hands</h3>
+                        <p>Create a Back Hand (strongest), Middle Hand (medium), and Front Hand (weakest). The golden rule: Back ≥ Middle ≥ Front</p>
+                    </div>
+                    <div class="step-card">
+                        <h3 style="margin-top: 1.5rem;">Score Against Others</h3>
+                        <p>Compare your hands against every other player. Win points for stronger hands, lose points for weaker ones.</p>
+                    </div>
+                    <div class="step-card">
+                        <h3 style="margin-top: 1.5rem;">Highest Score Wins!</h3>
+                        <p>Total up your wins and losses. The player with the best overall arrangement takes the round!</p>
+                    </div>
+                </div>
 
-<!-- Near the bottom of index.html, before closing </body> -->
-<script>
-// Existing game initialization
-window.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Initializing Pyramid Poker...');
+                <div style="text-align: center; margin-top: 3rem;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Special Pyramid Poker Hands</h3>
+                    <p style="font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
+                        Unlike regular poker, you can make special 6, 7, or 8 card hands!
+                        Create massive straight flushes or collect 8-of-a-kind for huge point bonuses.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    // Load empirical win probability data
-    const empiricalLoaded = await initializeEmpiricalWinProbability();
-    if (empiricalLoaded) {
-        console.log('✅ Empirical win prob loaded (30,868 entries)');
-    } else {
-        console.log('⚠️ Empirical data failed to load');
-    }
+    <!-- Features Section -->
+    <section id="features" class="page-section">
+        <div class="features">
+            <div class="container">
+                <h2 class="section-title">Game Features</h2>
 
-    // Load tiered win probability data
-    const tieredLoaded = await initializeTieredWinProbability();
-    if (tieredLoaded) {
-        console.log('✅ Tiered win prob loaded (1978 entries)');
-    } else {
-        console.log('⚠️ Tiered data failed to load');
-    }
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <h3>Smart AI Opponents</h3>
+                        <p>Practice against intelligent AI that uses advanced optimization algorithms. Choose from multiple AI personality types!</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🃏</div>
+                        <h3>Wild Card Magic</h3>
+                        <p>Wild cards add excitement and strategy. Turn a losing hand into a winner with smart wild card placement!</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Auto-Arrange Assistant</h3>
+                        <p>Learning? Use the auto-arrange feature to see optimal play. Advanced? Study the AI's choices to improve your game.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Detailed Statistics</h3>
+                        <p>Track your improvement with comprehensive stats. See win rates, favorite hands, and strategic insights.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <h3>Multiple Game Modes</h3>
+                        <p>Play offline against AI, local multiplayer with friends, or online with players worldwide.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🏆</div>
+                        <h3>Special Hand Scoring</h3>
+                        <p>Master the unique Pyramid Poker hands like 8-of-a-kind and 8-card straight flushes for massive point bonuses!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    // Load tiered2 win probability data
-    const tiered2Loaded = await initializeTiered2WinProbability();
-    if (tiered2Loaded) {
-        console.log('✅ Tiered2 win prob loaded (2235 entries)');
-    } else {
-        console.log('⚠️ Tiered data failed to load');
-    }
+    <!-- About Section -->
+    <section id="about" class="page-section">
+        <div class="about">
+            <div class="container">
+                <h2 class="section-title">About Pyramid Poker</h2>
 
-    // Load netEV_lookup_table
-    const netEVLoaded = await initializeNetEVLookup();
-    if (netEVLoaded) {
-        console.log('✅ netEV Lookup Table loaded (2270 entries)');
-    } else {
-        console.log('⚠️ netEV Lookup Table failed to load');
-    }
+                <div class="about-content">
+                    <div class="about-text">
+                        <h3 style="color: var(--primary-color); margin-bottom: 1rem;">The Game That's Taking the Poker World by Storm</h3>
+                        <p>Pyramid Poker started as an innovative twist on Chinese Poker and has rapidly grown into one of the most exciting poker variants available. What makes it special?</p>
 
+                        <ul style="margin: 1.5rem 0; padding-left: 1.5rem;">
+                            <li><strong>Strategic Depth:</strong> Every decision matters, from wild card placement to hand arrangement</li>
+                            <li><strong>Accessible Fun:</strong> Easy to learn basics, but endless room for improvement</li>
+                            <li><strong>Social Experience:</strong> Perfect for game nights and poker tournaments</li>
+                            <li><strong>Balanced Gameplay:</strong> Skill and luck combine for exciting, unpredictable games</li>
+                        </ul>
 
-});
-</script>
+                        <p>Whether you're a poker veteran looking for a fresh challenge or a newcomer excited to learn, Pyramid Poker offers an experience that grows with you.</p>
+                    </div>
 
-    <!-- Add these Firebase SDKs (before your existing scripts) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+                    <div class="about-image"></div>
+                </div>
 
-    <!-- Your Firebase files -->
-    <script src="js/firebase/firebase-config.js"></script>
-    <script src="js/firebase/firebase-auth.js"></script>
-    <script src="js/firebase/user-stats.js"></script>
+                <div style="margin-top: 3rem;">
+                    <div class="about-stats">
+                        <div class="stat-card">
+                            <div class="stat-number">50K+</div>
+                            <div>Games Played</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">15</div>
+                            <div>Countries</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">98%</div>
+                            <div>Player Satisfaction</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">24/7</div>
+                            <div>Online Play</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <!-- Login Modal -->
-    <script src="js/ui/lobby.js"></script>
-    <script src="js/ui/login-modal.js"></script>
+    <!-- Play Now Section -->
+    <section id="play-now" class="page-section">
+        <div class="play-now">
+            <div class="container">
+                <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">Ready to Play?</h2>
+                <p style="font-size: 1.2rem; opacity: 0.9; margin-bottom: 3rem;">
+                    Choose your adventure - learn against AI or jump into multiplayer action!
+                </p>
 
-    <!-- Core dependencies first -->
-    <script src="js/constants/hand-types.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/utilities/card-count.js"></script>
-    <script src="js/utilities/empirical-win-probability.js"></script>
-    <script src="js/utilities/tiered-win-probability.js"></script>
-    <script src="js/utilities/tiered2-win-probability.js"></script>
-    <script src="js/utilities/netEV-lookup-table.js"></script>
-    <script src="js/utilities/convert-to-card-model.js"></script>
-    <script src="js/hands/evaluate-hand.js"></script>
-    <script src="js/hands/evaluate-hand-new.js"></script>
-    <script src="js/hands/hand-utilities.js"></script>    <script src="js/hands/evaluate-hand-new.js"></script>
-    <script src="js/hands/scoring-utilities.js"></script>
-    <script src="js/core/player.js"></script>
-    <script src="js/core/deck.js"></script>
-    <script src="js/utils/version.js"></script>
-    <script src="js/core/game.js"></script>
-    <script src="js/utilities/analysis.js"></script>
-    <script src="js/utilities/card-parser.js"></script>
+                <div class="login-options">
+                    <div class="login-card">
+                        <h3 style="margin-bottom: 1rem;">🎯 Quick Play</h3>
+                        <p style="margin-bottom: 1.5rem;">Jump right in and start playing against AI opponents. No signup required!</p>
+                        <a href="#" class="btn btn-primary" onclick="startQuickPlay()">Play as Guest</a>
+                    </div>
 
+                    <div class="login-card">
+                        <h3 style="margin-bottom: 1rem;">🏆 Full Experience</h3>
+                        <p style="margin-bottom: 1.5rem;">Create an account to save progress, join tournaments, and compete on leaderboards!</p>
+                        <a href="#" class="btn btn-primary" onclick="showLogin()">Login / Sign Up</a>
+                    </div>
+                </div>
 
-    <!-- Hand detection and analysis -->
-    <script src="js/utilities/count-valid-hands.js"></script>
-    <script src="js/utilities/count-valid-hands-from-cards.js"></script>
-    <script src="js/utilities/create-arrangement.js"></script>
-    <script src="js/hands/hand-detector.js"></script>
-    <script src="js/arrange/hand-sorter.js"></script>
-    <script src="js/hands/card-utilities.js"></script>
-    <script src="js/hands/arrangement-scorer.js"></script>
-    <script src="js/hands/arrangement-validator.js"></script>
-    <script src="js/arrange/two-wild-strategy-one.js"></script>
-    <script src="js/arrange/two-wild-strategy-two.js"></script>
+                <!-- Login Form (initially hidden) -->
+                <div id="loginForm" style="display: none; max-width: 400px; margin: 3rem auto; background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 15px;">
+                    <h3 style="margin-bottom: 1.5rem;">Login to Your Account</h3>
+                    <input type="email" placeholder="Email" style="width: 100%; padding: 1rem; margin-bottom: 1rem; border: none; border-radius: 8px; background: rgba(255,255,255,0.2); color: white;">
+                    <input type="password" placeholder="Password" style="width: 100%; padding: 1rem; margin-bottom: 1.5rem; border: none; border-radius: 8px; background: rgba(255,255,255,0.2); color: white;">
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-primary" onclick="handleLogin()">Login</button>
+                        <button class="btn btn-secondary" onclick="hideLogin()">Cancel</button>
+                    </div>
+                    <p style="margin-top: 1rem; text-align: center;">
+                        <a href="#" style="color: var(--accent-color);" onclick="showSignup()">Don't have an account? Sign up!</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <!-- Other game components -->
-    <script src="js/tests/test-card-count.js"></script>
-    <script src="js/ui/scoring-popup.js"></script>
-    <script src="js/ui/display.js"></script>
-    <script src="js/core/game-config.js"></script>
-    <script src="js/ui/config.js"></script>
-    <script src="js/ui/rules.js"></script>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <a href="#" onclick="showSection('home')">Home</a>
+                <a href="#" onclick="showSection('how-to-play')">Rules</a>
+                <a href="#" onclick="showSection('features')">Features</a>
+                <a href="#" onclick="showSection('about')">About</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Contact</a>
+            </div>
+            <p>&copy; 2025 Pyramid Poker Online. The fastest growing poker game in the world!</p>
+        </div>
+    </footer>
 
-    <!-- Add these lines -->
-    <link rel="stylesheet" href="css/user-stats.css">
-    <script src="js/ui/user-stats-display.js"></script>
+    <!-- Remove the login modal script import since we're redirecting -->
 
+    <script>
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+            const toggleBtn = document.querySelector('.theme-toggle');
+            toggleBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        });
 
-    <!-- Only load tests in development -->
-    <script src="js/tests/test-cases.js"></script>
-    <script src="js/tests/test-evaluate-hand.js"></script>
-    <script src="js/tests/auto-arrange-tests.js"></script>
-    <script src="js/hands/hand-detector-metadata-reporter.js"></script>
+        // Theme toggle
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
-    <!-- load test cases -->
-    <script src="js/tests/test-hand-detector.js"></script>
+            body.setAttribute('data-theme', newTheme);
 
-    <!-- In your main pyramid-poker.html file -->
-    <script src="js/arrange/two-wild-strategy-one.js"></script></div>
-    <script src="js/arrange/find-best-setup-no-wild.js"></script>
-    <script src="js/arrange/find-best-setup-one-wild.js"></script>
-    <script src="js/arrange/find-best-setup-two-wild.js"></script>
-    <script src="js/arrange/find-best-setup.js"></script>
-    <script src="js/hands/auto-arrange.js"></script>
+            const toggleBtn = document.querySelector('.theme-toggle');
+            toggleBtn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
 
+            localStorage.setItem('theme', newTheme);
+        }
 
-    <!-- generate stats -->
-    <script src="js/stats/play-hand-stats.js"></script>
+        // Section navigation
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.page-section');
+            sections.forEach(section => section.classList.remove('active'));
 
-    <script src="js/tests/test-execution.js"></script>
-    <script src="js/tests/unittest-hand-detector.js"></script>
-    <script src="js/tests/test-tiered-win-probability.js"></script>
-    <script src="js/tests/create-from-cards-test-case.js"></script>
-    <script src="js/tests/test-all-methods.js"></script>
-    <script src="js/utilities/analyze-cards.js"></script>
-    <script src="js/arrange/one-wild-candidates.js"></script>
-    <script src="js/tests/batch.js"></script>
-    <script src="js/tests/top-arrangement-analysis.js"></script>
-    <script src="js/tests/debug-head-to-head.js"></script>
-    <script src="js/tests/debug-hand-corruption.js"></script>
-<!--    <script src="data/convert-tiered-csv.js"></script>-->
-    <!-- Add these lines after your existing scripts -->
-    <link rel="stylesheet" href="css/leaderboards.css">
-    <script src="js/firebase/leaderboards.js"></script>
-    <script src="js/ui/leaderboard-display.js"></script>
-    <script src="js/multiplayer/table-manager.js"></script>
-    <script src="js/multiplayer/tournament-sync.js"></script>
-    <script src="js/multiplayer/game-integration.js"></script>
-    <script src="js/multiplayer/multi-device-integration.js"></script>
-    <script src="js/multiplayer/cloud-new-game.js"></script>
+            // Show target section
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
 
+            // Smooth scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
-    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-firestore.js"></script>
+        // Login functions - redirect to game page with login
+        function showLogin() {
+            window.location.href = 'game.html?showLogin=true';
+        }
 
+        function hideLogin() {
+            document.getElementById('loginForm').style.display = 'none';
+        }
 
+        function handleLogin() {
+            showLogin();
+        }
+
+        function showSignup() {
+            // You can add signup functionality or redirect to login modal
+            window.loginModal.show();
+        }
+
+        function startQuickPlay() {
+            window.location.href = 'game.html';
+        }
+
+        // Add floating card animations
+        function addFloatingCards() {
+            const suits = ['♠', '♥', '♦', '♣'];
+            const ranks = ['A', 'K', 'Q', 'J', '10', '9', '8', '7'];
+
+            for (let i = 0; i < 8; i++) {
+                const card = document.createElement('div');
+                card.className = 'card-decoration';
+                card.textContent = ranks[Math.floor(Math.random() * ranks.length)] + suits[Math.floor(Math.random() * suits.length)];
+                card.style.top = Math.random() * 100 + '%';
+                card.style.left = Math.random() * 100 + '%';
+                card.style.animationDelay = Math.random() * 10 + 's';
+                document.querySelector('.hero').appendChild(card);
+            }
+        }
+
+        // Initialize floating cards
+        window.addEventListener('DOMContentLoaded', addFloatingCards);
+    </script>
 </body>
 </html>

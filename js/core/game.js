@@ -453,18 +453,18 @@ class PyramidPokerGame {
             // Set content and styling
             backStrengthEl.textContent = `${backStrength.name}   -   ${backPoints} Points`;
             backStrengthEl.style.color = '#FFFF00';
-//            backStrengthEl.style.fontWeight = 'bold';
-            backStrengthEl.style.fontSize = '18px';
+            backStrengthEl.style.fontWeight = 'bold';
+            backStrengthEl.style.fontSize = '16px';
 
             middleStrengthEl.textContent = `${middleStrength.name}  -  ${middlePoints} Points`;
             middleStrengthEl.style.color = '#FFFF00';
-//            middleStrengthEl.style.fontWeight = 'bold';
-            middleStrengthEl.style.fontSize = '18px';
+            middleStrengthEl.style.fontWeight = 'bold';
+            middleStrengthEl.style.fontSize = '16px';
 
             frontStrengthEl.textContent = `${frontStrength.name}  -  ${frontPoints} Points`;
             frontStrengthEl.style.color = '#FFFF00';
-//            frontStrengthEl.style.fontWeight = 'bold';
-            frontStrengthEl.style.fontSize = '18px';
+            frontStrengthEl.style.fontWeight = 'bold';
+            frontStrengthEl.style.fontSize = '16px';
 
             // Display hand strengths
             document.getElementById('backStrength');

@@ -79,8 +79,21 @@ class LoginModal {
         if (loginButton) {
             loginButton.addEventListener('click', () => {
                 console.log('🔧 Login button clicked!');
-                this.show();
+
+                // Check if user is logged in
+                const currentUser = window.firebaseAuth ? window.firebaseAuth.currentUser : null;
+
+                if (currentUser) {
+                    // User is logged in - logout
+                    this.logout();
+                } else {
+                    // User is logged out - show login modal
+                    this.show();
+                }
             });
+
+        //Do you have a logout() method in your login-modal.js? If not, we'll need to add one:
+
             console.log('🔧 Login button connected!');
         } else {
             console.log('🔧 WARNING: Login button not found!');
@@ -124,6 +137,15 @@ class LoginModal {
         this.isVisible = true;
         document.getElementById('emailInput').focus();
 
+    }
+
+    logout() {
+        firebase.auth().signOut().then(() => {
+            console.log('🔧 User logged out successfully');
+            this.updateLoginButtonText(); // Will show "Login" again
+        }).catch((error) => {
+            console.error('🔧 Logout error:', error);
+        });
     }
 
     updateLoginState(user) {
@@ -313,7 +335,38 @@ class LoginModal {
             const emailPrefix = currentUser.email.split('@')[0];
             loginButton.textContent = `Logout (${emailPrefix})`;
             console.log('🔧 Updated button to show logged-in user:', emailPrefix);
+        } else if (loginButton) {
+            // ADD THIS PART:
+            loginButton.textContent = 'Login';
+            console.log('🔧 Updated button to show logged-out state');
         }
+    }
+
+    logout() {
+        firebase.auth().signOut().then(() => {
+            console.log('🔧 User logged out successfully');
+            this.updateLoginButtonText();
+            this.hideStatsButton();
+
+            // Clear all user email displays
+            const userInfoElement = document.querySelector('.user-info');
+            if (userInfoElement) {
+                userInfoElement.textContent = '';
+            }
+
+            const currentUserElement = document.getElementById('currentUser');
+            if (currentUserElement) {
+                currentUserElement.textContent = '';
+            }
+
+            const lobbyHeaderElement = document.querySelector('.lobby-header');
+            if (lobbyHeaderElement) {
+                lobbyHeaderElement.textContent = '🏛️ Game Lobby';
+            }
+
+        }).catch((error) => {
+            console.error('🔧 Logout error:', error);
+        });
     }
 
 }

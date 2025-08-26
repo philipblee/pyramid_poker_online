@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pyramid Poker Online</title>
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- ================================================================ -->
+    <!-- STEP 1: ADD THIS CSS TO YOUR <head> section (after the existing <link> tag) -->
+    <!-- ================================================================ -->
+
+    <style id="loginModalStyles">
+        /* Login Modal Styles - matching config modal */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-content {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            border-radius: 15px;
+            border: 2px solid #4ecdc4;
+            max-width: 400px;
+            width: 90%;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .login-header h2 {
+            margin: 0;
+            color: #ffd700;
+        }
+
+        .login-close {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-close:hover {
+            background: rgba(255, 107, 107, 0.2);
+        }
+
+        .login-body {
+            padding: 20px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #ecf0f1;
+        }
+
+        .form-group input {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #4ecdc4;
+            background: rgba(52, 73, 94, 0.8);
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+
+        .form-group input::placeholder {
+            color: #95a5a6;
+        }
+
+        .passcode-input {
+            text-align: center;
+            letter-spacing: 8px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .login-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .login-btn-modal {
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            background: #4ecdc4;
+            color: white;
+            font-size: 16px;
+        }
+
+        .login-btn-modal:hover {
+            background: #45b7aa;
+        }
+
+        .login-btn-modal:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .mode-switch {
+            text-align: center;
+            color: #95a5a6;
+            font-size: 14px;
+        }
+
+        .mode-switch a {
+            color: #4ecdc4;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .mode-switch a:hover {
+            color: #ffd700;
+            text-decoration: underline;
+        }
+
+        /* Modal internal status area */
+        .modal-status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+            border: 1px solid transparent;
+        }
+
+        .modal-status.success {
+            background: rgba(46, 204, 113, 0.2);
+            border-color: #2ecc71;
+            color: #2ecc71;
+        }
+
+        .modal-status.error {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+        .modal-status.info {
+            background: rgba(52, 152, 219, 0.2);
+            border-color: #3498db;
+            color: #3498db;
+        }
+
+        /* Custom checkbox styling */
+        .checkbox-label {
+            display: flex !important;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: #ecf0f1 !important;
+            font-weight: normal !important;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 8px;
+            width: 16px;
+            height: 16px;
+            accent-color: #4ecdc4;
+        }
+
+        .checkbox-label:hover {
+            color: #4ecdc4 !important;
+        }
+    </style>
+
+</head>
+
+<body>
+    <!-- Animated background -->
+    <div class="bg-particles" id="bgParticles"></div>
+
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+        <span id="toggleIcon">◀</span>
+        <span id="toggleText">Hide</span>
+    </button>
+
+
+    <div class="header">
+        <div class="header-content">
+            <h1>🔺 Pyramid Poker Online</h1>
+            <div class="version-tag" id="version-info" title="Click for build details"> Loading...</div>
+            <button id="loginButton" class="btn btn-secondary login-btn">Login</button>
+        </div>
+    </div>
+
+
+    <!-- Lobby Screen -->
+    <div class="lobby-screen" id="lobbyScreen" style="display: none;">
+        <div class="lobby-header">
+            <h2 class="lobby-title">🏛️ Game Lobby</h2>
+            <div class="user-info">
+                👤 <span id="currentUser">Loading...</span>
+            </div>
+        </div>
+
+        <div class="table-grid" id="tableGrid">
+            <!-- Tables will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Sitting at Table Screen -->
+    <div class="table-screen" id="tableScreen" style="display: none;">
+        <div class="table-info">
+            <h2 id="tableTitle">🪑 Sitting at Table 1</h2>
+
+            <div class="current-settings">
+                <div class="settings-title">Current Table Settings</div>
+                <div class="settings-list" id="settingsDisplay">
+                    <!-- Settings will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="table-actions">
+                <button class="btn btn-warning" onclick="editSettings()">⚙️ Edit Settings</button>
+                <button class="btn btn-primary" onclick="startGame()">🎯 Start Game</button>
+                <button class="btn btn-danger" onclick="leaveTable()">🚪 Leave Table</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="game-area" id="gameArea" style="display: none;">
+    <!-- Your existing game content -->
+
+        <!-- Your existing game area - add style="display: none;" -->
+        <div class="game-controls">
+<!--            <button id="cloudGameButton" class="btn btn-primary" onclick="cloudNewGame()">-->
+<!--                    ONLINE-->
+<!--            </button>-->
+            <button id="newGame" class="btn btn-primary">New Game</button>
+            <button id="newRound" class="btn btn-secondary">New Round</button>
+            <button id="autoArrange" class="btn btn-secondary">Auto</button>
+            <button id="sortByRank" class="btn btn-secondary">Rank</button>
+            <button id="sortBySuit" class="btn btn-secondary">Suit</button>
+            <button id="submitHand" class="btn btn-primary" disabled>Submit</button>
+            <button id="gameSettings" class="btn btn-secondary">Settings</button>
+            <button id="helpButton" class="btn btn-secondary">Rules</button>
+        </div>
+
+
+
+    <!-- Remove the config button - it will be accessible via New Game -->
+
+
+        <div class="status" id="status">
+            Click "New Game" to configure a new game, or "New Round" to deal new hands!
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <div class="main-game">
+                <div class="hand-section">
+                    <div class="hand-label">
+                        <span class="hand-icon">🎴</span>
+                        Your Cards - Staging Area
+                    </div>
+                    <div class="hand-area staging-area" id="playerHand" data-hand="player"></div>
+                </div>
+
+                <div class="hand-section">
+                    <div class="hand-label">
+                        <span class="hand-icon">🏆</span>
+                        Back Hand (5-8 cards)
+                        <span class="hand-strength" id="backStrength"></span>
+                    </div>
+                    <div class="hand-area" id="backHand" data-hand="back"></div>
+                </div>
+
+                <div class="hand-section">
+                    <div class="hand-label">
+                        <span class="hand-icon">🥈</span>
+                        Middle Hand (5-7 cards)
+                        <span class="hand-strength" id="middleStrength"></span>
+                    </div>
+                    <div class="hand-area" id="middleHand" data-hand="middle"></div>
+                </div>
+
+                <div class="hand-section">
+                    <div class="hand-label">
+                        <span class="hand-icon">🥉</span>
+                        Front Hand (3-5 cards)
+                        <span class="hand-strength" id="frontStrength"></span>
+                    </div>
+                    <div class="hand-area" id="frontHand" data-hand="front"></div>
+                </div>
+            </div>
+
+            <div class="sidebar" id="sidebar">
+                <h3>Players</h3>
+                <div class="player-list" id="playerList"></div>
+
+                <div class="scoring" id="scoring" style="display: none;">
+                    <h3>Current Scores</h3>
+                    <div id="scoreList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scoring Popup -->
+    <div class="scoring-popup" id="scoringPopup">
+        <div class="scoring-content">
+            <button class="close-popup" onclick="game.closeScoringPopup()">×</button>
+            <h2 style="text-align: center; margin-bottom: 30px; color: #ffd700;">🏆 Round Results</h2>
+
+            <div class="player-hands-section">
+                <h3 style="color: #ffd700; margin-bottom: 20px;">All Players' Hands</h3>
+                <div id="allPlayerHands"></div>
+            </div>
+
+            <div class="round-robin-section">
+                <h3 style="color: #ffd700; margin-bottom: 20px;">Round-Robin Scoring</h3>
+                <div id="roundRobinResults"></div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-primary" onclick="game.closeScoringPopup()">Continue</button>
+            </div>
+        </div>
+
+
+    </div>
+    <!-- JavaScript Files -->
+
+<!-- Near the bottom of game.html, before closing </body> -->
+<script>
+// Existing game initialization
+window.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Initializing Pyramid Poker...');
+
+    // Load empirical win probability data
+    const empiricalLoaded = await initializeEmpiricalWinProbability();
+    if (empiricalLoaded) {
+        console.log('✅ Empirical win prob loaded (30,868 entries)');
+    } else {
+        console.log('⚠️ Empirical data failed to load');
+    }
+
+    // Load tiered win probability data
+    const tieredLoaded = await initializeTieredWinProbability();
+    if (tieredLoaded) {
+        console.log('✅ Tiered win prob loaded (1978 entries)');
+    } else {
+        console.log('⚠️ Tiered data failed to load');
+    }
+
+    // Load tiered2 win probability data
+    const tiered2Loaded = await initializeTiered2WinProbability();
+    if (tiered2Loaded) {
+        console.log('✅ Tiered2 win prob loaded (2235 entries)');
+    } else {
+        console.log('⚠️ Tiered data failed to load');
+    }
+
+    // Load netEV_lookup_table
+    const netEVLoaded = await initializeNetEVLookup();
+    if (netEVLoaded) {
+        console.log('✅ netEV Lookup Table loaded (2270 entries)');
+    } else {
+        console.log('⚠️ netEV Lookup Table failed to load');
+    }
+
+
+});
+</script>
+
+    <!-- Add these Firebase SDKs (before your existing scripts) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <!-- Your Firebase files -->
+    <script src="js/firebase/firebase-config.js"></script>
+    <script src="js/firebase/firebase-auth.js"></script>
+    <script src="js/firebase/user-stats.js"></script>
+
+    <!-- Login Modal -->
+    <script src="js/ui/lobby.js"></script>
+    <script src="js/ui/login-modal.js"></script>
+
+    <!-- Core dependencies first -->
+    <script src="js/constants/hand-types.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/utilities/card-count.js"></script>
+    <script src="js/utilities/empirical-win-probability.js"></script>
+    <script src="js/utilities/tiered-win-probability.js"></script>
+    <script src="js/utilities/tiered2-win-probability.js"></script>
+    <script src="js/utilities/netEV-lookup-table.js"></script>
+    <script src="js/utilities/convert-to-card-model.js"></script>
+    <script src="js/hands/evaluate-hand.js"></script>
+    <script src="js/hands/evaluate-hand-new.js"></script>
+    <script src="js/hands/hand-utilities.js"></script>    <script src="js/hands/evaluate-hand-new.js"></script>
+    <script src="js/hands/scoring-utilities.js"></script>
+    <script src="js/core/player.js"></script>
+    <script src="js/core/deck.js"></script>
+    <script src="js/utils/version.js"></script>
+    <script src="js/core/game.js"></script>
+    <script src="js/utilities/analysis.js"></script>
+    <script src="js/utilities/card-parser.js"></script>
+
+
+    <!-- Hand detection and analysis -->
+    <script src="js/utilities/count-valid-hands.js"></script>
+    <script src="js/utilities/count-valid-hands-from-cards.js"></script>
+    <script src="js/utilities/create-arrangement.js"></script>
+    <script src="js/hands/hand-detector.js"></script>
+    <script src="js/arrange/hand-sorter.js"></script>
+    <script src="js/hands/card-utilities.js"></script>
+    <script src="js/hands/arrangement-scorer.js"></script>
+    <script src="js/hands/arrangement-validator.js"></script>
+    <script src="js/arrange/two-wild-strategy-one.js"></script>
+    <script src="js/arrange/two-wild-strategy-two.js"></script>
+
+    <!-- Other game components -->
+    <script src="js/tests/test-card-count.js"></script>
+    <script src="js/ui/scoring-popup.js"></script>
+    <script src="js/ui/display.js"></script>
+    <script src="js/core/game-config.js"></script>
+    <script src="js/ui/config.js"></script>
+    <script src="js/ui/rules.js"></script>
+
+    <!-- Add these lines -->
+    <link rel="stylesheet" href="css/user-stats.css">
+    <script src="js/ui/user-stats-display.js"></script>
+
+
+    <!-- Only load tests in development -->
+    <script src="js/tests/test-cases.js"></script>
+    <script src="js/tests/test-evaluate-hand.js"></script>
+    <script src="js/tests/auto-arrange-tests.js"></script>
+    <script src="js/hands/hand-detector-metadata-reporter.js"></script>
+
+    <!-- load test cases -->
+    <script src="js/tests/test-hand-detector.js"></script>
+
+    <!-- In your main pyramid-poker.html file -->
+    <script src="js/arrange/two-wild-strategy-one.js"></script></div>
+    <script src="js/arrange/find-best-setup-no-wild.js"></script>
+    <script src="js/arrange/find-best-setup-one-wild.js"></script>
+    <script src="js/arrange/find-best-setup-two-wild.js"></script>
+    <script src="js/arrange/find-best-setup.js"></script>
+    <script src="js/hands/auto-arrange.js"></script>
+
+
+    <!-- generate stats -->
+    <script src="js/stats/play-hand-stats.js"></script>
+
+    <script src="js/tests/test-execution.js"></script>
+    <script src="js/tests/unittest-hand-detector.js"></script>
+    <script src="js/tests/test-tiered-win-probability.js"></script>
+    <script src="js/tests/create-from-cards-test-case.js"></script>
+    <script src="js/tests/test-all-methods.js"></script>
+    <script src="js/utilities/analyze-cards.js"></script>
+    <script src="js/arrange/one-wild-candidates.js"></script>
+    <script src="js/tests/batch.js"></script>
+    <script src="js/tests/top-arrangement-analysis.js"></script>
+    <script src="js/tests/debug-head-to-head.js"></script>
+    <script src="js/tests/debug-hand-corruption.js"></script>
+<!--    <script src="data/convert-tiered-csv.js"></script>-->
+    <!-- Add these lines after your existing scripts -->
+    <link rel="stylesheet" href="css/leaderboards.css">
+    <script src="js/firebase/leaderboards.js"></script>
+    <script src="js/ui/leaderboard-display.js"></script>
+    <script src="js/multiplayer/table-manager.js"></script>
+    <script src="js/multiplayer/tournament-sync.js"></script>
+    <script src="js/multiplayer/game-integration.js"></script>
+    <script src="js/multiplayer/multi-device-integration.js"></script>
+    <script src="js/multiplayer/cloud-new-game.js"></script>
+
+
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-firestore.js"></script>
+
+
+</body>
+</html>
