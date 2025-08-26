@@ -3,11 +3,20 @@
 // In lobby.js, update the tableSettings object (around line 4):
 
 let tableSettings = {
-    gameMode: 'offline',
-    aiPlayers: 4,
+    gameConnectMode: 'offline',
+    gameDeviceMode: 'single device',
+    gameMode: 'singleplayer',
+    gameVariant: 'no surrender',
+    computerPlayers: 4,
+    wildCardCount: 2,
+    deckCount: 2,
+    winProbabilityMethod: 'tiered2',  // NEW - added AI method
     rounds: 3,           // NEW - changed from totalRounds
-    wildCards: 2,
-    aiMethod: 'tiered2'  // NEW - added AI method
+    // Table/Lobby settings
+    maxPlayers: 6,                   // Maximum players allowed at table (2-6)
+    minPlayers: 2,                   // Minimum players to start game
+    tableId: null,                   // For multiplayer table identification
+    tableName: ''                   // Display name for table
 };
 
 // Update defaultTables array to use new structure:
@@ -293,12 +302,12 @@ function createTableSettingsModal() {
                 <div class="setting-group">
                     <label for="tableRounds">Rounds (3-20):</label>
                     <input type="range" id="tableRounds" min="3" max="20" value="3" oninput="updateRoundsDisplay(this.value)">
-                    <span id="roundsValue">3</span>
+                    <span id="rounds">3</span>
                 </div>
 
                 <div class="setting-group">
-                    <label for="tableAiMethod">AI Method:</label>
-                    <select id="tableAiMethod">
+                    <label for="winProbabilityMethod">AI Method:</label>
+                    <select id="winProbabilityMethod">
                         <option value="points">Points</option>
                         <option value="tiered2">Tiered2</option>
                         <option value="netEV">NetEV</option>
@@ -306,14 +315,14 @@ function createTableSettingsModal() {
                 </div>
 
                 <div class="setting-group">
-                    <label for="tableWildCards">Wild Cards (0-4):</label>
-                    <input type="range" id="tableWildCards" min="0" max="4" value="2" oninput="updateWildCardsDisplay(this.value)">
+                    <label for="tableWildCardCounts">Wild Cards (0-4):</label>
+                    <input type="range" id="tableWildCardCounts" min="0" max="4" value="2" oninput="updateWildCardsDisplay(this.value)">
                     <span id="wildCardsValue">2</span>
                 </div>
 
                 <div class="setting-group">
-                    <label for="tableAiPlayers">AI Players (1-5):</label>
-                    <input type="range" id="tableAiPlayers" min="1" max="5" value="4" oninput="updateAiPlayersDisplay(this.value)">
+                    <label for="tableComputerPlayers">AI Players (1-5):</label>
+                    <input type="range" id="tableComputerPlayers" min="1" max="5" value="4" oninput="updateAiPlayersDisplay(this.value)">
                     <span id="aiPlayersValue">4</span>
                 </div>
             </div>
@@ -336,9 +345,9 @@ function openTableSettings() {
 
     // Populate current settings
     document.getElementById('tableRounds').value = tableSettings.rounds || 3;
-    document.getElementById('tableAiMethod').value = tableSettings.winProbabilityMethod || 'tiered2';
-    document.getElementById('tableWildCards').value = tableSettings.wildCardCount || 2;
-    document.getElementById('tableAiPlayers').value = tableSettings.computerPlayers || 4;
+    document.getElementById('winProbabilityMethod').value = tableSettings.winProbabilityMethod || 'tiered2';
+    document.getElementById('tableWildCardCounts').value = tableSettings.wildCardCount || 2;
+    document.getElementById('tableComputerPlayers').value = tableSettings.computerPlayers || 4;
 
     // Update displays
     updateRoundsDisplay(tableSettings.rounds || 3);
@@ -358,9 +367,9 @@ function closeTableSettings() {
 function saveTableSettings() {
     // Get values from modal using GameConfig variable names
     tableSettings.rounds = parseInt(document.getElementById('tableRounds').value);
-    tableSettings.winProbabilityMethod = document.getElementById('tableAiMethod').value;  // Changed from aiMethod
-    tableSettings.wildCardCount = parseInt(document.getElementById('tableWildCards').value);        // Changed from wildCards
-    tableSettings.computerPlayers = parseInt(document.getElementById('tableAiPlayers').value);      // Changed from aiPlayers
+    tableSettings.winProbabilityMethod = document.getElementById('winProbabilityMethod').value;  // Changed from aiMethod
+    tableSettings.wildCardCount = parseInt(document.getElementById('tableWildCardCounts').value);        // Changed from wildCards
+    tableSettings.computerPlayers = parseInt(document.getElementById('tableComputerPlayers').value);      // Changed from aiPlayers
 
     // Add other GameConfig settings that might be set in lobby
     tableSettings.gameConnectMode = tableSettings.gameConnectMode || 'offline';
@@ -383,7 +392,7 @@ function saveTableSettings() {
 
 // Update display functions for sliders
 function updateRoundsDisplay(value) {
-    document.getElementById('roundsValue').textContent = value;
+    document.getElementById('rounds').textContent = value;
 }
 
 function updateAiPlayersDisplay(value) {
@@ -407,9 +416,9 @@ function openTableSettings() {
 
     // Populate current settings
     document.getElementById('tableRounds').value = tableSettings.rounds || 3;
-    document.getElementById('tableAiMethod').value = tableSettings.winProbabilityMethod || 'tiered2';
-    document.getElementById('tableWildCards').value = tableSettings.wildCardCount || 2;
-    document.getElementById('tableAiPlayers').value = tableSettings.computerPlayers || 4;
+    document.getElementById('winProbabilityMethod').value = tableSettings.winProbabilityMethod || 'tiered2';
+    document.getElementById('tableWildCardCounts').value = tableSettings.wildCardCount || 2;
+    document.getElementById('tableComputerPlayers').value = tableSettings.computerPlayers || 4;
 
     // Update displays
     updateRoundsDisplay(tableSettings.rounds || 3);
@@ -436,13 +445,13 @@ function createTableSettingsModal() {
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <input type="range" id="tableRounds" min="3" max="20" value="3"
                            oninput="updateRoundsDisplay(this.value)" style="flex: 1;">
-                    <span id="roundsValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">3</span>
+                    <span id="rounds" style="color: #ffd700; font-weight: bold; min-width: 30px;">3</span>
                 </div>
             </div>
 
             <div style="margin-bottom: 20px;">
                 <label style="color: #ffd700; display: block; margin-bottom: 8px;">AI Method:</label>
-                <select id="tableAiMethod" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
+                <select id="winProbabilityMethod" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
                     <option value="points">Points</option>
                     <option value="tiered2">Tiered2</option>
                     <option value="netEV">NetEV</option>
@@ -452,7 +461,7 @@ function createTableSettingsModal() {
             <div style="margin-bottom: 20px;">
                 <label style="color: #ffd700; display: block; margin-bottom: 8px;">Wild Cards (0-4):</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="range" id="tableWildCards" min="0" max="4" value="2"
+                    <input type="range" id="tableWildCardCounts" min="0" max="4" value="2"
                            oninput="updateWildCardsDisplay(this.value)" style="flex: 1;">
                     <span id="wildCardsValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">2</span>
                 </div>
@@ -461,7 +470,7 @@ function createTableSettingsModal() {
             <div style="margin-bottom: 20px;">
                 <label style="color: #ffd700; display: block; margin-bottom: 8px;">AI Players (1-5):</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="range" id="tableAiPlayers" min="1" max="5" value="4"
+                    <input type="range" id="tableComputerPlayers" min="1" max="5" value="4"
                            oninput="updateAiPlayersDisplay(this.value)" style="flex: 1;">
                     <span id="aiPlayersValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">4</span>
                 </div>
@@ -484,9 +493,9 @@ function closeTableSettings() {
 
 function saveTableSettings() {
     tableSettings.rounds = parseInt(document.getElementById('tableRounds').value);
-    tableSettings.winProbabilityMethod = document.getElementById('tableAiMethod').value;
-    tableSettings.wildCardCount = parseInt(document.getElementById('tableWildCards').value);
-    tableSettings.computerPlayers = parseInt(document.getElementById('tableAiPlayers').value);
+    tableSettings.winProbabilityMethod = document.getElementById('winProbabilityMethod').value;
+    tableSettings.wildCardCount = parseInt(document.getElementById('tableWildCardCounts').value);
+    tableSettings.computerPlayers = parseInt(document.getElementById('tableComputerPlayers').value);
 
     if (currentTable) {
         currentTable.settings = { ...tableSettings };
@@ -498,7 +507,7 @@ function saveTableSettings() {
 }
 
 function updateRoundsDisplay(value) {
-    document.getElementById('roundsValue').textContent = value;
+    document.getElementById('rounds').textContent = value;
 }
 
 function updateAiPlayersDisplay(value) {

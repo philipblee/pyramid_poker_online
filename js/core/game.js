@@ -426,15 +426,6 @@ class PyramidPokerGame {
 
             const handUtils = handUtilities();
 
-//            console.log(`back hand rank ${backStrength.rank}`);
-//            console.log(`middle hand rank ${middleStrength.rank}`);
-//            console.log(`front hand rank ${frontStrength.rank}`);
-//
-//            // Four of a Kind in different positions
-//            console.log(`back points ${handUtils.getPointValue(backStrength.rank, 'back')}`);
-//            console.log(`middle points ${handUtils.getPointValue(middleStrength.rank, 'middle')}`);
-//            console.log(`front points ${handUtils.getPointValue(frontStrength.rank, 'front')}`);
-
             const backPoints = handUtils.getPointValue(backStrength.rank, 'back');
             const middlePoints = handUtils.getPointValue(middleStrength.rank, 'middle');
             const frontPoints = handUtils.getPointValue(frontStrength.rank, 'front');
@@ -461,19 +452,19 @@ class PyramidPokerGame {
 
             // Set content and styling
             backStrengthEl.textContent = `${backStrength.name}   -   ${backPoints} Points`;
-            backStrengthEl.style.color = '#4ecdc4';
-            backStrengthEl.style.fontWeight = 'bold';
-            backStrengthEl.style.fontSize = '20px';
+            backStrengthEl.style.color = '#FFFF00';
+//            backStrengthEl.style.fontWeight = 'bold';
+            backStrengthEl.style.fontSize = '18px';
 
             middleStrengthEl.textContent = `${middleStrength.name}  -  ${middlePoints} Points`;
-            middleStrengthEl.style.color = '#4ecdc4';
-            middleStrengthEl.style.fontWeight = 'bold';
-            middleStrengthEl.style.fontSize = '20px';
+            middleStrengthEl.style.color = '#FFFF00';
+//            middleStrengthEl.style.fontWeight = 'bold';
+            middleStrengthEl.style.fontSize = '18px';
 
             frontStrengthEl.textContent = `${frontStrength.name}  -  ${frontPoints} Points`;
-            frontStrengthEl.style.color = '#4ecdc4';
-            frontStrengthEl.style.fontWeight = 'bold';
-            frontStrengthEl.style.fontSize = '20px';
+            frontStrengthEl.style.color = '#FFFF00';
+//            frontStrengthEl.style.fontWeight = 'bold';
+            frontStrengthEl.style.fontSize = '18px';
 
             // Display hand strengths
             document.getElementById('backStrength');
@@ -1044,7 +1035,8 @@ class PyramidPokerGame {
         const gameDoc = doc(collection(db, 'gameHistory'));
         await setDoc(gameDoc, {
             userId: this.authManager.currentUser.uid,
-            gameMode: this.config.gameMode,
+            gameConnectMode: this.config.gameConnectMode,
+            gameMode: this.config.gameDeviceMode,
             finalScore: scores.humanPlayer,
             wildCardCount: this.config.wildCardCount,
             opponents: scores.aiPlayers,

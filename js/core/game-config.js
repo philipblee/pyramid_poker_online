@@ -6,21 +6,12 @@ class GameConfig {
             // Connection/Device type settings
             gameConnectMode: 'offline',      // 'offline', 'online' - how game connects/syncs
             gameDeviceMode: 'single device', // 'single device', 'multi devices' - device setup
-
-            // Game mode settings
-            gameMode: 'singleplayer',        // 'singleplayer', 'multiplayer' - how many humans
+            gameMode: 'singleplayer',     // 'singleplayer', 'multiplayer' - how many humans
+            gameVariant: 'no surrender',     // 'no surrender', 'standard'
             computerPlayers: 5,              // Number of computer opponents (1-5)
-
-            // Wild card settings
             wildCardCount: 2,                // Number of wild cards (0-4)
-
-            // Deck settings
             deckCount: 2,                    // Number of standard decks (1-3)
-
-            // Win probability method
             winProbabilityMethod: 'tiered2', // 'points', 'empirical', 'tiered', 'tiered2', "netEV"
-
-            // Tournament/Round settings
             rounds: 1,                       // Number of rounds to play
             currentRound: 0,                 // Track current round
 
