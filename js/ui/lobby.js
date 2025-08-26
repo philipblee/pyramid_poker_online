@@ -279,11 +279,11 @@ function createTableSettingsModal() {
 
                 <div class="setting-group">
                     <label for="tableAiMethod">AI Method:</label>
-                    <select id="tableAiMethod">
-                        <option value="points">Points</option>
-                        <option value="tiered2">Tiered2</option>
-                        <option value="netEV">NetEV</option>
-                    </select>
+                        <select id="tableAiMethod" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
+                            <option value="points" style="background: #333; color: white;">Points</option>
+                            <option value="tiered2" style="background: #333; color: white;">Tiered2</option>
+                            <option value="netEV" style="background: #333; color: white;">NetEV</option>
+                        </select>
                 </div>
 
                 <div class="setting-group">

@@ -73,11 +73,11 @@ class PyramidPokerGame {
         // Run auto-arrange (this needs the spinner)
 
         // Count wild cards for time estimate
-        const currentCards = this.loadCurrentPlayerHand(); // Replace with your method to get cards
-        const wildCount = currentCards ? currentCards.filter(card => card.isWild).length : 0;
+//        const currentCards = this.loadCurrentPlayerHand(); // Replace with your method to get cards
+//        const wildCount = currentCards ? currentCards.filter(card => card.isWild).length : 0;
 
         // Show spinner immediately
-        showLoadingSpinner(wildCount);
+        showLoadingSpinner(0);
 
         // Use setTimeout to allow UI to update before computation
         setTimeout(() => {
@@ -137,8 +137,6 @@ class PyramidPokerGame {
             return;
         }
 
-        // In startNewGame(), after ensurePlayersExist() but before the tournament setup:
-
         // Configure players based on GameConfig
         if (window.gameConfig) {
             const targetPlayerCount = 1 + window.gameConfig.config.computerPlayers; // 1 human + N AI
@@ -185,6 +183,7 @@ class PyramidPokerGame {
         }
 
         this.loadCurrentPlayerHand();
+
         updateDisplay(this);
     }
 
@@ -241,6 +240,7 @@ class PyramidPokerGame {
         }
 
         this.loadCurrentPlayerHand();
+
         updateDisplay(this);
     }
 
@@ -266,10 +266,12 @@ class PyramidPokerGame {
 
         this.validateHands();
 
-        // Handle AI player turn
-        if (currentPlayer.type === 'ai') {
+        // Add the guard to prevent multiple AI turns
+        if (currentPlayer.type === 'ai' && !currentPlayer.isReady && !currentPlayer.aiTurnInProgress) {
+            currentPlayer.aiTurnInProgress = true; // Set flag
             this.handleAITurn();
         }
+
     }
 
     handleAITurn() {
@@ -296,6 +298,14 @@ class PyramidPokerGame {
             }, 3000); // 3 seconds to see the arranged cards
 
         }, 1000); // 1 second thinking time
+
+        // At the very end, clear the flag:
+        setTimeout(() => {
+            const currentPlayer = this.playerManager.getCurrentPlayer();
+            currentPlayer.aiTurnInProgress = false;
+
+    }, 6000); // After all your timeouts complete
+
     }
 
     submitAIPlayerHand() {
@@ -416,14 +426,14 @@ class PyramidPokerGame {
 
             const handUtils = handUtilities();
 
-            console.log(`back hand rank ${backStrength.rank}`);
-            console.log(`middle hand rank ${middleStrength.rank}`);
-            console.log(`front hand rank ${frontStrength.rank}`);
-
-            // Four of a Kind in different positions
-            console.log(`back points ${handUtils.getPointValue(backStrength.rank, 'back')}`);
-            console.log(`middle points ${handUtils.getPointValue(middleStrength.rank, 'middle')}`);
-            console.log(`front points ${handUtils.getPointValue(frontStrength.rank, 'front')}`);
+//            console.log(`back hand rank ${backStrength.rank}`);
+//            console.log(`middle hand rank ${middleStrength.rank}`);
+//            console.log(`front hand rank ${frontStrength.rank}`);
+//
+//            // Four of a Kind in different positions
+//            console.log(`back points ${handUtils.getPointValue(backStrength.rank, 'back')}`);
+//            console.log(`middle points ${handUtils.getPointValue(middleStrength.rank, 'middle')}`);
+//            console.log(`front points ${handUtils.getPointValue(frontStrength.rank, 'front')}`);
 
             const backPoints = handUtils.getPointValue(backStrength.rank, 'back');
             const middlePoints = handUtils.getPointValue(middleStrength.rank, 'middle');
@@ -682,6 +692,7 @@ class PyramidPokerGame {
 
         this.playerManager.setPlayerReady(currentPlayer.name, true);
         this.playerManager.nextPlayer();
+
 
          // Reset auto button for next turn (always happens after submit)
         this.autoArrangeUsed = false;

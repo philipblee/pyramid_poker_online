@@ -924,3 +924,14 @@ body {
     background: none;
     border: none;
 }
+
+#tableAiMethod option {
+    background: white !important;
+    color: black !important;  /* Black text on white background */
+}
+
+#tableAiMethod option:hover,
+#tableAiMethod option:checked {
+    background: #0066cc !important;  /* Blue when selected */
+    color: white !important;         /* White text when selected */
+}

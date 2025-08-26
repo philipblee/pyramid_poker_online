@@ -32,7 +32,12 @@
 - performance horrible, from 200ms to 5200ms.  not worth it
 - restored to main for next project.
 
-2025=07-27
+2025-07-27
 - I want to fix points
 - Maybe look for ways to refactor code for easier maintenance
 - evaluateHand and scoringUtilities needs improving
+
+2025-08-25
+- AI runs 6 times, every time loadCurrentPlayerHand() is called, because handleAITurn is in there.
+- adding the spinners resulted in more calls to loadCurrent...
+
