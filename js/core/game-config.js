@@ -3,28 +3,67 @@
 class GameConfig {
     constructor() {
         this.config = {
+            // Connection/Device type settings
+            gameConnectMode: 'offline',      // 'offline', 'online' - how game connects/syncs
+            gameDeviceMode: 'single device', // 'single device', 'multi devices' - device setup
+
             // Game mode settings
-            gameMode: 'singleplayer',        // 'multiplayer' or 'singleplayer'
-            computerPlayers: 5,             // Number of computer opponents (1-5)
+            gameMode: 'singleplayer',        // 'singleplayer', 'multiplayer' - how many humans
+            computerPlayers: 5,              // Number of computer opponents (1-5)
 
             // Wild card settings
-            wildCardCount: 2,               // Number of wild cards (0-4)
+            wildCardCount: 2,                // Number of wild cards (0-4)
 
             // Deck settings
-            deckCount: 2,                   // Number of standard decks (1-3)
+            deckCount: 2,                    // Number of standard decks (1-3)
 
             // Win probability method
-            winProbabilityMethod: 'tiered2',  // 'points', 'empirical', 'tiered', 'tiered2', "netEV"
+            winProbabilityMethod: 'tiered2', // 'points', 'empirical', 'tiered', 'tiered2', "netEV"
 
-            // Future expansion options (commented out for now)
-            // maxPlayers: 4,               // Maximum players (2-6)
-            // frontHandOptions: [3, 5],    // Allowed front hand sizes
-            // timeLimit: 0,                // Turn time limit in seconds (0 = none)
-            // scoringSystem: 'standard'    // 'standard', 'tournament', 'casual'
+            // Tournament/Round settings
+            rounds: 1,                       // Number of rounds to play
+            currentRound: 0,                 // Track current round
+
+            // Table/Lobby settings
+            maxPlayers: 6,                   // Maximum players allowed at table (2-6)
+            minPlayers: 2,                   // Minimum players to start game
+            tableId: null,                   // For multiplayer table identification
+            tableName: '',                   // Display name for table
+
+            // UI/Display settings
+            showAIThinking: true,            // Show AI thinking process
+            animationSpeed: 'normal',        // 'slow', 'normal', 'fast'
+            autoAdvance: false,              // Auto advance to next player
+
+            // Advanced AI settings
+            aiDifficulty: 'normal',          // 'easy', 'normal', 'hard'
+            aiPersonality: 'balanced',       // 'aggressive', 'balanced', 'conservative'
         };
 
         this.loadFromStorage();
     }
+
+
+    // Add methods to get/set specific settings
+    getWinProbabilityMethod() {
+        return this.config.winProbabilityMethod;
+    }
+
+    setWinProbabilityMethod(method) {
+        this.config.winProbabilityMethod = method;
+        this.saveToStorage();
+    }
+
+    getRounds() {
+        return this.config.rounds;
+    }
+
+    setRounds(rounds) {
+        this.config.rounds = rounds;
+        this.saveToStorage();
+    }
+
+    // Add other getters/setters as needed...
 
     // Get current configuration
     getConfig() {
@@ -90,7 +129,7 @@ class GameConfig {
     // Reset to default settings
     resetToDefaults() {
         this.config = {
-            gameMode: 'multiplayer',
+            gameMode: 'singleplayer',
             computerPlayers: 3,
             wildCardCount: 2,
             deckCount: 2
@@ -181,6 +220,7 @@ class GameConfig {
         };
     }
 }
+
 
 // Global configuration instance
 window.gameConfig = new GameConfig();

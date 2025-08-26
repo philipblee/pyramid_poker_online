@@ -156,10 +156,10 @@ function updateTableDisplay() {
     const modeText = tableSettings.gameMode === 'online' ? 'Online (Cloud Sync)' : 'Offline (Local Device)';
     const settingsHtml = `
         Mode: ${modeText}<br>
-        AI Players: ${tableSettings.aiPlayers}<br>
+        AI Players: ${tableSettings.computerPlayers}<br>
         Rounds: ${tableSettings.rounds}<br>          <!-- NEW -->
-        Wild Cards: ${tableSettings.wildCards}<br>
-        AI Method: ${tableSettings.aiMethod}         <!-- NEW -->
+        Wild Cards: ${tableSettings.wildCardCount}<br>
+        AI Method: ${tableSettings.winProbabilityMethod}         <!-- NEW -->
     `;
 
     document.getElementById('settingsDisplay').innerHTML = settingsHtml;
@@ -193,10 +193,16 @@ function onSettingsSaved(newSettings) {
 function startGame() {
     if (!currentTable) return;
 
-    console.log('Starting game with settings:', tableSettings);
+    console.log('Starting game with aligned settings:', tableSettings);
 
-    // If online mode, call your existing cloudNewGame() function
-    if (tableSettings.gameMode === 'online') {
+    // Now tableSettings uses the same names as GameConfig - direct copy!
+    if (game && game.gameConfig) {
+        Object.assign(game.gameConfig.config, tableSettings);
+        console.log('Applied settings to GameConfig:', game.gameConfig.config);
+    }
+
+    // Continue with your existing game start logic
+    if (tableSettings.gameConnectMode === 'online') {
         if (typeof cloudNewGame === 'function') {
             cloudNewGame().then(() => {
                 launchGameInterface();
@@ -209,16 +215,29 @@ function startGame() {
             launchGameInterface();
         }
     } else {
-        // For offline mode, directly launch game
         launchGameInterface();
     }
 }
 
 // Launch your existing game interface
 function launchGameInterface() {
+
+    console.log('🎮 Launching game interface with settings:', tableSettings);
+
     // Hide lobby, show your existing game interface
     document.getElementById('lobbyScreen').style.display = 'none';
     document.getElementById('tableScreen').style.display = 'none';
+
+    // Create or update game config with table settings
+    if (typeof game !== 'undefined' && game.gameConfig) {
+        // Apply table settings to existing game config
+        gameConfig.winProbabilityMethod = tableSettings.winProbabilityMethod;
+        gameConfig.wildCardCount = tableSettings.wildCardCount;
+        gameConfig.computerPlayers = tableSettings.computerPlayers;
+        gameConfig.rounds = tableSettings.rounds;
+        gameConfig.gameMode = tableSettings.gameMode;
+    }
+
 
     // Show your existing game area
     const gameArea = document.getElementById('gameArea');
@@ -279,11 +298,11 @@ function createTableSettingsModal() {
 
                 <div class="setting-group">
                     <label for="tableAiMethod">AI Method:</label>
-                        <select id="tableAiMethod" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
-                            <option value="points" style="background: #333; color: white;">Points</option>
-                            <option value="tiered2" style="background: #333; color: white;">Tiered2</option>
-                            <option value="netEV" style="background: #333; color: white;">NetEV</option>
-                        </select>
+                    <select id="tableAiMethod">
+                        <option value="points">Points</option>
+                        <option value="tiered2">Tiered2</option>
+                        <option value="netEV">NetEV</option>
+                    </select>
                 </div>
 
                 <div class="setting-group">
@@ -317,14 +336,14 @@ function openTableSettings() {
 
     // Populate current settings
     document.getElementById('tableRounds').value = tableSettings.rounds || 3;
-    document.getElementById('tableAiMethod').value = tableSettings.aiMethod || 'tiered2';
-    document.getElementById('tableWildCards').value = tableSettings.wildCards || 2;
-    document.getElementById('tableAiPlayers').value = tableSettings.aiPlayers || 4;
+    document.getElementById('tableAiMethod').value = tableSettings.winProbabilityMethod || 'tiered2';
+    document.getElementById('tableWildCards').value = tableSettings.wildCardCount || 2;
+    document.getElementById('tableAiPlayers').value = tableSettings.computerPlayers || 4;
 
     // Update displays
     updateRoundsDisplay(tableSettings.rounds || 3);
-    updateAiPlayersDisplay(tableSettings.aiPlayers || 4);
-    updateWildCardsDisplay(tableSettings.wildCards || 2);
+    updateAiPlayersDisplay(tableSettings.computerPlayers || 4);
+    updateWildCardsDisplay(tableSettings.wildCardCount || 2);
 
     // Show modal
     document.getElementById('tableSettingsModal').style.display = 'block';
@@ -337,11 +356,16 @@ function closeTableSettings() {
 
 // Save table settings
 function saveTableSettings() {
-    // Get values from modal
+    // Get values from modal using GameConfig variable names
     tableSettings.rounds = parseInt(document.getElementById('tableRounds').value);
-    tableSettings.aiMethod = document.getElementById('tableAiMethod').value;
-    tableSettings.wildCards = parseInt(document.getElementById('tableWildCards').value);
-    tableSettings.aiPlayers = parseInt(document.getElementById('tableAiPlayers').value);
+    tableSettings.winProbabilityMethod = document.getElementById('tableAiMethod').value;  // Changed from aiMethod
+    tableSettings.wildCardCount = parseInt(document.getElementById('tableWildCards').value);        // Changed from wildCards
+    tableSettings.computerPlayers = parseInt(document.getElementById('tableAiPlayers').value);      // Changed from aiPlayers
+
+    // Add other GameConfig settings that might be set in lobby
+    tableSettings.gameConnectMode = tableSettings.gameConnectMode || 'offline';
+    tableSettings.gameDeviceMode = tableSettings.gameDeviceMode || 'single device';
+    tableSettings.gameMode = tableSettings.gameMode || 'singleplayer';
 
     // Update current table if we have one
     if (currentTable) {
@@ -354,7 +378,7 @@ function saveTableSettings() {
     // Close modal
     closeTableSettings();
 
-    console.log('Table settings saved:', tableSettings);
+    console.log('Table settings saved (aligned with GameConfig):', tableSettings);
 }
 
 // Update display functions for sliders
@@ -383,14 +407,14 @@ function openTableSettings() {
 
     // Populate current settings
     document.getElementById('tableRounds').value = tableSettings.rounds || 3;
-    document.getElementById('tableAiMethod').value = tableSettings.aiMethod || 'tiered2';
-    document.getElementById('tableWildCards').value = tableSettings.wildCards || 2;
-    document.getElementById('tableAiPlayers').value = tableSettings.aiPlayers || 4;
+    document.getElementById('tableAiMethod').value = tableSettings.winProbabilityMethod || 'tiered2';
+    document.getElementById('tableWildCards').value = tableSettings.wildCardCount || 2;
+    document.getElementById('tableAiPlayers').value = tableSettings.computerPlayers || 4;
 
     // Update displays
     updateRoundsDisplay(tableSettings.rounds || 3);
-    updateAiPlayersDisplay(tableSettings.aiPlayers || 4);
-    updateWildCardsDisplay(tableSettings.wildCards || 2);
+    updateAiPlayersDisplay(tableSettings.computerPlayers || 4);
+    updateWildCardsDisplay(tableSettings.wildCardCount || 2);
 
     // Show modal
     document.getElementById('tableSettingsModal').style.display = 'block';
@@ -460,9 +484,9 @@ function closeTableSettings() {
 
 function saveTableSettings() {
     tableSettings.rounds = parseInt(document.getElementById('tableRounds').value);
-    tableSettings.aiMethod = document.getElementById('tableAiMethod').value;
-    tableSettings.wildCards = parseInt(document.getElementById('tableWildCards').value);
-    tableSettings.aiPlayers = parseInt(document.getElementById('tableAiPlayers').value);
+    tableSettings.winProbabilityMethod = document.getElementById('tableAiMethod').value;
+    tableSettings.wildCardCount = parseInt(document.getElementById('tableWildCards').value);
+    tableSettings.computerPlayers = parseInt(document.getElementById('tableAiPlayers').value);
 
     if (currentTable) {
         currentTable.settings = { ...tableSettings };
