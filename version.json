@@ -1,7 +1,7 @@
 {
-  "version": "v3.5.0",
-  "commit": "65ac4ba",
-  "branch": "main",
-  "buildDate": "2025-08-25T20:52:06.742Z",
-  "lastCommit": "2025-08-25 15:29:21 -0400"
+  "version": "v3.5.0-8-g99ad787",
+  "commit": "99ad787",
+  "branch": "fix-lobby-defaults",
+  "buildDate": "2025-08-27T13:22:43.590Z",
+  "lastCommit": "2025-08-27 09:22:10 -0400"
 }

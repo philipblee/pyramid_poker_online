@@ -4,15 +4,15 @@ class GameConfig {
     constructor() {
         this.config = {
             // Connection/Device type settings
-            gameConnectMode: 'offline',      // 'offline', 'online' - how game connects/syncs
-            gameDeviceMode: 'single device', // 'single device', 'multi devices' - device setup
-            gameMode: 'singleplayer',     // 'singleplayer', 'multiplayer' - how many humans
-            gameVariant: 'no surrender',     // 'no surrender', 'standard'
-            computerPlayers: 5,              // Number of computer opponents (1-5)
-            wildCardCount: 2,                // Number of wild cards (0-4)
-            deckCount: 2,                    // Number of standard decks (1-3)
-            winProbabilityMethod: 'tiered2', // 'points', 'empirical', 'tiered', 'tiered2', "netEV"
-            rounds: 1,                       // Number of rounds to play
+            gameConnectMode: 'offline',      //1 'offline', 'online' - how game connects/syncs
+            gameDeviceMode: 'single device', //2 'single device', 'multi devices' - device setup
+            gameMode: 'singleplayer',        //3 'singleplayer', 'multiplayer' - how many humans
+            gameVariant: 'no surrender',     //4 'no surrender', 'standard'
+            computerPlayers: 5,              //5 Number of computer opponents (1-5)
+            wildCardCount: 2,                //6 Number of wild cards (0-4)
+            deckCount: 2,                    //7 Number of standard decks (1-3)
+            winProbabilityMethod: 'tiered2', //8 'points', 'empirical', 'tiered', 'tiered2', "netEV"
+            rounds: 1,                       //9 Number of rounds to play
             currentRound: 0,                 // Track current round
 
             // Table/Lobby settings

@@ -267,13 +267,16 @@ function launchGameInterface() {
     // Create or update game config with table settings
     if (typeof game !== 'undefined' && game.gameConfig) {
         // Apply table settings to existing game config
-        gameConfig.winProbabilityMethod = tableSettings.winProbabilityMethod;
-        gameConfig.wildCardCount = tableSettings.wildCardCount;
+        gameConfig.gameConnectMode = tableSettings.gameConnectMode;
+        gameConfig.gameDeviceMode = tableSettings.gameDeviceMode;
+        gameConfig.gameVariant = tableSettings.gameVariant;
         gameConfig.computerPlayers = tableSettings.computerPlayers;
+        gameConfig.wildCardCount = tableSettings.wildCardCount;
+        gameConfig.deckCount = tableSettings.deckCount;
+        gameConfig.winProbabilityMethod = tableSettings.winProbabilityMethod;
         gameConfig.rounds = tableSettings.rounds;
         gameConfig.gameMode = tableSettings.gameMode;
     }
-
 
     // Show your existing game area
     const gameArea = document.getElementById('gameArea');
