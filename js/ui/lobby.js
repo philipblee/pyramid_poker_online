@@ -255,28 +255,27 @@ function startGame() {
     }
 }
 
+
 // Launch your existing game interface
 function launchGameInterface() {
-
-    console.log('🎮 Launching game interface with settings:', tableSettings);
+//    console.log('🎮 Launching game interface with tablesettings:', tableSettings);
 
     // Hide lobby, show your existing game interface
     document.getElementById('lobbyScreen').style.display = 'none';
     document.getElementById('tableScreen').style.display = 'none';
 
-    // Create or update game config with table settings
-    if (typeof game !== 'undefined' && game.gameConfig) {
-        // Apply table settings to existing game config
-        gameConfig.gameConnectMode = tableSettings.gameConnectMode;
-        gameConfig.gameDeviceMode = tableSettings.gameDeviceMode;
-        gameConfig.gameVariant = tableSettings.gameVariant;
-        gameConfig.computerPlayers = tableSettings.computerPlayers;
-        gameConfig.wildCardCount = tableSettings.wildCardCount;
-        gameConfig.deckCount = tableSettings.deckCount;
-        gameConfig.winProbabilityMethod = tableSettings.winProbabilityMethod;
-        gameConfig.rounds = tableSettings.rounds;
-        gameConfig.gameMode = tableSettings.gameMode;
-    }
+    // Apply table settings to gameConfig (the one that actually exists)
+    gameConfig.config.gameConnectMode = tableSettings.gameConnectMode;
+    gameConfig.config.gameDeviceMode = tableSettings.gameDeviceMode;
+    gameConfig.config.gameVariant = tableSettings.gameVariant;
+    gameConfig.config.computerPlayers = tableSettings.computerPlayers;
+    gameConfig.config.wildCardCount = tableSettings.wildCardCount;
+    gameConfig.config.deckCount = tableSettings.deckCount;
+    gameConfig.config.winProbabilityMethod = tableSettings.winProbabilityMethod;
+    gameConfig.config.rounds = tableSettings.rounds;
+    gameConfig.config.gameMode = tableSettings.gameMode;
+
+    console.log('🎮 Settings used for launching game:', gameConfig.config);
 
     // Show your existing game area
     const gameArea = document.getElementById('gameArea');
@@ -286,12 +285,14 @@ function launchGameInterface() {
 
     // Call your existing startNewGame function
     if (typeof startNewGame === 'function') {
-//        startNewGame();
-          window.game.startNewGame();
+        startNewGame();
+    } else if (window.game && typeof window.game.startNewGame === 'function') {
+        window.game.startNewGame();
     } else {
-//        console.warn('startNewGame function not found');
+        console.warn('No startNewGame function found');
     }
 }
+
 
 // Leave table
 function leaveTable() {
