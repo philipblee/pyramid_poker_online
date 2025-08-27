@@ -99,6 +99,100 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
     }
 
 
+    // MOVE THIS SECTION TO THE TOP to show it first
+    // Create scoring matrix
+    const matrixContainer = document.getElementById('scoringMatrix');
+    // Check if the HTML element exists, if not, create it
+    if (!matrixContainer) {
+        // Find a place to insert it. Let's assume you want it at the start of the popup content.
+        const firstSection = document.querySelector('.player-hands-section');
+        if (firstSection) {
+            const matrixDiv = document.createElement('div');
+            matrixDiv.id = 'scoringMatrix';
+            matrixDiv.innerHTML = `<h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">Head-to-Head Matrix</h3>`;
+            firstSection.parentNode.insertBefore(matrixDiv, firstSection);
+        }
+    }
+
+    // Build the matrix
+    const playerNames = game.players.map(p => p.name);
+    // Create matrix data
+    const matrix = {};
+    playerNames.forEach(player => {
+        matrix[player] = {};
+        playerNames.forEach(opponent => {
+            matrix[player][opponent] = player === opponent ? '-' : 0;
+        });
+    });
+
+    // Fill matrix with results
+    detailedResults.forEach(result => {
+        matrix[result.player1][result.player2] = result.player1Score > 0 ? `+${result.player1Score}` : result.player1Score;
+        matrix[result.player2][result.player1] = result.player2Score > 0 ? `+${result.player2Score}` : result.player2Score;
+    });
+
+    // Create HTML table
+    let tableHTML = `
+        <h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">Head-to-Head Matrix</h3>
+        <table style="border-collapse: collapse; margin: 0 auto; background: rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden;">
+            <thead>
+                <tr style="background: rgba(255,215,0,0.2);">
+                    <th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold;">vs</th>
+    `;
+
+    // Header row
+    playerNames.forEach(player => {
+        tableHTML += `<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; min-width: 80px;">${player}</th>`;
+    });
+
+    // Add Total column header
+    tableHTML += `<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #4ecdc4; font-weight: bold; min-width: 80px; background: rgba(78,205,196,0.2);">Total</th>`;
+
+    tableHTML += `</tr></thead><tbody>`;
+
+    // Data rows
+    playerNames.forEach(player => {
+        tableHTML += `<tr>`;
+        tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; background: rgba(255,215,0,0.1);">${player}</td>`;
+
+        let rowTotal = 0;
+
+        playerNames.forEach(opponent => {
+            const score = matrix[player][opponent];
+            let cellColor = '#ccc';
+
+            if (score === '-') {
+                cellColor = '#666';
+            } else if (score > 0) {
+                cellColor = '#4ecdc4';
+                rowTotal += parseInt(score);
+            } else if (score < 0) {
+                cellColor = '#ff6b6b';
+                rowTotal += parseInt(score);
+            }
+
+            tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; color: ${cellColor}; font-weight: bold;">${score}</td>`;
+        });
+
+        // Add total cell with special styling
+        const totalColor = rowTotal > 0 ? '#4ecdc4' : rowTotal < 0 ? '#ff6b6b' : '#ffd700';
+        const totalSign = rowTotal > 0 ? '+' : '';
+        tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; color: ${totalColor}; font-weight: bold; font-size: 16px; background: rgba(78,205,196,0.1);">${totalSign}${rowTotal}</td>`;
+
+        tableHTML += `</tr>`;
+    });
+
+    tableHTML += `</tbody></table>`;
+
+    // The HTML has a placeholder for a scoring matrix. Let's make sure it's at the top.
+    const container = document.querySelector('.scoring-content');
+    if (container) {
+        const matrixDiv = document.createElement('div');
+        matrixDiv.innerHTML = tableHTML;
+        // Insert the matrix right after the title and close button
+        container.insertBefore(matrixDiv, container.children[2]);
+    }
+
     // Display all player hands with card counts
     allPlayerHands.innerHTML = '';
     game.players.forEach(player => {
@@ -198,89 +292,7 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
         roundRobinResults.appendChild(matchupDiv);
     });
 
-    // Create scoring matrix
-    const matrixDiv = document.createElement('div');
-    matrixDiv.innerHTML = `
-        <h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">Head-to-Head Matrix</h3>
-        <div id="scoringMatrix"></div>
-    `;
-    roundRobinResults.appendChild(matrixDiv);
-
-    // Build the matrix
-    const matrixContainer = document.getElementById('scoringMatrix');
-    const playerNames = game.players.map(p => p.name);
-
-    // Create matrix data
-    const matrix = {};
-    playerNames.forEach(player => {
-        matrix[player] = {};
-        playerNames.forEach(opponent => {
-            matrix[player][opponent] = player === opponent ? '-' : 0;
-        });
-    });
-
-    // Fill matrix with results
-    detailedResults.forEach(result => {
-        matrix[result.player1][result.player2] = result.player1Score > 0 ? `+${result.player1Score}` : result.player1Score;
-        matrix[result.player2][result.player1] = result.player2Score > 0 ? `+${result.player2Score}` : result.player2Score;
-    });
-
-    // Create HTML table
-    let tableHTML = `
-        <table style="border-collapse: collapse; margin: 0 auto; background: rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden;">
-            <thead>
-                <tr style="background: rgba(255,215,0,0.2);">
-                    <th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold;">vs</th>
-    `;
-
-    // Header row
-    playerNames.forEach(player => {
-        tableHTML += `<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; min-width: 80px;">${player}</th>`;
-    });
-
-    // Add Total column header
-    tableHTML += `<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #4ecdc4; font-weight: bold; min-width: 80px; background: rgba(78,205,196,0.2);">Total</th>`;
-
-    tableHTML += `</tr></thead><tbody>`;
-
-    // Data rows
-    playerNames.forEach(player => {
-        tableHTML += `<tr>`;
-        tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; background: rgba(255,215,0,0.1);">${player}</td>`;
-
-        let rowTotal = 0;
-
-        playerNames.forEach(opponent => {
-            const score = matrix[player][opponent];
-            let cellClass = '';
-            let cellColor = '#ccc';
-
-            if (score === '-') {
-                cellClass = 'diagonal';
-                cellColor = '#666';
-            } else if (score > 0) {
-                cellClass = 'positive';
-                cellColor = '#4ecdc4';
-                rowTotal += parseInt(score);
-            } else if (score < 0) {
-                cellClass = 'negative';
-                cellColor = '#ff6b6b';
-                rowTotal += parseInt(score);
-            }
-
-            tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; color: ${cellColor}; font-weight: bold;">${score}</td>`;
-        });
-
-        // Add total cell with special styling
-        const totalColor = rowTotal > 0 ? '#4ecdc4' : rowTotal < 0 ? '#ff6b6b' : '#ffd700';
-        const totalSign = rowTotal > 0 ? '+' : '';
-        tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; color: ${totalColor}; font-weight: bold; font-size: 16px; background: rgba(78,205,196,0.1);">${totalSign}${rowTotal}</td>`;
-
-        tableHTML += `</tr>`;
-    });
-
-    tableHTML += `</tbody></table>`;
-    matrixContainer.innerHTML = tableHTML;
+    // The original code appended the matrix here. We've moved it up.
 
     popup.style.display = 'block';
 }

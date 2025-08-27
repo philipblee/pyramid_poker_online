@@ -70,14 +70,7 @@ class PyramidPokerGame {
         document.getElementById('autoArrange').textContent = 'Auto';
         console.log('🔄 Undid auto-arrange');
     } else {
-        // Run auto-arrange (this needs the spinner)
-
-        // Count wild cards for time estimate
-//        const currentCards = this.loadCurrentPlayerHand(); // Replace with your method to get cards
-//        const wildCount = currentCards ? currentCards.filter(card => card.isWild).length : 0;
-
-        // Show spinner immediately
-        showLoadingSpinner(0);
+        showLoadingSpinner(2);
 
         // Use setTimeout to allow UI to update before computation
         setTimeout(() => {
