@@ -23,28 +23,52 @@ let tableSettings = {
 const defaultTables = [
     {
         id: 1,
-        name: 'Quick Play',
-        settings: { gameMode: 'offline', aiPlayers: 5, rounds: 3, wildCards: 2, aiMethod: 'tiered2' },
+        name: 'Quick Play - 2 Wild Cards',
+        settings: { gameMode: 'singleplayer',
+                    gameConnectMode: 'offline',
+                    computerPlayers: 5,
+                    rounds: 3,
+                    wildCardCount: 2,
+                    winProbabilityMethod: 'netEV' },
         icon: '🏓'
     },
-//    {
-//        id: 2,
-//        name: 'Practice Table',
-//        settings: { gameMode: 'offline', aiPlayers: 1, rounds: 5, wildCards: 1, aiMethod: 'points' },
-//        icon: '🏓'
-//    },
-//    {
-//        id: 3,
-//        name: 'Cloud Ranked',
-//        settings: { gameMode: 'online', aiPlayers: 5, rounds: 3, wildCards: 2, aiMethod: 'netEV' },
-//        icon: '☁️'
-//    },
+
+    {
+        id: 2,
+        name: 'Practice Table - 1 Wild Cards',
+        settings: { gameMode: 'singleplayer',
+                    gameConnectMode: 'offline',
+                    computerPlayers: 5,
+                    rounds: 3,
+                    wildCardCount: 1,
+                    winProbabilityMethod: 'Points' },
+        icon: '🏓'
+    },
+
+    {
+        id: 3,
+        name: 'Challenge Mode - No Wilds',
+        settings: { gameMode: 'singleplayer',
+                    gameConnectMode: 'offline',
+                    computerPlayers: 5,
+                    rounds: 5,
+                    wildCardCount: 0,
+                    winProbabilityMethod: 'tiered2' },
+        icon: '🏓'
+    },
+
     {
         id: 4,
-        name: 'Challenge Mode',
-        settings: { gameMode: 'offline', aiPlayers: 5, rounds: 10, wildCards: 0, aiMethod: 'tiered2' },
-        icon: '🏓'
+        name: 'Cloud Ranked - 1 Wild Card',
+        settings: { gameMode: 'multiplayer',
+                    gameConnectMode: 'online',
+                    computerPlayers: 5,
+                    rounds: 3,
+                    wildCardCount: 2,
+                    winProbabilityMethod: 'netEV' },
+        icon: '☁️'
     }
+
 ];
 
 // Initialize lobby (call this after your Firebase login)
@@ -90,7 +114,8 @@ function createTableCard(table) {
     card.className = 'table-card';
     card.onclick = () => joinTable(table);
     const settings = table.settings;
-    const modeText = settings.gameMode === 'online' ? 'Online' : 'Offline';
+    const gameConnectModeText = settings.gameConnectMode === 'online' ? 'Online' : 'Offline';
+    const gameModeText = settings.gameMode === 'singleplayer' ? 'Single Human Player' : 'Multiple Human Players';
 
     card.innerHTML = `
         <div class="table-header">
@@ -98,10 +123,12 @@ function createTableCard(table) {
             <div class="table-icon">${table.icon}</div>
         </div>
         <div class="table-settings">
-            Mode: ${modeText}<br>
-            AI Players: ${settings.aiPlayers}<br>
+            Player(s): ${gameModeText}<br>
+            Computer Players: ${settings.computerPlayers}<br>
+            Connect Mode: ${gameConnectModeText}<br>
+            Computer Methodology: ${settings.winProbabilityMethod}<br>
             Rounds: ${settings.rounds}<br>
-            Wild Cards: ${settings.wildCards}
+            Wild Cards: ${settings.wildCardCount}
         </div>
         <div class="table-status">Join Table</div>
     `;

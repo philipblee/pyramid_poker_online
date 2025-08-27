@@ -304,7 +304,7 @@ class PyramidPokerGame {
             const currentPlayer = this.playerManager.getCurrentPlayer();
             currentPlayer.aiTurnInProgress = false;
 
-    }, 6000); // After all your timeouts complete
+    }, 3000); // After all your timeouts complete
 
     }
 
