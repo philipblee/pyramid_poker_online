@@ -59,7 +59,7 @@ const defaultTables = [
 
     {
         id: 4,
-        name: 'Cloud Ranked - 1 Wild Card',
+        name: 'Cloud Ranked - 2 Wild Card',
         settings: { gameMode: 'multiplayer',
                     gameConnectMode: 'online',
                     computerPlayers: 5,
