@@ -169,8 +169,9 @@ function calculateWildCardPower(wildCount, rankCounts, suitCounts) {
 
     let wildPower = 0;
 
-    // Base power: each wild card has inherent value
-    wildPower += wildCount * 25; // Base 25 points per wild
+    // Progressive wild card value (1 wild = 10, 2 wilds = 35 total)
+    if (wildCount >= 1) wildPower += 50;  // First wild = 10 points
+    if (wildCount >= 2) wildPower += 100; // Second wild = 25 more points
 
     // Synergy bonuses based on existing cards
 
@@ -238,13 +239,13 @@ function calculateHandScore(analysis) {
     // PREMIUM SINGLE ARRANGEMENTS
 
     // Made straight flushes (going to back, very strong)
-    score += analysis.madeStraightFlushes * 60.0;
+    score += analysis.madeStraightFlushes * 200.0;
 
     // Pentas (going to back, strong)
-    score += analysis.pentas * 70.0;
+    score += analysis.pentas * 240;
 
     // Quads (going to back, strong)
-    score += analysis.quads * 50.0;
+    score += analysis.quads * 160;
 
     // Multiple trips (can build multiple full houses)
     if (analysis.trips >= 3) {
@@ -275,18 +276,18 @@ function calculateHandScore(analysis) {
     const mediumPairs = analysis.pairsRanks.filter(rank => rank >= 8 && rank <= 10).length;
     const lowPairs = analysis.pairs - premiumPairs - mediumPairs;
 
-    score += premiumPairs * 3.0;
-    score += mediumPairs * 2.0;
-    score += lowPairs * 1.0;
+//    score += premiumPairs * 3.0;
+//    score += mediumPairs * 2.0;
+//    score += lowPairs * 1.0;
 
     // Multiple pairs synergy (can build across positions)
-    if (analysis.pairs >= 5) {
-        score += 15.0; // Many pairs - good flexibility
-    } else if (analysis.pairs === 4) {
-        score += 8.0;
-    } else if (analysis.pairs === 3) {
-        score += 4.0;
-    }
+//    if (analysis.pairs >= 5) {
+//        score += 15.0; // Many pairs - good flexibility
+//    } else if (analysis.pairs === 4) {
+//        score += 8.0;
+//    } else if (analysis.pairs === 3) {
+//        score += 4.0;
+//    }
 
     // Single made hands (likely going to back)
     score += analysis.madeStrights * 12.0;
@@ -304,23 +305,23 @@ function calculateHandScore(analysis) {
     }
 
     // Single straight potential
-    score += analysis.straightPotential * 4.0;
+//    score += analysis.straightPotential * 4.0;
 
     // Straight flush potential (premium back hand)
-    score += analysis.straightFlushPotentialOpen * 8.0;
-    score += analysis.straightFlushPotentialGap * 5.0;
+//    score += analysis.straightFlushPotentialOpen * 8.0;
+//    score += analysis.straightFlushPotentialGap * 5.0;
 
     // SYNERGY BONUSES
 
     // Trip + multiple pairs (full house opportunities)
     if (analysis.trips >= 1 && analysis.pairs >= 2) {
-        score += 4.0;
+        score += 100.0;
     }
 
     // Multiple drawing opportunities
-    if (analysis.straightPotential >= 1 && analysis.flushPotential >= 1) {
-        score += 5.0;
-    }
+//    if (analysis.straightPotential >= 1 && analysis.flushPotential >= 1) {
+//        score += 5.0;
+//    }
 
     // WILD CARD POWER (Major addition for 17-card game)
     score += analysis.wildCardPower;
@@ -328,14 +329,14 @@ function calculateHandScore(analysis) {
     // 17-CARD SPECIFIC BONUSES
 
     // More cards = more arrangement options
-    score += analysis.arrangementFlexibility * 0.5;
-
-    // Bonus for having many different hand types available
-    const handTypeDiversity = (analysis.pairs > 0 ? 1 : 0) +
-                             (analysis.trips > 0 ? 1 : 0) +
-                             (analysis.madeFlushes > 0 ? 1 : 0) +
-                             (analysis.madeStrights > 0 ? 1 : 0);
-    score += handTypeDiversity * 3.0;
+//    score += analysis.arrangementFlexibility * 0.5;
+//
+//    // Bonus for having many different hand types available
+//    const handTypeDiversity = (analysis.pairs > 0 ? 1 : 0) +
+//                             (analysis.trips > 0 ? 1 : 0) +
+//                             (analysis.madeFlushes > 0 ? 1 : 0) +
+//                             (analysis.madeStrights > 0 ? 1 : 0);
+//    score += handTypeDiversity * 3.0;
 
     return Math.round(score * 10) / 10; // Round to 1 decimal place
 }
@@ -547,7 +548,5 @@ function analyzeSuitedConnectors(cards) {
     return connectedSuits;
 }
 
-// Export the main function
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = seventeenCardHandStrengthEstimator;
-}
+// Make functions globally available for browser
+window.seventeenCardHandStrengthEstimator = seventeenCardHandStrengthEstimator;

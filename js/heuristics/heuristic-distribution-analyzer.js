@@ -389,11 +389,7 @@ function quickDistributionTest(numHands = 1000) {
     return heuristicDistributionAnalyzer(numHands);
 }
 
-// Export functions
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        heuristicDistributionAnalyzer,
-        quickDistributionTest,
-        generateRandomSeventeenCardHand
-    };
-}
+// Make functions globally available for browser
+window.heuristicDistributionAnalyzer = heuristicDistributionAnalyzer;
+window.quickDistributionTest = quickDistributionTest;
+window.generateRandomSeventeenCardHand = generateRandomSeventeenCardHand;
