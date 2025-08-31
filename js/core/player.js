@@ -22,19 +22,38 @@ class PlayerManager {
         const config = window.gameConfig.getConfig();
         console.log('Retrieved config:', config);
         
-        if (config.gameMode === 'singleplayer') {
+        if (config.gameMode === 'single-human') {
             // Create 1 human player + configured number of AI players
+            // Get the actual logged-in user's name
+            let humanPlayerName = 'Player 1'; // Default fallback
+
+            if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+                const user = window.firebaseAuth.currentUser;
+                humanPlayerName = user.displayName || user.email.split('@')[0] || 'Player 1';
+            }
+
+            // Create human player with actual name
             this.players.push({
-                name: 'Player 1',
+                name: humanPlayerName,
                 id: Date.now() + Math.random(),
                 ready: false,
                 type: 'human'
             });
-            this.scores.set('Player 1', 0);
+            this.scores.set(humanPlayerName, 0);
 
             // Add AI players
-            for (let i = 1; i <= config.computerPlayers; i++) {
-                const aiName = `AI Player ${i}`;
+            const aiNames = ['Peter AI', 'Tony AI', 'Johnny AI', 'Phil AI',
+                        'Tse Ming AI', 'Edmond AI', 'Ming AI', 'Jill AI',
+                        'Stephanie AI', 'Victoria AI', 'Clare AI', 'Linda AI',
+                        'Tse Ming AI', 'Edmond AI', 'Ming AI', 'Terry AI',
+                        'Moonie AI'];
+
+            // Create new shuffled array each time
+            for (let i = 0; i < config.computerPlayers; i++) {
+                // Remove a random name from the array
+                const randomIndex = Math.floor(Math.random() * aiNames.length);
+                const aiName = aiNames.splice(randomIndex, 1)[0] || `AI Player ${i + 1}`;
+
                 this.players.push({
                     name: aiName,
                     id: Date.now() + Math.random() + i,

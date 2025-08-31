@@ -288,7 +288,7 @@ class PyramidPokerGame {
                     this.submitAIPlayerHand();
                 }, 2000); // 2 seconds to read the hand details
 
-            }, 3000); // 3 seconds to see the arranged cards
+            }, 2000); // 3 seconds to see the arranged cards
 
         }, 1000); // 1 second thinking time
 
@@ -297,7 +297,7 @@ class PyramidPokerGame {
             const currentPlayer = this.playerManager.getCurrentPlayer();
             currentPlayer.aiTurnInProgress = false;
 
-    }, 3000); // After all your timeouts complete
+    }, 2000); // After all your timeouts complete
 
     }
 

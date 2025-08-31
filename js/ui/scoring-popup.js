@@ -38,6 +38,9 @@ function getCardCountFromSubmittedHands(game, playerName, position) {
 
 // Enhanced showScoringPopup with proper large hand support
 function showScoringPopup(game, detailedResults, roundScores, specialPoints, roundNumber = null) {
+
+    console.log(`🎯 showScoringPopup called - Round ${game.currentRound}, Call count:`, ++window.popupCallCount || (window.popupCallCount = 1));
+
     console.log('🔍 showScoringPopup called with:', {
         game,
         detailedResults,
@@ -85,6 +88,38 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
     const allPlayerHands = document.getElementById('allPlayerHands');
     const roundRobinResults = document.getElementById('roundRobinResults');
 
+    roundRobinResults.innerHTML = '';  // ADD THIS LINE
+
+    // After roundRobinResults.innerHTML = '';
+    console.log('After clearing roundRobinResults:', roundRobinResults.children.length);
+
+    // And later when you create the matrix:
+    console.log('Adding matrix to:', roundRobinResults);
+    console.log('roundRobinResults children before matrix:', roundRobinResults.children.length);
+
+    // After adding the matrix:
+    console.log('roundRobinResults children after matrix:', roundRobinResults.children.length);
+
+    // After the existing debug logs, add this:
+    try {
+        // Your matrix creation code
+        const matrixDiv = document.createElement('div');
+        console.log('Created matrixDiv:', matrixDiv);
+
+        matrixDiv.innerHTML = `
+            <h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">Head-to-Head Matrix</h3>
+            <div id="scoringMatrix"></div>
+        `;
+        console.log('Set matrixDiv innerHTML');
+
+        roundRobinResults.appendChild(matrixDiv);
+        console.log('Appended matrixDiv to roundRobinResults');
+        console.log('roundRobinResults children NOW:', roundRobinResults.children.length);
+
+    } catch (error) {
+        console.error('Error creating matrix:', error);
+    }
+
     // Update the popup title to show which round
     const title = roundNumber ? `Round ${roundNumber} Results` : `Round ${game.currentRound} Results`;
     popup.querySelector('h2').textContent = `🏆 ${title}`;
@@ -124,6 +159,9 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
             matrix[player][opponent] = player === opponent ? '-' : 0;
         });
     });
+
+
+console.log(`🎯 Matrix created for round ${game.currentRound}. Total children in roundRobinResults:`, roundRobinResults.children.length);
 
     // Fill matrix with results
     detailedResults.forEach(result => {

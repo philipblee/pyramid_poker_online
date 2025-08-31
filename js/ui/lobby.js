@@ -5,7 +5,7 @@
 let tableSettings = {
     gameConnectMode: 'offline',
     gameDeviceMode: 'single device',
-    gameMode: 'singleplayer',
+    gameMode: 'single-human',
     gameVariant: 'no surrender',
     computerPlayers: 4,
     wildCardCount: 2,
@@ -23,10 +23,11 @@ let tableSettings = {
 const defaultTables = [
     {
         id: 1,
-        name: 'Quick Play - 2 Wild Cards',
-        settings: { gameMode: 'singleplayer',
+        name: 'Offline vs. 1 AI Opponents - 2 Wilds',
+        settings: { gameMode: 'single-human',
                     gameConnectMode: 'offline',
-                    computerPlayers: 5,
+                    gameDeviceMode: 'single-device',
+                    computerPlayers: 1,
                     rounds: 3,
                     wildCardCount: 2,
                     winProbabilityMethod: 'netEV' },
@@ -35,10 +36,11 @@ const defaultTables = [
 
     {
         id: 2,
-        name: 'One-on-One Practice - 1 Wild',
-        settings: { gameMode: 'singleplayer',
+        name: 'Offline vs. 2 AI Opponents - 1 Wild',
+        settings: { gameMode: 'single-human',
                     gameConnectMode: 'offline',
-                    computerPlayers: 1,
+                    gameDeviceMode: 'single-device',
+                    computerPlayers: 2,
                     rounds: 3,
                     wildCardCount: 1,
                     winProbabilityMethod: 'netEV' },
@@ -47,9 +49,10 @@ const defaultTables = [
 
     {
         id: 3,
-        name: 'Challenge Mode - No Wilds',
-        settings: { gameMode: 'singleplayer',
+        name: 'Offline vs 3 AI Opponents - No Wilds',
+        settings: { gameMode: 'single-human',
                     gameConnectMode: 'offline',
+                    gameDeviceMode: 'single-device',
                     computerPlayers: 5,
                     rounds: 5,
                     wildCardCount: 0,
@@ -59,9 +62,75 @@ const defaultTables = [
 
     {
         id: 4,
-        name: 'Cloud Ranked - 2 Wild Card',
-        settings: { gameMode: 'multiplayer',
+        name: 'Offline vs 5 AI Opponents - No Wilds',
+        settings: { gameMode: 'single-human',
+                    gameConnectMode: 'offline',
+                    gameDeviceMode: 'single-device',
+                    computerPlayers: 5,
+                    rounds: 5,
+                    wildCardCount: 0,
+                    winProbabilityMethod: 'tiered2' },
+        icon: '🏓'
+    },
+
+        {
+        id: 5,
+        name: 'Offline Challenge - No Wilds',
+        settings: { gameMode: 'single-human',
+                    gameDeviceMode: 'single-device',
+                    gameConnectMode: 'offline',
+                    computerPlayers: 5,
+                    rounds: 5,
+                    wildCardCount: 0,
+                    winProbabilityMethod: 'tiered2' },
+        icon: '🏓'
+    },
+
+    {
+        id: 6,
+        name: 'Online - 2 Wild Card',
+        settings: { gameMode: 'multi-humans',
                     gameConnectMode: 'online',
+                    gameDeviceMode: 'multi-device',
+                    computerPlayers: 2,
+                    rounds: 3,
+                    wildCardCount: 2,
+                    winProbabilityMethod: 'netEV' },
+        icon: '☁️'
+    },
+
+    {
+        id: 7,
+        name: 'Online - 2 Wild Card',
+        settings: { gameMode: 'multi-humans',
+                    gameConnectMode: 'online',
+                    gameDeviceMode: 'multi-device',
+                    computerPlayers: 2,
+                    rounds: 3,
+                    wildCardCount: 2,
+                    winProbabilityMethod: 'netEV' },
+        icon: '☁️'
+    },
+
+    {
+        id: 8,
+        name: 'Online - 2 Wild Card',
+        settings: { gameMode: 'multi-humans',
+                    gameConnectMode: 'online',
+                    gameDeviceMode: 'multi-device',
+                    computerPlayers: 2,
+                    rounds: 3,
+                    wildCardCount: 2,
+                    winProbabilityMethod: 'netEV' },
+        icon: '☁️'
+    },
+
+    {
+        id: 9,
+        name: 'Online - 2 Wild Card',
+        settings: { gameMode: 'multi-humans',
+                    gameConnectMode: 'online',
+                    gameDeviceMode: 'multi-device',
                     computerPlayers: 5,
                     rounds: 3,
                     wildCardCount: 2,

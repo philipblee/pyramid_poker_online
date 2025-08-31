@@ -5,8 +5,8 @@ class GameConfig {
         this.config = {
             // Connection/Device type settings
             gameConnectMode: 'offline',      //1 'offline', 'online' - how game connects/syncs
-            gameDeviceMode: 'single device', //2 'single device', 'multi devices' - device setup
-            gameMode: 'singleplayer',        //3 'singleplayer', 'multiplayer' - how many humans
+            gameDeviceMode: 'single-device', //2 'single-device', 'multi-device' - device setup
+            gameMode: 'single-human',        //3 'single-human', 'multiple-humans' - how many humans
             gameVariant: 'no surrender',     //4 'no surrender', 'standard'
             computerPlayers: 5,              //5 Number of computer opponents (1-5)
             wildCardCount: 2,                //6 Number of wild cards (0-4)
@@ -63,9 +63,9 @@ class GameConfig {
 
     // Game mode settings
     setGameMode(mode) {
-        const validModes = ['multiplayer', 'singleplayer'];
+        const validModes = ['multiple-humans', 'single-human'];
         if (!validModes.includes(mode)) {
-            throw new Error('Game mode must be: multiplayer or singleplayer');
+            throw new Error('Game mode must be: multiple-humans or single-human');
         }
         this.config.gameMode = mode;
         this.saveToStorage();
@@ -120,7 +120,7 @@ class GameConfig {
     // Reset to default settings
     resetToDefaults() {
         this.config = {
-            gameMode: 'singleplayer',
+            gameMode: 'single-human',
             computerPlayers: 3,
             wildCardCount: 2,
             deckCount: 2
@@ -155,7 +155,7 @@ class GameConfig {
     // Get configuration summary for display
     getConfigSummary() {
         const summary = {
-            'Game Mode': this.config.gameMode === 'singleplayer' ?
+            'Game Mode': this.config.gameMode === 'single-human' ?
                 `Single Player (vs ${this.config.computerPlayers} AI)` : 'Multiplayer',
             'Wild Cards': `${this.config.wildCardCount} cards`,
             'Decks': `${this.config.deckCount} ${this.config.deckCount === 1 ? 'deck' : 'decks'}`
@@ -168,7 +168,7 @@ class GameConfig {
     isValid() {
         const { gameMode, computerPlayers, wildCardCount, deckCount } = this.config;
 
-        if (!['multiplayer', 'singleplayer'].includes(gameMode)) {
+        if (!['multiple-humans', 'single-human'].includes(gameMode)) {
             return { valid: false, error: 'Game mode must be multiplayer or singleplayer' };
         }
 
@@ -194,7 +194,7 @@ class GameConfig {
         const totalCards = totalStandardCards + this.config.wildCardCount;
 
         let playersNeeded;
-        if (this.config.gameMode === 'singleplayer') {
+        if (this.config.gameMode === 'single-human') {
             playersNeeded = 1 + this.config.computerPlayers; // Human + computers
         } else {
             playersNeeded = 4; // Default for multiplayer
