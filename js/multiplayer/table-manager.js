@@ -258,6 +258,79 @@ class TableManager {
     onTournamentStateChanged(tournament) {
         console.log('Tournament state changed:', tournament);
     }
+
+    // Add to TableManager class
+    async startRound(roundNumber) {
+        if (!this.currentTable) return;
+
+        // Deal cards to all human players
+        const tableDoc = await this.tablesRef.doc(this.currentTable).get();
+        const tableData = tableDoc.data();
+
+        // Create deck and deal 17 cards to each human player
+        const deck = new Deck(tableData.settings.wildCards || 2, 2);
+        deck.shuffle();
+
+        const humanPlayers = Object.entries(tableData.players)
+            .filter(([playerId, player]) => player.type === 'human');
+
+        const roundData = {
+            roundNumber: roundNumber,
+            playerCards: {},
+            submissions: {},
+            submissionCount: 0,
+            totalHumans: humanPlayers.length,
+            status: 'arranging' // arranging -> scoring -> complete
+        };
+
+        // Deal 17 cards to each human player
+        humanPlayers.forEach(([playerId, player]) => {
+            roundData.playerCards[playerId] = deck.deal(17);
+        });
+
+        // Update Firebase with round data
+        await this.tablesRef.doc(this.currentTable).update({
+            [`currentTournament.rounds.${roundNumber}`]: roundData,
+            [`currentTournament.currentRound`]: roundNumber
+        });
+    }
+
+    // Add to TableManager class
+    async submitPlayerHand(roundNumber, playerHand) {
+        if (!this.currentTable) return;
+
+        const submissionPath = `currentTournament.rounds.${roundNumber}.submissions.${this.currentUser.id}`;
+        const countPath = `currentTournament.rounds.${roundNumber}.submissionCount`;
+
+        // Use Firebase transaction to safely update count
+        return this.db.runTransaction(async (transaction) => {
+            const tableRef = this.tablesRef.doc(this.currentTable);
+            const tableDoc = await transaction.get(tableRef);
+            const tableData = tableDoc.data();
+
+            const currentRound = tableData.currentTournament.rounds[roundNumber];
+            const newCount = (currentRound.submissionCount || 0) + 1;
+
+            transaction.update(tableRef, {
+                [submissionPath]: {
+                    playerName: this.currentUser.name,
+                    hands: playerHand,
+                    submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                [countPath]: newCount
+            });
+
+            // Check if all players submitted
+            if (newCount >= currentRound.totalHumans) {
+                transaction.update(tableRef, {
+                    [`currentTournament.rounds.${roundNumber}.status`]: 'scoring'
+                });
+            }
+
+            return newCount;
+        });
+    }
+
 }
 
 // Lobby browsing functions (separate from table management)

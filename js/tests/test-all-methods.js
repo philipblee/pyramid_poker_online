@@ -18,8 +18,8 @@ function testAllMethods() {
 
     // Test ranges
     const testRanges = [
-//        { name: 'No-Wild', start: 1, end: 10, wildCount: 0 },
-//        { name: 'One-Wild', start: 1001, end: 1010, wildCount: 1 },
+        { name: 'No-Wild', start: 1, end: 10, wildCount: 0 },
+        { name: 'One-Wild', start: 1001, end: 1010, wildCount: 1 },
         { name: 'Two-Wild', start: 2001, end: 2010, wildCount: 2 }
     ];
 
