@@ -35,13 +35,13 @@ const defaultTables = [
 
     {
         id: 2,
-        name: 'Practice Table - 1 Wild Cards',
+        name: 'One-on-One Practice - 1 Wild',
         settings: { gameMode: 'singleplayer',
                     gameConnectMode: 'offline',
-                    computerPlayers: 5,
+                    computerPlayers: 1,
                     rounds: 3,
                     wildCardCount: 1,
-                    winProbabilityMethod: 'Points' },
+                    winProbabilityMethod: 'netEV' },
         icon: '🏓'
     },
 
@@ -268,12 +268,20 @@ function launchGameInterface() {
     gameConfig.config.gameConnectMode = tableSettings.gameConnectMode;
     gameConfig.config.gameDeviceMode = tableSettings.gameDeviceMode;
     gameConfig.config.gameVariant = tableSettings.gameVariant;
+    console.log('Before sync - gameConfig.computerPlayers:', gameConfig.config.computerPlayers);
     gameConfig.config.computerPlayers = tableSettings.computerPlayers;
+    console.log('After sync - gameConfig.computerPlayers:', gameConfig.config.computerPlayers);
+//    gameConfig.config.computerPlayers = tableSettings.computerPlayers;
     gameConfig.config.wildCardCount = tableSettings.wildCardCount;
     gameConfig.config.deckCount = tableSettings.deckCount;
     gameConfig.config.winProbabilityMethod = tableSettings.winProbabilityMethod;
     gameConfig.config.rounds = tableSettings.rounds;
     gameConfig.config.gameMode = tableSettings.gameMode;
+
+    // Use resetPlayers() to clear old players and create new ones with correct config
+    if (window.game && window.game.playerManager) {
+        window.game.playerManager.resetPlayers();
+    }
 
     console.log('🎮 Settings used for launching game:', gameConfig.config);
 

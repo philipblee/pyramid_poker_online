@@ -21,7 +21,7 @@ class PyramidPokerGame {
         this.tournamentScores = new Map(); // Running totals across rounds
 
         // Auto-add default players for easier testing
-        this.playerManager.addDefaultPlayers();
+//        this.playerManager.addDefaultPlayers();
 
         this.initializeEventListeners();
         updateDisplay(this);

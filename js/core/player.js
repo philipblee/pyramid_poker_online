@@ -8,8 +8,19 @@ class PlayerManager {
         this.scores = new Map();
     }
 
+    resetPlayers() {
+        this.players = [];
+        this.scores.clear();
+        this.addDefaultPlayers();
+        console.log('Players reset with current config');
+    }
+
     addDefaultPlayers() {
+        console.log('gameConfig object:', window.gameConfig);
+        console.log('getConfig function:', typeof window.gameConfig?.getConfig);
+
         const config = window.gameConfig.getConfig();
+        console.log('Retrieved config:', config);
         
         if (config.gameMode === 'singleplayer') {
             // Create 1 human player + configured number of AI players
