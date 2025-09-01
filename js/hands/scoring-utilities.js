@@ -7,75 +7,13 @@ class ScoringUtilities {
     // CORE SCORING: Official Pyramid Poker point values
     // =============================================================================
 
-    static getPointsForHand(hand, position, cardCount = null) {
-        const handName = hand.name ? hand.name.toLowerCase() : '';
-        const numCards = cardCount || (hand.cards ? hand.cards.length : 5);
-        const pos = position.toLowerCase();
+static getPointsForHand(hand, position, cardCount = null) {
+    const utilities = handUtilities();
+    const handTypeCode = hand.hand_rank[0];  // Get the numeric code (1-16)
+    return utilities.getPointValue(handTypeCode, position.toLowerCase());
+}
 
-        if (pos === 'front') {
-            // Front hand scoring (3-5 cards)
-            if (handName.includes('three of a kind')) return 3;
-            if (handName.includes('straight flush')) return 15;
-//            if (handName.includes('flush')) {
-//    //            console.log('FOUND FLUSH IN FRONT!');
-//    //            console.trace('Call stack for flush return');  // Shows where this was called from
-//                return 4;
-//                }
-            if (handName.includes('flush')) return 4;
-            if (handName.includes('straight') && !handName.includes('straight flush')) return 4;
-            if (handName.includes('full house')) return 5;
-            if (handName.includes('four of a kind')) return 12;
-            if (handName.includes('five of a kind')) return 18;
-            return 1; // High card, pair, two pair
-
-        } else if (pos === 'middle') {
-            // Check LARGE HANDS FIRST (6-7 cards)
-            if (numCards >= 6) {
-                if (handName.includes('straight flush')) {
-                    if (numCards === 6) return 16; // 2x back 6-card SF (8pts)
-                    if (numCards === 7) return 22; // 2x back 7-card SF (11pts)
-                }
-                if (handName.includes('of a kind')) {
-                    if (numCards === 6) return 20; // 2x back 6-of-a-kind (10pts)
-                    if (numCards === 7) return 28; // 2x back 7-of-a-kind (14pts)
-                }
-            }
-
-            // THEN check standard 5-card hands
-            if (handName.includes('full house')) return 2;
-            if (handName.includes('four of a kind')) return 8;
-            if (handName.includes('straight flush')) return 10;
-            if (handName.includes('five of a kind')) return 12;
-
-            return 1; // Weaker hands (straight, flush, etc.)
-
-        } else if (pos === 'back') {
-            // Check LARGE HANDS FIRST (6-8 cards)
-            if (numCards >= 6) {
-                if (handName.includes('straight flush')) {
-                    if (numCards === 6) return 8;  // 6-card Straight Flush
-                    if (numCards === 7) return 11; // 7-card Straight Flush
-                    if (numCards === 8) return 14; // 8-card Straight Flush
-                }
-                if (handName.includes('of a kind')) {
-                    if (numCards === 6) return 10; // 6 of a Kind
-                    if (numCards === 7) return 14; // 7 of a Kind
-                    if (numCards === 8) return 18; // 8 of a Kind
-                }
-            }
-
-            // THEN check standard 5-card hands
-            if (handName.includes('four of a kind')) return 4;
-            if (handName.includes('straight flush')) return 5;  // 5-card SF
-            if (handName.includes('five of a kind')) return 6;
-
-            return 1; // Weaker hands (full house, flush, straight, etc.)
-        }
-
-        return 1; // Default fallback
-    }
-
-    // =============================================================================
+// =============================================================================
     // PROBABILITY ESTIMATION
     // =============================================================================
 
@@ -85,14 +23,14 @@ class ScoringUtilities {
 
         // Base probabilities for 4-player game (adjustable for different player counts)
         const baseProbabilities = {
-            16: 0.90, // Very strong large hands
-            15: 0.88,
-            14: 0.86,
-            13: 0.84,
-            12: 0.82,
-            11: 0.80, // Strong large hands
-            10: 0.85, // Five of a kind - very likely to win
-            9: 0.75,  // Straight flush - strong
+            16: 1.00, // Very strong large hands
+            15: 0.99,
+            14: 0.98,
+            13: 0.97,
+            12: 0.96,
+            11: 0.95, // Strong large hands
+            10: 0.94, // Five of a kind - very likely to win
+            9: 0.93,  // Straight flush - strong
             8: 0.65,  // Four of a kind - good
             7: 0.55,  // Full house - decent
             6: 0.45,  // Flush - okay
@@ -135,7 +73,7 @@ class ScoringUtilities {
         const actualMethod = method ||
                             window.WIN_PROB_OVERRIDE ||
                             window.gameConfig?.config?.winProbabilityMethod ||
-                            'tiered';
+                            'tiered2';
 
         if (actualMethod === 'points') {
             const pointsIfWin = hand.positionScores[position];
@@ -150,7 +88,7 @@ class ScoringUtilities {
                 return netEV;
             } else {
                 // ✅ FIXED: Proper NetEV fallback calculation
-                const winProb = this.getWinProbabilityForMethod('tiered', position, hand);
+                const winProb = this.getWinProbabilityForMethod('tiered2', position, hand);
                 const lossProb = 1 - winProb;
                 const pointsIfWin = hand.positionScores[position];
 

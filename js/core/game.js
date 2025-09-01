@@ -808,7 +808,7 @@ class PyramidPokerGame {
 
     // Build HTML content
     let html = `
-        <h1 style="color: #ffd700; margin-bottom: 30px; font-size: 32px;">
+        <h1 style="color: #ffd700; margin-bottom: 24px; font-size: 20px;">
             🏆 TOURNAMENT COMPLETE! 🏆
         </h1>
         <div style="background: rgba(255, 215, 0, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 30px;">
@@ -822,13 +822,13 @@ class PyramidPokerGame {
         const bgColor = standing.position === 1 ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255, 255, 255, 0.1)';
         html += `
             <div style="background: ${bgColor}; padding: 15px; margin: 10px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 20px;">${medal} ${standing.position}. ${standing.playerName}</span>
-                <span style="font-size: 18px; font-weight: bold; color: #4ecdc4;">${standing.totalScore} points</span>
+                <span style="font-size: 16px;">${medal} ${standing.position}. ${standing.playerName}</span>
+                <span style="font-size: 14px; font-weight: bold; color: #4ecdc4;">${standing.totalScore} points</span>
             </div>
         `;
     });
 
-    html += `</div><div style="background: rgba(52, 73, 94, 0.5); padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+    html += `</div><div style="background: rgba(52, 73, 94, 0.5); padding: 20px; border-radius: 10px; margin-bottom: 24px;">
         <h3 style="color: #4ecdc4; margin-bottom: 15px;">Round-by-Round Breakdown</h3>
     `;
 

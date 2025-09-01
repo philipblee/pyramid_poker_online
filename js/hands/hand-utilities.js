@@ -1,7 +1,8 @@
 // js/utilities/hand-utilities.js
 /**
  * Hand ranking, description, and utility functions
- * Main function: handUtilities()
+ * function: handUtilities()
+ * arguments(handType, position) returns points,
  */
 
 function handUtilities() {
@@ -85,8 +86,8 @@ function handUtilities() {
                 9: 10,  // Straight Flush
                 10: 12, // Five of a Kind
                 11: 16, // 6-card Straight Flush
-                12: 20, // 7-card Straight Flush
-                13: 22, // 6 of a Kind
+                12: 20, // 6 of a Kind
+                13: 22, // 7-card Straight Flush
                 14: 28  // 7 of a Kind
             },
             'back': {
@@ -99,8 +100,8 @@ function handUtilities() {
                 9: 5,   // Straight Flush
                 10: 6,  // Five of a Kind
                 11: 8,  // 6-card Straight Flush
-                12: 11, // 7-card Straight Flush
-                13: 11, // 6 of a Kind
+                12: 11, // 6 of a Kind
+                13: 11, // 7-card Straight Flush
                 14: 14, // 7 of a Kind
                 15: 14, // 8-card Straight Flush
                 16: 18  // 8 of a Kind
@@ -117,3 +118,4 @@ function handUtilities() {
         getPointValue
     };
 }
+

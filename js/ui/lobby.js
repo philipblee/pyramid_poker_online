@@ -89,7 +89,7 @@ const defaultTables = [
     {
         id: 6,
         name: 'Online - 2 Wild Card',
-        settings: { gameMode: 'multi-humans',
+        settings: { gameMode: 'single-human',
                     gameConnectMode: 'online',
                     gameDeviceMode: 'multi-device',
                     computerPlayers: 2,
@@ -184,7 +184,7 @@ function createTableCard(table) {
     card.onclick = () => joinTable(table);
     const settings = table.settings;
     const gameConnectModeText = settings.gameConnectMode === 'online' ? 'Online' : 'Offline';
-    const gameModeText = settings.gameMode === 'singleplayer' ? 'Single Human Player' : 'Multiple Human Players';
+    const gameModeText = settings.gameMode === 'single-human' ? 'Single Human Player' : 'Multiple Human Players';
 
     card.innerHTML = `
         <div class="table-header">
