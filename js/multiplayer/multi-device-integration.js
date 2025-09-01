@@ -309,6 +309,270 @@ class MultiDeviceIntegration {
         }
     }
 
+    // NEW: Owner transfer
+    async transferOwnership() {
+        const players = Object.entries(this.playersData);
+
+        // Find next player (earliest joined)
+        const newOwner = players
+            .filter(([id, data]) => id !== this.currentUserId)
+            .sort((a, b) => a[1].joinedAt - b[1].joinedAt)[0];
+
+        if (newOwner) {
+            await this.tableManager.tablesRef.doc(this.currentTableId).update({
+                [`players.${newOwner[0]}.isOwner`]: true,
+                [`players.${this.currentUserId}.isOwner`]: false
+            });
+
+            console.log(`👑 Ownership transferred to ${newOwner[1].name}`);
+        }
+    }
+
+    // Add to MultiDeviceIntegration class
+
+    // Show lobby screen
+    showLobbyScreen(tableId) {
+        // Hide game screen, show lobby
+        document.getElementById('gameScreen').style.display = 'none';
+        document.getElementById('lobbyScreen').style.display = 'block';
+
+        // Set table ID
+        document.getElementById('currentTableId').textContent = tableId;
+
+        // Setup lobby controls
+        this.setupLobbyControls();
+    }
+
+    // Setup lobby button handlers
+    setupLobbyControls() {
+        const startBtn = document.getElementById('startGameBtn');
+        const leaveBtn = document.getElementById('leaveTableBtn');
+
+        startBtn.onclick = () => this.startCountdown();
+        leaveBtn.onclick = () => this.leaveTable();
+    }
+
+    // Update lobby display with current players
+    updateLobbyDisplay(playersData) {
+        const playerElements = document.querySelectorAll('.lobby-player');
+        const playerCount = Object.keys(playersData).length;
+
+        // Update player count
+        document.getElementById('playerCount').textContent = playerCount;
+
+        // Update player slots
+        let index = 0;
+        Object.entries(playersData).forEach(([userId, player]) => {
+            const element = playerElements[index];
+            element.classList.remove('empty');
+            element.textContent = player.isOwner ? `👑 ${player.name} (Owner)` : `🎯 ${player.name}`;
+
+            if (userId === this.currentUserId) {
+                element.textContent += ' (You)';
+            }
+            index++;
+        });
+
+        // Update start button
+        const startBtn = document.getElementById('startGameBtn');
+        if (playerCount >= 2) {
+            startBtn.disabled = false;
+            startBtn.textContent = 'Start Game';
+        } else {
+            startBtn.disabled = true;
+            startBtn.textContent = 'Need 2+ Players';
+        }
+
+        // Update status
+        const status = document.getElementById('lobbyStatus');
+        if (playerCount < 2) {
+            status.textContent = 'Waiting for more players to join...';
+        } else {
+            status.textContent = 'Ready to start! Waiting for game owner...';
+        }
+    }
+
+    // 3-2-1 countdown
+    async startCountdown() {
+        // Update Firebase: start countdown
+        await this.tableManager.tablesRef.doc(this.currentTableId).update({
+            'state': 'countdown',
+            'countdownStarted': Date.now()
+        });
+
+        this.showCountdown();
+    }
+
+    // Show countdown overlay
+    showCountdown() {
+        const overlay = document.getElementById('countdownOverlay');
+        const number = overlay.querySelector('.countdown-number');
+
+        overlay.style.display = 'flex';
+
+        let count = 3;
+        const interval = setInterval(() => {
+            number.textContent = count;
+
+            if (count <= 0) {
+                clearInterval(interval);
+                overlay.style.display = 'none';
+                this.startActualGame();
+            }
+            count--;
+        }, 1000);
+    }
+
+    // Start the actual game
+    async startActualGame() {
+        // Switch to game screen
+        document.getElementById('lobbyScreen').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'block';
+
+        // Deal cards and start multiplayer game
+        // Use existing startNewGame() but with multiplayer sync
+        window.game.startNewGame();
+        await this.syncHandsToFirebase();
+    }
+
+    // Add these methods to your existing MultiDeviceIntegration class
+
+    // Show the lobby screen
+    showLobbyScreen(tableId) {
+        console.log('🎮 Showing lobby for table:', tableId);
+
+        // Hide game screen, show lobby
+        const gameContainer = document.getElementById('gameContainer');
+        const lobbyScreen = document.getElementById('lobbyScreen');
+
+        if (gameContainer) gameContainer.style.display = 'none';
+        if (lobbyScreen) {
+            lobbyScreen.style.display = 'block';
+
+            // Set table ID
+            const tableIdElement = document.getElementById('currentTableId');
+            if (tableIdElement) {
+                tableIdElement.textContent = tableId.slice(-6); // Show last 6 chars
+            }
+        }
+
+        // Setup controls
+        this.setupLobbyControls();
+    }
+
+    // Setup lobby button handlers
+    setupLobbyControls() {
+        const startBtn = document.getElementById('startGameBtn');
+        const leaveBtn = document.getElementById('leaveTableBtn');
+
+        if (startBtn) {
+            startBtn.onclick = () => {
+                console.log('🚀 Start game clicked');
+                this.startCountdown();
+            };
+        }
+
+        if (leaveBtn) {
+            leaveBtn.onclick = () => {
+                console.log('👋 Leave table clicked');
+                this.leaveTable();
+            };
+        }
+    }
+
+    // Update lobby with current players
+    updateLobbyDisplay(playersData) {
+        console.log('👥 Updating lobby display:', playersData);
+
+        const playerElements = document.querySelectorAll('.lobby-player');
+        const playerCount = Object.keys(playersData).length;
+
+        // Update player count
+        const countElement = document.getElementById('playerCount');
+        if (countElement) {
+            countElement.textContent = playerCount;
+        }
+
+        // Clear all player slots first
+        playerElements.forEach(element => {
+            element.className = 'lobby-player empty';
+            element.textContent = '⏳ Waiting...';
+        });
+
+        // Fill in actual players
+        let index = 0;
+        Object.entries(playersData).forEach(([userId, player]) => {
+            if (index < playerElements.length) {
+                const element = playerElements[index];
+                element.classList.remove('empty');
+
+                if (player.isOwner) {
+                    element.classList.add('owner');
+                    element.textContent = `👑 ${player.name}`;
+                } else {
+                    element.textContent = `🎯 ${player.name}`;
+                }
+
+                if (userId === this.currentUserId) {
+                    element.textContent += ' (You)';
+                }
+            }
+            index++;
+        });
+
+        // Update start button
+        this.updateStartButton(playerCount);
+
+        // Update status message
+        this.updateLobbyStatus(playerCount);
+    }
+
+    // Update start button based on player count
+    updateStartButton(playerCount) {
+        const startBtn = document.getElementById('startGameBtn');
+        if (!startBtn) return;
+
+        if (playerCount >= 2) {
+            startBtn.disabled = false;
+            startBtn.textContent = `Start Game (${playerCount} Players)`;
+        } else {
+            startBtn.disabled = true;
+            startBtn.textContent = 'Need 2+ Players';
+        }
+    }
+
+    // Update status message
+    updateLobbyStatus(playerCount) {
+        const status = document.getElementById('lobbyStatus');
+        if (!status) return;
+
+        if (playerCount < 2) {
+            status.textContent = `Waiting for more players... (${playerCount}/6)`;
+        } else {
+            status.textContent = `Ready to start! ${playerCount} players joined.`;
+        }
+    }
+
+    // Start countdown (placeholder for now)
+    startCountdown() {
+        console.log('⏰ Starting countdown...');
+        alert('Countdown feature coming next! For now, this just shows the alert.');
+
+        // TODO: Implement actual countdown
+        // this.showCountdown();
+    }
+
+    // Leave table (placeholder)
+    leaveTable() {
+        console.log('👋 Leaving table...');
+
+        // Hide lobby, show game screen
+        document.getElementById('lobbyScreen').style.display = 'none';
+        document.getElementById('gameContainer').style.display = 'block';
+
+        alert('Left table! (In real version, this would clean up Firebase)');
+}
+
     // Cleanup - restore original handlers
     cleanup() {
         const newGameBtn = document.getElementById('newGame');
@@ -325,6 +589,41 @@ class MultiDeviceIntegration {
         }
 
         console.log('🧹 Multi-device integration cleaned up');
+    }
+}
+
+// NEW: Disconnection handling
+class DisconnectionManager {
+    startDisconnectionTimer(userId) {
+        console.log(`⏰ Starting 60-second timer for ${userId}`);
+
+        const timer = setTimeout(async () => {
+            console.log(`🤖 Auto-arranging for disconnected player: ${userId}`);
+
+            // Get player's current cards
+            const playerHand = await this.getPlayerHand(userId);
+
+            // Use existing findBestSetup for auto-arrange
+            const autoArrangement = window.findBestSetup(playerHand.cards);
+
+            // Submit auto-arranged hand
+            await this.submitPlayerHand(userId, autoArrangement, true); // isAutoSubmit = true
+
+            // Update table status
+            await this.updateTableStatus(`${playerName} auto-submitted (disconnected)`);
+
+        }, 60000); // 60 seconds
+
+        this.reconnectionTimers.set(userId, timer);
+    }
+
+    cancelDisconnectionTimer(userId) {
+        const timer = this.reconnectionTimers.get(userId);
+        if (timer) {
+            clearTimeout(timer);
+            this.reconnectionTimers.delete(userId);
+            console.log(`✅ ${userId} reconnected - cancelled auto-arrange timer`);
+        }
     }
 }
 

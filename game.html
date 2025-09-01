@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pyramid Poker Online</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/lobby.css">  ← ADD THIS HERE
 
     <!-- ================================================================ -->
     <!-- STEP 1: ADD THIS CSS TO YOUR <head> section (after the existing <link> tag) -->
@@ -345,6 +346,43 @@
         </div>
     </div>
 
+
+    <!-- NEW: Lobby screen -->
+    <div id="lobbyScreen" class="lobby-container" style="display: none;">
+        <h2>🎮 Pyramid Poker Table</h2>
+
+        <div class="table-info">
+            <div class="table-id">Table: <span id="currentTableId">Loading...</span></div>
+            <div class="player-count">Players: <span id="playerCount">0</span> of 6</div>
+        </div>
+
+        <div class="players-lobby">
+            <div class="lobby-player empty">⏳ Waiting...</div>
+            <div class="lobby-player empty">⏳ Waiting...</div>
+            <div class="lobby-player empty">⏳ Waiting...</div>
+            <div class="lobby-player empty">⏳ Waiting...</div>
+            <div class="lobby-player empty">⏳ Waiting...</div>
+            <div class="lobby-player empty">⏳ Waiting...</div>
+        </div>
+
+        <div id="lobbyStatus" class="lobby-status">
+            Connecting to table...
+        </div>
+
+        <div class="lobby-controls">
+            <button id="startGameBtn" class="btn btn-primary" disabled>
+                Start Game (Need 2+ Players)
+            </button>
+            <button id="leaveTableBtn" class="btn btn-secondary">Leave Table</button>
+        </div>
+    </div>
+
+    <!-- Countdown overlay -->
+    <div id="countdownOverlay" class="countdown-overlay" style="display: none;">
+        <div class="countdown-number">3</div>
+        <div class="countdown-text">Game starting...</div>
+    </div>
+
     <!-- Scoring Popup -->
     <div class="scoring-popup" id="scoringPopup">
         <div class="scoring-content">
@@ -421,6 +459,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     <script src="js/firebase/firebase-config.js"></script>
     <script src="js/firebase/firebase-auth.js"></script>
     <script src="js/firebase/user-stats.js"></script>
+
+    <!-- Add game states before other multiplayer scripts -->
+    <script src="js/constants/game-states.js"></script>
 
     <!-- Login Modal -->
     <script src="js/ui/lobby.js"></script>
@@ -509,6 +550,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     <link rel="stylesheet" href="css/leaderboards.css">
     <script src="js/firebase/leaderboards.js"></script>
     <script src="js/ui/leaderboard-display.js"></script>
+
     <script src="js/multiplayer/table-manager.js"></script>
     <script src="js/multiplayer/tournament-sync.js"></script>
     <script src="js/multiplayer/game-integration.js"></script>

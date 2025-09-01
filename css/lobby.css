@@ -1,0 +1,64 @@
+.lobby-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 30px;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    border-radius: 15px;
+    color: white;
+    text-align: center;
+}
+
+.players-lobby {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin: 30px 0;
+}
+
+.lobby-player {
+    padding: 15px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.lobby-player.owner {
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    color: #333;
+}
+
+.lobby-player:not(.empty):not(.owner) {
+    background: linear-gradient(45deg, #4ecdc4, #44a08d);
+}
+
+.lobby-player.empty {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.5);
+    border: 2px dashed rgba(255,255,255,0.3);
+}
+
+.countdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.countdown-number {
+    font-size: 120px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 20px #ffd700;
+}
+
+.countdown-text {
+    font-size: 24px;
+    color: white;
+    margin-top: 20px;
+}
