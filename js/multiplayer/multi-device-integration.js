@@ -1,14 +1,43 @@
 // js/multiplayer/multi-device-integration.js
 // Clean integration that enhances existing single-device system
 
+// Enhanced MultiDeviceIntegration with Table Management
 class MultiDeviceIntegration {
     constructor() {
-        this.tableManager = null;
-        this.currentTableId = null;
-        this.currentUserId = null;
-        this.isMultiDevice = false;
-        this.originalSubmitHandler = null;
+        // ... existing properties
+        this.playersData = new Map(); // Track all players
+        this.submissionTracker = new Map(); // Track who submitted
+        this.reconnectionTimers = new Map(); // 60-second timers
+        this.tableStateListener = null; // Firebase listener
     }
+
+    // NEW: Create or join table
+    async createOrJoinTable(tableId = null) {
+        if (!tableId) {
+            // Create new table
+            tableId = this.generateTableId();
+            await this.createNewTable(tableId);
+        } else {
+            // Join existing table
+            await this.joinExistingTable(tableId);
+        }
+
+        this.currentTableId = tableId;
+        await this.setupTableListener();
+    }
+
+    // NEW: Real-time submission tracking
+    async onPlayerSubmitted(userId) {
+        // Update submission status
+        await this.tableManager.tablesRef.doc(this.currentTableId).update({
+            [`submissions.${userId}`]: true,
+            'lastActivity': Date.now()
+        });
+
+        // Check if all players submitted
+        await this.checkAllSubmitted();
+    }
+
 
     // Initialize multi-device mode with table
     async initialize(tableManager) {
