@@ -9,6 +9,7 @@
 const firebaseConfig = {
   apiKey: "AIzaSyAyf-WOaoUfXf1HYWE8lUxniwpgiAvr7f0",
   authDomain: "pyramid-poker-online.firebaseapp.com",
+  databaseURL: "https://pyramid-poker-online-default-rtdb.firebaseio.com/",  // ADD THIS
   projectId: "pyramid-poker-online",
   storageBucket: "pyramid-poker-online.firebasestorage.app",
   messagingSenderId: "1062213831120",

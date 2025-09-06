@@ -31,7 +31,7 @@ class GameConfig {
             aiPersonality: 'balanced',       // 'aggressive', 'balanced', 'conservative'
         };
 
-        this.loadFromStorage();
+//        this.loadFromStorage();
     }
 
 

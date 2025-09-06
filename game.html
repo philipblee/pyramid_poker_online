@@ -259,6 +259,22 @@
                 </div>
             </div>
 
+
+            <!-- Multi-human player list (add around line 260, before existing buttons) -->
+            <div id="multiHumanPlayers" class="multi-human-section" style="display: none;">
+                <h4>Players in Table</h4>
+                <div class="players-list">
+                    <div class="player-slot empty">⏳ Waiting for players...</div>
+                    <div class="player-slot empty">⏳ Waiting for players...</div>
+                    <div class="player-slot empty">⏳ Waiting for players...</div>
+                    <div class="player-slot empty">⏳ Waiting for players...</div>
+                    <div class="player-slot empty">⏳ Waiting for players...</div>
+                    <div class="player-slot empty">⏳ Waiting for players...</div>
+                </div>
+                <div class="player-count">Players: <span id="currentPlayerCount">0</span> of 6</div>
+            </div>
+
+            <!-- Keep your existing buttons unchanged (lines 263-265) -->
             <div class="table-actions">
                 <button class="btn btn-warning" onclick="editSettings()">⚙️ Edit Settings</button>
                 <button class="btn btn-primary" onclick="startGame()">🎯 Start Game</button>
@@ -347,36 +363,6 @@
     </div>
 
 
-    <!-- NEW: Lobby screen -->
-    <div id="lobbyScreen" class="lobby-container" style="display: none;">
-        <h2>🎮 Pyramid Poker Table</h2>
-
-        <div class="table-info">
-            <div class="table-id">Table: <span id="currentTableId">Loading...</span></div>
-            <div class="player-count">Players: <span id="playerCount">0</span> of 6</div>
-        </div>
-
-        <div class="players-lobby">
-            <div class="lobby-player empty">⏳ Waiting...</div>
-            <div class="lobby-player empty">⏳ Waiting...</div>
-            <div class="lobby-player empty">⏳ Waiting...</div>
-            <div class="lobby-player empty">⏳ Waiting...</div>
-            <div class="lobby-player empty">⏳ Waiting...</div>
-            <div class="lobby-player empty">⏳ Waiting...</div>
-        </div>
-
-        <div id="lobbyStatus" class="lobby-status">
-            Connecting to table...
-        </div>
-
-        <div class="lobby-controls">
-            <button id="startGameBtn" class="btn btn-primary" disabled>
-                Start Game (Need 2+ Players)
-            </button>
-            <button id="leaveTableBtn" class="btn btn-secondary">Leave Table</button>
-        </div>
-    </div>
-
     <!-- Countdown overlay -->
     <div id="countdownOverlay" class="countdown-overlay" style="display: none;">
         <div class="countdown-number">3</div>
@@ -454,6 +440,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>  <!-- ADD THIS LINE -->
 
     <!-- Your Firebase files -->
     <script src="js/firebase/firebase-config.js"></script>

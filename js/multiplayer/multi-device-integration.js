@@ -26,6 +26,54 @@ class MultiDeviceIntegration {
         await this.setupTableListener();
     }
 
+    setupPlayerListListener(tableId, callback) {
+        console.log('🔥 Setting up player list listener for table:', tableId);
+
+        // Reference to the table's players
+        const playersRef = firebase.database().ref(`tables/${tableId}/players`);
+
+        // Listen for changes
+        this.playerListListener = playersRef.on('value', (snapshot) => {
+            const playersData = snapshot.val() || {};
+            const playersArray = Object.values(playersData);
+
+            console.log('🔥 Player list updated:', playersArray);
+            callback(playersArray);
+        });
+
+        // Store reference to remove listener later
+        this.currentPlayersRef = playersRef;
+    }
+
+    // Add this method to your MultiDeviceIntegration class
+async addPlayerToTable(tableId, playerInfo) {
+        try {
+            console.log('🔥 Adding player to Firebase table:', tableId, playerInfo);
+
+            // Reference to the table's players collection (v8 compat syntax)
+            const tableRef = firebase.database().ref(`tables/${tableId}/players`);
+
+            // Add player to Firebase
+            await tableRef.child(playerInfo.id).set({
+                id: playerInfo.id,
+                name: playerInfo.name,
+                joinedAt: playerInfo.joinedAt,
+                ready: playerInfo.ready,
+                connected: true
+            });
+
+            // Track locally
+            this.playersData.set(playerInfo.id, playerInfo);
+
+            console.log('✅ Player added successfully');
+            return playerInfo.id;
+
+        } catch (error) {
+            console.error('❌ Error adding player to table:', error);
+            throw error;
+        }
+    }
+
     // NEW: Real-time submission tracking
     async onPlayerSubmitted(userId) {
         // Update submission status
@@ -591,6 +639,8 @@ class MultiDeviceIntegration {
         console.log('🧹 Multi-device integration cleaned up');
     }
 }
+
+
 
 // NEW: Disconnection handling
 class DisconnectionManager {
