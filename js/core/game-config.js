@@ -12,7 +12,7 @@ class GameConfig {
             wildCardCount: 2,                //6 Number of wild cards (0-4)
             deckCount: 2,                    //7 Number of standard decks (1-3)
             winProbabilityMethod: 'tiered2', //8 'points', 'empirical', 'tiered', 'tiered2', "netEV"
-            rounds: 1,                       //9 Number of rounds to play
+            rounds: 3,                       //9 Number of rounds to play
             currentRound: 0,                 // Track current round
 
             // Table/Lobby settings
@@ -31,7 +31,7 @@ class GameConfig {
             aiPersonality: 'balanced',       // 'aggressive', 'balanced', 'conservative'
         };
 
-        this.loadFromStorage();
+//        this.loadFromStorage();
     }
 
 

@@ -699,7 +699,11 @@ class PyramidPokerGame {
     }
 
     calculateScores() {
+        console.log('🚀 calculateScores() START - this.maxRounds:', this.maxRounds);
+
         const playerNames = this.playerManager.getPlayerNames();
+        console.log('🔍 After getPlayerNames() - this.maxRounds:', this.maxRounds);
+
         const roundScores = new Map();
         const detailedResults = [];
         const bonusPoints = new Map();
@@ -709,6 +713,20 @@ class PyramidPokerGame {
             roundScores.set(name, 0);
             bonusPoints.set(name, 0);
         });
+
+        console.log('🔍 After initialization - this.maxRounds:', this.maxRounds);
+
+
+//        const playerNames = this.playerManager.getPlayerNames();
+//        const roundScores = new Map();
+//        const detailedResults = [];
+//        const bonusPoints = new Map();
+//
+//        // Initialize round scores
+//        playerNames.forEach(name => {
+//            roundScores.set(name, 0);
+//            bonusPoints.set(name, 0);
+//        });
 
         // Head-to-head comparisons (same as before)
         for (let i = 0; i < playerNames.length; i++) {
@@ -734,8 +752,13 @@ class PyramidPokerGame {
             }
         }
 
+        console.log('🔍 After head-to-head comparisons - this.maxRounds:', this.maxRounds);
+
         // NEW: Only store round history ONCE per round
         const roundAlreadyStored = this.roundHistory.some(round => round.roundNumber === this.currentRound);
+
+        console.log('🔍 After roundAlreadyStored check - this.maxRounds:', this.maxRounds);
+
         if (!roundAlreadyStored) {
             const roundData = {
                 roundNumber: this.currentRound,
@@ -753,12 +776,17 @@ class PyramidPokerGame {
             });
         }
 
+        console.log('🔍 After round history update - this.maxRounds:', this.maxRounds);
+
         // Update individual round scores (keep existing for current round display)
         roundScores.forEach((roundScore, playerName) => {
             if (!roundAlreadyStored) {
                 this.playerManager.updatePlayerScore(playerName, roundScore);
             }
         });
+
+        console.log('🔍 After updatePlayerScore - this.maxRounds:', this.maxRounds);
+        console.log('🔍 Just before showScoringPopup - this.maxRounds:', this.maxRounds);
 
         showScoringPopup(this, detailedResults, roundScores, new Map());
         updateDisplay(this);
