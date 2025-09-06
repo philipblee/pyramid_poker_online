@@ -1,7 +1,7 @@
 {
-  "version": "v3.5.0-8-g99ad787",
-  "commit": "99ad787",
-  "branch": "fix-lobby-defaults",
-  "buildDate": "2025-08-27T13:22:43.590Z",
-  "lastCommit": "2025-08-27 09:22:10 -0400"
+  "version": "v3.5.0-21-ga0dcf92",
+  "commit": "a0dcf92",
+  "branch": "main",
+  "buildDate": "2025-09-06T17:34:56.207Z",
+  "lastCommit": "2025-09-06 13:29:55 -0400"
 }
