@@ -1,0 +1,44 @@
+/* Only apply styles to elements within the multi-human section */
+#multiHumanPlayers {
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(78, 205, 196, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(78, 205, 196, 0.3);
+}
+
+#multiHumanPlayers h4 {
+    color: #4ecdc4;
+    margin-bottom: 15px;
+}
+
+#multiHumanPlayers .players-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+#multiHumanPlayers .player-slot {
+    padding: 10px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: bold;
+}
+
+#multiHumanPlayers .player-slot.empty {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.5);
+    border: 2px dashed rgba(255,255,255,0.3);
+}
+
+#multiHumanPlayers .player-slot:not(.empty) {
+    background: linear-gradient(45deg, #4ecdc4, #44a08d);
+    color: white;
+}
+
+#multiHumanPlayers .player-count {
+    text-align: center;
+    font-weight: bold;
+    color: #4ecdc4;
+}

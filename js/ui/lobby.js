@@ -15,6 +15,8 @@ let tableSettings = {
     // Table/Lobby settings
     maxPlayers: 6,                   // Maximum players allowed at table (2-6)
     minPlayers: 2,                   // Minimum players to start game
+    maxHumanPlayers: 6,              // Maximum number of human players, then join is disabled
+    humanPlayers: 0,
     tableId: null,                   // For multiplayer table identification
     tableName: ''                   // Display name for table
 };
@@ -23,7 +25,7 @@ let tableSettings = {
 const defaultTables = [
     {
         id: 1,
-        name: 'Offline vs. 1 AI Opponents - 2 Wilds',
+        name: '1. Offline vs. 1 AI Opponents - 2 Wilds',
         settings: { gameMode: 'single-human',
                     gameConnectMode: 'offline',
                     gameDeviceMode: 'single-device',
@@ -36,7 +38,7 @@ const defaultTables = [
 
     {
         id: 2,
-        name: 'Offline vs. 2 AI Opponents - 1 Wild',
+        name: '2. Offline vs. 2 AI Opponents - 1 Wild',
         settings: { gameMode: 'single-human',
                     gameConnectMode: 'offline',
                     gameDeviceMode: 'single-device',
@@ -49,7 +51,7 @@ const defaultTables = [
 
     {
         id: 3,
-        name: 'Offline vs 3 AI Opponents - No Wilds',
+        name: '3. Offline vs 3 AI Opponents - No Wilds',
         settings: { gameMode: 'single-human',
                     gameConnectMode: 'offline',
                     gameDeviceMode: 'single-device',
@@ -62,7 +64,7 @@ const defaultTables = [
 
     {
         id: 4,
-        name: 'Offline vs 5 AI Opponents - No Wilds',
+        name: '4. Offline vs 5 AI Opponents - No Wilds',
         settings: { gameMode: 'single-human',
                     gameConnectMode: 'offline',
                     gameDeviceMode: 'single-device',
@@ -75,7 +77,7 @@ const defaultTables = [
 
         {
         id: 5,
-        name: 'Offline Challenge - No Wilds',
+        name: '5. Offline Challenge - No Wilds',
         settings: { gameMode: 'single-human',
                     gameDeviceMode: 'single-device',
                     gameConnectMode: 'offline',
@@ -88,7 +90,7 @@ const defaultTables = [
 
     {
         id: 6,
-        name: 'Online - 2 Wild Card',
+        name: '6. Online - 2 Wild Card',
         settings: { gameMode: 'single-human',
                     gameConnectMode: 'online',
                     gameDeviceMode: 'multi-device',
@@ -101,21 +103,22 @@ const defaultTables = [
 
     {
         id: 7,
-        name: 'Online - 2 Wild Card',
-        settings: { gameMode: 'multi-humans',
+        name: '7. Online - 2 Wild Card',
+        settings: { gameMode: 'multiple-humans',
                     gameConnectMode: 'online',
                     gameDeviceMode: 'multi-device',
-                    computerPlayers: 2,
+                    computerPlayers: 0,
                     rounds: 3,
                     wildCardCount: 2,
+                    maxPlayers: 6,
                     winProbabilityMethod: 'netEV' },
         icon: '☁️'
     },
 
     {
         id: 8,
-        name: 'Online - 2 Wild Card',
-        settings: { gameMode: 'multi-humans',
+        name: '8. Online - 2 Wild Card',
+        settings: { gameMode: 'multiple-humans',
                     gameConnectMode: 'online',
                     gameDeviceMode: 'multi-device',
                     computerPlayers: 2,
@@ -127,8 +130,8 @@ const defaultTables = [
 
     {
         id: 9,
-        name: 'Online - 2 Wild Card',
-        settings: { gameMode: 'multi-humans',
+        name: '9. Online - 2 Wild Card',
+        settings: { gameMode: 'multiple-humans',
                     gameConnectMode: 'online',
                     gameDeviceMode: 'multi-device',
                     computerPlayers: 5,
@@ -231,6 +234,74 @@ function createCreateTableCard() {
 function joinTable(table) {
     currentTable = table;
     tableSettings = { ...table.settings };
+
+
+
+    console.log('🌐 Joining table:', table.name);
+    console.log('🔧 Debug - table properties:');
+    console.log('gameMode:', table.gameMode);
+    console.log('gameDeviceMode:', table.gameDeviceMode);
+    console.log('gameConnectMode:', table.gameConnectMode);
+
+    // NEW: Check if this is a multi-human table
+    if (table.settings.gameMode === 'multiple-humans' &&
+        table.settings.gameDeviceMode === 'multi-device' &&
+        table.settings.gameConnectMode === 'online') {
+
+        console.log('🌐 Joining multi-human table:', table.name);
+
+        // Initialize MultiDeviceIntegration if not already done
+        if (!window.multiDeviceIntegration) {
+            console.log('🔧 Initializing MultiDeviceIntegration...');
+            window.multiDeviceIntegration = new MultiDeviceIntegration();
+        }
+
+        // TODO 1: Add current player to Firebase table
+        // In your joinTable() function, replace the playerInfo creation with:
+        const currentUser = firebase.auth().currentUser;
+        const userName = currentUser ? currentUser.displayName || currentUser.email || 'Anonymous Player' : 'Guest Player';
+        console.log('🔍 Final userName will be:', userName);
+
+        const playerInfo = {
+            id: 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            name: userName,
+            joinedAt: Date.now(),
+            ready: false
+        };
+
+        // Add player to Firebase table (using .then() instead of await)
+        window.multiDeviceIntegration.addPlayerToTable(table.id, playerInfo)
+            // After the .then() in joinTable()
+            .then(() => {
+                console.log('✅ Player added successfully');
+
+                // Set up listener for real-time updates
+                window.multiDeviceIntegration.setupPlayerListListener(table.id, updatePlayerListUI);
+            })
+
+
+            .catch(error => {
+                console.error('❌ Error adding player:', error);
+            });
+
+        // Show the multi-human player section
+        const playerSection = document.getElementById('multiHumanPlayers');
+        if (playerSection) {
+            playerSection.style.display = 'block';
+        }
+
+        // TODO: Initialize Firebase listener for real-time updates
+        // TODO: Add current player to Firebase table
+        // TODO: Update player list in real-time
+
+    } else {
+        // Hide multi-human section for single-player tables
+        const playerSection = document.getElementById('multiHumanPlayers');
+        if (playerSection) {
+            playerSection.style.display = 'none';
+        }
+    }
+
     updateTableDisplay();
     showTableScreen();
 }
@@ -624,6 +695,52 @@ function updateAiPlayersDisplay(value) {
 
 function updateWildCardsDisplay(value) {
     document.getElementById('wildCardsValue').textContent = value;
+}
+
+function updatePlayerListUI(players) {
+    console.log('🖥️ Updating player list UI:', players);
+
+    // ADD THIS DEBUG BLOCK:
+    players.forEach((player, index) => {
+        console.log(`🔍 Player ${index}:`, player);
+        console.log(`🔍 Player ${index} name:`, player.name);
+        console.log(`🔍 Player ${index} type:`, typeof player.name);
+    });
+
+    const playerCount = players.length;
+    const maxPlayers = 6;
+
+    // Update player count
+    const playerCountElement = document.querySelector('.player-count');
+    if (playerCountElement) {
+        playerCountElement.textContent = `${playerCount} of ${maxPlayers} players`;
+    }
+
+    // Update individual player slots
+    const playerSlots = document.querySelectorAll('.player-slot');
+    console.log('🔧 Found player slots:', playerSlots.length);
+
+    playerSlots.forEach((slot, index) => {
+        if (index < players.length) {
+            // Player exists - show their info
+            slot.innerHTML = `
+                <span class="player-icon">👤</span>
+                <span class="player-name">${players[index].name}</span>
+            `;
+            slot.classList.remove('waiting');
+            slot.classList.add('occupied');
+        } else {
+            // Empty slot - show waiting
+            slot.innerHTML = `
+                <span class="player-icon">⏳</span>
+                <span class="player-name">Waiting for players...</span>
+            `;
+            slot.classList.add('waiting');
+            slot.classList.remove('occupied');
+        }
+    });
+
+    console.log('✅ Updated all player slots');
 }
 // Export functions for integration
 window.PyramidPokerLobby = {
