@@ -184,8 +184,33 @@ function populateLobby() {
 function createTableCard(table) {
     const card = document.createElement('div');
     card.className = 'table-card';
+
+
     card.onclick = () => joinTable(table);
     const settings = table.settings;
+    // ADD THIS DEBUG BLOCK:
+    console.log('🔍 Creating card for table:', table.name);
+    console.log('🔍 Table settings:', settings);
+    console.log('🔍 humanPlayers:', settings.humanPlayers);
+    console.log('🔍 maxHumanPlayers:', settings.maxHumanPlayers);
+
+    const currentPlayers = settings.humanPlayers || 0;
+    const maxPlayers = settings.maxHumanPlayers || 1;
+    const isFull = currentPlayers >= maxPlayers;
+
+    console.log('🔍 isFull calculation:', isFull, `(${currentPlayers}/${maxPlayers})`);
+
+    // Set onclick only if table isn't full
+    if (!isFull) {
+        console.log('🔍 Adding click handler for table:', table.name);
+        card.onclick = () => joinTable(table);
+    } else {
+        console.log('🔍 Table is full, NOT adding click handler');
+        card.classList.add('table-full');
+        card.style.cursor = 'not-allowed';
+    }
+
+
     const gameConnectModeText = settings.gameConnectMode === 'online' ? 'Online' : 'Offline';
     const gameModeText = settings.gameMode === 'single-human' ? 'Single Human Player' : 'Multiple Human Players';
 
@@ -232,16 +257,41 @@ function createCreateTableCard() {
 
 // Join existing table
 function joinTable(table) {
+
+    // ADD DEBUG LOGS:
+    console.log('🔍 joinTable called for:', table.name);
+    console.log('🔍 table.settings:', table.settings);
+    console.log('🔍 maxHumanPlayers:', table.settings.maxHumanPlayers);
+    console.log('🔍 humanPlayers:', table.settings.humanPlayers);
+
+    // Check if table is full (applies to ALL table types)
+    const maxHumanPlayers = table.settings.maxHumanPlayers || 1; // Default 1 for single-human
+    const currentHumanPlayers = table.settings.humanPlayers || 0;
+
+    console.log('🔍 Calculated - current:', currentHumanPlayers, 'max:', maxHumanPlayers);
+    console.log('🔍 Is full?', currentHumanPlayers >= maxHumanPlayers);
+
+
+    if (currentHumanPlayers >= maxHumanPlayers) {
+        alert(`Table "${table.name}" is full (${currentHumanPlayers}/${maxHumanPlayers} players)`);
+        return; // Exit early
+    }
+
     currentTable = table;
     tableSettings = { ...table.settings };
-
-
 
     console.log('🌐 Joining table:', table.name);
     console.log('🔧 Debug - table properties:');
     console.log('gameMode:', table.gameMode);
     console.log('gameDeviceMode:', table.gameDeviceMode);
     console.log('gameConnectMode:', table.gameConnectMode);
+
+    // Increment humanPlayers counter for ANY table type
+    firebase.database().ref(`tables/${table.id}/settings/humanPlayers`)
+        .transaction((current) => (current || 0) + 1)
+        .then(() => {
+            console.log('✅ Human player counter incremented');
+        });
 
     // NEW: Check if this is a multi-human table
     if (table.settings.gameMode === 'multiple-humans' &&
@@ -256,7 +306,6 @@ function joinTable(table) {
             window.multiDeviceIntegration = new MultiDeviceIntegration();
         }
 
-        // TODO 1: Add current player to Firebase table
         // In your joinTable() function, replace the playerInfo creation with:
         const currentUser = firebase.auth().currentUser;
         const userName = currentUser ? currentUser.displayName || currentUser.email || 'Anonymous Player' : 'Guest Player';
@@ -289,10 +338,6 @@ function joinTable(table) {
         if (playerSection) {
             playerSection.style.display = 'block';
         }
-
-        // TODO: Initialize Firebase listener for real-time updates
-        // TODO: Add current player to Firebase table
-        // TODO: Update player list in real-time
 
     } else {
         // Hide multi-human section for single-player tables
