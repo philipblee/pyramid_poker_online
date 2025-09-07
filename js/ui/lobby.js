@@ -15,6 +15,8 @@ let tableSettings = {
     // Table/Lobby settings
     maxPlayers: 6,                   // Maximum players allowed at table (2-6)
     minPlayers: 2,                   // Minimum players to start game
+    maxHumanPlayers: 6,              // Maximum number of human players, then join is disabled
+    humanPlayers: 0,
     tableId: null,                   // For multiplayer table identification
     tableName: ''                   // Display name for table
 };
@@ -105,9 +107,10 @@ const defaultTables = [
         settings: { gameMode: 'multiple-humans',
                     gameConnectMode: 'online',
                     gameDeviceMode: 'multi-device',
-                    computerPlayers: 2,
+                    computerPlayers: 0,
                     rounds: 3,
                     wildCardCount: 2,
+                    maxPlayers: 6,
                     winProbabilityMethod: 'netEV' },
         icon: '☁️'
     },
@@ -257,6 +260,7 @@ function joinTable(table) {
         // In your joinTable() function, replace the playerInfo creation with:
         const currentUser = firebase.auth().currentUser;
         const userName = currentUser ? currentUser.displayName || currentUser.email || 'Anonymous Player' : 'Guest Player';
+        console.log('🔍 Final userName will be:', userName);
 
         const playerInfo = {
             id: 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
@@ -695,6 +699,13 @@ function updateWildCardsDisplay(value) {
 
 function updatePlayerListUI(players) {
     console.log('🖥️ Updating player list UI:', players);
+
+    // ADD THIS DEBUG BLOCK:
+    players.forEach((player, index) => {
+        console.log(`🔍 Player ${index}:`, player);
+        console.log(`🔍 Player ${index} name:`, player.name);
+        console.log(`🔍 Player ${index} type:`, typeof player.name);
+    });
 
     const playerCount = players.length;
     const maxPlayers = 6;

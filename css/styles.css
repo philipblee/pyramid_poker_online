@@ -935,3 +935,8 @@ body {
     background: #0066cc !important;  /* Blue when selected */
     color: white !important;         /* White text when selected */
 }
+
+.table-card.table-full {
+    opacity: 0.6;
+    background-color: #f8f8f8;
+}
