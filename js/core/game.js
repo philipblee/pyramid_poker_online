@@ -243,6 +243,7 @@ class PyramidPokerGame {
         updateDisplay(this);
     }
 
+    // load all current playerHand
     loadCurrentPlayerHand() {
         if (this.gameState !== 'playing') return;
 
@@ -271,6 +272,45 @@ class PyramidPokerGame {
             this.handleAITurn();
         }
 
+    }
+
+
+    // Load current player's hand from Firebase into local playerHands Map
+    async loadCurrentPlayerHandFromFirebase() {
+        if (!window.multiDevice?.isMultiDevice || !window.multiDevice.currentTableId) return;
+
+        try {
+            const currentPlayer = this.playerManager.getCurrentPlayer();
+            if (!currentPlayer) return;
+
+            console.log(`☁️ Loading ${currentPlayer.name}'s hand from Firebase...`);
+
+            // Get current game data from Firebase
+            const tableDoc = await window.multiDevice.tableManager.tablesRef.doc(window.multiDevice.currentTableId).get();
+            const tableData = tableDoc.data();
+
+            if (!tableData?.currentGame?.dealtHands?.[currentPlayer.name]) {
+                console.log(`⚠️ No hand found for ${currentPlayer.name} in Firebase`);
+                return;
+            }
+
+            const handData = tableData.currentGame.dealtHands[currentPlayer.name];
+
+            // Update local playerHands Map with Firebase data
+            this.playerHands.set(currentPlayer.name, {
+                cards: handData.cards,
+                originalCards: [...handData.cards],
+                back: [],
+                middle: [],
+                front: []
+            });
+
+            console.log(`✅ Loaded ${currentPlayer.name}'s hand from Firebase`);
+
+        } catch (error) {
+            console.error('❌ Error loading hand from Firebase:', error);
+            // Fallback: keep existing local hand
+        }
     }
 
     handleAITurn() {

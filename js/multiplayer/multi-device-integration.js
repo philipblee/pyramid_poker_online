@@ -696,7 +696,7 @@ function updateLocalScoreDisplay(scoresData) {
 }
 
 // Add to multi-device-integration.js
-setupHandListener() {
+function setupHandListener() {
     const currentUser = firebase.auth().currentUser;
     const userName = currentUser ? currentUser.displayName || currentUser.email : 'Guest Player';
 
@@ -708,7 +708,7 @@ setupHandListener() {
     });
 }
 
-updateLocalPlayerHand(handData) {
+function updateLocalPlayerHand(handData) {
     // Update the local game with the player's hand from Firebase
     if (window.game && window.game.playerManager) {
         // Need to integrate with your existing hand management system

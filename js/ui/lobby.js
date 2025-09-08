@@ -318,6 +318,7 @@ function joinTable(table) {
     showTableScreen();
 
     });
+
     // NEW: Check if this is a multi-human table
     if (table.settings.gameMode === 'multiple-humans' &&
         table.settings.gameDeviceMode === 'multi-device' &&
