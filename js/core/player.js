@@ -15,6 +15,7 @@ class PlayerManager {
         console.log('Players reset with current config');
     }
 
+    // add default AI players
     addDefaultPlayers() {
         console.log('gameConfig object:', window.gameConfig);
         console.log('getConfig function:', typeof window.gameConfig?.getConfig);

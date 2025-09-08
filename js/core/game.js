@@ -19,10 +19,6 @@ class PyramidPokerGame {
         this.maxRounds = gameConfig.config.rounds;             // Tournament limit
         this.roundHistory = [];         // Store completed round data
         this.tournamentScores = new Map(); // Running totals across rounds
-
-        // Auto-add default players for easier testing
-//        this.playerManager.addDefaultPlayers();
-
         this.initializeEventListeners();
         updateDisplay(this);
         createParticles();
@@ -285,18 +281,19 @@ class PyramidPokerGame {
 
             console.log(`☁️ Loading ${currentPlayer.name}'s hand from Firebase...`);
 
-            // Get current game data from Firebase
-            const tableDoc = await window.multiDevice.tableManager.tablesRef.doc(window.multiDevice.currentTableId).get();
-            const tableData = tableDoc.data();
+            // Get from Realtime Database instead of Firestore
+            const snapshot = await firebase.database()
+                .ref(`tables/${window.multiDevice.currentTableId}/currentGame/dealtHands/${currentPlayer.name}`)
+                .once('value');
 
-            if (!tableData?.currentGame?.dealtHands?.[currentPlayer.name]) {
+            const handData = snapshot.val();
+
+            if (!handData) {
                 console.log(`⚠️ No hand found for ${currentPlayer.name} in Firebase`);
                 return;
             }
 
-            const handData = tableData.currentGame.dealtHands[currentPlayer.name];
-
-            // Update local playerHands Map with Firebase data
+            // Update local playerHands Map
             this.playerHands.set(currentPlayer.name, {
                 cards: handData.cards,
                 originalCards: [...handData.cards],
@@ -309,7 +306,6 @@ class PyramidPokerGame {
 
         } catch (error) {
             console.error('❌ Error loading hand from Firebase:', error);
-            // Fallback: keep existing local hand
         }
     }
 
@@ -334,7 +330,7 @@ class PyramidPokerGame {
                     this.submitAIPlayerHand();
                 }, 2000); // 2 seconds to read the hand details
 
-            }, 2000); // 3 seconds to see the arranged cards
+            }, 1500); // 3 seconds to see the arranged cards
 
         }, 1000); // 1 second thinking time
 
@@ -343,7 +339,7 @@ class PyramidPokerGame {
             const currentPlayer = this.playerManager.getCurrentPlayer();
             currentPlayer.aiTurnInProgress = false;
 
-    }, 2000); // After all your timeouts complete
+    }, 1200); // After all your timeouts complete
 
     }
 

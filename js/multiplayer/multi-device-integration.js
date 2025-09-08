@@ -46,7 +46,7 @@ class MultiDeviceIntegration {
     }
 
     // Add this method to your MultiDeviceIntegration class
-async addPlayerToTable(tableId, playerInfo) {
+    async addPlayerToTable(tableId, playerInfo) {
         try {
             console.log('🔥 Adding player to Firebase table:', tableId, playerInfo);
 
@@ -481,6 +481,10 @@ async addPlayerToTable(tableId, playerInfo) {
         // Use existing startNewGame() but with multiplayer sync
         window.game.startNewGame();
         await this.syncHandsToFirebase();
+
+        // NEW: Load current player's hand from Firebase
+        await window.game.loadCurrentPlayerHandFromFirebase();
+        window.game.loadCurrentPlayerHand();
     }
 
     // Add these methods to your existing MultiDeviceIntegration class
@@ -619,7 +623,50 @@ async addPlayerToTable(tableId, playerInfo) {
         document.getElementById('gameContainer').style.display = 'block';
 
         alert('Left table! (In real version, this would clean up Firebase)');
-}
+    }
+
+
+    // Add Firebase listener for score updates
+    setupScoreListener() {
+        firebase.database().ref(`tables/${currentTable.id}/scores`).on('value', (snapshot) => {
+            const scoresData = snapshot.val() || {};
+            this.updateLocalScoreDisplay(scoresData);
+        });
+    }
+
+    updateLocalScoreDisplay(scoresData) {
+        // Update the local game UI with scores from Firebase
+        Object.entries(scoresData).forEach(([playerName, score]) => {
+            // Update score in your existing game UI
+            if (window.game && window.game.playerManager) {
+                window.game.playerManager.updatePlayerScore(playerName, score);
+            }
+        });
+    }
+
+    // Add to multi-device-integration.js
+    setupHandListener() {
+        const currentUser = firebase.auth().currentUser;
+        const userName = currentUser ? currentUser.displayName || currentUser.email : 'Guest Player';
+
+        firebase.database().ref(`tables/${this.currentTableId}/hands/${userName}`).on('value', (snapshot) => {
+            const handData = snapshot.val();
+            if (handData) {
+                this.updateLocalPlayerHand(handData);
+            }
+        });
+    }
+
+    updateLocalPlayerHand(handData) {
+        // Update the local game with the player's hand from Firebase
+        if (window.game && window.game.playerManager) {
+            // Need to integrate with your existing hand management system
+            // This depends on how your game currently handles player hands
+            console.log('Retrieved hand from Firebase:', handData);
+        }
+    }
+
+
 
     // Cleanup - restore original handlers
     cleanup() {
@@ -674,46 +721,6 @@ class DisconnectionManager {
             this.reconnectionTimers.delete(userId);
             console.log(`✅ ${userId} reconnected - cancelled auto-arrange timer`);
         }
-    }
-}
-
-// Add Firebase listener for score updates
-function setupScoreListener() {
-    firebase.database().ref(`tables/${currentTable.id}/scores`).on('value', (snapshot) => {
-        const scoresData = snapshot.val() || {};
-        updateLocalScoreDisplay(scoresData);
-    });
-}
-
-function updateLocalScoreDisplay(scoresData) {
-    // Update the local game UI with scores from Firebase
-    Object.entries(scoresData).forEach(([playerName, score]) => {
-        // Update score in your existing game UI
-        if (window.game && window.game.playerManager) {
-            window.game.playerManager.updatePlayerScore(playerName, score);
-        }
-    });
-}
-
-// Add to multi-device-integration.js
-function setupHandListener() {
-    const currentUser = firebase.auth().currentUser;
-    const userName = currentUser ? currentUser.displayName || currentUser.email : 'Guest Player';
-
-    firebase.database().ref(`tables/${this.currentTableId}/hands/${userName}`).on('value', (snapshot) => {
-        const handData = snapshot.val();
-        if (handData) {
-            this.updateLocalPlayerHand(handData);
-        }
-    });
-}
-
-function updateLocalPlayerHand(handData) {
-    // Update the local game with the player's hand from Firebase
-    if (window.game && window.game.playerManager) {
-        // Need to integrate with your existing hand management system
-        // This depends on how your game currently handles player hands
-        console.log('Retrieved hand from Firebase:', handData);
     }
 }
 

@@ -204,7 +204,6 @@ function createTableCard(table) {
     const card = document.createElement('div');
     card.className = 'table-card';
 
-
     card.onclick = () => joinTable(table);
     const settings = table.settings;
     // ADD THIS DEBUG BLOCK:
@@ -481,6 +480,12 @@ function startMultiHumanGame() {
     console.log('Starting multi-human game...');
 
     if (tableSettings.gameConnectMode === 'online') {
+        // NEW: Initialize multi-device integration for online multi-human games
+        window.multiDevice = new MultiDeviceIntegration();
+        window.multiDevice.currentTableId = currentTable.id;
+        window.multiDevice.isMultiDevice = true;
+        console.log('🔗 Multi-device integration initialized');
+
         // Set game state in Firebase
         firebase.database().ref(`tables/${currentTable.id}/gameState`).set({
             status: 'starting',
@@ -559,7 +564,8 @@ function launchGameInterface() {
     gameConfig.config.gameMode = tableSettings.gameMode;
 
     // Use resetPlayers() to clear old players and create new ones with correct config
-    if (window.game && window.game.playerManager) {
+    // DON'T reset players for multi-human games - we already set them up manually
+    if (window.game && window.game.playerManager && gameConfig.config.gameMode !== 'multiple-humans') {
         window.game.playerManager.resetPlayers();
     }
 
