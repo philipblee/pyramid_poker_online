@@ -277,7 +277,7 @@
             <!-- Keep your existing buttons unchanged (lines 263-265) -->
             <div class="table-actions">
                 <button class="btn btn-warning" onclick="editSettings()">⚙️ Edit Settings</button>
-                <button class="btn btn-primary" onclick="startGame()">🎯 Start Game</button>
+                <button id="startGameBtn" class="btn btn-primary" onclick="startGame()">🎯 Start Game</button>
                 <button class="btn btn-danger" onclick="leaveTable()">🚪 Leave Table</button>
             </div>
         </div>
@@ -396,6 +396,41 @@
 
 <!-- Near the bottom of game.html, before closing </body> -->
 <script>
+function updateStartGameButton(playerCount) {
+    console.log('🔍 updateStartGameButton called with playerCount:', playerCount);
+
+    const startBtn = document.getElementById('startGameBtn');
+    console.log('🔍 startBtn element found:', !!startBtn);
+
+    if (!startBtn) return;
+
+    const gameMode = tableSettings.gameMode;
+    const minPlayers = tableSettings.minPlayers || 2;
+
+    console.log('🔍 gameMode:', gameMode);
+    console.log('🔍 minPlayers:', minPlayers);
+    console.log('🔍 playerCount >= minPlayers:', playerCount >= minPlayers);
+
+    if (gameMode === 'single-human') {
+        console.log('🔍 Single human mode - enabling button');
+        startBtn.disabled = false;
+        startBtn.textContent = '🎯 Start Game';
+    } else if (gameMode === 'multiple-humans') {
+        if (playerCount >= minPlayers) {
+            console.log('🔍 Multi-human mode - enough players, enabling');
+            startBtn.disabled = false;
+            startBtn.textContent = '🎯 Start Game';
+        } else {
+            console.log('🔍 Multi-human mode - not enough players, disabling');
+            startBtn.disabled = true;
+            startBtn.textContent = `Need ${minPlayers - playerCount} more players`;
+        }
+    }
+
+    console.log('🔍 Final button state - disabled:', startBtn.disabled, 'text:', startBtn.textContent);
+}
+
+
 // Existing game initialization
 window.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Initializing Pyramid Poker...');

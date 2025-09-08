@@ -677,5 +677,45 @@ class DisconnectionManager {
     }
 }
 
+// Add Firebase listener for score updates
+function setupScoreListener() {
+    firebase.database().ref(`tables/${currentTable.id}/scores`).on('value', (snapshot) => {
+        const scoresData = snapshot.val() || {};
+        updateLocalScoreDisplay(scoresData);
+    });
+}
+
+function updateLocalScoreDisplay(scoresData) {
+    // Update the local game UI with scores from Firebase
+    Object.entries(scoresData).forEach(([playerName, score]) => {
+        // Update score in your existing game UI
+        if (window.game && window.game.playerManager) {
+            window.game.playerManager.updatePlayerScore(playerName, score);
+        }
+    });
+}
+
+// Add to multi-device-integration.js
+setupHandListener() {
+    const currentUser = firebase.auth().currentUser;
+    const userName = currentUser ? currentUser.displayName || currentUser.email : 'Guest Player';
+
+    firebase.database().ref(`tables/${this.currentTableId}/hands/${userName}`).on('value', (snapshot) => {
+        const handData = snapshot.val();
+        if (handData) {
+            this.updateLocalPlayerHand(handData);
+        }
+    });
+}
+
+updateLocalPlayerHand(handData) {
+    // Update the local game with the player's hand from Firebase
+    if (window.game && window.game.playerManager) {
+        // Need to integrate with your existing hand management system
+        // This depends on how your game currently handles player hands
+        console.log('Retrieved hand from Firebase:', handData);
+    }
+}
+
 // Export for use in other modules
 window.MultiDeviceIntegration = MultiDeviceIntegration;

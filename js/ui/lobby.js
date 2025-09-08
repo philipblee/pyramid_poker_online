@@ -26,7 +26,9 @@ const defaultTables = [
     {
         id: 1,
         name: '1. Offline vs. 1 AI Opponents - 2 Wilds',
-        settings: { gameMode: 'single-human',
+        settings: {
+                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
+                    gameMode: 'single-human',
                     gameConnectMode: 'offline',
                     gameDeviceMode: 'single-device',
                     computerPlayers: 1,
@@ -39,7 +41,9 @@ const defaultTables = [
     {
         id: 2,
         name: '2. Offline vs. 2 AI Opponents - 1 Wild',
-        settings: { gameMode: 'single-human',
+        settings: {
+                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
+                    gameMode: 'single-human',
                     gameConnectMode: 'offline',
                     gameDeviceMode: 'single-device',
                     computerPlayers: 2,
@@ -52,7 +56,9 @@ const defaultTables = [
     {
         id: 3,
         name: '3. Offline vs 3 AI Opponents - No Wilds',
-        settings: { gameMode: 'single-human',
+        settings: {
+                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
+                    gameMode: 'single-human',
                     gameConnectMode: 'offline',
                     gameDeviceMode: 'single-device',
                     computerPlayers: 5,
@@ -65,7 +71,9 @@ const defaultTables = [
     {
         id: 4,
         name: '4. Offline vs 5 AI Opponents - No Wilds',
-        settings: { gameMode: 'single-human',
+        settings: {
+                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
+                    gameMode: 'single-human',
                     gameConnectMode: 'offline',
                     gameDeviceMode: 'single-device',
                     computerPlayers: 5,
@@ -75,10 +83,12 @@ const defaultTables = [
         icon: '🏓'
     },
 
-        {
+    {
         id: 5,
         name: '5. Offline Challenge - No Wilds',
-        settings: { gameMode: 'single-human',
+        settings: {
+                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
+                    gameMode: 'single-human',
                     gameDeviceMode: 'single-device',
                     gameConnectMode: 'offline',
                     computerPlayers: 5,
@@ -91,7 +101,10 @@ const defaultTables = [
     {
         id: 6,
         name: '6. Online - 2 Wild Card',
-        settings: { gameMode: 'single-human',
+        settings: {
+
+                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
+                    gameMode: 'single-human',
                     gameConnectMode: 'online',
                     gameDeviceMode: 'multi-device',
                     computerPlayers: 2,
@@ -104,7 +117,9 @@ const defaultTables = [
     {
         id: 7,
         name: '7. Online - 2 Wild Card',
-        settings: { gameMode: 'multiple-humans',
+        settings: {
+                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
+                    gameMode: 'multiple-humans',
                     gameConnectMode: 'online',
                     gameDeviceMode: 'multi-device',
                     computerPlayers: 0,
@@ -118,7 +133,9 @@ const defaultTables = [
     {
         id: 8,
         name: '8. Online - 2 Wild Card',
-        settings: { gameMode: 'multiple-humans',
+        settings: {
+                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
+                    gameMode: 'multiple-humans',
                     gameConnectMode: 'online',
                     gameDeviceMode: 'multi-device',
                     computerPlayers: 2,
@@ -131,7 +148,9 @@ const defaultTables = [
     {
         id: 9,
         name: '9. Online - 2 Wild Card',
-        settings: { gameMode: 'multiple-humans',
+        settings: {
+                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
+                    gameMode: 'multiple-humans',
                     gameConnectMode: 'online',
                     gameDeviceMode: 'multi-device',
                     computerPlayers: 5,
@@ -257,42 +276,48 @@ function createCreateTableCard() {
 
 // Join existing table
 function joinTable(table) {
-
-    // ADD DEBUG LOGS:
     console.log('🔍 joinTable called for:', table.name);
-    console.log('🔍 table.settings:', table.settings);
-    console.log('🔍 maxHumanPlayers:', table.settings.maxHumanPlayers);
-    console.log('🔍 humanPlayers:', table.settings.humanPlayers);
 
-    // Check if table is full (applies to ALL table types)
-    const maxHumanPlayers = table.settings.maxHumanPlayers || 1; // Default 1 for single-human
-    const currentHumanPlayers = table.settings.humanPlayers || 0;
+    // Get CURRENT data from Firebase, not stale table data
+    firebase.database().ref(`tables/${table.id}/settings/humanPlayers`).once('value', (snapshot) => {
+        const currentHumanPlayers = snapshot.val() || 0;
+        const maxHumanPlayers = table.settings.maxHumanPlayers || 6;
 
-    console.log('🔍 Calculated - current:', currentHumanPlayers, 'max:', maxHumanPlayers);
-    console.log('🔍 Is full?', currentHumanPlayers >= maxHumanPlayers);
+        console.log('🔍 REAL current players from Firebase:', currentHumanPlayers);
+        // Check if table is full (applies to ALL table types)
+        console.log('🔍 Calculated - current:', currentHumanPlayers, 'max:', maxHumanPlayers);
+        console.log('🔍 Is full?', currentHumanPlayers >= maxHumanPlayers);
+        console.log('🔍 Max players:', maxHumanPlayers);
 
+        if (currentHumanPlayers >= maxHumanPlayers) {
+            alert(`Table "${table.name}" is full (${currentHumanPlayers}/${maxHumanPlayers} players)`);
+            console.log('❌ JOIN BLOCKED - table actually full');
+            return;
+        }
 
-    if (currentHumanPlayers >= maxHumanPlayers) {
-        alert(`Table "${table.name}" is full (${currentHumanPlayers}/${maxHumanPlayers} players)`);
-        return; // Exit early
-    }
+        console.log('✅ JOIN ALLOWED - proceeding with fresh data');
 
-    currentTable = table;
-    tableSettings = { ...table.settings };
+        // NOW proceed with joining...
+        currentTable = table;
+        tableSettings = { ...table.settings };
 
-    console.log('🌐 Joining table:', table.name);
-    console.log('🔧 Debug - table properties:');
-    console.log('gameMode:', table.gameMode);
-    console.log('gameDeviceMode:', table.gameDeviceMode);
-    console.log('gameConnectMode:', table.gameConnectMode);
+        // Initialize the start button state for single-player tables
+        if (table.settings.gameMode === 'single-human') {
+            updateStartGameButton(1); // Single player is always ready
+        } else {
+            updateStartGameButton(0); // Multi-player starts with 0 players
+        }
 
-    // Increment humanPlayers counter for ANY table type
-    firebase.database().ref(`tables/${table.id}/settings/humanPlayers`)
-        .transaction((current) => (current || 0) + 1)
-        .then(() => {
-            console.log('✅ Human player counter incremented');
-        });
+        firebase.database().ref(`tables/${table.id}/settings/humanPlayers`)
+            .transaction((current) => (current || 0) + 1)
+            .then(() => {
+                console.log('✅ Human player counter incremented');
+                table.settings.humanPlayers += 1
+            });
+    updateTableDisplay();
+    showTableScreen();
 
+    });
     // NEW: Check if this is a multi-human table
     if (table.settings.gameMode === 'multiple-humans' &&
         table.settings.gameDeviceMode === 'multi-device' &&
@@ -326,6 +351,7 @@ function joinTable(table) {
 
                 // Set up listener for real-time updates
                 window.multiDeviceIntegration.setupPlayerListListener(table.id, updatePlayerListUI);
+                window.multiDeviceIntegration.setupScoreListener(); // Add this line
             })
 
 
@@ -347,8 +373,7 @@ function joinTable(table) {
         }
     }
 
-    updateTableDisplay();
-    showTableScreen();
+
 }
 
 // Create new table (opens your existing settings modal)
@@ -416,13 +441,24 @@ function startGame() {
 
     console.log('Starting game with aligned settings:', tableSettings);
 
-    // Now tableSettings uses the same names as GameConfig - direct copy!
+    // Apply settings to game config (same for all modes)
     if (game && game.gameConfig) {
         Object.assign(game.gameConfig.config, tableSettings);
         console.log('Applied settings to GameConfig:', game.gameConfig.config);
     }
 
-    // Continue with your existing game start logic
+    // Branch based on game mode
+    if (tableSettings.gameMode === 'single-human') {
+        // Your existing single-human logic
+        startSingleHumanGame();
+    } else if (tableSettings.gameMode === 'multiple-humans') {
+        // New multi-human logic
+        startMultiHumanGame();
+    }
+}
+
+function startSingleHumanGame() {
+    // Move your existing logic here
     if (tableSettings.gameConnectMode === 'online') {
         if (typeof cloudNewGame === 'function') {
             cloudNewGame().then(() => {
@@ -440,6 +476,64 @@ function startGame() {
     }
 }
 
+function startMultiHumanGame() {
+    console.log('Starting multi-human game...');
+
+    if (tableSettings.gameConnectMode === 'online') {
+        // Set game state in Firebase
+        firebase.database().ref(`tables/${currentTable.id}/gameState`).set({
+            status: 'starting',
+            startedAt: Date.now(),
+            currentRound: 1
+        }).then(() => {
+            console.log('Game state initialized for all players');
+
+            // Set up players, then launch
+            setupMultiHumanPlayers().then(() => {
+                launchGameInterface(); // Your existing function
+            });
+        });
+    } else {
+        launchGameInterface();
+    }
+}
+
+function startMultiHumanCloudGame() {
+    // Set game state to "starting" for all players
+    firebase.database().ref(`tables/${currentTable.id}/gameState`).set({
+        status: 'starting',
+        startedAt: Date.now(),
+        currentRound: 1
+    }).then(() => {
+        console.log('Game state initialized for all players');
+
+        // BEFORE launching, set up the players correctly
+        setupMultiHumanPlayers().then(() => {
+            launchGameInterface(); // Your existing function works!
+        });
+    });
+}
+
+async function setupMultiHumanPlayers() {
+    // Get current players from Firebase
+    const playersSnapshot = await firebase.database().ref(`tables/${currentTable.id}/players`).once('value');
+    const playersData = playersSnapshot.val() || {};
+    const playersArray = Object.values(playersData);
+
+    console.log('Setting up multi-human players:', playersArray);
+
+    // Clear existing players and add real players
+    if (window.game && window.game.playerManager) {
+        window.game.playerManager.resetPlayers();
+
+        // Add each real player by name
+        playersArray.forEach((player) => {
+            window.game.playerManager.addPlayer(player.name);
+        });
+
+        console.log(`Added ${playersArray.length} human players to game`);
+    }
+}
 
 // Launch your existing game interface
 function launchGameInterface() {
@@ -786,6 +880,19 @@ function updatePlayerListUI(players) {
     });
 
     console.log('✅ Updated all player slots');
+
+
+    // Update the player count display
+//    const playerCountElement = document.getElementById('currentPlayerCount');
+    if (playerCountElement) {
+        playerCountElement.textContent = players.length;
+    }
+
+    // Update start game button
+    updateStartGameButton(players.length);
+
+    console.log('Updated all player slots');
+
 }
 // Export functions for integration
 window.PyramidPokerLobby = {
