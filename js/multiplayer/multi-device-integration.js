@@ -120,12 +120,7 @@ class MultiDeviceIntegration {
         // Store original handler
         const originalNewGame = newGameBtn.onclick;
 
-        // Configure for multi-device single player (1 human + 5 AI)
-        window.gameConfig.config.gameMode = 'singleplayer';  // Single player mode
-        window.gameConfig.config.computerPlayers = 5;        // 5 AI opponents
-        window.gameConfig.saveToStorage();
-
-        console.log('🎮 Configured for single player vs 5 AI');
+        console.log('🎮 Configured for single player vs AI');
 
         // Replace with enhanced version
         newGameBtn.onclick = async () => {
@@ -141,6 +136,37 @@ class MultiDeviceIntegration {
 
                 // Add: sync dealt hands to Firebase for cloud storage
                 await this.syncHandsToFirebase();
+
+        // Replace with enhanced version
+        newGameBtn.onclick = async () => {
+            try {
+                console.log('🎮 Starting multi-device single player game');
+
+                // Use existing startNewGame() - works perfectly as-is
+                if (originalNewGame) {
+                    originalNewGame();
+                } else {
+                    window.game.startNewGame();
+                }
+
+                // Add: sync dealt hands to Firebase for cloud storage
+                await this.syncHandsToFirebase();
+                console.log('✅ Game started and all hands are synced to cloud/Firebase');
+
+                // ✅ NEW: All players retrieve hands from Firebase (universal source)
+                // In enhanced start button, after retrieve call:
+                await this.retrieveAllHandsFromFirebase();
+                console.log('🔍 After Firebase retrieval - playerHands size:', window.game.playerHands.size);
+                window.game.playerHands.forEach((hand, playerName) => {
+                    console.log(`🔍 ${playerName} has ${hand.cards.length} cards from Firebase`);
+                });
+
+
+            } catch (error) {
+                console.error('❌ Error starting multi-device game:', error);
+                alert('Error starting cloud game. Please try again.');
+            }
+        };
 
                 console.log('✅ Game started and synced to cloud');
 
@@ -183,6 +209,7 @@ class MultiDeviceIntegration {
 
     // Sync all dealt hands to Firebase for cloud storage
     async syncHandsToFirebase() {
+
         if (!this.isMultiDevice || !window.game.playerHands) return;
 
         console.log('☁️ Syncing dealt hands to Firebase...');
@@ -197,14 +224,67 @@ class MultiDeviceIntegration {
             };
         });
 
-        // Store in Firebase
-        await this.tableManager.tablesRef.doc(this.currentTableId).update({
-            'currentGame.dealtHands': handsData,
-            'currentGame.round': window.game.currentRound,
-            'currentGame.status': 'cardsDealt'
-        });
+        // In syncHandsToFirebase(), before the Firebase call:
+        console.log('🔍 About to sync hands to Firebase:', handsData);
+        console.log('🔍 Sample hand cards:', handsData[Object.keys(handsData)[0]]?.cards?.slice(0,2));
+
+        console.log('🔍 currentTableId type:', typeof this.currentTableId);
+        console.log('🔍 currentTableId value:', this.currentTableId);
+
+        // ✅ Correct - actual object
+        // Instead of .update()
+        await this.tableManager.tablesRef.doc(this.currentTableId.toString()).set({
+            'currentGame': {
+                'dealtHands': handsData,
+                'round': window.game.currentRound,
+                'status': 'cardsDealt'
+            }
+        }, { merge: true }); // merge: true will update existing or create new
 
         console.log(`✅ Synced ${Object.keys(handsData).length} hands to Firebase`);
+    }
+
+    async retrieveAllHandsFromFirebase() {
+        if (!this.isMultiDevice || !this.currentTableId) return;
+
+        console.log('☁️ Retrieving all dealt hands from Firebase...');
+
+        try {
+
+            // ✅ Correct - string "6"
+            const tableDoc = await this.tableManager.tablesRef.doc(this.currentTableId.toString()).get();
+
+            const dealtHands = tableDoc.data()?.currentGame?.dealtHands;
+
+            if (!dealtHands) {
+                console.error('❌ No dealt hands found in Firebase');
+                return;
+            }
+
+            // Clear current hands and repopulate from Firebase
+            window.game.playerHands.clear();
+
+            Object.entries(dealtHands).forEach(([playerName, handData]) => {
+                window.game.playerHands.set(playerName, {
+                    cards: handData.cards,        // Direct from Firebase
+                    originalCards: handData.cards, // Same data
+                    back: [],
+                    middle: [],
+                    front: []
+                });
+            });
+
+            console.log(`✅ Retrieved ${Object.keys(dealtHands).length} hands from Firebase`);
+
+        } catch (error) {
+            console.error('❌ Error retrieving hands from Firebase:', error);
+        }
+
+    console.log('🔍 After Firebase retrieval - playerHands size:', window.game.playerHands.size);
+    window.game.playerHands.forEach((hand, playerName) => {
+        console.log(`🔍 ${playerName} has ${hand.cards.length} cards from Firebase`);
+    });
+
     }
 
     // Sync tournament results to Firebase for cloud storage

@@ -207,10 +207,10 @@ function createTableCard(table) {
     card.onclick = () => joinTable(table);
     const settings = table.settings;
     // ADD THIS DEBUG BLOCK:
-    console.log('🔍 Creating card for table:', table.name);
-    console.log('🔍 Table settings:', settings);
-    console.log('🔍 humanPlayers:', settings.humanPlayers);
-    console.log('🔍 maxHumanPlayers:', settings.maxHumanPlayers);
+//    console.log('🔍 Creating card for table:', table.name);
+//    console.log('🔍 Table settings:', settings);
+//    console.log('🔍 humanPlayers:', settings.humanPlayers);
+//    console.log('🔍 maxHumanPlayers:', settings.maxHumanPlayers);
 
     const currentPlayers = settings.humanPlayers || 0;
     const maxPlayers = settings.maxHumanPlayers || 1;
@@ -220,10 +220,10 @@ function createTableCard(table) {
 
     // Set onclick only if table isn't full
     if (!isFull) {
-        console.log('🔍 Adding click handler for table:', table.name);
+//        console.log('🔍 Adding click handler for table:', table.name);
         card.onclick = () => joinTable(table);
     } else {
-        console.log('🔍 Table is full, NOT adding click handler');
+//        console.log('🔍 Table is full, NOT adding click handler');
         card.classList.add('table-full');
         card.style.cursor = 'not-allowed';
     }
@@ -439,6 +439,7 @@ function onSettingsSaved(newSettings) {
 function startGame() {
     if (!currentTable) return;
 
+    console.log('🔥 STARTGAME FUNCTION CALLED!'); // ← Add this
     console.log('🎮 Starting game with table settings:', tableSettings);
 
     // STEP 1: Update the CORRECT gameConfig object
@@ -451,22 +452,30 @@ function startGame() {
     }
 
     // STEP 2: Enhanced branching based on game mode AND connect mode
-    if (tableSettings.gameMode === 'single-human') {
+    if (window.gameConfig.config.gameMode === 'single-human') {
+        console.log('🔥 CALLING startSingleHumanGame()!');
         startSingleHumanGame();
-    } else if (tableSettings.gameMode === 'multiple-humans' && tableSettings.gameConnectMode === 'online') {
-        startMultiHumanGame(); // Your existing multi-device version
-    } else if (tableSettings.gameMode === 'multiple-humans' && tableSettings.gameConnectMode === 'offline') {
-        startMultiHumanOfflineGame(); // New function for offline multi-human
+    } else if (window.gameConfig.config.gameMode === 'multiple-humans' && window.gameConfig.config.gameConnectMode === 'online') {
+        console.log('🔥 CALLING startMultiHumanGame()!');
+        startMultiHumanGame();
+    } else if (window.gameConfig.config.gameMode === 'multiple-humans' && window.gameConfig.config.gameConnectMode === 'offline') {
+        console.log('🔥 CALLING startMultiHumanOfflineGame()!');
+        startMultiHumanOfflineGame();
+    } else {
+        console.log('❌ No matching game mode found');
     }
 }
 
 // Replace the existing startSingleHumanGame() function in lobby.js with this version
 
 async function startSingleHumanGame() {
+
+    console.log('🔥 startSingleHumanGame() CALLED!'); // ← Add this
+
     if (tableSettings.gameConnectMode === 'online') {
-        // Create tableManager with FIRESTORE references (to match syncHandsToFirebase)
+        // Create tableManager and initialize
         const tableManager = {
-            tablesRef: firebase.firestore().collection('tables'), // Firestore collection
+            tablesRef: firebase.firestore().collection('tables'),
             currentTable: currentTable.id,
             currentUser: { id: 'player-1' }
         };
@@ -474,43 +483,25 @@ async function startSingleHumanGame() {
         window.multiDevice = new MultiDeviceIntegration();
         await window.multiDevice.initialize(tableManager);
 
-        console.log('Starting single-human online game');
+        console.log('🎮 Starting single-human online game');
         window.game.startNewGame();
 
-        window.multiDevice.syncHandsToFirebase().then(() => {
-            console.log('Single-human game synced to Firebase');
-            return window.game.loadCurrentPlayerHandFromFirebase();
-        }).then(() => {
-            window.game.loadCurrentPlayerHand();
-            console.log('Single-human hand loaded from Firebase');
-        }).catch(error => {
-            console.error('Firebase operations failed:', error);
-            window.game.loadCurrentPlayerHand();
-        });
+        // ✅ Clean Firebase coordination using multiDevice methods:
+        await window.multiDevice.syncHandsToFirebase();
+        await window.multiDevice.retrieveAllHandsFromFirebase();
+
+        console.log('✅ Single-human game synced and retrieved from Firebase');
+
+        // ✅ MISSING: Continue with normal game flow
+        window.game.loadCurrentPlayerHand(); // Load human player's cards into UI
+        // Or call whatever function starts the card arrangement phase
+        launchGameInterface();
 
     } else {
         launchGameInterface();
     }
 }
 
-function startSingleHumanGame() {
-    // Move your existing logic here
-    if (tableSettings.gameConnectMode === 'online') {
-        if (typeof cloudNewGame === 'function') {
-            cloudNewGame().then(() => {
-                launchGameInterface();
-            }).catch(error => {
-                console.error('Cloud setup failed:', error);
-                alert('Failed to connect to cloud. Try offline mode.');
-            });
-        } else {
-            console.warn('cloudNewGame function not found');
-            launchGameInterface();
-        }
-    } else {
-        launchGameInterface();
-    }
-}
 function startMultiHumanCloudGame() {
     // Set game state to "starting" for all players
     firebase.database().ref(`tables/${currentTable.id}/gameState`).set({
