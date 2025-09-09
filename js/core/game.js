@@ -317,8 +317,11 @@ class PyramidPokerGame {
         }
     }
 
-    handleAITurn() {
+    async handleAITurn() {
         const currentPlayer = this.playerManager.getCurrentPlayer();
+
+        await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
+
         console.log(`🤖 AI ${currentPlayer.name} is thinking...`);
 
         // Step 1: Show AI is thinking (1 second)

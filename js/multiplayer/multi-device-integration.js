@@ -179,31 +179,44 @@ class MultiDeviceIntegration {
 
     // Enhance submit button to sync results
     enhanceSubmitButton() {
+        console.log('🔧 Enhancing submit button...');
         const submitBtn = document.getElementById('submitHand');
-        if (!submitBtn) return;
+        if (!submitBtn) {
+            console.log('❌ Submit button not found!');
+            return;
+        }
+
+        console.log('✅ Found submit button, enhancing...');
 
         // Store original handler
         this.originalSubmitHandler = submitBtn.onclick;
 
-        // Replace with enhanced version
         submitBtn.onclick = async () => {
-            try {
-                console.log('📤 Submitting with cloud sync');
 
-                // Use existing submit logic - works perfectly as-is
+            // Always use the human player for manual clicks
+            const humanPlayer = window.game.players.find(p => !p.isAI);
+            const playerName = humanPlayer ? humanPlayer.name : 'peter';
+
+
+            try {
+
+                console.log(`Storing arrangement for human player: ${playerName}`);
+
+                // Store arrangement
+                await this.storePlayerArrangementToFirebase(playerName);
+
+                // Call original handler
                 if (this.originalSubmitHandler) {
-                    this.originalSubmitHandler();
+                    await this.originalSubmitHandler.call(this);
                 }
 
-                // Add: sync results to Firebase for cloud storage
+                // Sync results
                 await this.syncResultsToFirebase();
 
-                console.log('✅ Results submitted and synced to cloud');
-
             } catch (error) {
-                console.error('❌ Error syncing results:', error);
-                // Don't block the game, just log the error
+                console.error('Error:', error);
             }
+
         };
     }
 
@@ -287,6 +300,29 @@ class MultiDeviceIntegration {
 
     }
 
+    async storePlayerArrangementToFirebase(playerName) {
+        console.log(`☁️ Storing player arrangement to Firebase for: ${playerName}`);
+
+        const playerHand = window.game.playerHands.get(playerName); // Use passed parameter
+
+        const arrangementData = {
+            [playerName]: { // Use passed parameter
+                back: playerHand.back,
+                middle: playerHand.middle,
+                front: playerHand.front,
+                timestamp: Date.now()
+            }
+        };
+
+        await this.tableManager.tablesRef.doc(this.currentTableId.toString()).set({
+            'currentGame': {
+                'arrangements': arrangementData
+            }
+        }, { merge: true });
+
+        console.log(`✅ Stored arrangement for ${playerName}`);
+    }
+
     // Sync tournament results to Firebase for cloud storage
     async syncResultsToFirebase() {
         if (!this.isMultiDevice) return;
@@ -297,7 +333,7 @@ class MultiDeviceIntegration {
         const results = this.extractGameResults();
 
         // Store in Firebase
-        await this.tableManager.tablesRef.doc(this.currentTableId).update({
+        await this.tableManager.tablesRef.doc(this.currentTableId.toString()).update({
             'currentGame.results': results,
             'currentGame.completedAt': Date.now(),
             'currentGame.status': 'completed'
