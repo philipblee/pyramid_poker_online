@@ -300,6 +300,36 @@ class MultiDeviceIntegration {
 
     }
 
+
+    async retrieveAllArrangementsFromFirebase() {
+        console.log('☁️ Retrieving all arrangements from Firebase...');
+
+        try {
+            const tableDoc = await this.tableManager.tablesRef.doc(this.currentTableId.toString()).get();
+            const arrangements = tableDoc.data()?.currentGame?.arrangements;
+
+            if (!arrangements) {
+                console.log('⚠️ No arrangements found in Firebase');
+                return;
+            }
+
+            // Update local playerHands with Firebase arrangements
+            Object.entries(arrangements).forEach(([playerName, arrangement]) => {
+                const playerHand = window.game.playerHands.get(playerName);
+                if (playerHand) {
+                    playerHand.back = arrangement.back;
+                    playerHand.middle = arrangement.middle;
+                    playerHand.front = arrangement.front;
+                }
+            });
+
+            console.log(`✅ Retrieved ${Object.keys(arrangements).length} arrangements from Firebase`);
+
+        } catch (error) {
+            console.error('❌ Error retrieving arrangements:', error);
+        }
+    }
+
     async storePlayerArrangementToFirebase(playerName) {
         console.log(`☁️ Storing player arrangement to Firebase for: ${playerName}`);
 
