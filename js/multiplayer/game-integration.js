@@ -293,23 +293,24 @@ class GameIntegration {
         console.log('✅ Arrangement submitted to Firebase');
     }
 
-// Run existing tournament scoring system
-async runExistingTournamentScoring() {
-    console.log('🏆 Running existing tournament scoring');
+    // Run existing tournament scoring system
+    async runExistingTournamentScoring() {
+        console.log('🏆 Running existing tournament scoring');
 
-    // Phase 3: Retrieve all arrangements before scoring
-    if (this.isMultiDevice) {
-        await this.retrieveAllArrangementsFromFirebase();
+        // Phase 3: Retrieve all arrangements before scoring
+        if (this.isMultiDevice) {
+            await this.retrieveAllArrangementsFromFirebase();
+        }
+
+        // Trigger existing scoring system
+        if (window.game && typeof window.game.calculateScores === 'function') {
+            window.game.calculateScores();
+        } else {
+            // Fallback: trigger submit logic
+            this.triggerExistingScoring();
+        }
     }
 
-    // Trigger existing scoring system
-    if (window.game && typeof window.game.calculateScores === 'function') {
-        window.game.calculateScores();
-    } else {
-        // Fallback: trigger submit logic
-        this.triggerExistingScoring();
-    }
-}
     // Trigger existing scoring logic
     triggerExistingScoring() {
         // Mark all players as submitted for existing system

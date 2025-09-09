@@ -106,6 +106,9 @@ class MultiDeviceIntegration {
         // Override submit button to sync results
         this.enhanceSubmitButton();
 
+        // Override calculateScores to retrieve from Firebase
+        this.enhanceCalculateScores();
+
         // Add multi-device status indicator
         this.addMultiDeviceStatus();
 
@@ -218,6 +221,43 @@ class MultiDeviceIntegration {
             }
 
         };
+    }
+
+    // this handles retrieve arrangements from Firebase
+    enhanceCalculateScores() {
+        if (!window.game || typeof window.game.calculateScores !== 'function') return;
+
+        console.log('🔧 Enhancing calculateScores for Firebase coordination...');
+
+        // Store original handler
+        this.originalCalculateScores = window.game.calculateScores;
+
+        // Replace with enhanced version
+        window.game.calculateScores = async () => {
+            console.log('🎯 Enhanced calculateScores called!');
+
+            try {
+                // Phase 3: Retrieve all arrangements before scoring
+                if (this.isMultiDevice) {
+                    await this.retrieveAllArrangementsFromFirebase();
+                }
+
+                // Call original calculateScores
+                if (this.originalCalculateScores) {
+                    this.originalCalculateScores.call(window.game);
+                }
+
+            } catch (error) {
+                console.error('❌ Error in enhanced calculateScores:', error);
+
+                // Fallback to original on error
+                if (this.originalCalculateScores) {
+                    this.originalCalculateScores.call(window.game);
+                }
+            }
+        };
+
+        console.log('✅ calculateScores enhanced for Firebase coordination');
     }
 
     // Sync all dealt hands to Firebase for cloud storage

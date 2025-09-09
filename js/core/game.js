@@ -335,11 +335,29 @@ class PyramidPokerGame {
                 // Update display so human can see AI's hand
                 this.validateHands(); // This updates the UI with hand strengths and colors
 
-                // Step 3: Let player read the hand details (2 more seconds)
-                setTimeout(() => {
-                    console.log(`✅ AI ${currentPlayer.name} submitting hand...`);
-                    this.submitAIPlayerHand();
-                }, 2000); // 2 seconds to read the hand details
+            // Step 3: Let player read the hand details (2 more seconds)
+            setTimeout(async () => {
+                console.log(`✅ AI ${currentPlayer.name} submitting hand...`);
+                this.submitAIPlayerHand();
+
+                // Store AI arrangement to Firebase
+                if (window.multiDevice && window.multiDevice.isMultiDevice) {
+                    await window.multiDevice.storePlayerArrangementToFirebase(currentPlayer.name);
+                }
+            }, 2000);
+
+//
+//
+//                setTimeout(() => {
+//                    console.log(`✅ AI ${currentPlayer.name} submitting hand...`);
+//                    this.submitAIPlayerHand();
+//
+//                    // Store AI arrangement to Firebase
+//                    if (window.multiDevice && window.multiDevice.isMultiDevice) {
+//                        await window.multiDevice.storePlayerArrangementToFirebase(currentPlayer.name);
+//                    }
+//
+//                }, 2000); // 2 seconds to read the hand details
 
             }, 1500); // 3 seconds to see the arranged cards
 
