@@ -439,21 +439,57 @@ function onSettingsSaved(newSettings) {
 function startGame() {
     if (!currentTable) return;
 
-    console.log('Starting game with aligned settings:', tableSettings);
+    console.log('🎮 Starting game with table settings:', tableSettings);
 
-    // Apply settings to game config (same for all modes)
-    if (game && game.gameConfig) {
-        Object.assign(game.gameConfig.config, tableSettings);
-        console.log('Applied settings to GameConfig:', game.gameConfig.config);
+    // STEP 1: Update the CORRECT gameConfig object
+    if (window.gameConfig) {
+        Object.assign(window.gameConfig.config, tableSettings);
+        window.gameConfig.saveToStorage();
+        console.log('✅ Applied settings to window.gameConfig:', window.gameConfig.config);
+    } else {
+        console.error('❌ window.gameConfig not found!');
     }
 
-    // Branch based on game mode
+    // STEP 2: Enhanced branching based on game mode AND connect mode
     if (tableSettings.gameMode === 'single-human') {
-        // Your existing single-human logic
         startSingleHumanGame();
-    } else if (tableSettings.gameMode === 'multiple-humans') {
-        // New multi-human logic
-        startMultiHumanGame();
+    } else if (tableSettings.gameMode === 'multiple-humans' && tableSettings.gameConnectMode === 'online') {
+        startMultiHumanGame(); // Your existing multi-device version
+    } else if (tableSettings.gameMode === 'multiple-humans' && tableSettings.gameConnectMode === 'offline') {
+        startMultiHumanOfflineGame(); // New function for offline multi-human
+    }
+}
+
+// Replace the existing startSingleHumanGame() function in lobby.js with this version
+
+async function startSingleHumanGame() {
+    if (tableSettings.gameConnectMode === 'online') {
+        // Create tableManager with FIRESTORE references (to match syncHandsToFirebase)
+        const tableManager = {
+            tablesRef: firebase.firestore().collection('tables'), // Firestore collection
+            currentTable: currentTable.id,
+            currentUser: { id: 'player-1' }
+        };
+
+        window.multiDevice = new MultiDeviceIntegration();
+        await window.multiDevice.initialize(tableManager);
+
+        console.log('Starting single-human online game');
+        window.game.startNewGame();
+
+        window.multiDevice.syncHandsToFirebase().then(() => {
+            console.log('Single-human game synced to Firebase');
+            return window.game.loadCurrentPlayerHandFromFirebase();
+        }).then(() => {
+            window.game.loadCurrentPlayerHand();
+            console.log('Single-human hand loaded from Firebase');
+        }).catch(error => {
+            console.error('Firebase operations failed:', error);
+            window.game.loadCurrentPlayerHand();
+        });
+
+    } else {
+        launchGameInterface();
     }
 }
 
@@ -475,35 +511,6 @@ function startSingleHumanGame() {
         launchGameInterface();
     }
 }
-
-function startMultiHumanGame() {
-    console.log('Starting multi-human game...');
-
-    if (tableSettings.gameConnectMode === 'online') {
-        // NEW: Initialize multi-device integration for online multi-human games
-        window.multiDevice = new MultiDeviceIntegration();
-        window.multiDevice.currentTableId = currentTable.id;
-        window.multiDevice.isMultiDevice = true;
-        console.log('🔗 Multi-device integration initialized');
-
-        // Set game state in Firebase
-        firebase.database().ref(`tables/${currentTable.id}/gameState`).set({
-            status: 'starting',
-            startedAt: Date.now(),
-            currentRound: 1
-        }).then(() => {
-            console.log('Game state initialized for all players');
-
-            // Set up players, then launch
-            setupMultiHumanPlayers().then(() => {
-                launchGameInterface(); // Your existing function
-            });
-        });
-    } else {
-        launchGameInterface();
-    }
-}
-
 function startMultiHumanCloudGame() {
     // Set game state to "starting" for all players
     firebase.database().ref(`tables/${currentTable.id}/gameState`).set({

@@ -130,9 +130,6 @@ class PyramidPokerGame {
         if (window.gameConfig) {
             const targetPlayerCount = 1 + window.gameConfig.config.computerPlayers; // 1 human + N AI
 
-//            // Ensure we have the right number of players
-//            this.playerManager.setPlayerCount(targetPlayerCount, window.gameConfig.config.computerPlayers);
-
             console.log(`🎮 Configured for ${targetPlayerCount} players (1 human + ${window.gameConfig.config.computerPlayers} AI)`);
         }
 
@@ -273,6 +270,17 @@ class PyramidPokerGame {
 
     // Load current player's hand from Firebase into local playerHands Map
     async loadCurrentPlayerHandFromFirebase() {
+            console.log('🔧 DEBUG: Firebase loading function called');
+
+        if (!window.multiDevice?.isMultiDevice || !window.multiDevice.currentTableId) {
+            console.log('🔧 DEBUG: Exiting early - multiDevice check failed');
+            console.log('isMultiDevice:', window.multiDevice?.isMultiDevice);
+            console.log('currentTableId:', window.multiDevice.currentTableId);
+            return;
+        }
+
+
+
         if (!window.multiDevice?.isMultiDevice || !window.multiDevice.currentTableId) return;
 
         try {
