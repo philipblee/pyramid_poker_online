@@ -551,6 +551,56 @@ function startMultiHumanCloudGame() {
     });
 }
 
+function updateStartGameButtonForOwnership(playerCount, playersArray) {
+    console.log('🔍 updateStartGameButtonForOwnership called with:', playerCount, playersArray);
+
+    const startBtn = document.getElementById('startGameBtn') ||
+                    document.querySelector('button[onclick*="startGame"]') ||
+                    document.getElementById('startGame');
+
+    // Safety checks
+    if (!startBtn) {
+        console.log('🔍 No start button found');
+        return;
+    }
+
+    if (!playersArray || !Array.isArray(playersArray)) {
+        console.log('🔍 No valid playersArray provided:', playersArray);
+        return;
+    }
+
+    // Get current user
+    const currentUser = firebase.auth().currentUser;
+    const currentUserName = currentUser ?
+        currentUser.displayName || currentUser.email || 'Anonymous Player' :
+        'Guest Player';
+
+    console.log('🔍 Current user name:', currentUserName);
+    console.log('🔍 Players array:', playersArray);
+
+    // Find current user in players array
+    const currentPlayerIndex = playersArray.findIndex(player => player.name === currentUserName);
+    const isFirstPlayer = currentPlayerIndex === 0;
+
+    console.log('🔍 Current player index:', currentPlayerIndex, 'isFirstPlayer:', isFirstPlayer);
+
+    if (playerCount >= 2) {
+        if (isFirstPlayer) {
+            // First player - can start game
+            startBtn.disabled = false;
+            startBtn.textContent = '👑 Start Game';
+            startBtn.title = 'You are the table owner - start when ready';
+            console.log('🔍 Set as table owner');
+        } else {
+            // Other players - cannot start game
+            startBtn.disabled = true;
+            startBtn.textContent = 'Waiting for Owner';
+            startBtn.title = 'Only the first player can start the game';
+            console.log('🔍 Set as regular player');
+        }
+    }
+}
+
 async function setupMultiDeviceMultiHuman() {
     console.log('🌐 Setting up multi-device multi-human mode');
 
@@ -1014,6 +1064,11 @@ function updatePlayerListUI(players) {
     updateStartGameButton(players.length);
 
     console.log('Updated all player slots');
+
+    // In your updatePlayerListUI function, add this at the end:
+    if (typeof updateStartGameButtonForOwnership === 'function') {
+        updateStartGameButtonForOwnership(players ? players.length : 0, players);
+    }
 
 }
 // Export functions for integration
