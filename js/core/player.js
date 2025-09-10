@@ -67,19 +67,21 @@ class PlayerManager {
             console.log(`Auto-added single player mode: 1 human + ${config.computerPlayers} AI players (${this.players.length} total)`);
         } else {
             // Multiplayer mode - create default human players
-            const defaultPlayers = ['Player 1', 'Player 2'];
+            if (config.gameDeviceMode === 'single-device'){
 
-            defaultPlayers.forEach(playerName => {
-                this.players.push({
-                    name: playerName,
-                    id: Date.now() + Math.random(),
-                    ready: false,
-                    type: 'human'
+                const defaultPlayers = ['Player 1', 'Player 2'];
+
+                defaultPlayers.forEach(playerName => {
+                    this.players.push({
+                        name: playerName,
+                        id: Date.now() + Math.random(),
+                        ready: false,
+                        type: 'human'
+                    });
+                    this.scores.set(playerName, 0);
                 });
-                this.scores.set(playerName, 0);
-            });
 
-            console.log('Auto-added default players:', defaultPlayers);
+            console.log('Auto-added default players:', defaultPlayers);}
         }
     }
 
