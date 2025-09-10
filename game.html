@@ -467,6 +467,16 @@ window.addEventListener('DOMContentLoaded', async () => {
         console.log('⚠️ netEV Lookup Table failed to load');
     }
 
+    // Remove firebase players from tables 6 and 7 so lobby tables cleared
+<!--    firebase.database().ref(`tables/6`).remove()-->
+<!--        .then(() => {-->
+<!--            console.log('Entire table 6 cleared');-->
+<!--        });-->
+
+<!--    firebase.database().ref(`tables/7`).remove()-->
+<!--    .then(() => {-->
+<!--        console.log('Entire table 7 cleared');-->
+<!--    });-->
 
 });
 </script>
@@ -487,6 +497,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     <!-- Login Modal -->
     <script src="js/multiplayer/game-state-manager.js"></script>
+    <script src="js/multiplayer/table-owner-manager.js"></script>
+    <script src="js/multiplayer/game-launcher.js"></script>
     <script src="js/ui/lobby.js"></script>
     <script src="js/ui/login-modal.js"></script>
 
