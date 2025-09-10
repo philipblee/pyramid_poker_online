@@ -352,6 +352,9 @@ function joinTable(table) {
                 // Set up listener for real-time updates
                 window.multiDeviceIntegration.setupPlayerListListener(table.id, updatePlayerListUI);
                 window.multiDeviceIntegration.setupScoreListener(); // Add this line
+
+                    // NEW: Add table state listener
+                  window.multiDeviceIntegration.setupTableStateListener(table.id, handleTableStateChange);
             })
 
 
@@ -372,8 +375,36 @@ function joinTable(table) {
             playerSection.style.display = 'none';
         }
     }
+}
 
+// Add this function (can go in your main game file or wherever your joinTable function is)
+function handleTableStateChange(tableState) {
+    console.log('🎮 Handling table state change:', tableState);
 
+    switch(tableState) {
+        case TABLE_STATES.DEALING:
+            console.log('🎮 Game started! Moving to dealing phase...');
+            transitionFromLobbyToDealing();
+            break;
+
+        case TABLE_STATES.PLAYING:
+            console.log('🎮 Cards dealt! Players can now arrange hands...');
+            transitionToPlayingPhase();
+            break;
+
+        case TABLE_STATES.ALL_SUBMITTED:
+            console.log('🎮 All players submitted! Moving to scoring...');
+            transitionToScoringPhase();
+            break;
+
+        case TABLE_STATES.SCORING:
+            console.log('🎮 Showing scores...');
+            // Handle scoring display
+            break;
+
+        default:
+            console.log('🎮 Unknown table state:', tableState);
+    }
 }
 
 // Create new table (opens your existing settings modal)
@@ -456,8 +487,8 @@ function startGame() {
         console.log('🔥 CALLING startSingleHumanGame()!');
         startSingleHumanGame();
     } else if (window.gameConfig.config.gameMode === 'multiple-humans' && window.gameConfig.config.gameConnectMode === 'online') {
-        console.log('🔥 CALLING startMultiHumanGame()!');
-        startMultiHumanGame();
+        console.log('🔥 CALLING startMultiHumanCloudGame()!');
+        startMultiHumanCloudGame();
     } else if (window.gameConfig.config.gameMode === 'multiple-humans' && window.gameConfig.config.gameConnectMode === 'offline') {
         console.log('🔥 CALLING startMultiHumanOfflineGame()!');
         startMultiHumanOfflineGame();
@@ -503,39 +534,81 @@ async function startSingleHumanGame() {
 }
 
 function startMultiHumanCloudGame() {
-    // Set game state to "starting" for all players
-    firebase.database().ref(`tables/${currentTable.id}/gameState`).set({
-        status: 'starting',
-        startedAt: Date.now(),
+    console.log('🚀 Starting multi-human cloud game for table:', currentTable.id);
+
+    // Write to tableState to match your listener
+    firebase.database().ref(`tables/${currentTable.id}`).update({
+        tableState: TABLE_STATES.DEALING,
+        gameStarted: Date.now(),
         currentRound: 1
     }).then(() => {
-        console.log('Game state initialized for all players');
+        console.log('✅ Table state set to DEALING - all players should be notified');
 
-        // BEFORE launching, set up the players correctly
-        setupMultiHumanPlayers().then(() => {
-            launchGameInterface(); // Your existing function works!
+        // Use the new multi-device setup
+        setupMultiDeviceMultiHuman().then(() => {
+            launchGameInterface();
         });
     });
 }
 
-async function setupMultiHumanPlayers() {
-    // Get current players from Firebase
-    const playersSnapshot = await firebase.database().ref(`tables/${currentTable.id}/players`).once('value');
-    const playersData = playersSnapshot.val() || {};
-    const playersArray = Object.values(playersData);
+async function setupMultiDeviceMultiHuman() {
+    console.log('🌐 Setting up multi-device multi-human mode');
 
-    console.log('Setting up multi-human players:', playersArray);
+    // Get the current user info
+    const currentUser = firebase.auth().currentUser;
+    const userName = currentUser ?
+        currentUser.displayName || currentUser.email || 'Anonymous Player' :
+        'Guest Player';
 
-    // Clear existing players and add real players
+    console.log('🎮 Setting up local player:', userName);
+
+    // Clear existing players and add ONLY the current player
     if (window.game && window.game.playerManager) {
         window.game.playerManager.resetPlayers();
 
-        // Add each real player by name
-        playersArray.forEach((player) => {
-            window.game.playerManager.addPlayer(player.name);
-        });
+        // Add only THIS device's player
+        window.game.playerManager.addPlayer(userName, true); // true = isHuman
 
-        console.log(`Added ${playersArray.length} human players to game`);
+        console.log(`✅ Added current player (${userName}) to this device`);
+        console.log('🌐 Other players will be managed by their own devices via Firebase');
+    }
+
+    return Promise.resolve();
+}
+
+async function setupMultiHumanPlayers() {
+    console.log('🌐 Setting up players for multi-device mode...');
+
+    // Get current user info to identify THIS player
+    const currentUser = firebase.auth().currentUser;
+    const currentUserName = currentUser ?
+        currentUser.displayName || currentUser.email || 'Anonymous Player' :
+        'Guest Player';
+
+    console.log('🎮 Current user:', currentUserName);
+
+    if (window.game && window.game.playerManager) {
+        // Clear any existing players
+        window.game.playerManager.resetPlayers();
+
+        // Add ONLY the current player to this device
+        // Other devices will manage their own players
+        window.game.playerManager.addPlayer(currentUserName, true); // true = isHuman
+
+        console.log(`✅ Added current player "${currentUserName}" to this device`);
+        console.log('🌐 Other players will be managed by their own devices via Firebase');
+
+        // Get total player count for game setup
+        const playersSnapshot = await firebase.database().ref(`tables/${currentTable.id}/players`).once('value');
+        const playersData = playersSnapshot.val() || {};
+        const totalPlayers = Object.keys(playersData).length;
+
+        console.log(`📊 Total players in game: ${totalPlayers}`);
+        console.log(`🖥️ This device manages: 1 player (${currentUserName})`);
+
+        // Update game config to reflect multi-device setup
+        gameConfig.config.computerPlayers = 0; // No AI needed
+        gameConfig.config.totalPlayers = totalPlayers; // For reference
     }
 }
 
@@ -551,10 +624,7 @@ function launchGameInterface() {
     gameConfig.config.gameConnectMode = tableSettings.gameConnectMode;
     gameConfig.config.gameDeviceMode = tableSettings.gameDeviceMode;
     gameConfig.config.gameVariant = tableSettings.gameVariant;
-    console.log('Before sync - gameConfig.computerPlayers:', gameConfig.config.computerPlayers);
     gameConfig.config.computerPlayers = tableSettings.computerPlayers;
-    console.log('After sync - gameConfig.computerPlayers:', gameConfig.config.computerPlayers);
-//    gameConfig.config.computerPlayers = tableSettings.computerPlayers;
     gameConfig.config.wildCardCount = tableSettings.wildCardCount;
     gameConfig.config.deckCount = tableSettings.deckCount;
     gameConfig.config.winProbabilityMethod = tableSettings.winProbabilityMethod;
@@ -585,6 +655,53 @@ function launchGameInterface() {
     }
 }
 
+function transitionFromLobbyToDealing() {
+    console.log('🎮 Transitioning from lobby to dealing phase...');
+
+    // Hide lobby UI
+    const lobbyView = document.getElementById('lobbyView') ||
+                     document.querySelector('.lobby-container') ||
+                     document.querySelector('.table-selection');
+
+    if (lobbyView) {
+        lobbyView.style.display = 'none';
+        console.log('✅ Lobby view hidden');
+    }
+
+    // Show game UI
+    const gameView = document.getElementById('gameView') ||
+                     document.querySelector('.game-area') ||
+                     document.getElementById('gameArea');
+
+    if (gameView) {
+        gameView.style.display = 'block';
+        console.log('✅ Game view shown');
+    }
+
+    // Update status
+    const statusElement = document.getElementById('status');
+    if (statusElement) {
+        statusElement.textContent = 'Game started! Cards are being dealt...';
+    }
+
+    // Trigger the game start for this device
+    if (typeof launchGameInterface === 'function') {
+        console.log('🚀 Launching game interface...');
+        launchGameInterface();
+    }
+
+    console.log('✅ Transition complete - Player should see game interface');
+}
+
+function transitionToPlayingPhase() {
+    console.log('🎮 Transitioning to playing phase...');
+    // TODO: Enable game controls, show "arrange your cards" message
+}
+
+function transitionToScoringPhase() {
+    console.log('🎮 Transitioning to scoring phase...');
+    // TODO: Show scoring results
+}
 
 // Leave table
 function leaveTable() {

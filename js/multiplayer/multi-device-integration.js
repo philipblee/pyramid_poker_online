@@ -26,6 +26,28 @@ class MultiDeviceIntegration {
         await this.setupTableListener();
     }
 
+    // state listener
+    setupTableStateListener(tableId, callback) {
+        console.log('🔥 Setting up table state listener for table:', tableId);
+
+        // Reference to the table's state
+        const tableStateRef = firebase.database().ref(`tables/${tableId}/tableState`);
+
+        // Listen for changes
+        this.tableStateListener = tableStateRef.on('value', (snapshot) => {
+            const tableState = snapshot.val();
+            console.log('🔥 Table state updated:', tableState);
+
+            if (tableState) {
+                callback(tableState);
+            }
+        });
+
+        // Store reference to remove listener later
+        this.currentTableStateRef = tableStateRef;
+    }
+
+    // list listener
     setupPlayerListListener(tableId, callback) {
         console.log('🔥 Setting up player list listener for table:', tableId);
 
