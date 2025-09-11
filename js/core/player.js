@@ -67,7 +67,7 @@ class PlayerManager {
             console.log(`Auto-added single player mode: 1 human + ${config.computerPlayers} AI players (${this.players.length} total)`);
         } else {
             // Multiplayer mode - create default human players
-            if (config.gameDeviceMode === 'multi-device'){
+            if (config.gameDeviceMode === 'single-device'){
 
                 const defaultPlayers = ['Player 1', 'Player 2'];
 
@@ -152,9 +152,22 @@ class PlayerManager {
         return scoreMap;
     }
 
-    validateMinimumPlayers() {
-        if (this.players.length < 2) {
-            throw new Error('Need at least 2 players to start!');
+    async validateMinimumPlayers() {
+        const isMultiDevice = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
+
+        if (isMultiDevice) {
+            // Get shared player count from Firebase
+            const snapshot = await firebase.database().ref(`tables/${currentTable.id}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`).once('value');
+            const playerCount = snapshot.val() || 0;
+
+            if (playerCount < 2) {
+                throw new Error(`Need at least 2 players to start! Currently have ${playerCount} players.`);
+            }
+        } else {
+            // Single-device validation
+            if (this.players.length < 2) {
+                throw new Error('Need at least 2 players to start in validateMinimumPlayers!');
+            }
         }
     }
 
