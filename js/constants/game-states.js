@@ -15,7 +15,8 @@ const TABLE_STATES = {
     ALL_SUBMITTED: 'all_submitted',
     SCORING: 'scoring',
     ROUND_COMPLETE: 'round_complete',
-    TOURNAMENT_COMPLETE: 'tournament_complete'
+    TOURNAMENT_COMPLETE: 'tournament_complete',
+    NUM_HUMAN_PLAYERS: 'num_human_players'  // NEW: Shared player count
 };
 
 // Export for use in other modules

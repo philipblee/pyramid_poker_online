@@ -67,7 +67,7 @@ class PlayerManager {
             console.log(`Auto-added single player mode: 1 human + ${config.computerPlayers} AI players (${this.players.length} total)`);
         } else {
             // Multiplayer mode - create default human players
-            if (config.gameDeviceMode === 'single-device'){
+            if (config.gameDeviceMode === 'multi-device'){
 
                 const defaultPlayers = ['Player 1', 'Player 2'];
 
@@ -160,9 +160,17 @@ class PlayerManager {
 
     ensurePlayersExist() {
         if (this.players.length === 0) {
-            console.log('No players found - adding default players for testing');
-            this.addDefaultPlayers();
-            return true; // Indicates players were auto-added
+            // Check if we're in multi-device mode - don't add test players
+            const isMultiDevice = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
+
+            if (isMultiDevice) {
+                console.log('🌐 Multi-device mode - not adding default test players, using real players from Firebase');
+                return false; // Don't auto-add players in multi-device
+            } else {
+                console.log('No players found - adding default players for testing');
+                this.addDefaultPlayers();
+                return true; // Indicates players were auto-added
+            }
         }
         return false;
     }

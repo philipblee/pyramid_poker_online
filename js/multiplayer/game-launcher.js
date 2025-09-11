@@ -103,6 +103,8 @@ async function setupMultiDeviceMultiHuman() {
         console.log('🌐 Other players will be managed by their own devices via Firebase');
     }
 
+    console.log('✅ Multi-device multi-human setup complete with submission coordination');
+
     return Promise.resolve();
 }
 

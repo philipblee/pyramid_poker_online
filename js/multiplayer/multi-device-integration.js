@@ -3,7 +3,29 @@
 
 // Enhanced MultiDeviceIntegration with Table Management
 class MultiDeviceIntegration {
-    constructor() {
+    constructor(tableId = null, tableManager = null) {
+
+        console.log('🔧 MultiDeviceIntegration constructor called');
+        console.log('  tableId:', tableId);
+        console.log('  tableManager:', tableManager);
+
+        this.currentTableId = tableId;
+        this.tableManager = tableManager;
+
+        // Debug the isMultiDevice setting
+        console.log('  window.gameConfig exists:', !!window.gameConfig);
+        console.log('  window.gameConfig:', window.gameConfig);
+        console.log('  gameConfig.config:', window.gameConfig?.config);
+        console.log('  gameDeviceMode value:', window.gameConfig?.config?.gameDeviceMode);
+        console.log('  gameDeviceMode type:', typeof window.gameConfig?.config?.gameDeviceMode);
+        console.log('  comparison result:', window.gameConfig?.config?.gameDeviceMode === 'multi-device');
+
+        this.isMultiDevice = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
+        console.log('  final isMultiDevice:', this.isMultiDevice);
+
+//        this.currentTableId = tableId;
+//        this.tableManager = tableManager;
+//        this.isMultiDevice = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
         // ... existing properties
         this.playersData = new Map(); // Track all players
         this.submissionTracker = new Map(); // Track who submitted
@@ -41,10 +63,18 @@ class MultiDeviceIntegration {
             if (tableState) {
                 callback(tableState);
             }
-        });
 
         // Store reference to remove listener later
         this.currentTableStateRef = tableStateRef;
+
+        // In setupTableStateListener
+        firebase.database().ref(`tables/${tableId}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`)
+            .on('value', (snapshot) => {
+                const playerCount = snapshot.val() || 0;
+                console.log(`🔍 Shared player count: ${playerCount}`);
+                updateStartGameButton(playerCount);
+            });
+        });
     }
 
     // list listener
@@ -105,9 +135,8 @@ class MultiDeviceIntegration {
         });
 
         // Check if all players submitted
-        await this.checkAllSubmitted();
+        await this.checkAllPlayersSubmitted();
     }
-
 
     // Initialize multi-device mode with table
     async initialize(tableManager) {
@@ -120,21 +149,215 @@ class MultiDeviceIntegration {
         this.setupMultiDeviceEnhancements();
     }
 
+    // Check if all players have submitted their arrangements
+    async checkAllPlayersSubmitted() {
+        if (!this.isMultiDevice) return;
+
+        console.log('🔍 Checking if all players have submitted...');
+
+        try {
+            // Get current table data
+            const tableDoc = await this.tableManager.tablesRef.doc(this.currentTableId.toString()).get();
+            const tableData = tableDoc.data();
+
+            if (!tableData) {
+                console.log('❌ No table data found');
+                return;
+            }
+
+            // Get total players in the table
+//            const totalPlayers = tableData.players ? Object.keys(tableData.players).length : 0;
+            const totalPlayers = 2; // Temporary fix for testing
+            console.log(`👥 Total players in table: ${totalPlayers}`);
+
+
+            // Get submitted arrangements
+            const arrangements = tableData.currentGame?.arrangements || {};
+            const submittedCount = Object.keys(arrangements).length;
+            console.log(`📝 Players submitted: ${submittedCount}/${totalPlayers}`);
+
+            // Check if all players have submitted
+            if (submittedCount >= totalPlayers && totalPlayers > 1) {
+                console.log('🎉 All players have submitted! Transitioning to ALL_SUBMITTED state...');
+                await this.transitionToAllSubmitted();
+            } else {
+                console.log(`⏳ Waiting for more submissions (${submittedCount}/${totalPlayers})`);
+                // Update UI to show waiting status
+                this.updateSubmissionStatus(submittedCount, totalPlayers);
+            }
+
+        } catch (error) {
+            console.error('❌ Error checking submissions:', error);
+        }
+    }
+
+    // Transition to ALL_SUBMITTED state
+    async transitionToAllSubmitted() {
+        console.log('🚀 Transitioning to ALL_SUBMITTED state...');
+
+        try {
+            // Update table state in Realtime Database
+            await this.tableManager.tablesRef.doc(this.currentTableId.toString()).update({
+                'currentGame.status': 'ALL_SUBMITTED',
+                'currentGame.allSubmittedAt': Date.now()
+            });
+
+            console.log('✅ Successfully transitioned to ALL_SUBMITTED state');
+
+            // Show "All players submitted" message
+            this.showAllSubmittedMessage();
+
+            // Start scoring process (with slight delay for UI feedback)
+            setTimeout(() => {
+                this.proceedToScoring();
+            }, 2000);
+
+        } catch (error) {
+            console.error('❌ Error transitioning to ALL_SUBMITTED:', error);
+        }
+    }
+
+    /**
+     * Update UI to show submission status
+     */
+    updateSubmissionStatus(submittedCount, totalPlayers) {
+        const statusElement = document.getElementById('status');
+        if (statusElement) {
+            statusElement.innerHTML = `⏳ Waiting for players to submit (${submittedCount}/${totalPlayers} submitted)`;
+            statusElement.style.color = '#ffd700';
+        }
+
+        // Disable submit button after submission
+        const submitBtn = document.getElementById('submitHand');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitted ✓';
+            submitBtn.style.backgroundColor = '#28a745';
+        }
+    }
+
+    /**
+     * Show "All players submitted" message
+     */
+    showAllSubmittedMessage() {
+        const statusElement = document.getElementById('status');
+        if (statusElement) {
+            statusElement.innerHTML = '🎉 All players submitted! Starting scoring...';
+            statusElement.style.color = '#4ecdc4';
+        }
+    }
+
+    /**
+     * Proceed to scoring phase
+     */
+    proceedToScoring() {
+        console.log('🏆 Proceeding to scoring phase...');
+
+        // Call the original submit handler to trigger scoring
+        if (this.originalSubmitHandler) {
+            this.originalSubmitHandler.call(this);
+        }
+
+        // Then sync results
+        this.syncResultsToFirebase();
+    }
+
+    /**
+     * Enhanced submit button with submission coordination
+     */
+    enhanceSubmitButton() {
+        console.log('🔧 Enhancing submit button... STACK:', new Error().stack);
+        const submitBtn = document.getElementById('submitHand');
+        if (!submitBtn) {
+            console.log('❌ Submit button not found!');
+            return;
+        }
+
+        console.log('✅ Found submit button, enhancing...');
+
+        // Store original handler
+        this.originalSubmitHandler = submitBtn.onclick;
+
+        submitBtn.onclick = async () => {
+
+            // Always use the human player for manual clicks
+            const humanPlayer = window.game.players.find(p => !p.isAI);
+            const playerName = humanPlayer ? humanPlayer.name : 'peter@gmail.com';
+
+            try {
+                console.log(`📝 Storing arrangement for human player: ${playerName}`);
+
+                // Store arrangement to Firebase
+                await this.storePlayerArrangementToFirebase(playerName);
+
+                // 🆕 CHECK SUBMISSION COORDINATION
+
+                await this.checkAllPlayersSubmitted();
+
+                // Note: Original handler and results sync are now called from
+                // proceedToScoring() only when ALL players have submitted
+
+            } catch (error) {
+                console.error('❌ Error in enhanced submit:', error);
+            }
+        };
+    }
+
+    /**
+     * Set up listener for submission state changes (call this during initialization)
+     */
+    setupSubmissionListener() {
+        if (!this.isMultiDevice) return;
+
+        console.log('👂 Setting up submission state listener...');
+
+        // Listen for changes to the game status
+        const tableRef = this.tableManager.tablesRef.doc(this.currentTableId.toString());
+
+    }
+
+    /**
+     * Clean up listeners (call this when leaving the game)
+     */
+    cleanupSubmissionListener() {
+        if (this.submissionListener) {
+            this.submissionListener();
+            this.submissionListener = null;
+            console.log('🧹 Cleaned up submission listener');
+        }
+    }
+
     // Add multi-device enhancements to existing UI
-    setupMultiDeviceEnhancements() {
-        // Override new game button to sync to Firebase
-        this.enhanceNewGameButton();
+    async setupMultiDeviceEnhancements() {
+        console.log('🌐 Setting up multi-device enhancements');
 
-        // Override submit button to sync results
+//        // 🆕 ADD: Player setup for multi-device (from setupMultiDeviceMultiHuman)
+//        const currentUser = firebase.auth().currentUser;
+//        const userName = currentUser ?
+//            currentUser.displayName || currentUser.email || 'Anonymous Player' :
+//            'Guest Player';
+//
+//        console.log('🎮 Setting up local player:', userName);
+//
+//        // Clear existing players and add ONLY the current player
+//        if (window.game && window.game.playerManager) {
+//            window.game.playerManager.resetPlayers();
+//            window.game.playerManager.addPlayer(userName, true); // true = isHuman
+//            console.log(`✅ Added current player (${userName}) to this device`);
+//            console.log('🌐 Other players will be managed by their own devices via Firebase');
+//        }
+
+        // UI enhancements
+        // this.enhanceNewGameButton();
         this.enhanceSubmitButton();
-
-        // Override calculateScores to retrieve from Firebase
-        this.enhanceCalculateScores();
-
-        // Add multi-device status indicator
+        // this.enhanceCalculateScores();
         this.addMultiDeviceStatus();
 
-        console.log('✅ Multi-device enhancements added to existing game');
+        // Submission coordination
+        this.setupSubmissionListener();
+
+        console.log('✅ Multi-device enhancements setup complete');
+        return Promise.resolve();
     }
 
     // Enhance new game button to sync to Firebase
@@ -199,49 +422,6 @@ class MultiDeviceIntegration {
                 console.error('❌ Error starting multi-device game:', error);
                 alert('Error starting cloud game. Please try again.');
             }
-        };
-    }
-
-    // Enhance submit button to sync results
-    enhanceSubmitButton() {
-        console.log('🔧 Enhancing submit button...');
-        const submitBtn = document.getElementById('submitHand');
-        if (!submitBtn) {
-            console.log('❌ Submit button not found!');
-            return;
-        }
-
-        console.log('✅ Found submit button, enhancing...');
-
-        // Store original handler
-        this.originalSubmitHandler = submitBtn.onclick;
-
-        submitBtn.onclick = async () => {
-
-            // Always use the human player for manual clicks
-            const humanPlayer = window.game.players.find(p => !p.isAI);
-            const playerName = humanPlayer ? humanPlayer.name : 'peter';
-
-
-            try {
-
-                console.log(`Storing arrangement for human player: ${playerName}`);
-
-                // Store arrangement
-                await this.storePlayerArrangementToFirebase(playerName);
-
-                // Call original handler
-                if (this.originalSubmitHandler) {
-                    await this.originalSubmitHandler.call(this);
-                }
-
-                // Sync results
-                await this.syncResultsToFirebase();
-
-            } catch (error) {
-                console.error('Error:', error);
-            }
-
         };
     }
 
@@ -361,7 +541,6 @@ class MultiDeviceIntegration {
     });
 
     }
-
 
     async retrieveAllArrangementsFromFirebase() {
         console.log('☁️ Retrieving all arrangements from Firebase...');
@@ -833,7 +1012,6 @@ class MultiDeviceIntegration {
         alert('Left table! (In real version, this would clean up Firebase)');
     }
 
-
     // Add Firebase listener for score updates
     setupScoreListener() {
         firebase.database().ref(`tables/${currentTable.id}/scores`).on('value', (snapshot) => {
@@ -874,8 +1052,6 @@ class MultiDeviceIntegration {
         }
     }
 
-
-
     // Cleanup - restore original handlers
     cleanup() {
         const newGameBtn = document.getElementById('newGame');
@@ -894,8 +1070,6 @@ class MultiDeviceIntegration {
         console.log('🧹 Multi-device integration cleaned up');
     }
 }
-
-
 
 // NEW: Disconnection handling
 class DisconnectionManager {

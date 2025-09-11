@@ -4,7 +4,7 @@
 
 let tableSettings = {
     gameConnectMode: 'offline',
-    gameDeviceMode: 'single device',
+    gameDeviceMode: 'single-device',
     gameMode: 'single-human',
     gameVariant: 'no surrender',
     computerPlayers: 4,
@@ -277,6 +277,23 @@ function createCreateTableCard() {
 function joinTable(table) {
     console.log('🔍 joinTable called for:', table.name);
 
+    // 🎯 FIX: Update gameConfig.config (not the whole gameConfig object)
+    if (window.gameConfig) {
+        Object.assign(window.gameConfig.config, {
+            ...table.settings,
+            gameDeviceMode: table.settings.gameDeviceMode.replace(' ', '-'),
+            tableId: table.id
+        });
+        console.log('✅ gameConfig.config updated with table settings');
+        console.log('🔍 gameDeviceMode now:', window.gameConfig.config.gameDeviceMode);
+    } else {
+        console.error('❌ window.gameConfig not found during joinTable!');
+    }
+
+    // In joinTable() after successful join
+    firebase.database().ref(`tables/${table.id}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`)
+        .transaction((current) => (current || 0) + 1);
+
     // Get CURRENT data from Firebase, not stale table data
     firebase.database().ref(`tables/${table.id}/settings/humanPlayers`).once('value', (snapshot) => {
         const currentHumanPlayers = snapshot.val() || 0;
@@ -328,7 +345,13 @@ function joinTable(table) {
         // Initialize MultiDeviceIntegration if not already done
         if (!window.multiDeviceIntegration) {
             console.log('🔧 Initializing MultiDeviceIntegration...');
-            window.multiDeviceIntegration = new MultiDeviceIntegration();
+            window.multiDeviceIntegration = new MultiDeviceIntegration(table.id, {
+                tablesRef: firebase.firestore().collection('tables')
+            });
+
+            // ADD back:
+            window.multiDeviceIntegration.setupMultiDeviceEnhancements();
+
         }
 
         // In your joinTable() function, replace the playerInfo creation with:
@@ -546,7 +569,7 @@ function saveTableSettings() {
 
     // Add other GameConfig settings that might be set in lobby
     tableSettings.gameConnectMode = tableSettings.gameConnectMode || 'offline';
-    tableSettings.gameDeviceMode = tableSettings.gameDeviceMode || 'single device';
+    tableSettings.gameDeviceMode = tableSettings.gameDeviceMode || 'single-device';
     tableSettings.gameMode = tableSettings.gameMode || 'singleplayer';
 
     // Update current table if we have one
@@ -688,6 +711,32 @@ function updateWildCardsDisplay(value) {
 }
 function updatePlayerListUI(players) {
     console.log('🖥️ Updating player list UI:', players);
+
+    // NEW: Sync Firebase players to local PlayerManager
+    if (window.game?.playerManager) {
+        window.game.playerManager.players = players.map(firebasePlayer => ({
+            name: firebasePlayer.name,
+            id: firebasePlayer.id,
+            isAI: false
+        }));
+        console.log(`✅ Synced ${window.game.playerManager.players.length} Firebase players to PlayerManager`);
+    }
+
+    // DEBUG: Find the player manager object (remove after testing)
+    console.log('🔍 window.playerManager:', window.playerManager);
+    console.log('🔍 window.game:', window.game);
+    console.log('🔍 window.game?.playerManager:', window.game?.playerManager);
+
+    // NEW: Sync Firebase players to local player manager array
+    if (window.playerManager) {
+        window.playerManager.players = players.map(firebasePlayer => ({
+            name: firebasePlayer.name,
+            id: firebasePlayer.id,
+            isAI: false,
+            // Add any other properties that existing validation expects
+        }));
+        console.log(`✅ Synced ${window.playerManager.players.length} Firebase players to local array`);
+    }
 
     // ADD THIS DEBUG BLOCK:
     players.forEach((player, index) => {

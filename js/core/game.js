@@ -128,9 +128,21 @@ class PyramidPokerGame {
 
         // Configure players based on GameConfig
         if (window.gameConfig) {
-            const targetPlayerCount = 1 + window.gameConfig.config.computerPlayers; // 1 human + N AI
+            // Check if we're in multi-device mode
+            const isMultiDevice = window.gameConfig.config.gameDeviceMode === 'multi-device';
 
-            console.log(`🎮 Configured for ${targetPlayerCount} players (1 human + ${window.gameConfig.config.computerPlayers} AI)`);
+            if (isMultiDevice) {
+                // For multi-device, get actual player count from the game
+                const humanPlayers = this.players.filter(p => !p.isAI).length;
+                const aiPlayers = this.players.filter(p => p.isAI).length;
+                const totalPlayers = this.players.length;
+
+                console.log(`🎮 Multi-device configured for ${totalPlayers} players (${humanPlayers} human + ${aiPlayers} AI)`);
+            } else {
+                // For single-device, use the original logic
+                const targetPlayerCount = 1 + window.gameConfig.config.computerPlayers; // 1 human + N AI
+                console.log(`🎮 Single-device configured for ${targetPlayerCount} players (1 human + ${window.gameConfig.config.computerPlayers} AI)`);
+            }
         }
 
         // NEW: Initialize tournament
@@ -345,19 +357,6 @@ class PyramidPokerGame {
                     await window.multiDevice.storePlayerArrangementToFirebase(currentPlayer.name);
                 }
             }, 2000);
-
-//
-//
-//                setTimeout(() => {
-//                    console.log(`✅ AI ${currentPlayer.name} submitting hand...`);
-//                    this.submitAIPlayerHand();
-//
-//                    // Store AI arrangement to Firebase
-//                    if (window.multiDevice && window.multiDevice.isMultiDevice) {
-//                        await window.multiDevice.storePlayerArrangementToFirebase(currentPlayer.name);
-//                    }
-//
-//                }, 2000); // 2 seconds to read the hand details
 
             }, 1500); // 3 seconds to see the arranged cards
 
