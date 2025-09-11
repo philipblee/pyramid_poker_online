@@ -780,18 +780,6 @@ class PyramidPokerGame {
 
         console.log('🔍 After initialization - this.maxRounds:', this.maxRounds);
 
-
-//        const playerNames = this.playerManager.getPlayerNames();
-//        const roundScores = new Map();
-//        const detailedResults = [];
-//        const bonusPoints = new Map();
-//
-//        // Initialize round scores
-//        playerNames.forEach(name => {
-//            roundScores.set(name, 0);
-//            bonusPoints.set(name, 0);
-//        });
-
         // Head-to-head comparisons (same as before)
         for (let i = 0; i < playerNames.length; i++) {
             for (let j = i + 1; j < playerNames.length; j++) {
