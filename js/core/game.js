@@ -789,6 +789,9 @@ class PyramidPokerGame {
                 const hand1 = this.submittedHands.get(player1);
                 const hand2 = this.submittedHands.get(player2);
 
+                console.log(`🔍 Player in calculateScores ${player1} hand:`, hand1);
+                console.log(`🔍 Player in calculateScores ${player2} hand:`, hand2);
+
                 const result = this.compareHands(hand1, hand2);
 
                 roundScores.set(player1, roundScores.get(player1) + result.player1Score);
@@ -803,6 +806,8 @@ class PyramidPokerGame {
                 });
             }
         }
+
+        console.log('Detailed Results from calculateScores()', detailedResults)
 
         console.log('🔍 After head-to-head comparisons - this.maxRounds:', this.maxRounds);
 
@@ -839,6 +844,9 @@ class PyramidPokerGame {
 
         console.log('🔍 After updatePlayerScore - this.maxRounds:', this.maxRounds);
         console.log('🔍 Just before showScoringPopup - this.maxRounds:', this.maxRounds);
+
+        // In calculateScores(), after generating detailed results
+        window.game.lastDetailedResults = detailedResults; // Store for later extraction
 
         showScoringPopup(this, detailedResults, roundScores, new Map());
         updateDisplay(this);

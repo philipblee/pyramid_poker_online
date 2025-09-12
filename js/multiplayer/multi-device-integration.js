@@ -250,57 +250,66 @@ class MultiDeviceIntegration {
     /**
      * Proceed to scoring phase
      */
-    proceedToScoring() {
+
+    async proceedToScoring() {
         console.log('🏆 Proceeding to scoring phase...');
 
-        // Call the original submit handler to trigger scoring
-        if (this.originalSubmitHandler) {
-            this.originalSubmitHandler.call(this);
+        // Load arrangements from Firestore
+        await this.RetrieveAllArrangementsFromFirebase();
+
+        // Debug: Check what's actually in submittedHands before scoring
+        console.log('🔍 submittedHands before calculateScores:', window.game.submittedHands);
+        console.log('🔍 submittedHands size:', window.game.submittedHands.size);
+        window.game.submittedHands.forEach((value, key) => {
+            console.log(`🔍 ${key}: has back =`, !!value?.back, 'has middle =', !!value?.middle, 'has front =', !!value?.front);
+        });
+
+        // Call scoring
+        if (window.game && window.game.calculateScores) {
+            window.game.calculateScores();
         }
 
-        // Then sync results
         this.syncResultsToFirebase();
     }
+
+//    async proceedToScoring() {
+//        console.log('🏆 Proceeding to scoring phase...');
+//
+//        // First: Load arrangements from Firebase into local game state
+//        await this.RetrieveAllArrangementsFromFirebase();
+//
+//        // Call scoring
+//        if (window.game && window.game.calculateScores) {
+//            window.game.calculateScores();
+//        }
+//
+//        // Advance to SCORING state so all players see the popup
+//        await handleTableStateChange('scoring');
+//    }
 
     /**
      * Enhanced submit button with submission coordination
      */
     enhanceSubmitButton() {
-        console.log('🔧 Enhancing submit button... STACK:', new Error().stack);
         const submitBtn = document.getElementById('submitHand');
-        if (!submitBtn) {
-            console.log('❌ Submit button not found!');
-            return;
-        }
+        if (!submitBtn) return;
 
-        console.log('✅ Found submit button, enhancing...');
+        // Add enhanced handler that runs FIRST and stops other handlers
+        submitBtn.addEventListener('click', async (e) => {
+            e.stopImmediatePropagation(); // Prevents original handler
 
-        // Store original handler
-        this.originalSubmitHandler = submitBtn.onclick;
-
-        submitBtn.onclick = async () => {
-
-            // Always use the human player for manual clicks
+            // Enhanced multi-device logic
             const humanPlayer = window.game.players.find(p => !p.isAI);
             const playerName = humanPlayer ? humanPlayer.name : 'peter@gmail.com';
 
             try {
                 console.log(`📝 Storing arrangement for human player: ${playerName}`);
-
-                // Store arrangement to Firebase
                 await this.storePlayerArrangementToFirebase(playerName);
-
-                // 🆕 CHECK SUBMISSION COORDINATION
-
                 await this.checkAllPlayersSubmitted();
-
-                // Note: Original handler and results sync are now called from
-                // proceedToScoring() only when ALL players have submitted
-
             } catch (error) {
                 console.error('❌ Error in enhanced submit:', error);
             }
-        };
+        }, true); // 'true' = capture phase, runs before original handler
     }
 
     /**
@@ -331,23 +340,6 @@ class MultiDeviceIntegration {
     async setupMultiDeviceEnhancements() {
         console.log('🌐 Setting up multi-device enhancements');
 
-//        // 🆕 ADD: Player setup for multi-device (from setupMultiDeviceMultiHuman)
-//        const currentUser = firebase.auth().currentUser;
-//        const userName = currentUser ?
-//            currentUser.displayName || currentUser.email || 'Anonymous Player' :
-//            'Guest Player';
-//
-//        console.log('🎮 Setting up local player:', userName);
-//
-//        // Clear existing players and add ONLY the current player
-//        if (window.game && window.game.playerManager) {
-//            window.game.playerManager.resetPlayers();
-//            window.game.playerManager.addPlayer(userName, true); // true = isHuman
-//            console.log(`✅ Added current player (${userName}) to this device`);
-//            console.log('🌐 Other players will be managed by their own devices via Firebase');
-//        }
-
-        // UI enhancements
         // this.enhanceNewGameButton();
         this.enhanceSubmitButton();
         // this.enhanceCalculateScores();
@@ -542,42 +534,97 @@ class MultiDeviceIntegration {
 
     }
 
-    async retrieveAllArrangementsFromFirebase() {
-        console.log('☁️ Retrieving all arrangements from Firebase...');
+    async RetrieveAllArrangementsFromFirebase() {
+      console.log('☁️ Loading arrangements from Firestore...');
 
-        try {
-            const tableDoc = await this.tableManager.tablesRef.doc(this.currentTableId.toString()).get();
-            const arrangements = tableDoc.data()?.currentGame?.arrangements;
+      const doc = await this.tableManager.tablesRef.doc(this.currentTableId.toString()).get();
 
-            if (!arrangements) {
-                console.log('⚠️ No arrangements found in Firebase');
-                return;
-            }
+      if (!doc.exists) {
+        console.log('❌ No table document found');
+        return;
+      }
 
-            // Update local playerHands with Firebase arrangements
-            Object.entries(arrangements).forEach(([playerName, arrangement]) => {
-                const playerHand = window.game.playerHands.get(playerName);
-                if (playerHand) {
-                    playerHand.back = arrangement.back;
-                    playerHand.middle = arrangement.middle;
-                    playerHand.front = arrangement.front;
-                }
-            });
+      const data = doc.data();
+      const firebaseArrangements = data?.currentGame?.arrangements || {};
 
-            console.log(`✅ Retrieved ${Object.keys(arrangements).length} arrangements from Firebase`);
+      console.log('🔍 Raw Firestore arrangements:', firebaseArrangements);
+      console.log('🔍 Number of arrangements found:', Object.keys(firebaseArrangements).length);
 
-        } catch (error) {
-            console.error('❌ Error retrieving arrangements:', error);
-        }
+      // Clear and repopulate submittedHands
+      window.game.submittedHands.clear();
+
+      console.log("RetrieveAllArrangementsFromFirebase show 'players': ", window.game.players); // Check if players array is populated
+
+      Object.entries(firebaseArrangements).forEach(([uniqueId, arrangement]) => {
+        const player = window.game.players.find(p => p.id === uniqueId);
+        const playerName = player ? player.name : uniqueId; // Fallback to uniqueId if player not found
+
+        console.log(`🔍 Loading arrangement for player: ${playerName}`);
+        window.game.submittedHands.set(playerName, arrangement);
+      });
+
+      console.log('🔍 Loaded submittedHands size:', window.game.submittedHands.size);
     }
+
+//    async RetrieveAllArrangementsFromFirebase() {
+//        console.log('☁️ Loading arrangements from Firestore...');
+//
+//        const doc = await this.tableManager.tablesRef.doc(this.currentTableId.toString()).get();
+//
+//        if (!doc.exists) {
+//            console.log('❌ No table document found');
+//            return;
+//        }
+//
+//        const data = doc.data();
+//        const firebaseArrangements = data?.currentGame?.arrangements || {};
+//
+//        console.log('🔍 Raw Firestore arrangements:', firebaseArrangements);
+//        console.log('🔍 Number of arrangements found:', Object.keys(firebaseArrangements).length);
+//
+//        // Clear and repopulate submittedHands
+//        window.game.submittedHands.clear();
+//
+//        Object.entries(firebaseArrangements).forEach(([key, arrangement]) => {
+//            console.log(`🔍 Loading arrangement key: ${key}`);
+//            window.game.submittedHands.set(key, arrangement);
+//        });
+//
+//        console.log('🔍 Loaded submittedHands size:', window.game.submittedHands.size);
+//    }
+
+//    async RetrieveAllArrangementsFromFirebase() {
+//        console.log('☁️ Loading arrangements from Firebase...');
+//
+//        const snapshot = await firebase.database()
+//            .ref(`tables/${this.currentTableId}/currentGame/arrangements`)
+//            .once('value');
+//
+//        const firebaseArrangements = snapshot.val() || {};
+//        console.log('🔍 Raw Firebase arrangements:', firebaseArrangements);
+//
+//        // Clear and repopulate submittedHands with whatever keys exist
+//        window.game.submittedHands.clear();
+//
+//        Object.entries(firebaseArrangements).forEach(([key, arrangement]) => {
+//            console.log(`🔍 Loading arrangement key: ${key}`);
+//            window.game.submittedHands.set(key, arrangement);
+//        });
+//
+//        console.log('🔍 Loaded submittedHands size:', window.game.submittedHands.size);
+//    }
 
     async storePlayerArrangementToFirebase(playerName) {
         console.log(`☁️ Storing player arrangement to Firebase for: ${playerName}`);
 
-        const playerHand = window.game.playerHands.get(playerName); // Use passed parameter
+        const playerHand = window.game.playerHands.get(playerName);
+
+        // Get the unique player ID instead of using playerName
+        const player = window.game.players.find(p => p.name === playerName);
+        const uniquePlayerId = player ? player.id : playerName; // Fallback to playerName if ID not found
 
         const arrangementData = {
-            [playerName]: { // Use passed parameter
+            [uniquePlayerId]: { // Use unique player ID as key
                 back: playerHand.back,
                 middle: playerHand.middle,
                 front: playerHand.front,
@@ -622,8 +669,10 @@ class MultiDeviceIntegration {
             round: window.game.currentRound,
             scores: {},
             arrangements: {},
+            detailedResults: window.game.lastDetailedResults || [], // Include detailed results
             timestamp: Date.now()
         };
+
 
         // Extract scores
         if (window.game.tournamentScores) {
@@ -1068,6 +1117,35 @@ class MultiDeviceIntegration {
         }
 
         console.log('🧹 Multi-device integration cleaned up');
+    }
+}
+
+async function showMultiDeviceScoringResults() {
+    try {
+        const resultsSnapshot = await firebase.database()
+            .ref(`tables/7/currentGame/results`)
+            .once('value');
+
+        console.log('🔍 Firebase results snapshot:', resultsSnapshot.val());
+        const results = resultsSnapshot.val();
+
+        if (results) {
+            console.log('✅ Found results, showing popup...');
+            console.log('🔍 detailedResults:', results.detailedResults);
+            console.log('🔍 scores:', results.scores);
+
+            // Extract the scoring data
+            const detailedResults = results.detailedResults || [];
+            const roundScores = new Map(Object.entries(results.scores || {}));
+            const specialPoints = new Map(); // If you have special points
+
+            // Show the scoring popup using existing function
+            showScoringPopup(window.game, detailedResults, roundScores, specialPoints);
+        } else {
+            console.log('❌ No results found in Firebase');
+        }
+    } catch (error) {
+        console.error('❌ Error loading scoring results:', error);
     }
 }
 
