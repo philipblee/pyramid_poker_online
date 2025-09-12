@@ -49,7 +49,7 @@ function transitionToScoringPhase() {
 }
 
 // Add this function (can go in your main game file or wherever your joinTable function is)
-function handleTableStateChange(tableState) {
+async function handleTableStateChange(tableState) {
     console.log('🎮 Handling table state change:', tableState);
 
     switch(tableState) {
@@ -70,10 +70,10 @@ function handleTableStateChange(tableState) {
 
         case TABLE_STATES.SCORING:
             console.log('🎮 Showing scores...');
-            // Handle scoring display
+            await showMultiDeviceScoringResults();
             break;
 
-        default:
-            console.log('🎮 Unknown table state:', tableState);
-    }
-}
+                default:
+                    console.log('🎮 Unknown table state:', tableState);
+            }
+        }
