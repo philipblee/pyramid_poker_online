@@ -639,6 +639,7 @@ body {
 /* Keep staging area centered */
 #playerHand {
     justify-content: center;
+    max-width: 1312px; /*18 cards worth of space: 77.17px * 17 = 1312px */
 }
 
 .header-content {
