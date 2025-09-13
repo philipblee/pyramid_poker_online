@@ -269,23 +269,19 @@ class MultiDeviceIntegration {
             window.game.calculateScores();
         }
 
+        // In proceedToScoring(), after calculateScores() and before syncResultsToFirebase()
+        console.log('🔍 Cleaning up dual-value Map behavior...');
+        if (window.game.submittedHands._originalGet) {
+            window.game.submittedHands.get = window.game.submittedHands._originalGet;
+            delete window.game.submittedHands._originalGet;
+            console.log('✅ Original Map.get method restored');
+
+            // Also reset any other temporary properties
+            console.log('🔍 submittedHands after restoration:', window.game.submittedHands.size);
+        }
+
         this.syncResultsToFirebase();
     }
-
-//    async proceedToScoring() {
-//        console.log('🏆 Proceeding to scoring phase...');
-//
-//        // First: Load arrangements from Firebase into local game state
-//        await this.RetrieveAllArrangementsFromFirebase();
-//
-//        // Call scoring
-//        if (window.game && window.game.calculateScores) {
-//            window.game.calculateScores();
-//        }
-//
-//        // Advance to SCORING state so all players see the popup
-//        await handleTableStateChange('scoring');
-//    }
 
     /**
      * Enhanced submit button with submission coordination
@@ -534,6 +530,7 @@ class MultiDeviceIntegration {
 
     }
 
+    // In RetrieveAllArrangementsFromFirebase()
     async RetrieveAllArrangementsFromFirebase() {
         console.log('☁️ Loading arrangements from Firestore...');
 
@@ -541,49 +538,55 @@ class MultiDeviceIntegration {
         const data = doc.data();
         const firebaseArrangements = data?.currentGame?.arrangements || {};
 
-        console.log('🔍 Raw Firestore arrangements:', firebaseArrangements);
-
-        // STEP 1: Store original players for restoration (but don't modify them yet)
-        this.originalPlayers = [...window.game.players];
-        console.log('🔍 Stored original players:', this.originalPlayers.map(p => p.name));
-
-        // Keep existing logic for now (will still fail with duplicate keys)
-        const originalPlayerNames = window.game.players.map(p => p.name);
+        // Store arrangements with unique keys
         window.game.submittedHands.clear();
-
-//        // Get arrangements as an array
-//        const arrangements = Object.values(firebaseArrangements);
-//
-//        // Assign first arrangement to first player, second to second player, etc.
-//        window.game.players.forEach((player, index) => {
-//            if (index < arrangements.length) {
-//                console.log(`🔍 Assigning arrangement ${index} to player ${index} (${player.name})`);
-//                window.game.submittedHands.set(player, arrangements[index]);
-//            }
-//        });
-
-        // Get the original player names from the game
-        const originalPlayerNames = window.game.players.map(p => p.name);
-        console.log('🔍 Original player names:', originalPlayerNames);
-
-        // Map the two arrangements to the original player names
         const arrangementEntries = Object.entries(firebaseArrangements);
 
         arrangementEntries.forEach(([key, arrangement], index) => {
-            console.log("In RetrieveAllPlayerArrangements: index, arrangement, key", index, arrangement, key)
-            if (index < originalPlayerNames.length) {
-                const playerName = originalPlayerNames[index];
-                console.log(`🔍 Mapping arrangement ${key} to player ${playerName}`);
-                window.game.submittedHands.set(playerName, arrangement);
-            }
+            const uniqueKey = `arrangement_${index}`;
+            console.log(`🔍 Storing arrangement with unique key: ${uniqueKey}`);
+            window.game.submittedHands.set(uniqueKey, arrangement);
         });
 
-        console.log('🔍 Loaded submittedHands size:', window.game.submittedHands.size);
-        console.log('🔍 Final player keys:', Array.from(window.game.submittedHands.keys()));
+        console.log('🔍 submittedHands size:', window.game.submittedHands.size);
+        console.log('🔍 submittedHands keys:', Array.from(window.game.submittedHands.keys()));
+
+        // After storing arrangements with unique keys
+        console.log('🔍 Creating dual-value Map behavior...');
+
+        let callCount = 0;
+        const arrangements = [
+            window.game.submittedHands.get('arrangement_0'),
+            window.game.submittedHands.get('arrangement_1')
+        ];
+
+        console.log('🔍 Retrieved arrangements for dual behavior:');
+        console.log('🔍 arrangement_0:', arrangements[0] ? 'exists' : 'missing');
+        console.log('🔍 arrangement_1:', arrangements[1] ? 'exists' : 'missing');
+
+        // Store original get method
+        window.game.submittedHands._originalGet = window.game.submittedHands.get;
+
+        // Override get to return alternating arrangements for the same player name
+        window.game.submittedHands.get = function(playerName) {
+            const arrangement = arrangements[callCount % 2];
+            console.log(`🔍 Get call ${callCount} for "${playerName}" returning arrangement_${callCount % 2}`);
+            console.log(`🔍 Returned arrangement has back:`, !!arrangement?.back, 'cards:', arrangement?.back?.length);
+            callCount++;
+            return arrangement;
+        };
+
+        // Clear the unique keys and set up the original player names
+        console.log('🔍 Before clearing - submittedHands size:', window.game.submittedHands.size);
+        console.log('🔍 Before clearing - keys:', Array.from(window.game.submittedHands.keys()));
+
+        window.game.submittedHands.clear();
+        window.game.submittedHands.set('peter@gmail.com', 'placeholder');
+
+        console.log('🔍 After setup - submittedHands size:', window.game.submittedHands.size);
+        console.log('🔍 After setup - keys:', Array.from(window.game.submittedHands.keys()));
+        console.log('🔍 callCount reset to:', callCount);
     }
-
-
-
 
     async storePlayerArrangementToFirebase(playerName) {
         console.log(`☁️ Storing player arrangement to Firebase for: ${playerName}`);
