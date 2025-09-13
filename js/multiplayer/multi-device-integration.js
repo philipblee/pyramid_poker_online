@@ -535,84 +535,55 @@ class MultiDeviceIntegration {
     }
 
     async RetrieveAllArrangementsFromFirebase() {
-      console.log('☁️ Loading arrangements from Firestore...');
+        console.log('☁️ Loading arrangements from Firestore...');
 
-      const doc = await this.tableManager.tablesRef.doc(this.currentTableId.toString()).get();
+        const doc = await this.tableManager.tablesRef.doc(this.currentTableId.toString()).get();
+        const data = doc.data();
+        const firebaseArrangements = data?.currentGame?.arrangements || {};
 
-      if (!doc.exists) {
-        console.log('❌ No table document found');
-        return;
-      }
+        console.log('🔍 Raw Firestore arrangements:', firebaseArrangements);
 
-      const data = doc.data();
-      const firebaseArrangements = data?.currentGame?.arrangements || {};
+        // STEP 1: Store original players for restoration (but don't modify them yet)
+        this.originalPlayers = [...window.game.players];
+        console.log('🔍 Stored original players:', this.originalPlayers.map(p => p.name));
 
-      console.log('🔍 Raw Firestore arrangements:', firebaseArrangements);
-      console.log('🔍 Number of arrangements found:', Object.keys(firebaseArrangements).length);
+        // Keep existing logic for now (will still fail with duplicate keys)
+        const originalPlayerNames = window.game.players.map(p => p.name);
+        window.game.submittedHands.clear();
 
-      // Clear and repopulate submittedHands
-      window.game.submittedHands.clear();
+//        // Get arrangements as an array
+//        const arrangements = Object.values(firebaseArrangements);
+//
+//        // Assign first arrangement to first player, second to second player, etc.
+//        window.game.players.forEach((player, index) => {
+//            if (index < arrangements.length) {
+//                console.log(`🔍 Assigning arrangement ${index} to player ${index} (${player.name})`);
+//                window.game.submittedHands.set(player, arrangements[index]);
+//            }
+//        });
 
-      console.log("RetrieveAllArrangementsFromFirebase show 'players': ", window.game.players); // Check if players array is populated
+        // Get the original player names from the game
+        const originalPlayerNames = window.game.players.map(p => p.name);
+        console.log('🔍 Original player names:', originalPlayerNames);
 
-      Object.entries(firebaseArrangements).forEach(([uniqueId, arrangement]) => {
-        const player = window.game.players.find(p => p.id === uniqueId);
-        const playerName = player ? player.name : uniqueId; // Fallback to uniqueId if player not found
+        // Map the two arrangements to the original player names
+        const arrangementEntries = Object.entries(firebaseArrangements);
 
-        console.log(`🔍 Loading arrangement for player: ${playerName}`);
-        window.game.submittedHands.set(playerName, arrangement);
-      });
+        arrangementEntries.forEach(([key, arrangement], index) => {
+            console.log("In RetrieveAllPlayerArrangements: index, arrangement, key", index, arrangement, key)
+            if (index < originalPlayerNames.length) {
+                const playerName = originalPlayerNames[index];
+                console.log(`🔍 Mapping arrangement ${key} to player ${playerName}`);
+                window.game.submittedHands.set(playerName, arrangement);
+            }
+        });
 
-      console.log('🔍 Loaded submittedHands size:', window.game.submittedHands.size);
+        console.log('🔍 Loaded submittedHands size:', window.game.submittedHands.size);
+        console.log('🔍 Final player keys:', Array.from(window.game.submittedHands.keys()));
     }
 
-//    async RetrieveAllArrangementsFromFirebase() {
-//        console.log('☁️ Loading arrangements from Firestore...');
-//
-//        const doc = await this.tableManager.tablesRef.doc(this.currentTableId.toString()).get();
-//
-//        if (!doc.exists) {
-//            console.log('❌ No table document found');
-//            return;
-//        }
-//
-//        const data = doc.data();
-//        const firebaseArrangements = data?.currentGame?.arrangements || {};
-//
-//        console.log('🔍 Raw Firestore arrangements:', firebaseArrangements);
-//        console.log('🔍 Number of arrangements found:', Object.keys(firebaseArrangements).length);
-//
-//        // Clear and repopulate submittedHands
-//        window.game.submittedHands.clear();
-//
-//        Object.entries(firebaseArrangements).forEach(([key, arrangement]) => {
-//            console.log(`🔍 Loading arrangement key: ${key}`);
-//            window.game.submittedHands.set(key, arrangement);
-//        });
-//
-//        console.log('🔍 Loaded submittedHands size:', window.game.submittedHands.size);
-//    }
 
-//    async RetrieveAllArrangementsFromFirebase() {
-//        console.log('☁️ Loading arrangements from Firebase...');
-//
-//        const snapshot = await firebase.database()
-//            .ref(`tables/${this.currentTableId}/currentGame/arrangements`)
-//            .once('value');
-//
-//        const firebaseArrangements = snapshot.val() || {};
-//        console.log('🔍 Raw Firebase arrangements:', firebaseArrangements);
-//
-//        // Clear and repopulate submittedHands with whatever keys exist
-//        window.game.submittedHands.clear();
-//
-//        Object.entries(firebaseArrangements).forEach(([key, arrangement]) => {
-//            console.log(`🔍 Loading arrangement key: ${key}`);
-//            window.game.submittedHands.set(key, arrangement);
-//        });
-//
-//        console.log('🔍 Loaded submittedHands size:', window.game.submittedHands.size);
-//    }
+
 
     async storePlayerArrangementToFirebase(playerName) {
         console.log(`☁️ Storing player arrangement to Firebase for: ${playerName}`);
