@@ -64,14 +64,14 @@ class PyramidPokerGame {
         this.restoreToDealtState();
         this.autoArrangeUsed = false;
         document.getElementById('autoArrange').textContent = 'Auto';
-        console.log('🔄 Undid auto-arrange');
+        console.log('Log from handleAutoArrange: 🔄 Undid auto-arrange');
     } else {
         showLoadingSpinner(2);
 
         // Use setTimeout to allow UI to update before computation
         setTimeout(() => {
             try {
-                console.log('🧠 Starting auto-arrange optimization...');
+                console.log('Log from handleAutoArrange: 🧠 Starting auto-arrange optimization...');
 
                 // Your existing auto-arrange logic
                 this.autoArrangeManager.autoArrangeHand();
@@ -81,7 +81,7 @@ class PyramidPokerGame {
                 // Hide spinner when done
                 hideLoadingSpinner();
 
-                console.log('✅ Auto-arrange applied successfully');
+                console.log('Log from handleAutoArrange: ✅ Auto-arrange applied successfully');
 
             } catch (error) {
                 console.error('❌ Auto-arrange failed:', error);
@@ -90,7 +90,8 @@ class PyramidPokerGame {
             }
         }, 100); // Small delay ensures spinner shows
     }
-}
+    }
+
     restoreToDealtState() {
         const currentPlayer = this.playerManager.getCurrentPlayer();
         const playerData = this.playerHands.get(currentPlayer.name);
@@ -334,22 +335,22 @@ class PyramidPokerGame {
 
         await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
 
-        console.log(`🤖 AI ${currentPlayer.name} is thinking...`);
+        console.log(`Log from handleAITurn: 🤖 AI ${currentPlayer.name} is thinking...`);
 
         // Step 1: Show AI is thinking (1 second)
         setTimeout(() => {
-            console.log(`🧠 AI ${currentPlayer.name} running auto-arrange...`);
+            console.log(`Log from handleAITurn: 🧠 AI ${currentPlayer.name} running auto-arrange...`);
             this.autoArrangeManager.autoArrangeHand();
 
             // Step 2: Let player see the AI's arranged hand (3 seconds)
             setTimeout(() => {
-                console.log(`👀 AI ${currentPlayer.name} displaying final arrangement...`);
+                console.log(`Log from handleAITurn: 👀 AI ${currentPlayer.name} displaying final arrangement...`);
                 // Update display so human can see AI's hand
                 this.validateHands(); // This updates the UI with hand strengths and colors
 
             // Step 3: Let player read the hand details (2 more seconds)
             setTimeout(async () => {
-                console.log(`✅ AI ${currentPlayer.name} submitting hand...`);
+                console.log(`Log from handleAITurn: ✅ AI ${currentPlayer.name} submitting hand...`);
                 this.submitAIPlayerHand();
 
                 // Store AI arrangement to Firebase

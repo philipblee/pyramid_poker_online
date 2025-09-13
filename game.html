@@ -464,11 +464,32 @@ window.addEventListener('DOMContentLoaded', async () => {
         console.log('⚠️ netEV Lookup Table failed to load');
     }
 
-    // Remove firebase players from tables 6 and 7 so lobby tables cleared
-<!--    firebase.database().ref(`tables/6`).remove()-->
-<!--        .then(() => {-->
-<!--            console.log('Entire table 6 cleared');-->
-<!--        });-->
+    // Remove firebase players from single player tables - tables 1-6 cleared from lobby
+
+    firebase.database().ref(`tables/1`).remove()
+        .then(() => {
+            console.log('Entire table 1 cleared');
+        });
+    firebase.database().ref(`tables/2`).remove()
+        .then(() => {
+            console.log('Entire table 2 cleared');
+        });
+    firebase.database().ref(`tables/3`).remove()
+        .then(() => {
+            console.log('Entire table 3 cleared');
+        });
+    firebase.database().ref(`tables/4`).remove()
+        .then(() => {
+            console.log('Entire table 4 cleared');
+        });
+    firebase.database().ref(`tables/5`).remove()
+        .then(() => {
+            console.log('Entire table 5 cleared');
+        });
+    firebase.database().ref(`tables/6`).remove()
+        .then(() => {
+            console.log('Entire table 6 cleared');
+        });
 
 <!--    firebase.database().ref(`tables/7`).remove()-->
 <!--    .then(() => {-->
