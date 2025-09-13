@@ -130,35 +130,35 @@ const defaultTables = [
         icon: '☁️'
     },
 
-    {
-        id: 8,
-        name: '8. Online - 2 Wild Card',
-        settings: {
-                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
-                    gameMode: 'multiple-humans',
-                    gameConnectMode: 'online',
-                    gameDeviceMode: 'multi-device',
-                    computerPlayers: 2,
-                    rounds: 3,
-                    wildCardCount: 2,
-                    winProbabilityMethod: 'netEV' },
-        icon: '☁️'
-    },
-
-    {
-        id: 9,
-        name: '9. Online - 2 Wild Card',
-        settings: {
-                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
-                    gameMode: 'multiple-humans',
-                    gameConnectMode: 'online',
-                    gameDeviceMode: 'multi-device',
-                    computerPlayers: 5,
-                    rounds: 3,
-                    wildCardCount: 2,
-                    winProbabilityMethod: 'netEV' },
-        icon: '☁️'
-    }
+//    {
+//        id: 8,
+//        name: '8. Online - 2 Wild Card',
+//        settings: {
+//                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
+//                    gameMode: 'multiple-humans',
+//                    gameConnectMode: 'online',
+//                    gameDeviceMode: 'multi-device',
+//                    computerPlayers: 2,
+//                    rounds: 3,
+//                    wildCardCount: 2,
+//                    winProbabilityMethod: 'netEV' },
+//        icon: '☁️'
+//    },
+//
+//    {
+//        id: 9,
+//        name: '9. Online - 2 Wild Card',
+//        settings: {
+//                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
+//                    gameMode: 'multiple-humans',
+//                    gameConnectMode: 'online',
+//                    gameDeviceMode: 'multi-device',
+//                    computerPlayers: 5,
+//                    rounds: 3,
+//                    wildCardCount: 2,
+//                    winProbabilityMethod: 'netEV' },
+//        icon: '☁️'
+//    }
 
 ];
 
