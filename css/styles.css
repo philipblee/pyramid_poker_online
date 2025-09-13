@@ -619,19 +619,19 @@ body {
 /* Card width is 68px + 8px gap = 76px per card space */
 
 #backHand {
-    margin-left: 190px; /* 2 cards worth: 76px * 2 = 152px */
+    margin-left: 0px; /* 0 cards worth: 76px * 2 = 152px */
     justify-content: flex-start !important;
     max-width: 684px; /* 9 cards worth of space: 76px * 9 = 684px */
 }
 
 #middleHand {
-    margin-left: 190px; /* 2.5 cards worth: 76px * 2.5 = 190px */
+    margin-left: 0px; /* 2.5 cards worth: 76px * 2.5 = 190px */
     justify-content: flex-start !important;
     max-width: 608px; /* 8 cards worth of space: 76px * 8 = 608px */
 }
 
 #frontHand {
-    margin-left: 190px; /* Aligned with middle and back hands */
+    margin-left: 0px; /* Aligned with middle and back hands */
     justify-content: flex-start !important;
     max-width: 456px; /* 6 cards worth of space: 76px * 6 = 456px */
 }
