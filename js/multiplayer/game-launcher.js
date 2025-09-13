@@ -15,9 +15,14 @@ function startGame() {
     }
 
     // STEP 2: Enhanced branching based on game mode AND connect mode
-    if (window.gameConfig.config.gameMode === 'single-human') {
+    if (window.gameConfig.config.gameMode === 'single-human' && window.gameConfig.config.gameConnectMode === 'offline') {
         console.log('🔥 CALLING startSingleHumanGame()!');
         startSingleHumanGame();
+
+    } else if (window.gameConfig.config.gameMode === 'single-human' && window.gameConfig.config.gameConnectMode === 'online') {
+        console.log('🔥 CALLING startsingleHumanGame()!');
+        startMultiHumanCloudGame();
+
     } else if (window.gameConfig.config.gameMode === 'multiple-humans' && window.gameConfig.config.gameConnectMode === 'online') {
         console.log('🔥 CALLING startMultiHumanCloudGame()!');
         startMultiHumanCloudGame();
@@ -41,10 +46,10 @@ async function startSingleHumanGame() {
             currentUser: { id: 'player-1' }
         };
 
+        console.log('🎮 Starting single-human online game');
+
         window.multiDevice = new MultiDeviceIntegration();
         await window.multiDevice.initialize(tableManager);
-
-        console.log('🎮 Starting single-human online game');
         window.game.startNewGame();
 
         // ✅ Clean Firebase coordination using multiDevice methods:
@@ -81,6 +86,7 @@ function startMultiHumanCloudGame() {
     });
 }
 
+// multiple humans, multiple devices
 async function setupMultiDeviceMultiHuman() {
     console.log('🌐 Setting up multi-device multi-human mode');
 
