@@ -413,5 +413,5 @@ function openGameRules() {
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
     // Rules UI initializes automatically
-    console.log('🎯 Game Rules modal ready');
+//    console.log('🎯 Game Rules modal ready');
 });

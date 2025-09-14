@@ -389,37 +389,34 @@ async function joinTable(table) {
 
             // ADD back:
             window.multiDeviceIntegration.setupMultiDeviceEnhancements();
-
         }
 
-        // In joinTable() function - replace the userName creation with:
+        // In joinTable()
         const currentUser = firebase.auth().currentUser;
-        let userName = currentUser ? currentUser.displayName || currentUser.email || 'Anonymous Player' : 'Guest Player';
+        let uniquePlayerName = currentUser ? currentUser.email : 'Guest Player';
 
-        // Generate unique email for multi-device mode
-        // In joinTable() function:
         if (currentUser && currentUser.email && window.game?.playerManager) {
-            console.log('🔧 Generating unique email via PlayerManager...');
-            userName = await window.game.playerManager.generateUniquePlayerEmail(currentUser.email, table.id);
-            console.log('🔧 Generated unique userName:', userName);
+            console.log('🔧 Generating unique player name...');
+            uniquePlayerName = await window.game.playerManager.generateUniquePlayerName(currentUser.email, table.id);
+            console.log('🔧 Generated uniquePlayerName:', uniquePlayerName);
         }
 
-        // Use it:
-        const isOwner = await claimOwnershipIfNeeded(table.id, userName);
-
-        // In joinTable() after determining isOwner
+        const isOwner = await claimOwnershipIfNeeded(table.id, uniquePlayerName);
 
         const playerInfo = {
             id: 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-            name: userName,
+            name: uniquePlayerName,  // Always use uniquePlayerName
             joinedAt: Date.now(),
             ready: false,
             isOwner: isOwner
         };
 
+        console.log('log in joinTable Creating playerInfo with isOwner:', isOwner);
+        console.log('log in joinTable Final playerInfo:', playerInfo);
+
         window.currentPlayerIsOwner = playerInfo.isOwner;
 
-        console.log('🔍 userName, isOwner:', userName, isOwner);
+        console.log('🔍 userName, isOwner:', uniquePlayerName, isOwner);
 
         // Add player to Firebase table (using .then() instead of await)
         window.multiDeviceIntegration.addPlayerToTable(table.id, playerInfo)

@@ -108,9 +108,9 @@ class FirebaseAuth {
         // Update your existing UI here
         // This connects to your current login system
         if (isLoggedIn) {
-            console.log('🔥 Should update UI to show logged-in state');
+            console.log('🔥 Update UI to show logged-in state');
         } else {
-            console.log('🔥 Should update UI to show logged-out state');
+            console.log('🔥 Update UI to show logged-out state');
         }
     }
 }

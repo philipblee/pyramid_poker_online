@@ -389,5 +389,5 @@ function handleLoginSubmit() {
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
     window.loginModal = new LoginModal();
-    console.log('🔑 Login Modal initialized with existing HTML');
+//    console.log('🔑 Login Modal initialized with existing HTML');
 });

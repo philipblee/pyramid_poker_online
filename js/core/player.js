@@ -8,9 +8,8 @@ class PlayerManager {
         this.activeEmails = new Set(); // Add this to track unique emails
     }
 
-    // Instead of using the email as a key, let's use a simple counter approach:
-    async generateUniquePlayerEmail(originalEmail, tableId) {
-        console.log(`🔧 generateUniquePlayerEmail called with: ${originalEmail}`);
+    async generateUniquePlayerName(originalEmail, tableId) {
+        console.log(`🔧 generateUniquePlayerName called with: ${originalEmail}`);
 
         // Get current active emails from Firebase
         const activeEmailsRef = firebase.database().ref(`tables/${tableId}/activeEmails`);
@@ -21,7 +20,6 @@ class PlayerManager {
 
         // If the base email doesn't exist, use it as-is
         if (!activeEmailsArray.includes(originalEmail)) {
-            // Add to Firebase as an array
             activeEmailsArray.push(originalEmail);
             await activeEmailsRef.set(activeEmailsArray);
             console.log(`🔧 Using original email: ${originalEmail}`);
@@ -31,19 +29,19 @@ class PlayerManager {
         // Generate unique email
         const [localPart, domainPart] = originalEmail.split('@');
         let counter = 1;
-        let uniqueEmail;
+        let uniquePlayerName;
 
         do {
             const paddedCounter = counter.toString().padStart(2, '0');
-            uniqueEmail = `${localPart}_${paddedCounter}@${domainPart}`;
+            uniquePlayerName = `${localPart}_${paddedCounter}@${domainPart}`;
             counter++;
-        } while (activeEmailsArray.includes(uniqueEmail));
+        } while (activeEmailsArray.includes(uniquePlayerName));
 
         // Add to Firebase
-        activeEmailsArray.push(uniqueEmail);
+        activeEmailsArray.push(uniquePlayerName);
         await activeEmailsRef.set(activeEmailsArray);
-        console.log(`🔧 Generated unique email: ${uniqueEmail}`);
-        return uniqueEmail;
+        console.log(`🔧 Generated unique player name: ${uniquePlayerName}`);
+        return uniquePlayerName;
     }
 
     // Update addDefaultPlayers() method - Firebase auth section

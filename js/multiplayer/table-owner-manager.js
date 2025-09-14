@@ -1,5 +1,4 @@
-// table-owner-manager.js
-
+// table-owner-manager.js - ONLY for updating button state
 async function tableOwnerManager(playerCount, playersArray, tableId) {
     const startBtn = document.getElementById('startGameBtn') ||
                     document.querySelector('button[onclick*="startGame"]') ||
@@ -10,27 +9,29 @@ async function tableOwnerManager(playerCount, playersArray, tableId) {
     }
 
     const currentUser = firebase.auth().currentUser;
-    const currentPlayer = playersArray.find(p => p.name.includes(currentUser.email.split('@')[0]));
-    const currentUserName = currentPlayer ? currentPlayer.name : currentUser.email;
     if (!currentUser) return;
 
-    // Sort players by join time to find the owner (first player)
-    const sortedPlayers = [...playersArray].sort((a, b) => a.joinedAt - b.joinedAt);
+    // Don't generate - just find our existing player in the array
+    // Player 0 should be found by their stored name 'joe@gmail.com'
+    const ourPlayer = playersArray.find(p => {
+        // Check if this player's name matches our original email OR contains our email prefix
+        return p.name === currentUser.email ||
+               (p.name.includes(currentUser.email.split('@')[0]) && p.name.includes('@'));
+    });
 
-    // Check if current user is the first player (owner)
-    const isOwner = await claimOwnershipIfNeeded(tableId, currentUserName);
-    const playerInfo = {
-        id: 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-        name: currentUserName,
-        joinedAt: Date.now(),
-        ready: false,
+    console.log('🔍 Looking for player with email:', currentUser.email);
+    console.log('🔍 Available players:', playersArray.map(p => p.name));
+    console.log('🔍 Found our player:', ourPlayer);
+
+    if (!ourPlayer) {
+        console.log('Our player not found in array');
+        return;
+    }
+
+    const isOwner = ourPlayer.isOwner;
+    console.log('🔍 Button update check:', {
+        ourPlayerName: ourPlayer.name,
         isOwner: isOwner
-    };
-
-    console.log('🔍 Ownership check:', {
-        currentUserName,
-        firstPlayer: sortedPlayers[0]?.name,
-        isOwner
     });
 
     if (playerCount >= 2) {

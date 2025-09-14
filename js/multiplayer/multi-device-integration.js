@@ -108,7 +108,8 @@ class MultiDeviceIntegration {
                 name: playerInfo.name,
                 joinedAt: playerInfo.joinedAt,
                 ready: playerInfo.ready,
-                connected: true
+                connected: true,
+                isOwner: window.currentPlayerIsOwner
             });
 
             // Track locally

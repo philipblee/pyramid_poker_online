@@ -21,7 +21,7 @@ class UserStatsDisplay {
     }
 
     createStatsModal() {
-        console.log('📊 Creating stats modal...');
+//        console.log('📊 Creating stats modal...');
 
         // Create the main modal container
         const modal = document.createElement('div');
@@ -279,7 +279,7 @@ class UserStatsDisplay {
     }
 
     async refreshStats() {
-        console.log('🔄 Refreshing user stats...');
+//        console.log('🔄 Refreshing user stats...');
         await this.loadStats();
     }
 
@@ -295,5 +295,5 @@ class UserStatsDisplay {
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
     window.userStatsDisplay = new UserStatsDisplay();
-    console.log('📊 User Stats Display initialized');
+//    console.log('📊 User Stats Display initialized');
 });

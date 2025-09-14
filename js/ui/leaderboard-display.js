@@ -293,5 +293,5 @@ class LeaderboardDisplay {
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
     window.leaderboardDisplay = new LeaderboardDisplay();
-    console.log('🏆 Leaderboard Display initialized');
+//    console.log('🏆 Leaderboard Display initialized');
 });
