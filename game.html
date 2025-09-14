@@ -475,18 +475,18 @@ window.addEventListener('DOMContentLoaded', async () => {
 <!--        console.log('Entire table 7 cleared');-->
 <!--    });-->
 
-    // Delete just the FireStore currentGame field from tables/7
-    firebase.firestore().collection('tables').doc('7').update({
-        currentGame: firebase.firestore.FieldValue.delete()
-    })
-    .then(() => console.log('currentGame from tables/7 deleted'));
+<!--    // Delete just the FireStore currentGame field from tables/7-->
+<!--    firebase.firestore().collection('tables').doc('7').update({-->
+<!--        currentGame: firebase.firestore.FieldValue.delete()-->
+<!--    })-->
+<!--    .then(() => console.log('currentGame from tables/7 deleted'));-->
 
 
-    // Delete just the FireStore currentGame field from tables/6
-    firebase.firestore().collection('tables').doc('6').update({
-        currentGame: firebase.firestore.FieldValue.delete()
-    })
-    .then(() => console.log('currentGame from tables/6 deleted'));
+<!--    // Delete just the FireStore currentGame field from tables/6-->
+<!--    firebase.firestore().collection('tables').doc('6').update({-->
+<!--        currentGame: firebase.firestore.FieldValue.delete()-->
+<!--    })-->
+<!--    .then(() => console.log('currentGame from tables/6 deleted'));-->
 
 });
 </script>
