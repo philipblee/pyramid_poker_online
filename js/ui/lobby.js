@@ -273,6 +273,24 @@ function createCreateTableCard() {
     return card;
 }
 
+// In joinTable() function - after generating userName
+async function claimOwnershipIfNeeded(tableId) {
+    // Check current ownership state
+    const ownershipRef = firebase.database().ref(`tables/${tableId}/state/${TABLE_STATES.TABLE_OWNED}`);
+    const snapshot = await ownershipRef.once('value');
+    const isOwned = snapshot.val();
+
+    if (isOwned === 'false' || isOwned === null) {
+        // Table not owned, claim it
+        await ownershipRef.set('true');
+        console.log('👑 Claimed table ownership');
+        return true;
+    } else {
+        console.log('🔍 Table already owned');
+        return false;
+    }
+}
+
 // Join existing table
 async function joinTable(table) {
     console.log('🔍 joinTable called for:', table.name);
@@ -319,9 +337,9 @@ async function joinTable(table) {
 
         // Initialize the start button state for single-player tables
         if (table.settings.gameMode === 'single-human') {
-            updateStartGameButton(1); // Single player is always ready
+            updateStartGameButton(1, 'true'); // Single player is always ready
         } else {
-            updateStartGameButton(0); // Multi-player starts with 0 players
+            updateStartGameButton(0, 'false'); // Multi-player starts with 0 players
         }
 
         firebase.database().ref(`tables/${table.id}/settings/humanPlayers`)
@@ -366,21 +384,18 @@ async function joinTable(table) {
             console.log('🔧 Generated unique userName:', userName);
         }
 
-        // In joinTable() function - add this BEFORE creating playerInfo
-        // Check if this is the first player (owner)
-        const playersSnapshot = await firebase.database().ref(`tables/${table.id}/players`).once('value');
-        const existingPlayers = playersSnapshot.val() || {};
-        const isFirstPlayer = Object.keys(existingPlayers).length === 0;
-
-        console.log('🔍 Is first player (owner):', isFirstPlayer);
+        // Use it:
+        const isOwner = await claimOwnershipIfNeeded(table.id);
 
         const playerInfo = {
             id: 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
             name: userName,
             joinedAt: Date.now(),
             ready: false,
-            isOwner: isFirstPlayer  // Add comma here!
+            isOwner: isOwner
         };
+
+        console.log('🔍 userName, isOwner:', userName, isOwner);
 
         // Add player to Firebase table (using .then() instead of await)
         window.multiDeviceIntegration.addPlayerToTable(table.id, playerInfo)
@@ -392,8 +407,8 @@ async function joinTable(table) {
                 window.multiDeviceIntegration.setupPlayerListListener(table.id, updatePlayerListUI);
                 window.multiDeviceIntegration.setupScoreListener(); // Add this line
 
-                    // NEW: Add table state listener
-                  window.multiDeviceIntegration.setupTableStateListener(table.id, handleTableStateChange);
+                // NEW: Add table state listener
+                window.multiDeviceIntegration.setupTableStateListener(table.id, handleTableStateChange);
             })
 
 
@@ -725,7 +740,7 @@ function updateAiPlayersDisplay(value) {
 function updateWildCardsDisplay(value) {
     document.getElementById('wildCardsValue').textContent = value;
 }
-function updatePlayerListUI(players) {
+function updatePlayerListUI(players, tableId) {
     console.log('🖥️ Updating player list UI:', players);
 
     // NEW: Sync Firebase players to local PlayerManager
@@ -803,14 +818,12 @@ function updatePlayerListUI(players) {
     }
 
     // Update start game button
-    updateStartGameButton(players.length);
+    updateStartGameButton(players.length, 'false');
 
     console.log('Updated all player slots');
 
     // In your updatePlayerListUI function, add this at the end:
-    if (typeof updateStartGameButtonForOwnership === 'function') {
-        updateStartGameButtonForOwnership(players ? players.length : 0, players);
-    }
+    tableOwnerManager(players ? players.length : 0, players,tableId);
 
 }
 

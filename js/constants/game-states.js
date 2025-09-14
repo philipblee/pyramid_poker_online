@@ -1,5 +1,6 @@
 // js/constants/game-states.js
 const LOBBY_STATES = {
+    TABLE_OWNED: 'false',
     WAITING_FOR_PLAYERS: 'waiting',
     READY_TO_START: 'ready',
     STARTING_COUNTDOWN: 'countdown',

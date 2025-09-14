@@ -14,7 +14,7 @@ class NetEVLookup {
      */
     async loadData() {
         try {
-            console.log('🎯 Loading Net EV Lookup from CSV...');
+//            console.log('🎯 Loading Net EV Lookup from CSV...');
 
             // Fetch the CSV file
             const response = await fetch('data/netEV_lookup_table.csv');
@@ -25,7 +25,7 @@ class NetEVLookup {
             const csvText = await response.text();
             this.parseCSV(csvText);
 
-            console.log(`✅ Loaded ${this.evMap.size} Net EV entries`);
+//            console.log(`✅ Loaded ${this.evMap.size} Net EV entries`);
             this.isLoaded = true;
             return true;
 
@@ -102,7 +102,7 @@ class NetEVLookup {
             }
         });
 
-        console.log(`📊 CSV parsing complete: ${parseCount} entries parsed, ${errorCount} errors`);
+//        console.log(`📊 CSV parsing complete: ${parseCount} entries parsed, ${errorCount} errors`);
 
         if (parseCount === 0) {
             throw new Error('No valid data entries found in CSV');

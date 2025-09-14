@@ -23,9 +23,6 @@ class MultiDeviceIntegration {
         this.isMultiDevice = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
         console.log('  final isMultiDevice:', this.isMultiDevice);
 
-//        this.currentTableId = tableId;
-//        this.tableManager = tableManager;
-//        this.isMultiDevice = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
         // ... existing properties
         this.playersData = new Map(); // Track all players
         this.submissionTracker = new Map(); // Track who submitted
@@ -72,7 +69,7 @@ class MultiDeviceIntegration {
             .on('value', (snapshot) => {
                 const playerCount = snapshot.val() || 0;
                 console.log(`🔍 Shared player count: ${playerCount}`);
-                updateStartGameButton(playerCount);
+                updateStartGameButton(playerCount, 'false');
             });
         });
     }
@@ -356,12 +353,22 @@ class MultiDeviceIntegration {
         // Store original handler
         const originalNewGame = newGameBtn.onclick;
 
-        console.log('🎮 Configured for single player vs AI');
+        console.log('🎮 Configured for multi-device game');
 
         // Replace with enhanced version
         newGameBtn.onclick = async () => {
             try {
-                console.log('🎮 Starting multi-device single player game');
+                // ✅ NEW: Owner-only check
+                if (!await this.isTableOwner()) {
+                    console.log('❌ Only table owner can start the game');
+                    alert('Only the table owner can start the game');
+                    return;
+                }
+
+                console.log('🎮 Owner starting multi-device game');
+
+                // ✅ NEW: Owner sets state for ALL players
+                await firebase.database().ref(`tables/${this.tableId}/state/tableState`).set(TABLE_STATES.DEALING);
 
                 // Use existing startNewGame() - works perfectly as-is
                 if (originalNewGame) {
@@ -372,45 +379,34 @@ class MultiDeviceIntegration {
 
                 // Add: sync dealt hands to Firebase for cloud storage
                 await this.syncHandsToFirebase();
+                console.log('✅ Owner: Game started and all hands synced to Firebase');
 
-        // Replace with enhanced version
-        newGameBtn.onclick = async () => {
-            try {
-                console.log('🎮 Starting multi-device single player game');
-
-                // Use existing startNewGame() - works perfectly as-is
-                if (originalNewGame) {
-                    originalNewGame();
-                } else {
-                    window.game.startNewGame();
-                }
-
-                // Add: sync dealt hands to Firebase for cloud storage
-                await this.syncHandsToFirebase();
-                console.log('✅ Game started and all hands are synced to cloud/Firebase');
-
-                // ✅ NEW: All players retrieve hands from Firebase (universal source)
-                // In enhanced start button, after retrieve call:
+                // All players retrieve hands from Firebase
                 await this.retrieveAllHandsFromFirebase();
                 console.log('🔍 After Firebase retrieval - playerHands size:', window.game.playerHands.size);
-                window.game.playerHands.forEach((hand, playerName) => {
-                    console.log(`🔍 ${playerName} has ${hand.cards.length} cards from Firebase`);
-                });
-
 
             } catch (error) {
                 console.error('❌ Error starting multi-device game:', error);
                 alert('Error starting cloud game. Please try again.');
             }
         };
+    }
 
-                console.log('✅ Game started and synced to cloud');
+    // Add this helper method to check ownership
+    async isTableOwner() {
+        const currentUser = firebase.auth().currentUser;
+        if (!currentUser) return false;
 
-            } catch (error) {
-                console.error('❌ Error starting multi-device game:', error);
-                alert('Error starting cloud game. Please try again.');
+        const playersSnapshot = await firebase.database().ref(`tables/${this.tableId}/players`).once('value');
+        const players = playersSnapshot.val() || {};
+
+        // Find our player and check if they're the owner
+        for (let playerId in players) {
+            if (players[playerId].name === currentUser.email || players[playerId].name.includes(currentUser.email.split('@')[0])) {
+                return players[playerId].isOwner === true;
             }
-        };
+        }
+        return false;
     }
 
     // this handles retrieve arrangements from Firebase

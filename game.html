@@ -391,7 +391,7 @@
 
 <!-- Near the bottom of game.html, before closing </body> -->
 <script>
-function updateStartGameButton(playerCount) {
+function updateStartGameButton(playerCount, isOwner='false') {
     console.log('🔍 updateStartGameButton called with playerCount:', playerCount);
 
     const startBtn = document.getElementById('startGameBtn');
@@ -401,10 +401,6 @@ function updateStartGameButton(playerCount) {
 
     const gameMode = tableSettings.gameMode;
     const minPlayers = tableSettings.minPlayers || 2;
-
-<!--    console.log('🔍 gameMode:', gameMode);-->
-<!--    console.log('🔍 minPlayers:', minPlayers);-->
-<!--    console.log('🔍 playerCount >= minPlayers:', playerCount >= minPlayers);-->
 
     if (gameMode === 'single-human') {
         console.log('🔍 Single human mode - enabling button');

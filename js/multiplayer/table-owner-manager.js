@@ -1,4 +1,6 @@
-function updateStartGameButtonForOwnership(playerCount, playersArray) {
+// table-owner-manager.js
+
+async function tableOwnerManager(playerCount, playersArray, tableId) {
     const startBtn = document.getElementById('startGameBtn') ||
                     document.querySelector('button[onclick*="startGame"]') ||
                     document.getElementById('startGame');
@@ -7,23 +9,32 @@ function updateStartGameButtonForOwnership(playerCount, playersArray) {
         return;
     }
 
-    // NEW: Simpler approach - just check if we have exactly 2 players
-    // First player in the array is the owner
     const currentUser = firebase.auth().currentUser;
-    const currentUserName = currentUser ?
-        currentUser.displayName || currentUser.email || 'Anonymous Player' :
-        'Guest Player';
+    const currentPlayer = playersArray.find(p => p.name.includes(currentUser.email.split('@')[0]));
+    const currentUserName = currentPlayer ? currentPlayer.name : currentUser.email;
+    if (!currentUser) return;
 
-    // Sort players by join time, then check if current user is first
+    // Sort players by join time to find the owner (first player)
     const sortedPlayers = [...playersArray].sort((a, b) => a.joinedAt - b.joinedAt);
-    const isFirstPlayer = sortedPlayers.length > 0 && sortedPlayers[0].name === currentUserName;
+
+    // Check if current user is the first player (owner)
+    const isOwner = await claimOwnershipIfNeeded(tableId);
+    const playerInfo = {
+        id: 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+        name: currentUserName,
+        joinedAt: Date.now(),
+        ready: false,
+        isOwner: isOwner
+    };
+
+    console.log('🔍 Ownership check:', {
+        currentUserName,
+        firstPlayer: sortedPlayers[0]?.name,
+        isOwner
+    });
 
     if (playerCount >= 2) {
-        // For testing: make one browser show owner, other show waiting
-        // We can use a simple random assignment temporarily
-        const shouldBeOwner = Math.random() > 0.5; // Temporary for testing
-
-        if (shouldBeOwner) {
+        if (isOwner) {
             startBtn.disabled = false;
             startBtn.textContent = '👑 Start Game';
             startBtn.title = 'You are the table owner';
