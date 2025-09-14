@@ -1,46 +1,85 @@
-// js/core/player.js
-// Player management functionality extracted from game.js
+// In js/core/player.js - Add to PlayerManager class
 
 class PlayerManager {
     constructor() {
         this.players = [];
         this.currentPlayerIndex = 0;
         this.scores = new Map();
+        this.activeEmails = new Set(); // Add this to track unique emails
     }
 
-    resetPlayers() {
-        this.players = [];
-        this.scores.clear();
-        this.addDefaultPlayers();
-        console.log('Players reset with current config');
+    // Instead of using the email as a key, let's use a simple counter approach:
+    async generateUniquePlayerEmail(originalEmail, tableId) {
+        console.log(`🔧 generateUniquePlayerEmail called with: ${originalEmail}`);
+
+        // Get current active emails from Firebase
+        const activeEmailsRef = firebase.database().ref(`tables/${tableId}/activeEmails`);
+        const snapshot = await activeEmailsRef.once('value');
+        const activeEmailsArray = snapshot.val() || [];
+
+        console.log(`🔧 Current activeEmails from Firebase:`, activeEmailsArray);
+
+        // If the base email doesn't exist, use it as-is
+        if (!activeEmailsArray.includes(originalEmail)) {
+            // Add to Firebase as an array
+            activeEmailsArray.push(originalEmail);
+            await activeEmailsRef.set(activeEmailsArray);
+            console.log(`🔧 Using original email: ${originalEmail}`);
+            return originalEmail;
+        }
+
+        // Generate unique email
+        const [localPart, domainPart] = originalEmail.split('@');
+        let counter = 1;
+        let uniqueEmail;
+
+        do {
+            const paddedCounter = counter.toString().padStart(2, '0');
+            uniqueEmail = `${localPart}_${paddedCounter}@${domainPart}`;
+            counter++;
+        } while (activeEmailsArray.includes(uniqueEmail));
+
+        // Add to Firebase
+        activeEmailsArray.push(uniqueEmail);
+        await activeEmailsRef.set(activeEmailsArray);
+        console.log(`🔧 Generated unique email: ${uniqueEmail}`);
+        return uniqueEmail;
     }
 
-    // add default AI players
+    // Update addDefaultPlayers() method - Firebase auth section
     addDefaultPlayers() {
         console.log('gameConfig object:', window.gameConfig);
         console.log('getConfig function:', typeof window.gameConfig?.getConfig);
 
         const config = window.gameConfig.getConfig();
         console.log('Retrieved config:', config);
-        
+
         if (config.gameMode === 'single-human') {
             // Create 1 human player + configured number of AI players
             // Get the actual logged-in user's name
             let humanPlayerName = 'Player 1'; // Default fallback
+            let playerEmail = null;
 
             if (window.firebaseAuth && window.firebaseAuth.currentUser) {
                 const user = window.firebaseAuth.currentUser;
-                humanPlayerName = user.displayName || user.email.split('@')[0] || 'Player 1';
+
+                // Generate unique email for this session
+                const uniqueEmail = this.generateUniquePlayerEmail(user.email);
+
+                // Use the unique email as the player NAME (not just store it separately)
+                humanPlayerName = uniqueEmail;  // This becomes peter_01@gmail.com
             }
 
-            // Create human player with actual name
+            // Create human player with unique email as the name
             this.players.push({
-                name: humanPlayerName,
+                name: humanPlayerName,          // This is now peter_01@gmail.com
+                originalEmail: user?.email,     // Optional: keep original for reference
                 id: Date.now() + Math.random(),
                 ready: false,
                 type: 'human'
             });
-            this.scores.set(humanPlayerName, 0);
+
+            this.scores.set(humanPlayerName, 0); // Uses the unique email as key
 
             // Add AI players
             const aiNames = ['Peter AI', 'Tony AI', 'Johnny AI', 'Phil AI',
@@ -85,6 +124,58 @@ class PlayerManager {
         }
     }
 
+    // Update other methods to use email as key where appropriate
+    setPlayerReady(playerIdentifier, ready = true) {
+        const player = this.players.find(p => p.email === playerIdentifier || p.name === playerIdentifier);
+        if (player) {
+            player.ready = ready;
+        }
+    }
+
+    // Add cleanup method for when players leave
+    removePlayerEmail(email) {
+        this.activeEmails.delete(email);
+    }
+
+    // Update removePlayer to clean up email tracking
+    removePlayer(index) {
+        if (index >= 0 && index < this.players.length) {
+            const removedPlayer = this.players[index];
+
+            // Clean up email tracking
+            if (removedPlayer.email) {
+                this.removePlayerEmail(removedPlayer.email);
+            }
+
+            // Remove from players array
+            this.players.splice(index, 1);
+
+            // Remove from scores if they exist
+            const scoreKey = removedPlayer.email || removedPlayer.name;
+            if (this.scores.has(scoreKey)) {
+                this.scores.delete(scoreKey);
+            }
+
+
+            // Adjust current player index if necessary
+            if (this.currentPlayerIndex >= index && this.currentPlayerIndex > 0) {
+                this.currentPlayerIndex--;
+            }
+
+            console.log(`Removed player: ${removedPlayer.name}`);
+            return removedPlayer;
+        }
+        return null;
+    }
+
+
+    resetPlayers() {
+        this.players = [];
+        this.scores.clear();
+        this.addDefaultPlayers();
+        console.log('Players reset with current config');
+    }
+
     addPlayer(playerName) {
         if (!playerName) {
             playerName = prompt('Enter player name:') || `Player ${this.players.length + 1}`;
@@ -114,12 +205,6 @@ class PlayerManager {
         return this.players.map(p => p.name);
     }
 
-    setPlayerReady(playerName, ready = true) {
-        const player = this.players.find(p => p.name === playerName);
-        if (player) {
-            player.ready = ready;
-        }
-    }
 
     areAllPlayersReady() {
         return this.players.every(p => p.ready);

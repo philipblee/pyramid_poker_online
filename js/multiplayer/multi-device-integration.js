@@ -102,7 +102,7 @@ class MultiDeviceIntegration {
         try {
             console.log('🔥 Adding player to Firebase table:', tableId, playerInfo);
 
-            // Reference to the table's players collection (v8 compat syntax)
+            // Reference to the table's players collection (v8 compatible syntax)
             const tableRef = firebase.database().ref(`tables/${tableId}/players`);
 
             // Add player to Firebase

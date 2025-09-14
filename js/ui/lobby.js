@@ -274,7 +274,7 @@ function createCreateTableCard() {
 }
 
 // Join existing table
-function joinTable(table) {
+async function joinTable(table) {
     console.log('🔍 joinTable called for:', table.name);
 
     // 🎯 FIX: Update gameConfig.config (not the whole gameConfig object)
@@ -354,16 +354,32 @@ function joinTable(table) {
 
         }
 
-        // In your joinTable() function, replace the playerInfo creation with:
+        // In joinTable() function - replace the userName creation with:
         const currentUser = firebase.auth().currentUser;
-        const userName = currentUser ? currentUser.displayName || currentUser.email || 'Anonymous Player' : 'Guest Player';
-        console.log('🔍 Final userName will be:', userName);
+        let userName = currentUser ? currentUser.displayName || currentUser.email || 'Anonymous Player' : 'Guest Player';
+
+        // Generate unique email for multi-device mode
+        // In joinTable() function:
+        if (currentUser && currentUser.email && window.game?.playerManager) {
+            console.log('🔧 Generating unique email via PlayerManager...');
+            userName = await window.game.playerManager.generateUniquePlayerEmail(currentUser.email, table.id);
+            console.log('🔧 Generated unique userName:', userName);
+        }
+
+        // In joinTable() function - add this BEFORE creating playerInfo
+        // Check if this is the first player (owner)
+        const playersSnapshot = await firebase.database().ref(`tables/${table.id}/players`).once('value');
+        const existingPlayers = playersSnapshot.val() || {};
+        const isFirstPlayer = Object.keys(existingPlayers).length === 0;
+
+        console.log('🔍 Is first player (owner):', isFirstPlayer);
 
         const playerInfo = {
             id: 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
             name: userName,
             joinedAt: Date.now(),
-            ready: false
+            ready: false,
+            isOwner: isFirstPlayer  // Add comma here!
         };
 
         // Add player to Firebase table (using .then() instead of await)
@@ -497,7 +513,7 @@ function createTableSettingsModal() {
             <div class="modal-body">
                 <div class="setting-group">
                     <label for="tableRounds">Rounds (3-20):</label>
-                    <input type="range" id="tableRounds" min="3" max="20" value="3" oninput="updateRoundsDisplay(this.value)">
+                    <input type="range" id="tableRounds" min="3" max="20" value="3" input="updateRoundsDisplay(this.value)">
                     <span id="rounds">3</span>
                 </div>
 
@@ -512,13 +528,13 @@ function createTableSettingsModal() {
 
                 <div class="setting-group">
                     <label for="tableWildCardCounts">Wild Cards (0-4):</label>
-                    <input type="range" id="tableWildCardCounts" min="0" max="4" value="2" oninput="updateWildCardsDisplay(this.value)">
+                    <input type="range" id="tableWildCardCounts" min="0" max="4" value="2" input="updateWildCardsDisplay(this.value)">
                     <span id="wildCardsValue">2</span>
                 </div>
 
                 <div class="setting-group">
                     <label for="tableComputerPlayers">AI Players (1-5):</label>
-                    <input type="range" id="tableComputerPlayers" min="1" max="5" value="4" oninput="updateAiPlayersDisplay(this.value)">
+                    <input type="range" id="tableComputerPlayers" min="1" max="5" value="4" input="updateAiPlayersDisplay(this.value)">
                     <span id="aiPlayersValue">4</span>
                 </div>
             </div>
@@ -636,7 +652,7 @@ function createTableSettingsModal() {
                 <label style="color: #ffd700; display: block; margin-bottom: 8px;">Rounds (3-20):</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <input type="range" id="tableRounds" min="3" max="20" value="3"
-                           oninput="updateRoundsDisplay(this.value)" style="flex: 1;">
+                           input="updateRoundsDisplay(this.value)" style="flex: 1;">
                     <span id="rounds" style="color: #ffd700; font-weight: bold; min-width: 30px;">3</span>
                 </div>
             </div>
@@ -654,7 +670,7 @@ function createTableSettingsModal() {
                 <label style="color: #ffd700; display: block; margin-bottom: 8px;">Wild Cards (0-4):</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <input type="range" id="tableWildCardCounts" min="0" max="4" value="2"
-                           oninput="updateWildCardsDisplay(this.value)" style="flex: 1;">
+                           input="updateWildCardsDisplay(this.value)" style="flex: 1;">
                     <span id="wildCardsValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">2</span>
                 </div>
             </div>
@@ -663,7 +679,7 @@ function createTableSettingsModal() {
                 <label style="color: #ffd700; display: block; margin-bottom: 8px;">AI Players (1-5):</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <input type="range" id="tableComputerPlayers" min="1" max="5" value="4"
-                           oninput="updateAiPlayersDisplay(this.value)" style="flex: 1;">
+                           input="updateAiPlayersDisplay(this.value)" style="flex: 1;">
                     <span id="aiPlayersValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">4</span>
                 </div>
             </div>
