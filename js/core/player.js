@@ -60,17 +60,6 @@ class PlayerManager {
             let humanPlayerName = 'Player 1'; // Default fallback
             let playerEmail = null;
 
-// no longer need because it's done at joinTable()
-//            if (window.firebaseAuth && window.firebaseAuth.currentUser) {
-//                const user = window.firebaseAuth.currentUser;
-//
-//                // Generate unique email for this session
-//                const uniqueEmail = this.generateUniquePlayerEmail(user.email);
-//
-//                // Use the unique email as the player NAME (not just store it separately)
-//                humanPlayerName = uniqueEmail;  // This becomes peter_01@gmail.com
-//            }
-
             // Create human player with unique email as the name
             this.players.push({
                 name: humanPlayerName,          // This is now peter_01@gmail.com

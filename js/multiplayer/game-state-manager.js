@@ -76,4 +76,24 @@ async function handleTableStateChange(tableState) {
                 default:
                     console.log('🎮 Unknown table state:', tableState);
             }
+
+
         }
+
+// Add this function to lobby.js
+async function setupLobbyStateListener(tableId) {
+    firebase.database().ref(`tables/${tableId}/state/LOBBY_STATE`).on('value', (snapshot) => {
+        const lobbyState = snapshot.val();
+        console.log('🏛️ Lobby state changed:', lobbyState);
+
+        if (lobbyState === 'ready') {
+            // Trigger button update for all players
+            const playersSnapshot = firebase.database().ref(`tables/${tableId}/players`).once('value');
+            playersSnapshot.then(snapshot => {
+                const players = snapshot.val() || {};
+                const playersArray = Object.values(players);
+                updateStartGameButton(playersArray.length, playersArray);
+            });
+        }
+    });
+}

@@ -237,4 +237,4 @@ class UserStatsManager {
 
 // Initialize when page loads
 window.userStatsManager = new UserStatsManager();
-console.log('📊 User Stats Manager initialized');
+//console.log('📊 User Stats Manager initialized');

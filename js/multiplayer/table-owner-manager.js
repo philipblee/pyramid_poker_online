@@ -18,7 +18,7 @@ async function tableOwnerManager(playerCount, playersArray, tableId) {
     const sortedPlayers = [...playersArray].sort((a, b) => a.joinedAt - b.joinedAt);
 
     // Check if current user is the first player (owner)
-    const isOwner = await claimOwnershipIfNeeded(tableId);
+    const isOwner = await claimOwnershipIfNeeded(tableId, currentUserName);
     const playerInfo = {
         id: 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
         name: currentUserName,

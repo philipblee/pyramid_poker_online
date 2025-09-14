@@ -223,7 +223,6 @@
         <span id="toggleText">Hide</span>
     </button>
 
-
     <div class="header">
         <div class="header-content">
             <h1>🔺 Pyramid Poker Online</h1>
@@ -232,8 +231,7 @@
         </div>
     </div>
 
-
-    <!-- Lobby Screen -->
+    <!-- Sitting at Lobby Screen -->
     <div class="lobby-screen" id="lobbyScreen" style="display: none;">
         <div class="lobby-header">
             <h2 class="lobby-title">🏛️ Game Lobby</h2>
@@ -283,7 +281,7 @@
         </div>
     </div>
 
-
+    <!-- Sitting at Game Screen -->
     <div class="game-area" id="gameArea" style="display: none;">
     <!-- Your existing game content -->
 
@@ -357,7 +355,6 @@
         </div>
     </div>
 
-
     <!-- Countdown overlay -->
     <div id="countdownOverlay" class="countdown-overlay" style="display: none;">
         <div class="countdown-number">3</div>
@@ -389,103 +386,116 @@
     </div>
     <!-- JavaScript Files -->
 
-<!-- Near the bottom of game.html, before closing </body> -->
-<script>
-function updateStartGameButton(playerCount, isOwner='false') {
-    console.log('🔍 updateStartGameButton called with playerCount:', playerCount);
+    <!-- Near the bottom of game.html, before closing </body> -->
+    <script>
+        function updateStartGameButton(playerCount) {
+<!--            console.log('🔍 updateStartGameButton called with playerCount:', playerCount);-->
+            const startBtn = document.getElementById('startGameBtn');
+<!--            console.log('🔍 startBtn element found:', !!startBtn);-->
+<!--            if (!startBtn) return;-->
 
-    const startBtn = document.getElementById('startGameBtn');
-    console.log('🔍 startBtn element found:', !!startBtn);
+            const gameMode = tableSettings.gameMode;
+            const minPlayers = tableSettings.minPlayers || 2;
 
-    if (!startBtn) return;
+            const isOwner = window.currentPlayerIsOwner
+            console.log("Log in game.html, isOwner:", isOwner)
 
-    const gameMode = tableSettings.gameMode;
-    const minPlayers = tableSettings.minPlayers || 2;
+            if (gameMode === 'single-human') {
+                console.log('🔍 Single-human mode - enabling button');
+                startBtn.disabled = false;
+                startBtn.textContent = '🎯 Start Single-User Game';
 
-    if (gameMode === 'single-human') {
-        console.log('🔍 Single human mode - enabling button');
-        startBtn.disabled = false;
-        startBtn.textContent = '🎯 Start Game';
-    } else if (gameMode === 'multiple-humans') {
-        if (playerCount >= minPlayers) {
-            console.log('🔍 Multi-human mode - enough players, enabling');
-            startBtn.disabled = false;
-            startBtn.textContent = '🎯 Start Game';
-        } else {
-            console.log('🔍 Multi-human mode - not enough players, disabling');
-            startBtn.disabled = true;
-            startBtn.textContent = `Need ${minPlayers - playerCount} more players`;
+
+            if (gameMode === 'multiple-humans') {
+                console.log('🔍 Multi-human mode - ready to disable/enable start button');
+                if (playerCount >= minPlayers) {
+                    if (IsOwner) {
+                        startBtn.disabled = false;
+                        startBtn.textContent = '👑 Start Multi-User Game';
+                        console.log('🔍 Is Owner & Enough Players - enabling Start Multi-User Game button');
+                    }
+                    else
+                    {
+                        startBtn.disabled = true;
+                        startBtn.textContent = 'Waiting for Owner';
+                        console.log('🔍 Not Owner & Enough Players - disabling button - Waiting for Owner');
+                    }
+                }
+                else
+                {
+                    startBtn.disabled = true;
+                    startBtn.textContent = `Need ${minPlayers - playerCount} more players`;
+                    console.log('🔍 Multi-human mode - not enough players, disabling button - Waiting for more players');
+                }
+            }
         }
-    }
-
-    console.log('🔍 Final button state - disabled:', startBtn.disabled, 'text:', startBtn.textContent);
-}
+        }
 
 
-// Existing game initialization
-window.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Initializing Pyramid Poker...');
+        // Existing game initialization
+        window.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Initializing Pyramid Poker...');
 
-    // Load empirical win probability data
-    const empiricalLoaded = await initializeEmpiricalWinProbability();
-    if (empiricalLoaded) {
-<!--        console.log('✅ Empirical win prob loaded (30,868 entries)');-->
-    } else {
-        console.log('⚠️ Empirical data failed to load');
-    }
+            // Load empirical win probability data
+            const empiricalLoaded = await initializeEmpiricalWinProbability();
+            if (empiricalLoaded) {
+        <!--        console.log('✅ Empirical win prob loaded (30,868 entries)');-->
+            } else {
+                console.log('⚠️ Empirical data failed to load');
+            }
 
-    // Load tiered win probability data
-    const tieredLoaded = await initializeTieredWinProbability();
-    if (tieredLoaded) {
-<!--        console.log('✅ Tiered win prob loaded (1978 entries)');-->
-    } else {
-        console.log('⚠️ Tiered data failed to load');
-    }
+            // Load tiered win probability data
+            const tieredLoaded = await initializeTieredWinProbability();
+            if (tieredLoaded) {
+        <!--        console.log('✅ Tiered win prob loaded (1978 entries)');-->
+            } else {
+                console.log('⚠️ Tiered data failed to load');
+            }
 
-    // Load tiered2 win probability data
-    const tiered2Loaded = await initializeTiered2WinProbability();
-    if (tiered2Loaded) {
-<!--        console.log('✅ Tiered2 win prob loaded (2235 entries)');-->
-    } else {
-        console.log('⚠️ Tiered data failed to load');
-    }
+            // Load tiered2 win probability data
+            const tiered2Loaded = await initializeTiered2WinProbability();
+            if (tiered2Loaded) {
+        <!--        console.log('✅ Tiered2 win prob loaded (2235 entries)');-->
+            } else {
+                console.log('⚠️ Tiered data failed to load');
+            }
 
-    // Load netEV_lookup_table
-    const netEVLoaded = await initializeNetEVLookup();
-    if (netEVLoaded) {
-<!--        console.log('✅ netEV Lookup Table loaded (2270 entries)');-->
-    } else {
-        console.log('⚠️ netEV Lookup Table failed to load');
-    }
+            // Load netEV_lookup_table
+            const netEVLoaded = await initializeNetEVLookup();
+            if (netEVLoaded) {
+        <!--        console.log('✅ netEV Lookup Table loaded (2270 entries)');-->
+            } else {
+                console.log('⚠️ netEV Lookup Table failed to load');
+            }
 
-<!-- Continue with other scripts... -->
+        <!-- Continue with other scripts... -->
 
-    // Remove players from Realtime Database tables 6
-    firebase.database().ref(`tables/6`).remove()
-        .then(() => {
-            console.log('Entire table 6 cleared');
+            // Remove players from Realtime Database tables 6
+            firebase.database().ref(`tables/6`).remove()
+                .then(() => {
+                    console.log('Entire table 6 cleared');
+                });
+
+        <!--    firebase.database().ref(`tables/7`).remove()-->
+        <!--    .then(() => {-->
+        <!--        console.log('Entire table 7 cleared');-->
+        <!--    });-->
+
+        <!--    // Delete just the FireStore currentGame field from tables/7-->
+        <!--    firebase.firestore().collection('tables').doc('7').update({-->
+        <!--        currentGame: firebase.firestore.FieldValue.delete()-->
+        <!--    })-->
+        <!--    .then(() => console.log('currentGame from tables/7 deleted'));-->
+
+
+        <!--    // Delete just the FireStore currentGame field from tables/6-->
+        <!--    firebase.firestore().collection('tables').doc('6').update({-->
+        <!--        currentGame: firebase.firestore.FieldValue.delete()-->
+        <!--    })-->
+        <!--    .then(() => console.log('currentGame from tables/6 deleted'));-->
+
         });
-
-<!--    firebase.database().ref(`tables/7`).remove()-->
-<!--    .then(() => {-->
-<!--        console.log('Entire table 7 cleared');-->
-<!--    });-->
-
-<!--    // Delete just the FireStore currentGame field from tables/7-->
-<!--    firebase.firestore().collection('tables').doc('7').update({-->
-<!--        currentGame: firebase.firestore.FieldValue.delete()-->
-<!--    })-->
-<!--    .then(() => console.log('currentGame from tables/7 deleted'));-->
-
-
-<!--    // Delete just the FireStore currentGame field from tables/6-->
-<!--    firebase.firestore().collection('tables').doc('6').update({-->
-<!--        currentGame: firebase.firestore.FieldValue.delete()-->
-<!--    })-->
-<!--    .then(() => console.log('currentGame from tables/6 deleted'));-->
-
-});
-</script>
+    </script>
 
     <!-- Add these SDKs (before your existing scripts) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>

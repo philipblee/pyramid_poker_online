@@ -69,7 +69,7 @@ class MultiDeviceIntegration {
             .on('value', (snapshot) => {
                 const playerCount = snapshot.val() || 0;
                 console.log(`🔍 Shared player count: ${playerCount}`);
-                updateStartGameButton(playerCount, 'false');
+                updateStartGameButton(playerCount);
             });
         });
     }

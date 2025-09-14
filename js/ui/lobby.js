@@ -274,19 +274,24 @@ function createCreateTableCard() {
 }
 
 // In joinTable() function - after generating userName
-async function claimOwnershipIfNeeded(tableId) {
-    // Check current ownership state
-    const ownershipRef = firebase.database().ref(`tables/${tableId}/state/${TABLE_STATES.TABLE_OWNED}`);
-    const snapshot = await ownershipRef.once('value');
-    const isOwned = snapshot.val();
+async function claimOwnershipIfNeeded(tableId, playerName) {
+    // Check who currently owns the table
+    const ownerRef = firebase.database().ref(`tables/${tableId}/state/TABLE_OWNER`);
+    const snapshot = await ownerRef.once('value');
+    const currentOwner = snapshot.val();
 
-    if (isOwned === 'false' || isOwned === null) {
-        // Table not owned, claim it
-        await ownershipRef.set('true');
+    if (!currentOwner) {
+        // No owner, claim it
+        await ownerRef.set(playerName);
         console.log('👑 Claimed table ownership');
         return true;
+    } else if (currentOwner === playerName) {
+        // We already own it
+        console.log('👑 We already own this table');
+        return true;
     } else {
-        console.log('🔍 Table already owned');
+        // Someone else owns it
+        console.log(`🔍 Table owned by: ${currentOwner}`);
         return false;
     }
 }
@@ -331,15 +336,30 @@ async function joinTable(table) {
 
         console.log('✅ JOIN ALLOWED - proceeding with fresh data');
 
+        // Use it:
+        const isOwner = 'true'
+
+        // In joinTable() after determining isOwner
+
+        const playerInfo = {
+            id: 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            name: 'n/a not using Firebase',
+            joinedAt: Date.now(),
+            ready: false,
+            isOwner: isOwner
+        };
+
+        window.currentPlayerIsOwner = playerInfo.isOwner;
+
         // NOW proceed with joining...
         currentTable = table;
         tableSettings = { ...table.settings };
 
         // Initialize the start button state for single-player tables
         if (table.settings.gameMode === 'single-human') {
-            updateStartGameButton(1, 'true'); // Single player is always ready
+            updateStartGameButton(1); // Single player is always ready
         } else {
-            updateStartGameButton(0, 'false'); // Multi-player starts with 0 players
+            updateStartGameButton(0); // Multi-player starts with 0 players
         }
 
         firebase.database().ref(`tables/${table.id}/settings/humanPlayers`)
@@ -385,7 +405,9 @@ async function joinTable(table) {
         }
 
         // Use it:
-        const isOwner = await claimOwnershipIfNeeded(table.id);
+        const isOwner = await claimOwnershipIfNeeded(table.id, userName);
+
+        // In joinTable() after determining isOwner
 
         const playerInfo = {
             id: 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
@@ -395,22 +417,39 @@ async function joinTable(table) {
             isOwner: isOwner
         };
 
+        window.currentPlayerIsOwner = playerInfo.isOwner;
+
         console.log('🔍 userName, isOwner:', userName, isOwner);
 
         // Add player to Firebase table (using .then() instead of await)
         window.multiDeviceIntegration.addPlayerToTable(table.id, playerInfo)
             // After the .then() in joinTable()
-            .then(() => {
+            .then(async () => {
                 console.log('✅ Player added successfully');
 
                 // Set up listener for real-time updates
                 window.multiDeviceIntegration.setupPlayerListListener(table.id, updatePlayerListUI);
                 window.multiDeviceIntegration.setupScoreListener(); // Add this line
+                
 
                 // NEW: Add table state listener
                 window.multiDeviceIntegration.setupTableStateListener(table.id, handleTableStateChange);
-            })
 
+                // Set up lobby state listener
+                setupLobbyStateListener(table.id);
+
+                // If owner and enough players, set lobby to ready
+                if (playerInfo.isOwner) {
+                    const playersSnapshot = await firebase.database().ref(`tables/${table.id}/players`).once('value');
+                    const players = playersSnapshot.val() || {};
+                    const currentPlayerCount = Object.keys(players).length;
+
+                    if (currentPlayerCount >= 2) {
+                        await firebase.database().ref(`tables/${table.id}/state/LOBBY_STATE`).set('ready');
+                        console.log('🏛️ Owner set lobby state to ready');
+                    }
+                }
+            })
 
             .catch(error => {
                 console.error('❌ Error adding player:', error);
@@ -818,7 +857,7 @@ function updatePlayerListUI(players, tableId) {
     }
 
     // Update start game button
-    updateStartGameButton(players.length, 'false');
+    updateStartGameButton(players.length);
 
     console.log('Updated all player slots');
 
@@ -826,6 +865,7 @@ function updatePlayerListUI(players, tableId) {
     tableOwnerManager(players ? players.length : 0, players,tableId);
 
 }
+
 
 // Export functions for integration
 window.PyramidPokerLobby = {

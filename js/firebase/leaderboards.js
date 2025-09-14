@@ -259,4 +259,4 @@ class LeaderboardManager {
 
 // Initialize when page loads
 window.leaderboardManager = new LeaderboardManager();
-console.log('🏆 Leaderboard Manager initialized');
+//console.log('🏆 Leaderboard Manager initialized');
