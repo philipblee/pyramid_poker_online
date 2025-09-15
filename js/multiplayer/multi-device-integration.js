@@ -16,13 +16,13 @@ class MultiDeviceIntegration {
         // Debug the isMultiDevice setting
         console.log('  window.gameConfig exists:', !!window.gameConfig);
         console.log('  window.gameConfig:', window.gameConfig);
-        console.log('  gameConfig.config:', window.gameConfig?.config);
-        console.log('  gameDeviceMode value:', window.gameConfig?.config?.gameDeviceMode);
-        console.log('  gameDeviceMode type:', typeof window.gameConfig?.config?.gameDeviceMode);
-        console.log('  comparison result:', window.gameConfig?.config?.gameDeviceMode === 'multi-device');
+//        console.log('  gameConfig.config:', window.gameConfig?.config);
+//        console.log('  gameDeviceMode value:', window.gameConfig?.config?.gameDeviceMode);
+//        console.log('  gameDeviceMode type:', typeof window.gameConfig?.config?.gameDeviceMode);
+//        console.log('  comparison result:', window.gameConfig?.config?.gameDeviceMode === 'multi-device');
 
-        this.isMultiDevice = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
-        console.log('  final isMultiDevice:', this.isMultiDevice);
+//        this.isMultiDevice = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
+//        console.log('  final isMultiDevice:', this.isMultiDevice);
 
         // ... existing properties
         this.playersData = new Map(); // Track all players
@@ -31,8 +31,8 @@ class MultiDeviceIntegration {
         this.tableStateListener = null; // Firebase listener
 
         // ADD OWNER DETECTION:
-//        this.isOwner = this.isTableOwner();
-//        console.log('🏗️ Constructor - Setting isOwner:', this.isOwner);
+        this.isOwner = this.isTableOwner();
+        console.log('🏗️ Constructor - Setting isOwner:', this.isOwner);
 
     }
 
@@ -293,16 +293,38 @@ class MultiDeviceIntegration {
 
         // Add enhanced handler that runs FIRST and stops other handlers
         submitBtn.addEventListener('click', async (e) => {
+
             e.stopImmediatePropagation(); // Prevents original handler
 
             // Enhanced multi-device logic
             const humanPlayer = window.game.players.find(p => !p.isAI);
-            const myUniquePlayerName = window.currentPlayerUniquePlayerName;
-            const playerName = myUniquePlayerName || "error in playerName";
+//            const playerName = humanPlayer ? humanPlayer.name : 'fallback@gmail.com';
+
+            const playerName = window.currentPlayerUniquePlayerName;
+
+            console.log('🔍 PLAYER IDENTITY CHECK:');
+            console.log('- playerName:', playerName);
+            console.log('- Expected for this device:'), // what should it be?
+            console.log('- playerHands before storage:', window.game.playerHands);
+            console.log('- playerHands has this key?', window.game.playerHands.has(playerName));
 
             try {
                 console.log(`📝 Storing arrangement for human player: ${playerName}`);
+
+                // RIGHT BEFORE calling storePlayerArrangementToFirebase:
+                console.log('🔍 PRE-STORAGE DEBUG for:', playerName);
+                console.log('🔍 Current playerHands Map:', window.game.playerHands);
+                console.log('🔍 PlayerHands has key?', window.game.playerHands.has(playerName));
+                console.log('🔍 Direct playerHands.get():', window.game.playerHands.get(playerName));
+
+                // Also check what's visually arranged:
+                console.log('🔍 DOM back hand:', document.querySelector('.back-hand')?.children.length);
+                console.log('🔍 DOM middle hand:', document.querySelector('.middle-hand')?.children.length);
+                console.log('🔍 DOM front hand:', document.querySelector('.front-hand')?.children.length);
+
                 await this.storePlayerArrangementToFirebase(playerName);
+
+
                 // Add after successful storage:
                 const submitBtn = document.getElementById('submitHand');
                 if (submitBtn) {
@@ -326,7 +348,7 @@ class MultiDeviceIntegration {
      * Set up listener for submission state changes (call this during initialization)
      */
     // In setupSubmissionListener(), add more logging:
-    setupSubmissionListener() {
+    async setupSubmissionListener() {
         if (!this.isMultiDevice) return;
 
         console.log('👂 Setting up submission state listener...');
@@ -335,22 +357,23 @@ class MultiDeviceIntegration {
 
         const tableRef = this.tableManager.tablesRef.doc(this.currentTableId.toString());
 
-        this.submissionListener = tableRef.onSnapshot((doc) => {
+        this.submissionListener = tableRef.onSnapshot(async (doc) => {
             console.log('📡 FIRESTORE LISTENER TRIGGERED!');
-            console.log('📡 Document exists:', doc.exists);
-            console.log('📡 Document data:', doc.data());
-
-            // ADD OWNERSHIP DEBUG:
-            console.log('📡 this.isOwner:', this.isOwner);
-            console.log('📡 Checking ownership manually...');
 
             if (this.isOwner) {
-                console.log('📡 Owner detected change, checking submissions...');
-                this.checkAllPlayersSubmitted();
+                const stateSnapshot = await firebase.database().ref(`tables/${this.tableId}/tableState`).once('value');
+                const currentState = stateSnapshot.val(); // Should return "dealing" or "playing"
+
+                console.log('📡 Current TABLE_STATE:', currentState);
+
+                if (currentState === TABLE_STATES.PLAYING) {
+                    console.log('📡 Owner checking submissions (PLAYING state)');
+                    this.checkAllPlayersSubmitted();
+                } else {
+                    console.log('📡 Skipping check - not in PLAYING state:', currentState);
+                }
             }
         });
-
-        console.log('👂 Listener set up successfully');
     }
 
     /**
@@ -628,20 +651,43 @@ async isTableOwner() {
     async storePlayerArrangementToFirebase(playerName) {
         console.log(`☁️ Storing player arrangement to Firebase for: ${playerName}`);
 
-        const playerHand = window.game.playerHands.get(playerName);
+        // DEBUG 1: Check what we're looking for
+        console.log('🔍 DEBUG - Input playerName:', playerName);
+        console.log('🔍 DEBUG - typeof playerName:', typeof playerName);
 
-        // Get the unique player ID instead of using playerName
+        // DEBUG 2: Check if playerHands exists and has the player
+        console.log('🔍 DEBUG - window.game.playerHands exists:', !!window.game.playerHands);
+        console.log('🔍 DEBUG - playerHands keys:', window.game.playerHands ? Array.from(window.game.playerHands.keys()) : 'No playerHands');
+
+        const playerHand = window.game.playerHands.get(playerName);
+        console.log('🔍 DEBUG - Retrieved playerHand:', playerHand);
+        console.log('🔍 DEBUG - playerHand exists:', !!playerHand);
+
+        if (playerHand) {
+            console.log('🔍 DEBUG - playerHand.back length:', playerHand.back?.length);
+            console.log('🔍 DEBUG - playerHand.middle length:', playerHand.middle?.length);
+            console.log('🔍 DEBUG - playerHand.front length:', playerHand.front?.length);
+        }
+
+        // DEBUG 3: Check players array and ID matching
+        console.log('🔍 DEBUG - window.game.players:', window.game.players?.map(p => ({name: p.name, id: p.id})));
+
         const player = window.game.players.find(p => p.name === playerName);
-        const uniquePlayerId = player ? player.id : playerName; // Fallback to playerName if ID not found
+        console.log('🔍 DEBUG - Found matching player:', player);
+
+        const uniquePlayerId = player ? player.id : playerName;
+        console.log('🔍 DEBUG - Using uniquePlayerId:', uniquePlayerId);
 
         const arrangementData = {
-            [uniquePlayerId]: { // Use unique player ID as key
+            [uniquePlayerId]: {
                 back: playerHand.back,
                 middle: playerHand.middle,
                 front: playerHand.front,
                 timestamp: Date.now()
             }
         };
+
+        console.log('🔍 DEBUG - Final arrangementData:', JSON.stringify(arrangementData, null, 2));
 
         await this.tableManager.tablesRef.doc(this.currentTableId.toString()).set({
             'currentGame': {
@@ -651,7 +697,6 @@ async isTableOwner() {
 
         console.log(`✅ Stored arrangement for ${playerName}`);
     }
-
     // Sync tournament results to Firebase for cloud storage
     async syncResultsToFirebase() {
         if (!this.isMultiDevice) return;

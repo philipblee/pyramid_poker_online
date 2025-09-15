@@ -40,21 +40,50 @@ function transitionFromLobbyToDealing() {
 
 function transitionToPlayingPhase() {
     console.log('🎮 Transitioning to playing phase...');
-    // TODO: Enable game controls, show "arrange your cards" message
+
+    console.log('🎮 Transitioning to playing phase...');
+    console.log('🎮 About to call setTableState(PLAYING)');
+
+    // ADD THIS - Set state to PLAYING:
+    if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
+        setTableState(TABLE_STATES.PLAYING);
+    }
+
+    // Enable game controls, show "arrange your cards" message
 }
 
 function transitionToScoringPhase() {
     console.log('🎮 Transitioning to scoring phase...');
-    // TODO: Show scoring results
+
+    // ADD THIS - Set state to SCORING:
+    if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
+        setTableState(TABLE_STATES.SCORING);
+    }
 }
 
 async function handleTableStateChange(tableState) {
     console.log('🎮 Handling table state change:', tableState);
 
     switch(tableState) {
+
         case TABLE_STATES.DEALING:
             console.log('🎮 Game started! Moving to dealing phase...');
             transitionFromLobbyToDealing();
+
+            // After dealing setup, immediately advance to playing
+            setTimeout(() => {
+                console.log('🎮 Dealing complete, moving to playing phase...');
+                transitionToPlayingPhase();
+            }, 1000);
+            break;case TABLE_STATES.DEALING:
+            console.log('🎮 Game started! Moving to dealing phase...');
+            transitionFromLobbyToDealing();
+
+            // After dealing setup, immediately advance to playing
+            setTimeout(() => {
+                console.log('🎮 Dealing complete, moving to playing phase...');
+                transitionToPlayingPhase();
+            }, 1000);
             break;
 
         case TABLE_STATES.PLAYING:
@@ -84,6 +113,25 @@ async function handleTableStateChange(tableState) {
 
         }
 
+// In game-state-manager.js or wherever global functions are:
+async function setTableState(newState) {
+    console.log('👑 setTableState called with:', newState);
+
+    if (!window.multiDeviceIntegration || !window.multiDeviceIntegration.isOwner) {
+        console.log('❌ Only owner can change table state');
+        return;
+    }
+
+    const tableId = window.multiDeviceIntegration.tableId;
+    console.log('👑 Setting table state to:', newState, 'for table:', tableId);
+
+    try {
+        await firebase.database().ref(`tables/${tableId}/tableState`).set(newState);
+        console.log('✅ State set successfully');
+    } catch (error) {
+        console.log('❌ Error setting state:', error);
+    }
+}
 // Add this function to lobby.js
 async function setupLobbyStateListener(tableId) {
     firebase.database().ref(`tables/${tableId}/state/LOBBY_STATE`).on('value', (snapshot) => {
