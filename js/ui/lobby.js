@@ -396,9 +396,12 @@ async function joinTable(table) {
         let uniquePlayerName = currentUser ? currentUser.email : 'Guest Player';
 
         if (currentUser && currentUser.email && window.game?.playerManager) {
-            console.log('🔧 Generating unique player name...');
+            console.log('🔧 Log in joinTable - Generating unique player name...');
             uniquePlayerName = await window.game.playerManager.generateUniquePlayerName(currentUser.email, table.id);
-            console.log('🔧 Generated uniquePlayerName:', uniquePlayerName);
+            console.log('🔧 Log in joinTable - Generated uniquePlayerName:', uniquePlayerName);
+            // Add this line:
+            window.currentPlayerUniquePlayerName = uniquePlayerName;
+            console.log('🔧 Log in joinTable - Set window.currentPlayerUniquePlayerName to:', window.currentPlayerUniquePlayerName);
         }
 
         const isOwner = await claimOwnershipIfNeeded(table.id, uniquePlayerName);

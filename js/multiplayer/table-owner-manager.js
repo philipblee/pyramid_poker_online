@@ -12,10 +12,9 @@ async function tableOwnerManager(playerCount, playersArray, tableId) {
     if (!currentUser) return;
 
     // Find our player in the existing players array (don't create new player)
-    const ourPlayer = playersArray.find(p =>
-        p.name === currentUser.email ||
-        p.name.includes(currentUser.email.split('@')[0])
-    );
+    const humanPlayer = window.game.players.find(p => !p.isAI);
+    const ourPlayerName = humanPlayer ? humanPlayer.name : currentUser?.email;
+    const ourPlayer = playersArray.find(p => p.name === ourPlayerName);
 
     if (!ourPlayer) {
         console.log('Our player not found in array');
