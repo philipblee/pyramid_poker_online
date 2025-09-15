@@ -29,6 +29,11 @@ class MultiDeviceIntegration {
         this.submissionTracker = new Map(); // Track who submitted
         this.reconnectionTimers = new Map(); // 60-second timers
         this.tableStateListener = null; // Firebase listener
+
+        // ADD OWNER DETECTION:
+//        this.isOwner = this.isTableOwner();
+//        console.log('🏗️ Constructor - Setting isOwner:', this.isOwner);
+
     }
 
     // NEW: Create or join table
@@ -155,32 +160,29 @@ class MultiDeviceIntegration {
     // Check if all players have submitted their arrangements
     async checkAllPlayersSubmitted() {
         console.log('👑 Owner checking if all players have submitted...');
-
-        // Debug: Check what data we're working with
+//
+//        // Debug: Check what data we're working with
         const playersSnapshot = await firebase.database().ref(`tables/${this.tableId}/players`).once('value');
         const players = playersSnapshot.val() || {};
         const totalPlayers = Object.keys(players).length;
 
-        console.log('🔍 Raw Firebase table data:', tableSnapshot.val());
-        console.log('🔍 Players data:', tableSnapshot.val()?.players);
-        console.log('🔍 Timestamp field:', tableSnapshot.val()?.lastActivityTimestamp);
-
-        console.log('🔍 DEBUG - Players in table:', Object.keys(players));
-        console.log('🔍 DEBUG - Total players:', totalPlayers);
-
-        // Check submissions - this is likely where the issue is
-        const submissionsSnapshot = await firebase.database().ref(`tables/${this.tableId}/submissions`).once('value');
-        const submissions = submissionsSnapshot.val() || {};
-        const submittedCount = Object.keys(submissions).length;
-
-        console.log('🔍 DEBUG - Submissions data:', submissions);
-        console.log('🔍 DEBUG - Submitted count:', submittedCount);
-
         // Alternative check - look at Firestore arrangements
-        const arrangementsSnapshot = await firebase.firestore().collection('currentGames').doc(`table_${this.tableId}`).get();
+        const arrangementsSnapshot = await firebase.firestore()
+            .collection('tables')
+            .doc(this.tableId.toString())
+            .get();
+
         const arrangementsData = arrangementsSnapshot.data();
 
+        console.log('🔍 DEBUG - Full arrangements snapshot:', arrangementsSnapshot);
         console.log('🔍 DEBUG - Firestore arrangements:', arrangementsData);
+
+        // COUNT ARRANGEMENTS, NOT SUBMISSIONS:
+        const arrangements = arrangementsData || {};
+        const submittedCount = Object.keys(arrangements).length;
+
+        console.log('🔍 DEBUG - Arrangements count:', submittedCount);
+        console.log('🔍 DEBUG - Total players needed:', totalPlayers);
 
         if (submittedCount >= totalPlayers) {
             console.log('🎉 All players have submitted! Transitioning...');
@@ -295,7 +297,8 @@ class MultiDeviceIntegration {
 
             // Enhanced multi-device logic
             const humanPlayer = window.game.players.find(p => !p.isAI);
-            const playerName = humanPlayer ? humanPlayer.name : 'peter@gmail.com';
+            const myUniquePlayerName = window.currentPlayerUniquePlayerName;
+            const playerName = myUniquePlayerName || "error in playerName";
 
             try {
                 console.log(`📝 Storing arrangement for human player: ${playerName}`);
@@ -322,14 +325,32 @@ class MultiDeviceIntegration {
     /**
      * Set up listener for submission state changes (call this during initialization)
      */
+    // In setupSubmissionListener(), add more logging:
     setupSubmissionListener() {
         if (!this.isMultiDevice) return;
 
         console.log('👂 Setting up submission state listener...');
+        console.log('👂 Table ID:', this.currentTableId);
+        console.log('👂 Is Owner:', this.isOwner);
 
-        // Listen for changes to the game status
         const tableRef = this.tableManager.tablesRef.doc(this.currentTableId.toString());
 
+        this.submissionListener = tableRef.onSnapshot((doc) => {
+            console.log('📡 FIRESTORE LISTENER TRIGGERED!');
+            console.log('📡 Document exists:', doc.exists);
+            console.log('📡 Document data:', doc.data());
+
+            // ADD OWNERSHIP DEBUG:
+            console.log('📡 this.isOwner:', this.isOwner);
+            console.log('📡 Checking ownership manually...');
+
+            if (this.isOwner) {
+                console.log('📡 Owner detected change, checking submissions...');
+                this.checkAllPlayersSubmitted();
+            }
+        });
+
+        console.log('👂 Listener set up successfully');
     }
 
     /**

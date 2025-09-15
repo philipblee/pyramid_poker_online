@@ -48,7 +48,6 @@ function transitionToScoringPhase() {
     // TODO: Show scoring results
 }
 
-// Add this function (can go in your main game file or wherever your joinTable function is)
 async function handleTableStateChange(tableState) {
     console.log('🎮 Handling table state change:', tableState);
 
@@ -61,6 +60,11 @@ async function handleTableStateChange(tableState) {
         case TABLE_STATES.PLAYING:
             console.log('🎮 Cards dealt! Players can now arrange hands...');
             transitionToPlayingPhase();
+
+            // ADD THIS:
+            if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
+                window.multiDeviceIntegration.setupSubmissionListener();
+            }
             break;
 
         case TABLE_STATES.ALL_SUBMITTED:
