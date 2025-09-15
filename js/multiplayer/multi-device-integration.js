@@ -10,6 +10,7 @@ class MultiDeviceIntegration {
         console.log('  tableManager:', tableManager);
 
         this.currentTableId = tableId;
+        this.tableId = tableId
         this.tableManager = tableManager;
 
         // Debug the isMultiDevice setting
@@ -133,7 +134,11 @@ class MultiDeviceIntegration {
         });
 
         // Check if all players submitted
-        await this.checkAllPlayersSubmitted();
+        if (await this.isTableOwner()) {
+            await this.checkAllPlayersSubmitted();
+        } else {
+            console.log('Not owner - skipping submission check');
+        }
     }
 
     // Initialize multi-device mode with table
@@ -299,7 +304,19 @@ class MultiDeviceIntegration {
             try {
                 console.log(`📝 Storing arrangement for human player: ${playerName}`);
                 await this.storePlayerArrangementToFirebase(playerName);
-                await this.checkAllPlayersSubmitted();
+                // Add after successful storage:
+                const submitBtn = document.getElementById('submitHand');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Submitted ✓';
+                }
+
+
+                if (await this.isTableOwner()) {
+                    await this.checkAllPlayersSubmitted();
+                } else {
+                    console.log('Not owner - skipping submission check');
+                }
             } catch (error) {
                 console.error('❌ Error in enhanced submit:', error);
             }
@@ -394,21 +411,27 @@ class MultiDeviceIntegration {
     }
 
     // Add this helper method to check ownership
-    async isTableOwner() {
-        const currentUser = firebase.auth().currentUser;
-        if (!currentUser) return false;
+async isTableOwner() {
+    console.log('🔍 isTableOwner START');
+    try {
+        const ownerSnapshot = await firebase.database().ref(`tables/${this.currentTableId}/state/TABLE_OWNER`).once('value');
+        const tableOwner = ownerSnapshot.val();
 
-        const playersSnapshot = await firebase.database().ref(`tables/${this.tableId}/players`).once('value');
-        const players = playersSnapshot.val() || {};
+        const myUniquePlayerName = window.currentPlayerUniquePlayerName;
 
-        // Find our player and check if they're the owner
-        for (let playerId in players) {
-            if (players[playerId].name === currentUser.email || players[playerId].name.includes(currentUser.email.split('@')[0])) {
-                return players[playerId].isOwner === true;
-            }
-        }
+        console.log('🔍 Ownership check debug:', {
+            tableOwner,
+            myUniquePlayerName,
+            tableId: this.currentTableId,
+            match: tableOwner === myUniquePlayerName
+        });
+
+        return tableOwner === myUniquePlayerName;
+    } catch (error) {
+        console.error('❌ Error in isTableOwner:', error);
         return false;
     }
+}
 
     // this handles retrieve arrangements from Firebase
     enhanceCalculateScores() {
