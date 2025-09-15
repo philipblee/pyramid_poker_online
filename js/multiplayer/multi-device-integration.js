@@ -154,43 +154,39 @@ class MultiDeviceIntegration {
 
     // Check if all players have submitted their arrangements
     async checkAllPlayersSubmitted() {
-        if (!this.isMultiDevice) return;
+        console.log('👑 Owner checking if all players have submitted...');
 
-        console.log('🔍 Checking if all players have submitted...');
+        // Debug: Check what data we're working with
+        const playersSnapshot = await firebase.database().ref(`tables/${this.tableId}/players`).once('value');
+        const players = playersSnapshot.val() || {};
+        const totalPlayers = Object.keys(players).length;
 
-        try {
-            // Get current table data
-            const tableDoc = await this.tableManager.tablesRef.doc(this.currentTableId.toString()).get();
-            const tableData = tableDoc.data();
+        console.log('🔍 Raw Firebase table data:', tableSnapshot.val());
+        console.log('🔍 Players data:', tableSnapshot.val()?.players);
+        console.log('🔍 Timestamp field:', tableSnapshot.val()?.lastActivityTimestamp);
 
-            if (!tableData) {
-                console.log('❌ No table data found');
-                return;
-            }
+        console.log('🔍 DEBUG - Players in table:', Object.keys(players));
+        console.log('🔍 DEBUG - Total players:', totalPlayers);
 
-            // Get total players in the table
-//            const totalPlayers = tableData.players ? Object.keys(tableData.players).length : 0;
-            const totalPlayers = 2; // Temporary fix for testing
-            console.log(`👥 Total players in table: ${totalPlayers}`);
+        // Check submissions - this is likely where the issue is
+        const submissionsSnapshot = await firebase.database().ref(`tables/${this.tableId}/submissions`).once('value');
+        const submissions = submissionsSnapshot.val() || {};
+        const submittedCount = Object.keys(submissions).length;
 
+        console.log('🔍 DEBUG - Submissions data:', submissions);
+        console.log('🔍 DEBUG - Submitted count:', submittedCount);
 
-            // Get submitted arrangements
-            const arrangements = tableData.currentGame?.arrangements || {};
-            const submittedCount = Object.keys(arrangements).length;
-            console.log(`📝 Players submitted: ${submittedCount}/${totalPlayers}`);
+        // Alternative check - look at Firestore arrangements
+        const arrangementsSnapshot = await firebase.firestore().collection('currentGames').doc(`table_${this.tableId}`).get();
+        const arrangementsData = arrangementsSnapshot.data();
 
-            // Check if all players have submitted
-            if (submittedCount >= totalPlayers && totalPlayers > 1) {
-                console.log('🎉 All players have submitted! Transitioning to ALL_SUBMITTED state...');
-                await this.transitionToAllSubmitted();
-            } else {
-                console.log(`⏳ Waiting for more submissions (${submittedCount}/${totalPlayers})`);
-                // Update UI to show waiting status
-                this.updateSubmissionStatus(submittedCount, totalPlayers);
-            }
+        console.log('🔍 DEBUG - Firestore arrangements:', arrangementsData);
 
-        } catch (error) {
-            console.error('❌ Error checking submissions:', error);
+        if (submittedCount >= totalPlayers) {
+            console.log('🎉 All players have submitted! Transitioning...');
+            await this.transitionToAllSubmitted();
+        } else {
+            console.log(`⏳ Waiting for more submissions (${submittedCount}/${totalPlayers})`);
         }
     }
 

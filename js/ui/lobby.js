@@ -296,9 +296,53 @@ async function claimOwnershipIfNeeded(tableId, playerName) {
     }
 }
 
-// Join existing table
+
 async function joinTable(table) {
     console.log('🔍 joinTable called for:', table.name);
+
+
+    // NEW: Check for stale table data and clean up if needed
+    console.log('🧹 Checking for stale table data...');
+    const playersSnapshot = await firebase.database().ref(`tables/${table.id}/players`).once('value');
+    const existingPlayers = playersSnapshot.val() || {};
+    const playerCount = Object.keys(existingPlayers).length;
+
+    // When players join, set lastActivity
+    await firebase.database().ref(`tables/${table.id}/lastActivity`).set(Date.now());
+
+    if (playerCount > 0) {
+        console.log(`🔍 Found ${playerCount} existing players in table`);
+
+        // Check last activity
+        const lastActivitySnapshot = await firebase.database().ref(`tables/${table.id}/lastActivity`).once('value');
+        const lastActivity = lastActivitySnapshot.val() || 0;
+        const timeSinceActivity = Date.now() - lastActivity;
+        const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+        console.log('🔍 Current timestamp:', Date.now());
+        console.log('🔍 Last activity timestamp:', lastActivity);
+
+        if (lastActivity && lastActivity > 0) {
+            const timeSinceActivity = Date.now() - lastActivity;
+            const fiveMinutes = 5 * 60 * 1000;
+
+            console.log(`🕒 Time since last activity: ${Math.round(timeSinceActivity / 1000)} seconds`);
+
+            if (timeSinceActivity > fiveMinutes) {
+                console.log('🧹 Cleaning up stale table data...');
+                await firebase.database().ref(`tables/${table.id}`).remove();
+                await firebase.firestore().collection('currentGames').doc(`table_${table.id}`).delete();
+                console.log('✅ Stale data cleaned up');
+            } else {
+                console.log('🔍 Table data is recent, keeping existing players');
+            }
+        } else {
+                // Don't clean up if there's no timestamp - could be a legitimate new game
+                console.log('🔍 No lastActivity timestamp - assuming fresh table, keeping players');
+
+        }
+
+        }
 
     // 🎯 FIX: Update gameConfig.config (not the whole gameConfig object)
     if (window.gameConfig) {

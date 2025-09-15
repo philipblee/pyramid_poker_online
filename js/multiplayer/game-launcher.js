@@ -98,18 +98,13 @@ async function setupMultiDeviceMultiHuman() {
 
     console.log('🎮 Setting up local player:', userName);
 
-    // Clear existing players and add ONLY the current player
-    if (window.game && window.game.playerManager) {
+    // Only reset players in single-device mode
+    if (window.gameConfig.config.gameDeviceMode === 'single-device') {
         window.game.playerManager.resetPlayers();
-
-        // Add only THIS device's player
-        window.game.playerManager.addPlayer(userName, true); // true = isHuman
-
-        console.log(`✅ Added current player (${userName}) to this device`);
-        console.log('🌐 Other players will be managed by their own devices via Firebase');
+        window.game.playerManager.addPlayer(userName, true);
+    } else {
+        console.log('🌐 Multi-device mode: players already synced from Firebase');
     }
-
-    console.log('✅ Multi-device multi-human setup complete with submission coordination');
 
     return Promise.resolve();
 }
@@ -192,5 +187,3 @@ function launchGameInterface() {
         console.warn('No startNewGame function found');
     }
 }
-
-
