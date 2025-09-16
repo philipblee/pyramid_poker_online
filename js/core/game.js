@@ -349,6 +349,9 @@ class PyramidPokerGame {
     async handleAITurn() {
         const currentPlayer = this.playerManager.getCurrentPlayer();
 
+        // Show spinner immediately
+        showLoadingSpinner();
+
         await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
 
         console.log(`Log from handleAITurn: 🤖 AI ${currentPlayer.name} is thinking...`);
@@ -361,7 +364,10 @@ class PyramidPokerGame {
             // Step 2: Let player see the AI's arranged hand (3 seconds)
             setTimeout(() => {
                 console.log(`Log from handleAITurn: 👀 AI ${currentPlayer.name} displaying final arrangement...`);
-                // Update display so human can see AI's hand
+
+                // Hide spinner once arrangement is visible
+                hideLoadingSpinner();
+
                 this.validateHands(); // This updates the UI with hand strengths and colors
 
             // Step 3: Let player read the hand details (2 more seconds)
