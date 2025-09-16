@@ -107,14 +107,15 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
         console.log('Created matrixDiv:', matrixDiv);
 
         matrixDiv.innerHTML = `
-            <h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">Head-to-Head Matrix</h3>
+//            <h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">Head-to-Head Matrix</h3>
             <div id="scoringMatrix"></div>
         `;
         console.log('Set matrixDiv innerHTML');
 
-        roundRobinResults.appendChild(matrixDiv);
-        console.log('Appended matrixDiv to roundRobinResults');
-        console.log('roundRobinResults children NOW:', roundRobinResults.children.length);
+//        commented out this block because roundRobinResults keep appending
+//        roundRobinResults.appendChild(matrixDiv);
+//        console.log('Appended matrixDiv to roundRobinResults');
+//        console.log('roundRobinResults children NOW:', roundRobinResults.children.length);
 
     } catch (error) {
         console.error('Error creating matrix:', error);
@@ -144,7 +145,7 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
         if (firstSection) {
             const matrixDiv = document.createElement('div');
             matrixDiv.id = 'scoringMatrix';
-            matrixDiv.innerHTML = `<h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">Head-to-Head Matrix</h3>`;
+            matrixDiv.innerHTML = `<h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">  </h3>`;
             firstSection.parentNode.insertBefore(matrixDiv, firstSection);
         }
     }
@@ -225,7 +226,12 @@ console.log(`🎯 Matrix created for round ${game.currentRound}. Total children 
     // The HTML has a placeholder for a scoring matrix. Let's make sure it's at the top.
     const container = document.querySelector('.scoring-content');
     if (container) {
+        // Remove any existing tournament matrix (safest - only removes our specific element)
+        const oldMatrix = container.querySelector('#tournament-head-to-head-matrix');
+        if (oldMatrix) oldMatrix.remove();
+
         const matrixDiv = document.createElement('div');
+        matrixDiv.id = 'tournament-head-to-head-matrix'; // Give it a unique ID
         matrixDiv.innerHTML = tableHTML;
         // Insert the matrix right after the title and close button
         container.insertBefore(matrixDiv, container.children[2]);

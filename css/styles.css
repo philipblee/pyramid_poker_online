@@ -643,6 +643,12 @@ body {
     max-width: 1312px; /*18 cards worth of space: 77.17px * 17 = 1312px */
 }
 
+/* Force consistent button alignment */
+.btn-primary, .btn-secondary {
+    line-height: 1.2;
+    vertical-align: middle;
+}
+
 .header-content {
     display: flex;
     align-items: center;

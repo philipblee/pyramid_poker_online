@@ -54,14 +54,14 @@ class PlayerManager {
 
         if (config.gameMode === 'single-human') {
             // Create 1 human player + configured number of AI players
-            // Get the actual logged-in user's name
-            let humanPlayerName = 'Player 1'; // Default fallback
-            let playerEmail = null;
+            // Get the actual logged-in user
+            const user = window.firebaseAuthManager.currentUser;
+            let humanPlayerName = user?.email || 'Player 1'; // Use real email or fallback
 
-            // Create human player with unique email as the name
+            // Create human player with actual email as the name
             this.players.push({
-                name: humanPlayerName,          // This is now peter_01@gmail.com
-                originalEmail: user?.email,     // Optional: keep original for reference
+                name: humanPlayerName,          // This will now be your actual email
+                originalEmail: user?.email,     // Keep original for reference
                 id: Date.now() + Math.random(),
                 ready: false,
                 type: 'human'
@@ -155,7 +155,6 @@ class PlayerManager {
         }
         return null;
     }
-
 
     resetPlayers() {
         this.players = [];
