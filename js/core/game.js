@@ -58,7 +58,7 @@ class PyramidPokerGame {
         return playerName;
     }
 
-  handleAutoArrangeToggle() {
+    handleAutoArrangeToggle() {
     if (this.autoArrangeUsed) {
         // Undo auto-arrange (instant, no spinner needed)
         this.restoreToDealtState();
@@ -247,6 +247,22 @@ class PyramidPokerGame {
         this.loadCurrentPlayerHand();
 
         updateDisplay(this);
+    }
+
+    startNewTournament() {
+        console.log('🏆 Starting completely new tournament...');
+
+        // Clear all tournament-level data
+        this.currentRound = 0;  // or 1, depending on your preference
+        this.roundHistory = [];
+        this.roundRobinResults = [];  // <-- This is the key line for your bug
+        this.tournamentScores.clear();
+
+        // Reset game state
+        this.gameState = 'waiting';
+
+        // Call the regular game start logic
+        this.startNewGame();
     }
 
     // load all current playerHand
@@ -941,13 +957,28 @@ class PyramidPokerGame {
         html += `</div>`;
     }
 
+
+//    comment out this "start new tournament" block while I try something below this;
+//    html += `
+//        </div>
+//        <button onclick="this.parentElement.parentElement.remove(); game.gameState='waiting'; game.currentRound=0; game.roundRobinResults = []; updateDisplay(game);"
+//                style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
+//            Start New Tournament
+//        </button>
+//    `;
+
+
+//  commented out "start new tournament" block - trying something different
     html += `
         </div>
-        <button onclick="this.parentElement.parentElement.remove(); game.gameState='waiting'; game.currentRound=0; updateDisplay(game);"
+        <button onclick="this.parentElement.parentElement.remove(); game.startNewTournament();"
                 style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
             Start New Tournament
         </button>
     `;
+
+    // log start of new tournament
+    console.log ("Log from game.js - User clicked startNewTournament")
 
     content.innerHTML = html;
     modal.appendChild(content);
@@ -956,6 +987,8 @@ class PyramidPokerGame {
     // Reset to waiting state when closed
     this.gameState = 'waiting';
     this.currentRound = 0;
+    this.roundRobinResults = [];
+    console.log('🎯 After reset - roundRobinResults:', this.roundRobinResults); // <-- ADD THIS
     updateDisplay(this);
     }
 

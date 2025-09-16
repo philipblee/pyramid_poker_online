@@ -112,9 +112,10 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
         `;
         console.log('Set matrixDiv innerHTML');
 
-        roundRobinResults.appendChild(matrixDiv);
-        console.log('Appended matrixDiv to roundRobinResults');
-        console.log('roundRobinResults children NOW:', roundRobinResults.children.length);
+//        commented out this block because roundRobinResults keep appending
+//        roundRobinResults.appendChild(matrixDiv);
+//        console.log('Appended matrixDiv to roundRobinResults');
+//        console.log('roundRobinResults children NOW:', roundRobinResults.children.length);
 
     } catch (error) {
         console.error('Error creating matrix:', error);
@@ -225,7 +226,12 @@ console.log(`🎯 Matrix created for round ${game.currentRound}. Total children 
     // The HTML has a placeholder for a scoring matrix. Let's make sure it's at the top.
     const container = document.querySelector('.scoring-content');
     if (container) {
+        // Remove any existing tournament matrix (safest - only removes our specific element)
+        const oldMatrix = container.querySelector('#tournament-head-to-head-matrix');
+        if (oldMatrix) oldMatrix.remove();
+
         const matrixDiv = document.createElement('div');
+        matrixDiv.id = 'tournament-head-to-head-matrix'; // Give it a unique ID
         matrixDiv.innerHTML = tableHTML;
         // Insert the matrix right after the title and close button
         container.insertBefore(matrixDiv, container.children[2]);
