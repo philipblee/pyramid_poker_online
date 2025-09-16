@@ -107,7 +107,7 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
         console.log('Created matrixDiv:', matrixDiv);
 
         matrixDiv.innerHTML = `
-            <h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">Head-to-Head Matrix</h3>
+//            <h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">Head-to-Head Matrix</h3>
             <div id="scoringMatrix"></div>
         `;
         console.log('Set matrixDiv innerHTML');
@@ -145,7 +145,7 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
         if (firstSection) {
             const matrixDiv = document.createElement('div');
             matrixDiv.id = 'scoringMatrix';
-            matrixDiv.innerHTML = `<h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">Head-to-Head Matrix</h3>`;
+            matrixDiv.innerHTML = `<h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">  </h3>`;
             firstSection.parentNode.insertBefore(matrixDiv, firstSection);
         }
     }
