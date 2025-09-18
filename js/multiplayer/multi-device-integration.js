@@ -21,8 +21,8 @@ class MultiDeviceIntegration {
 //        console.log('  gameDeviceMode type:', typeof window.gameConfig?.config?.gameDeviceMode);
 //        console.log('  comparison result:', window.gameConfig?.config?.gameDeviceMode === 'multi-device');
 
-//        this.isMultiDevice = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
-//        console.log('  final isMultiDevice:', this.isMultiDevice);
+        this.isMultiDevice = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
+        console.log('  final isMultiDevice:', this.isMultiDevice);
 
         // ... existing properties
         this.playersData = new Map(); // Track all players
@@ -172,7 +172,7 @@ class MultiDeviceIntegration {
             .doc(this.tableId.toString())
             .get();
 
-        const arrangementsData = arrangementsSnapshot.data();
+        const arrangementsData = arrangementsSnapshot.data()?.currentGame?.arrangements;
 
         console.log('🔍 DEBUG - Full arrangements snapshot:', arrangementsSnapshot);
         console.log('🔍 DEBUG - Firestore arrangements:', arrangementsData);
@@ -180,7 +180,8 @@ class MultiDeviceIntegration {
         // COUNT ARRANGEMENTS, NOT SUBMISSIONS:
         const arrangements = arrangementsData || {};
         const submittedCount = Object.keys(arrangements).length;
-
+        console.log('🔍 DEBUG - arrangements keys:', Object.keys(arrangements));
+        console.log('🔍 DEBUG - arrangementsData type:', typeof arrangementsData);
         console.log('🔍 DEBUG - Arrangements count:', submittedCount);
         console.log('🔍 DEBUG - Total players needed:', totalPlayers);
 
@@ -301,6 +302,19 @@ class MultiDeviceIntegration {
 //            const playerName = humanPlayer ? humanPlayer.name : 'fallback@gmail.com';
 
             const playerName = window.currentPlayerUniquePlayerName;
+
+            // Read from where single instance actually stored the data (playerHands[0])
+            const playerData = window.game.playerHands.get(window.game.players[0].name);
+            if (playerData) {
+                // Store the actual arrangement data under the correct unique player key
+                window.game.playerHands.set(playerName, {
+                    back: [...playerData.back],
+                    middle: [...playerData.middle],
+                    front: [...playerData.front],
+                    cards: [...playerData.cards],
+                    originalCards: [...playerData.originalCards]
+                });
+}
 
             console.log('🔍 PLAYER IDENTITY CHECK:');
             console.log('- playerName:', playerName);
