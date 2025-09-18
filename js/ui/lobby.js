@@ -357,6 +357,15 @@ async function joinTable(table) {
         console.error('❌ window.gameConfig not found during joinTable!');
     }
 
+    // Get current player count to determine my index
+    const currentCountSnapshot = await firebase.database()
+        .ref(`tables/${table.id}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`)
+        .once('value');
+    const myPlayerIndex = currentCountSnapshot.val() || 0;
+    window.myPlayerIndex = myPlayerIndex;
+    console.log(`Set device player index to: ${myPlayerIndex}`);
+
+
     // In joinTable() after successful join
     firebase.database().ref(`tables/${table.id}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`)
         .transaction((current) => (current || 0) + 1);
