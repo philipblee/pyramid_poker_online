@@ -13,6 +13,9 @@ class MultiDeviceIntegration {
         this.tableId = tableId
         this.tableManager = tableManager;
 
+        this.tableState = null;  // Will be updated by Firebase listener
+        this.currentTableStateRef = null;  // Firebase reference for cleanup
+
         // Debug the isMultiDevice setting
         console.log('  window.gameConfig exists:', !!window.gameConfig);
         console.log('  window.gameConfig:', window.gameConfig);
@@ -62,6 +65,9 @@ class MultiDeviceIntegration {
         this.tableStateListener = tableStateRef.on('value', (snapshot) => {
             const tableState = snapshot.val();
             console.log('🔥 Table state updated:', tableState);
+
+            // Store the current state value
+            this.tableState = tableState;  // Add this line
 
             if (tableState) {
                 callback(tableState);
@@ -185,10 +191,10 @@ class MultiDeviceIntegration {
         console.log('🔍 DEBUG - Arrangements count:', submittedCount);
         console.log('🔍 DEBUG - Total players needed:', totalPlayers);
 
-        if (submittedCount >= totalPlayers) {
+        if (submittedCount >= totalPlayers && this.tableState !== 'all_submitted' && this.isowner) {
             console.log('🎉 All players have submitted! Transitioning...');
             await this.transitionToAllSubmitted();
-        } else {
+        } else if (this.tableState === 'all_submitted' && this.isowner) {
             console.log(`⏳ Waiting for more submissions (${submittedCount}/${totalPlayers})`);
         }
     }
@@ -200,9 +206,12 @@ class MultiDeviceIntegration {
         try {
             // Update table state in Realtime Database
             await this.tableManager.tablesRef.doc(this.currentTableId.toString()).update({
-                'currentGame.status': 'ALL_SUBMITTED',
+//                'currentGame.status': 'ALL_SUBMITTED',
                 'currentGame.allSubmittedAt': Date.now()
             });
+
+            // Add Realtime Database write to fix infinite loop
+            await firebase.database().ref(`tables/${this.currentTableId}/tableState`).set('all_submitted');
 
             console.log('✅ Successfully transitioned to ALL_SUBMITTED state');
 
@@ -282,7 +291,11 @@ class MultiDeviceIntegration {
             console.log('🔍 submittedHands after restoration:', window.game.submittedHands.size);
         }
 
-        this.syncResultsToFirebase();
+        // In proceedToScoring() after calculateScores() finishes
+        if (window.currentPlayerIsOwner) {
+            window.game.calculateScores();
+            await this.syncResultsToFirebase(); // Add this call
+        }
     }
 
     /**
@@ -337,7 +350,6 @@ class MultiDeviceIntegration {
                 console.log('🔍 DOM front hand:', document.querySelector('.front-hand')?.children.length);
 
                 await this.storePlayerArrangementToFirebase(playerName);
-
 
                 // Add after successful storage:
                 const submitBtn = document.getElementById('submitHand');
@@ -724,7 +736,7 @@ async isTableOwner() {
         await this.tableManager.tablesRef.doc(this.currentTableId.toString()).update({
             'currentGame.results': results,
             'currentGame.completedAt': Date.now(),
-            'currentGame.status': 'completed'
+//            'currentGame.status': 'completed'
         });
 
         // Update player stats in Firebase
