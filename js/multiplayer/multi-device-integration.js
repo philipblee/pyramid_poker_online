@@ -739,7 +739,7 @@ async isTableOwner() {
             round: window.game.currentRound,
             scores: {},
             arrangements: {},
-            detailedResults: window.game.lastDetailedResults || [], // Include detailed results
+            detailedResults: window.game.detailedResults || [], // Include detailed results
             timestamp: Date.now()
         };
 

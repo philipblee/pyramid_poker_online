@@ -869,7 +869,7 @@ class PyramidPokerGame {
         console.log('🔍 Just before showScoringPopup - this.maxRounds:', this.maxRounds);
 
         // In calculateScores(), after generating detailed results
-        window.game.lastDetailedResults = detailedResults; // Store for later extraction
+        window.game.detailedResults = detailedResults; // Store for later extraction
 
         showScoringPopup(this, detailedResults, roundScores, new Map());
         updateDisplay(this);
