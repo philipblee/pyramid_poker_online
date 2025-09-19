@@ -191,12 +191,13 @@ class MultiDeviceIntegration {
         console.log('🔍 DEBUG - Arrangements count:', submittedCount);
         console.log('🔍 DEBUG - Total players needed:', totalPlayers);
 
-        if (submittedCount >= totalPlayers && this.tableState !== 'all_submitted' && this.isowner) {
+        if (submittedCount >= totalPlayers && this.tableState !== 'all_submitted' && this.isOwner) {
             console.log('🎉 All players have submitted! Transitioning...');
             await this.transitionToAllSubmitted();
-        } else if (this.tableState === 'all_submitted' && this.isowner) {
+        } else if (this.tableState === 'all_submitted' && this.isOwner) {
             console.log(`⏳ Waiting for more submissions (${submittedCount}/${totalPlayers})`);
-        }
+        } else {console.log ("log from checkAllPlayerSubmitted - if there are enough players and I am owner, you should not see this")}
+
     }
 
     // Transition to ALL_SUBMITTED state
