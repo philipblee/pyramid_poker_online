@@ -38,17 +38,21 @@ function transitionFromLobbyToDealing() {
     console.log('✅ Transition complete - Player should see game interface');
 }
 
-function transitionToPlayingPhase() {
+function transitionToPlaying() {
+    console.log('=== ENTERING transitionToPlayingPhase ===');
+    debugger;
     console.log('🎮 Transitioning to playing phase...');
 
     console.log('🎮 Transitioning to playing phase...');
     console.log('🎮 About to call setTableState(PLAYING)');
 
-    // ADD THIS - Set state to PLAYING:
-    if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
-        setTableState(TABLE_STATES.PLAYING);
+    console.log('Owner check:', window.isOwner);
+    if (window.multiDeviceIntegration && window.isOwner) {
+       console.log('Owner confirmed - setting state to PLAYING');
+       setTableState(TABLE_STATES.PLAYING);
+    } else {
+       console.log('In transitionToPlaying this instance is Not the owner');
     }
-
     // Enable game controls, show "arrange your cards" message
 }
 
@@ -73,22 +77,13 @@ async function handleTableStateChange(tableState) {
             // After dealing setup, immediately advance to playing
             setTimeout(() => {
                 console.log('🎮 Dealing complete, moving to playing phase...');
-                transitionToPlayingPhase();
-            }, 1000);
-            break;case TABLE_STATES.DEALING:
-            console.log('🎮 Game started! Moving to dealing phase...');
-            transitionFromLobbyToDealing();
-
-            // After dealing setup, immediately advance to playing
-            setTimeout(() => {
-                console.log('🎮 Dealing complete, moving to playing phase...');
-                transitionToPlayingPhase();
+                transitionToPlaying();
             }, 1000);
             break;
 
         case TABLE_STATES.PLAYING:
             console.log('🎮 Cards dealt! Players can now arrange hands...');
-            transitionToPlayingPhase();
+            // transitionToPlaying();
 
             // ADD THIS:
             if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
@@ -117,7 +112,7 @@ async function handleTableStateChange(tableState) {
 async function setTableState(newState) {
     console.log('👑 setTableState called with:', newState);
 
-    if (!window.multiDeviceIntegration || !window.multiDeviceIntegration.isOwner) {
+    if (!window.multiDeviceIntegration || !window.isOwner) {
         console.log('❌ Only owner can change table state');
         return;
     }

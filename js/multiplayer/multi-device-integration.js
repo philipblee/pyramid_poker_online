@@ -166,7 +166,6 @@ class MultiDeviceIntegration {
     // Check if all players have submitted their arrangements
     async checkAllPlayersSubmitted() {
             console.log('=== ENTERING checkAllPlayersSubmitted ===');
-            debugger; // This will pause execution in browser DevTools
 
         console.log('👑 Owner checking if all players have submitted...');
 //
@@ -214,8 +213,6 @@ class MultiDeviceIntegration {
     async transitionToAllSubmitted() {
 
         console.log('=== ENTERING transitionToAllSubmitted ===');
-        debugger; // This will pause execution in browser DevTools
-        console.log('🚀 Transitioning to ALL_SUBMITTED state...');
 
         try {
             // Update table state in Realtime Database
@@ -721,7 +718,7 @@ async isTableOwner() {
             }
         };
 
-        console.log('🔍 DEBUG - Final arrangementData:', JSON.stringify(arrangementData, null, 2));
+//        console.log('🔍 DEBUG - Final arrangementData:', JSON.stringify(arrangementData, null, 2));
 
         await this.tableManager.tablesRef.doc(this.currentTableId.toString()).set({
             'currentGame': {
