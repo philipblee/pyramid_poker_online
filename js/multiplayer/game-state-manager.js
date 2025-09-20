@@ -97,15 +97,15 @@ async function handleTableStateChange(tableState) {
             break;
 
         case TABLE_STATES.SCORING:
-            console.log('🎮 Showing scores...');
-//            await showScoringPopup();
+            if (!window.isOwner) {
+                console.log('Non-owner proceeding to scoring with Firebase data...');
+                await window.multiDeviceIntegration.proceedToScoring();
+            }
             break;
 
                 default:
                     console.log('🎮 Unknown table state:', tableState);
             }
-
-
         }
 
 // In game-state-manager.js or wherever global functions are:
