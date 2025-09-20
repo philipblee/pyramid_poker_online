@@ -103,7 +103,7 @@ async function handleTableStateChange(tableState) {
 
         case TABLE_STATES.SCORING:
             console.log('🎮 Showing scores...');
-            await showMultiDeviceScoringResults();
+//            await showScoringPopup();
             break;
 
                 default:
@@ -148,4 +148,25 @@ async function setupLobbyStateListener(tableId) {
             });
         }
     });
+}
+
+// In the Continue button click handler
+function onScoringComplete() {
+    if (window.isOwner) {
+        console.log('Owner clicked Continue on Scoring Popup');
+        transitionToRoundComplete();
+    } else {
+        console.log('Non-owner waiting for owner to click Continue');
+        closeScoringPopup();
+    }
+}
+
+// In game-state-manager.js (or wherever state transitions are defined)
+async function transitionToRoundComplete() {
+    console.log('🔄 Transitioning to ROUND_COMPLETE state...');
+
+    // Only update Realtime Database (what listeners actually read)
+    await firebase.database().ref(`tables/${this.currentTableId}/tableState`).set('round_complete');
+
+    console.log('✅ Successfully transitioned to ROUND_COMPLETE state');
 }

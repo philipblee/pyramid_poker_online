@@ -59,37 +59,37 @@ class PyramidPokerGame {
     }
 
     handleAutoArrangeToggle() {
-    if (this.autoArrangeUsed) {
-        // Undo auto-arrange (instant, no spinner needed)
-        this.restoreToDealtState();
-        this.autoArrangeUsed = false;
-        document.getElementById('autoArrange').textContent = 'Auto';
-        console.log('Log from handleAutoArrange: 🔄 Undid auto-arrange');
-    } else {
-        showLoadingSpinner(2);
+        if (this.autoArrangeUsed) {
+            // Undo auto-arrange (instant, no spinner needed)
+            this.restoreToDealtState();
+            this.autoArrangeUsed = false;
+            document.getElementById('autoArrange').textContent = 'Auto';
+            console.log('Log from handleAutoArrange: 🔄 Undid auto-arrange');
+        } else {
+            showLoadingSpinner(2);
 
-        // Use setTimeout to allow UI to update before computation
-        setTimeout(() => {
-            try {
-                console.log('Log from handleAutoArrange: 🧠 Starting auto-arrange optimization...');
+            // Use setTimeout to allow UI to update before computation
+            setTimeout(() => {
+                try {
+                    console.log('Log from handleAutoArrange: 🧠 Starting auto-arrange optimization...');
 
-                // Your existing auto-arrange logic
-                this.autoArrangeManager.autoArrangeHand();
-                this.autoArrangeUsed = true;
-                document.getElementById('autoArrange').textContent = 'Undo Auto';
+                    // Your existing auto-arrange logic
+                    this.autoArrangeManager.autoArrangeHand();
+                    this.autoArrangeUsed = true;
+                    document.getElementById('autoArrange').textContent = 'Undo Auto';
 
-                // Hide spinner when done
-                hideLoadingSpinner();
+                    // Hide spinner when done
+                    hideLoadingSpinner();
 
-                console.log('Log from handleAutoArrange: ✅ Auto-arrange applied successfully');
+                    console.log('Log from handleAutoArrange: ✅ Auto-arrange applied successfully');
 
-            } catch (error) {
-                console.error('❌ Auto-arrange failed:', error);
-                hideLoadingSpinner();
-                alert('Auto-arrange failed. Please try manually.');
-            }
-        }, 100); // Small delay ensures spinner shows
-    }
+                } catch (error) {
+                    console.error('❌ Auto-arrange failed:', error);
+                    hideLoadingSpinner();
+                    alert('Auto-arrange failed. Please try manually.');
+                }
+            }, 100); // Small delay ensures spinner shows
+        }
     }
 
     restoreToDealtState() {
@@ -872,6 +872,7 @@ class PyramidPokerGame {
         window.game.detailedResults = detailedResults; // Store for later extraction
 
         showScoringPopup(this, detailedResults, roundScores, new Map());
+
         updateDisplay(this);
 
         console.log(`🔍 Round Check: currentRound=${this.currentRound}, maxRounds=${this.maxRounds}, this.currentRound=${this.currentRound}`);

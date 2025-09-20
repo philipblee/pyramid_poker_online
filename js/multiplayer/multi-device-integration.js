@@ -34,7 +34,7 @@ class MultiDeviceIntegration {
         this.tableStateListener = null; // Firebase listener
 
         // ADD OWNER DETECTION:
-        this.isOwner = this.isTableOwner();
+        this.isOwner = window.isOwner;
         console.log('🏗️ Constructor - Setting isOwner:', this.isOwner);
 
     }
@@ -121,7 +121,7 @@ class MultiDeviceIntegration {
                 joinedAt: playerInfo.joinedAt,
                 ready: playerInfo.ready,
                 connected: true,
-                isOwner: window.currentPlayerIsOwner
+                isOwner: window.isOwner
             });
 
             // Track locally
@@ -165,6 +165,9 @@ class MultiDeviceIntegration {
 
     // Check if all players have submitted their arrangements
     async checkAllPlayersSubmitted() {
+            console.log('=== ENTERING checkAllPlayersSubmitted ===');
+            debugger; // This will pause execution in browser DevTools
+
         console.log('👑 Owner checking if all players have submitted...');
 //
 //        // Debug: Check what data we're working with
@@ -180,8 +183,8 @@ class MultiDeviceIntegration {
 
         const arrangementsData = arrangementsSnapshot.data()?.currentGame?.arrangements;
 
-        console.log('🔍 DEBUG - Full arrangements snapshot:', arrangementsSnapshot);
-        console.log('🔍 DEBUG - Firestore arrangements:', arrangementsData);
+//        console.log('🔍 DEBUG - Full arrangements snapshot:', arrangementsSnapshot);
+//        console.log('🔍 DEBUG - Firestore arrangements:', arrangementsData);
 
         // COUNT ARRANGEMENTS, NOT SUBMISSIONS:
         const arrangements = arrangementsData || {};
@@ -190,6 +193,13 @@ class MultiDeviceIntegration {
         console.log('🔍 DEBUG - arrangementsData type:', typeof arrangementsData);
         console.log('🔍 DEBUG - Arrangements count:', submittedCount);
         console.log('🔍 DEBUG - Total players needed:', totalPlayers);
+
+        console.log('🔍 submittedCount >= totalPlayers:', submittedCount >= totalPlayers);
+        console.log('🔍 this.tableState !== all_submitted:', this.tableState !== 'all_submitted');
+        console.log('🔍 this.isOwner:', this.isOwner);
+        console.log('🔍 Full condition result:', (submittedCount >= totalPlayers && this.tableState !== 'all_submitted' && this.isOwner));
+
+        this.isOwner = window.isOwner; // this is redundant but just to be sure
 
         if (submittedCount >= totalPlayers && this.tableState !== 'all_submitted' && this.isOwner) {
             console.log('🎉 All players have submitted! Transitioning...');
@@ -202,19 +212,16 @@ class MultiDeviceIntegration {
 
     // Transition to ALL_SUBMITTED state
     async transitionToAllSubmitted() {
+
+        console.log('=== ENTERING transitionToAllSubmitted ===');
+        debugger; // This will pause execution in browser DevTools
         console.log('🚀 Transitioning to ALL_SUBMITTED state...');
 
         try {
             // Update table state in Realtime Database
-            await this.tableManager.tablesRef.doc(this.currentTableId.toString()).update({
-//                'currentGame.status': 'ALL_SUBMITTED',
-                'currentGame.allSubmittedAt': Date.now()
-            });
-
-            // Add Realtime Database write to fix infinite loop
+            console.log('About to write to Firebase, tableId:', this.currentTableId);
             await firebase.database().ref(`tables/${this.currentTableId}/tableState`).set('all_submitted');
-
-            console.log('✅ Successfully transitioned to ALL_SUBMITTED state');
+            console.log('Firebase write completed successfully');
 
             // Show "All players submitted" message
             this.showAllSubmittedMessage();
@@ -293,7 +300,7 @@ class MultiDeviceIntegration {
         }
 
         // In proceedToScoring() after calculateScores() finishes
-        if (window.currentPlayerIsOwner) {
+        if (window.isOwner) {
             window.game.calculateScores();
             await this.syncResultsToFirebase(); // Add this call
         }
@@ -328,7 +335,7 @@ class MultiDeviceIntegration {
                     cards: [...playerData.cards],
                     originalCards: [...playerData.originalCards]
                 });
-}
+            }
 
             console.log('🔍 PLAYER IDENTITY CHECK:');
             console.log('- playerName:', playerName);
@@ -393,7 +400,7 @@ class MultiDeviceIntegration {
 
                 console.log('📡 Current TABLE_STATE:', currentState);
 
-                if (currentState === TABLE_STATES.PLAYING) {
+                if (this.tableState === TABLE_STATES.PLAYING) {
                     console.log('📡 Owner checking submissions (PLAYING state)');
                     this.checkAllPlayersSubmitted();
                 } else {
@@ -1203,34 +1210,34 @@ async isTableOwner() {
     }
 }
 
-async function showMultiDeviceScoringResults() {
-    try {
-        const resultsSnapshot = await firebase.database()
-            .ref(`tables/7/currentGame/results`)
-            .once('value');
-
-        console.log('🔍 Firebase results snapshot:', resultsSnapshot.val());
-        const results = resultsSnapshot.val();
-
-        if (results) {
-            console.log('✅ Found results, showing popup...');
-            console.log('🔍 detailedResults:', results.detailedResults);
-            console.log('🔍 scores:', results.scores);
-
-            // Extract the scoring data
-            const detailedResults = results.detailedResults || [];
-            const roundScores = new Map(Object.entries(results.scores || {}));
-            const specialPoints = new Map(); // If you have special points
-
-            // Show the scoring popup using existing function
-            showScoringPopup(window.game, detailedResults, roundScores, specialPoints);
-        } else {
-            console.log('❌ No results found in Firebase');
-        }
-    } catch (error) {
-        console.error('❌ Error loading scoring results:', error);
-    }
-}
+//async function showMultiDeviceScoringResults() {
+//    try {
+//        const resultsSnapshot = await firebase.database()
+//            .ref(`tables/7/currentGame/results`)
+//            .once('value');
+//
+//        console.log('🔍 Firebase results snapshot:', resultsSnapshot.val());
+//        const results = resultsSnapshot.val();
+//
+//        if (results) {
+//            console.log('✅ Found results, showing popup...');
+//            console.log('🔍 detailedResults:', results.detailedResults);
+//            console.log('🔍 scores:', results.scores);
+//
+//            // Extract the scoring data
+//            const detailedResults = results.detailedResults || [];
+//            const roundScores = new Map(Object.entries(results.scores || {}));
+//            const specialPoints = new Map(); // If you have special points
+//
+//            // Show the scoring popup using existing function
+//            showScoringPopup(window.game, detailedResults, roundScores, specialPoints);
+//        } else {
+//            console.log('❌ No results found in Firebase');
+//        }
+//    } catch (error) {
+//        console.error('❌ Error loading scoring results:', error);
+//    }
+//}
 
 // NEW: Disconnection handling
 class DisconnectionManager {

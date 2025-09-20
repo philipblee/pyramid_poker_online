@@ -370,6 +370,9 @@ async function joinTable(table) {
     firebase.database().ref(`tables/${table.id}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`)
         .transaction((current) => (current || 0) + 1);
 
+    // Use it:
+    isOwner = (TABLE_STATES.NUM_HUMAN_PLAYERS === 1);
+
     // Get CURRENT data from Firebase, not stale table data
     firebase.database().ref(`tables/${table.id}/settings/humanPlayers`).once('value', (snapshot) => {
         const currentHumanPlayers = snapshot.val() || 0;
@@ -389,8 +392,6 @@ async function joinTable(table) {
 
         console.log('✅ JOIN ALLOWED - proceeding with fresh data');
 
-        // Use it:
-        const isOwner = 'true'
 
         // In joinTable() after determining isOwner
 
@@ -402,7 +403,7 @@ async function joinTable(table) {
             isOwner: isOwner
         };
 
-        window.currentPlayerIsOwner = playerInfo.isOwner;
+        window.isOwner = playerInfo.isOwner;
 
         // NOW proceed with joining...
         currentTable = table;
@@ -470,7 +471,7 @@ async function joinTable(table) {
         console.log('log in joinTable Creating playerInfo with isOwner:', isOwner);
         console.log('log in joinTable Final playerInfo:', playerInfo);
 
-        window.currentPlayerIsOwner = playerInfo.isOwner;
+        window.isOwner = playerInfo.isOwner;
 
         console.log('🔍 userName, isOwner:', uniquePlayerName, isOwner);
 
