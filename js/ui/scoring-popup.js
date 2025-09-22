@@ -369,6 +369,12 @@ async function closeScoringPopup() {
 }
 
 function resetGameUI() {
+
+    // Reset auto arrange state
+    if (game.autoArrangeUsed) {
+        game.autoArrangeUsed = false;
+    }
+
     // Reset auto button to "Auto"
     const autoArrange = document.getElementById('autoArrange');
     if (autoArrange) {

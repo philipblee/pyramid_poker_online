@@ -188,7 +188,6 @@ class PyramidPokerGame {
 
     startNewRound() {
 
-
         // DEBUG: Check the values before the comparison
         console.log(`🔍 ROUND CHECK: currentRound=${this.currentRound}, maxRounds=${this.maxRounds}`);
         console.log(`🔍 COMPARISON: ${this.currentRound} >= ${this.maxRounds} = ${this.currentRound >= this.maxRounds}`);
@@ -199,22 +198,19 @@ class PyramidPokerGame {
             return;
         }
 
-        // Check if tournament is complete
+        // In startNewRound(), after the maxRounds check:
         if (this.currentRound >= this.maxRounds) {
-//            alert(`Tournament complete! All ${this.maxRounds} rounds have been played. Click "New Game" to start a new tournament.`);
             this.showTournamentSummary();
+            if (window.isOwner) {
+                setTableState(TABLE_STATES.TOURNAMENT_COMPLETE);
+            }
             return;
         }
 
-        // Check if we're in the middle of a round
-//        if (this.gameState === 'playing') {
-//            const readyCount = this.playerManager.getReadyCount();
-//            if (readyCount < this.playerManager.players.length) {
-//                if (!confirm(`Round ${this.currentRound} is still in progress (${readyCount}/${this.playerManager.players.length} players ready). Start Round ${this.currentRound + 1} anyway?`)) {
-//                    return;
-//                }
-//            }
-//        }
+        // Continue with new round
+        if (window.isOwner) {
+            setTableState(TABLE_STATES.DEALING);
+        }
 
         // Advance to next round
         this.currentRound++;
@@ -901,103 +897,92 @@ class PyramidPokerGame {
             console.log(`Round ${index + 1}:`, round.roundNumber, 'Scores:', [...round.roundScores.entries()]);
         });
 
-    // Create sorted tournament standings
-    const standings = [...this.tournamentScores.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .map((entry, index) => ({
-            position: index + 1,
-            playerName: entry[0],
-            totalScore: entry[1]
-        }));
+        // Create sorted tournament standings
+        const standings = [...this.tournamentScores.entries()]
+            .sort((a, b) => b[1] - a[1])
+            .map((entry, index) => ({
+                position: index + 1,
+                playerName: entry[0],
+                totalScore: entry[1]
+            }));
 
-    // Create tournament summary modal
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.8); z-index: 1001;
-        display: flex; align-items: center; justify-content: center;
-    `;
-
-    const content = document.createElement('div');
-    content.style.cssText = `
-        background: linear-gradient(135deg, #2c3e50, #34495e);
-        border-radius: 15px; border: 2px solid #ffd700;
-        max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;
-        color: white; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        padding: 30px; text-align: center;
-    `;
-
-    // Build HTML content
-    let html = `
-        <h1 style="color: #ffd700; margin-bottom: 24px; font-size: 20px;">
-            🏆 TOURNAMENT COMPLETE! 🏆
-        </h1>
-        <div style="background: rgba(255, 215, 0, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 30px;">
-            <h2 style="color: #4ecdc4; margin-bottom: 20px;">Final Standings</h2>
-    `;
-
-    standings.forEach(standing => {
-        const medal = standing.position === 1 ? '🥇' :
-                     standing.position === 2 ? '🥈' :
-                     standing.position === 3 ? '🥉' : '🏅';
-        const bgColor = standing.position === 1 ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255, 255, 255, 0.1)';
-        html += `
-            <div style="background: ${bgColor}; padding: 15px; margin: 10px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 16px;">${medal} ${standing.position}. ${standing.playerName}</span>
-                <span style="font-size: 14px; font-weight: bold; color: #4ecdc4;">${standing.totalScore} points</span>
-            </div>
+        // Create tournament summary modal
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); z-index: 1001;
+            display: flex; align-items: center; justify-content: center;
         `;
-    });
 
-    html += `</div><div style="background: rgba(52, 73, 94, 0.5); padding: 20px; border-radius: 10px; margin-bottom: 24px;">
-        <h3 style="color: #4ecdc4; margin-bottom: 15px;">Round-by-Round Breakdown</h3>
-    `;
+        const content = document.createElement('div');
+        content.style.cssText = `
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            border-radius: 15px; border: 2px solid #ffd700;
+            max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;
+            color: white; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            padding: 30px; text-align: center;
+        `;
 
-    for (let round = 1; round <= this.roundHistory.length; round++) {
-        const roundData = this.roundHistory[round - 1];
-        html += `<div style="margin-bottom: 15px;"><h4 style="color: #ffd700;">Round ${round}</h4>`;
-        roundData.roundScores.forEach((score, playerName) => {
-            const sign = score > 0 ? '+' : '';
-            const color = score > 0 ? '#4ecdc4' : score < 0 ? '#ff6b6b' : '#95a5a6';
-            html += `<div style="color: ${color};">${playerName}: ${sign}${score}</div>`;
+        // Build HTML content
+        let html = `
+            <h1 style="color: #ffd700; margin-bottom: 24px; font-size: 20px;">
+                🏆 TOURNAMENT COMPLETE! 🏆
+            </h1>
+            <div style="background: rgba(255, 215, 0, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+                <h2 style="color: #4ecdc4; margin-bottom: 20px;">Final Standings</h2>
+        `;
+
+        standings.forEach(standing => {
+            const medal = standing.position === 1 ? '🥇' :
+                         standing.position === 2 ? '🥈' :
+                         standing.position === 3 ? '🥉' : '🏅';
+            const bgColor = standing.position === 1 ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255, 255, 255, 0.1)';
+            html += `
+                <div style="background: ${bgColor}; padding: 15px; margin: 10px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 16px;">${medal} ${standing.position}. ${standing.playerName}</span>
+                    <span style="font-size: 14px; font-weight: bold; color: #4ecdc4;">${standing.totalScore} points</span>
+                </div>
+            `;
         });
-        html += `</div>`;
-    }
 
+        html += `</div><div style="background: rgba(52, 73, 94, 0.5); padding: 20px; border-radius: 10px; margin-bottom: 24px;">
+            <h3 style="color: #4ecdc4; margin-bottom: 15px;">Round-by-Round Breakdown</h3>
+        `;
 
-//    comment out this "start new tournament" block while I try something below this;
-//    html += `
-//        </div>
-//        <button onclick="this.parentElement.parentElement.remove(); game.gameState='waiting'; game.currentRound=0; game.roundRobinResults = []; updateDisplay(game);"
-//                style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
-//            Start New Tournament
-//        </button>
-//    `;
+        for (let round = 1; round <= this.roundHistory.length; round++) {
+            const roundData = this.roundHistory[round - 1];
+            html += `<div style="margin-bottom: 15px;"><h4 style="color: #ffd700;">Round ${round}</h4>`;
+            roundData.roundScores.forEach((score, playerName) => {
+                const sign = score > 0 ? '+' : '';
+                const color = score > 0 ? '#4ecdc4' : score < 0 ? '#ff6b6b' : '#95a5a6';
+                html += `<div style="color: ${color};">${playerName}: ${sign}${score}</div>`;
+            });
+            html += `</div>`;
+        }
 
+    //  commented out "start new tournament" block - trying something different
+        html += `
+            </div>
+            <button onclick="this.parentElement.parentElement.remove(); game.startNewTournament();"
+                    style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
+                Start New Tournament
+            </button>
+        `;
 
-//  commented out "start new tournament" block - trying something different
-    html += `
-        </div>
-        <button onclick="this.parentElement.parentElement.remove(); game.startNewTournament();"
-                style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
-            Start New Tournament
-        </button>
-    `;
+        // log start of new tournament
+        console.log ("Log from game.js - User clicked startNewTournament")
 
-    // log start of new tournament
-    console.log ("Log from game.js - User clicked startNewTournament")
+        content.innerHTML = html;
+        modal.appendChild(content);
+        document.body.appendChild(modal);
 
-    content.innerHTML = html;
-    modal.appendChild(content);
-    document.body.appendChild(modal);
-
-    // Reset to waiting state when closed
-    this.gameState = 'waiting';
-    this.currentRound = 0;
-    this.roundRobinResults = [];
-    console.log('🎯 After reset - roundRobinResults:', this.roundRobinResults); // <-- ADD THIS
-    updateDisplay(this);
-    }
+        // Reset to waiting state when closed
+        this.gameState = 'waiting';
+        this.currentRound = 0;
+        this.roundRobinResults = [];
+        console.log('🎯 After reset - roundRobinResults:', this.roundRobinResults); // <-- ADD THIS
+        updateDisplay(this);
+        }
 
     compareHands(hand1, hand2) {
         let player1Score = 0;

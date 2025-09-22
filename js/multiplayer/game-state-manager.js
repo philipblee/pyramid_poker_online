@@ -110,6 +110,10 @@ async function handleTableStateChange(tableState) {
             }
             break;
 
+        case TABLE_STATES.TOURNAMENT_COMPLETE:
+            game.showTournamentSummary();
+            break;
+
                 default:
                     console.log('🎮 Unknown table state:', tableState);
             }
