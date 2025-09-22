@@ -424,7 +424,7 @@ class MultiDeviceIntegration {
 
         // this.enhanceNewGameButton();
         this.enhanceSubmitButton();
-        // this.enhanceCalculateScores();
+
         this.addMultiDeviceStatus();
 
         // Submission coordination
@@ -502,43 +502,6 @@ async isTableOwner() {
         console.error('❌ Error in isTableOwner:', error);
         return false;
     }
-}
-
-    // this handles retrieve arrangements from Firebase
-    enhanceCalculateScores() {
-        if (!window.game || typeof window.game.calculateScores !== 'function') return;
-
-        console.log('🔧 Enhancing calculateScores for Firebase coordination...');
-
-        // Store original handler
-        this.originalCalculateScores = window.game.calculateScores;
-
-        // Replace with enhanced version
-        window.game.calculateScores = async () => {
-            console.log('🎯 Enhanced calculateScores called!');
-
-            try {
-                // Phase 3: Retrieve all arrangements before scoring
-                if (this.isMultiDevice) {
-                    await this.retrieveAllArrangementsFromFirebase();
-                }
-
-                // Call original calculateScores
-                if (this.originalCalculateScores) {
-                    this.originalCalculateScores.call(window.game);
-                }
-
-            } catch (error) {
-                console.error('❌ Error in enhanced calculateScores:', error);
-
-                // Fallback to original on error
-                if (this.originalCalculateScores) {
-                    this.originalCalculateScores.call(window.game);
-                }
-            }
-        };
-
-        console.log('✅ calculateScores enhanced for Firebase coordination');
     }
 
     // Sync all dealt hands to Firebase for cloud storage
@@ -621,6 +584,24 @@ async isTableOwner() {
 
     }
 
+    async RetrieveAllArrangementsFromFirebase() {
+        console.log('☁️ Loading correct arrangements from Firestore...');
+
+        const doc = await this.tableManager.tablesRef.doc(this.currentTableId.toString()).get();
+        const data = doc.data();
+        const firebaseArrangements = data?.currentGame?.arrangements || {};
+
+        window.game.submittedHands.clear();
+        Object.entries(firebaseArrangements).forEach(([playerEmail, arrangement]) => {
+            window.game.submittedHands.set(playerEmail, arrangement);
+        });
+
+        console.log('✅ Loaded arrangements with correct keys');
+    }
+
+
+
+/*
     // In RetrieveAllArrangementsFromFirebase()
     async RetrieveAllArrangementsFromFirebase() {
         console.log('☁️ Loading arrangements from Firestore...');
@@ -678,6 +659,7 @@ async isTableOwner() {
         console.log('🔍 After setup - keys:', Array.from(window.game.submittedHands.keys()));
         console.log('🔍 callCount reset to:', callCount);
     }
+*/
 
     async storePlayerArrangementToFirebase(playerName) {
         console.log(`☁️ Storing player arrangement to Firebase for: ${playerName}`);
@@ -706,11 +688,11 @@ async isTableOwner() {
         const player = window.game.players.find(p => p.name === playerName);
         console.log('🔍 DEBUG - Found matching player:', player);
 
-        const uniquePlayerId = player ? player.id : playerName;
-        console.log('🔍 DEBUG - Using uniquePlayerId:', uniquePlayerId);
+        const uniquePlayerName = playerName;
+        console.log('🔍 DEBUG - Using uniquePlayerName:', uniquePlayerName);
 
         const arrangementData = {
-            [uniquePlayerId]: {
+            [uniquePlayerName]: {
                 back: playerHand.back,
                 middle: playerHand.middle,
                 front: playerHand.front,
@@ -720,13 +702,17 @@ async isTableOwner() {
 
 //        console.log('🔍 DEBUG - Final arrangementData:', JSON.stringify(arrangementData, null, 2));
 
+        console.log(`🕐 BEFORE Firebase write: ${uniquePlayerName} at ${Date.now()}`);
+
         await this.tableManager.tablesRef.doc(this.currentTableId.toString()).set({
             'currentGame': {
                 'arrangements': arrangementData
             }
         }, { merge: true });
 
-        console.log(`✅ Stored arrangement for ${playerName}`);
+        console.log(`🕐 AFTER Firebase write: ${uniquePlayerName} at ${Date.now()}`);
+
+        console.log(`✅ Stored arrangement for ${uniquePlayerName}`);
     }
     // Sync tournament results to Firebase for cloud storage
     async syncResultsToFirebase() {

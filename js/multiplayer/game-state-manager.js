@@ -40,7 +40,6 @@ function transitionFromLobbyToDealing() {
 
 function transitionToPlaying() {
     console.log('=== ENTERING transitionToPlayingPhase ===');
-    debugger;
     console.log('🎮 Transitioning to playing phase...');
 
     console.log('🎮 Transitioning to playing phase...');
