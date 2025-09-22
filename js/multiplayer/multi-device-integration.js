@@ -1132,69 +1132,6 @@ async isTableOwner() {
     }
 }
 
-//async function showMultiDeviceScoringResults() {
-//    try {
-//        const resultsSnapshot = await firebase.database()
-//            .ref(`tables/7/currentGame/results`)
-//            .once('value');
-//
-//        console.log('🔍 Firebase results snapshot:', resultsSnapshot.val());
-//        const results = resultsSnapshot.val();
-//
-//        if (results) {
-//            console.log('✅ Found results, showing popup...');
-//            console.log('🔍 detailedResults:', results.detailedResults);
-//            console.log('🔍 scores:', results.scores);
-//
-//            // Extract the scoring data
-//            const detailedResults = results.detailedResults || [];
-//            const roundScores = new Map(Object.entries(results.scores || {}));
-//            const specialPoints = new Map(); // If you have special points
-//
-//            // Show the scoring popup using existing function
-//            showScoringPopup(window.game, detailedResults, roundScores, specialPoints);
-//        } else {
-//            console.log('❌ No results found in Firebase');
-//        }
-//    } catch (error) {
-//        console.error('❌ Error loading scoring results:', error);
-//    }
-//}
-
-// NEW: Disconnection handling
-class DisconnectionManager {
-    startDisconnectionTimer(userId) {
-        console.log(`⏰ Starting 60-second timer for ${userId}`);
-
-        const timer = setTimeout(async () => {
-            console.log(`🤖 Auto-arranging for disconnected player: ${userId}`);
-
-            // Get player's current cards
-            const playerHand = await this.getPlayerHand(userId);
-
-            // Use existing findBestSetup for auto-arrange
-            const autoArrangement = window.findBestSetup(playerHand.cards);
-
-            // Submit auto-arranged hand
-            await this.submitPlayerHand(userId, autoArrangement, true); // isAutoSubmit = true
-
-            // Update table status
-            await this.updateTableStatus(`${playerName} auto-submitted (disconnected)`);
-
-        }, 60000); // 60 seconds
-
-        this.reconnectionTimers.set(userId, timer);
-    }
-
-    cancelDisconnectionTimer(userId) {
-        const timer = this.reconnectionTimers.get(userId);
-        if (timer) {
-            clearTimeout(timer);
-            this.reconnectionTimers.delete(userId);
-            console.log(`✅ ${userId} reconnected - cancelled auto-arrange timer`);
-        }
-    }
-}
 
 // Export for use in other modules
 window.MultiDeviceIntegration = MultiDeviceIntegration;
