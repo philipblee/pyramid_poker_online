@@ -473,6 +473,8 @@ async function joinTable(table) {
 
         window.isOwner = playerInfo.isOwner;
 
+        window.multiDeviceIntegration.enhanceContinueButton();
+
         console.log('🔍 userName, isOwner:', uniquePlayerName, isOwner);
 
         // Add player to Firebase table (using .then() instead of await)

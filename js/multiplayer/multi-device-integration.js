@@ -184,6 +184,7 @@ class MultiDeviceIntegration {
 
 //        console.log('🔍 DEBUG - Full arrangements snapshot:', arrangementsSnapshot);
 //        console.log('🔍 DEBUG - Firestore arrangements:', arrangementsData);
+        this.isOwner = window.isOwner; // this is redundant but just to be sure
 
         // COUNT ARRANGEMENTS, NOT SUBMISSIONS:
         const arrangements = arrangementsData || {};
@@ -198,7 +199,6 @@ class MultiDeviceIntegration {
         console.log('🔍 this.isOwner:', this.isOwner);
         console.log('🔍 Full condition result:', (submittedCount >= totalPlayers && this.tableState !== 'all_submitted' && this.isOwner));
 
-        this.isOwner = window.isOwner; // this is redundant but just to be sure
 
         if (submittedCount >= totalPlayers && this.tableState !== 'all_submitted' && this.isOwner) {
             console.log('🎉 All players have submitted! Transitioning...');
@@ -375,9 +375,57 @@ class MultiDeviceIntegration {
         }, true); // 'true' = capture phase, runs before original handler
     }
 
-    /**
-     * Set up listener for submission state changes (call this during initialization)
-     */
+    // enhanceContinueButton changes tableState to round_complete, then only owner can click continue to progress
+    enhanceContinueButton() {
+
+        console.log('🔍 enhanceContinueButton - window.isOwner:', window.isOwner);
+
+        const continueButton = document.querySelector('#scoringPopup .btn.btn-primary');
+        const closeButton = document.querySelector('#scoringPopup .close-popup');
+
+        if (!continueButton && !closeButton) {
+            console.warn('No continue/close buttons found in scoring popup');
+            return;
+        }
+
+        const buttons = [continueButton, closeButton].filter(Boolean);
+
+        if (window.isOwner) {
+            // Owner: Add Firebase update before existing logic
+            buttons.forEach(button => {
+                const originalOnClick = button.onclick;
+
+                button.onclick = async () => {
+                    // Update Firebase state first
+                    await setTableState('round_complete');
+
+                    // Then proceed with original logic
+                    if (originalOnClick) {
+                        originalOnClick.call(button);
+                    } else {
+                        closeScoringPopup();
+                    }
+                };
+            });
+        } else {
+            // Non-owner: Show waiting state
+            buttons.forEach(button => {
+                button.disabled = true;
+                button.title = "Waiting for table owner...";
+                button.style.opacity = '0.5';
+            });
+
+            // Add waiting message
+            const waitingMsg = document.createElement('div');
+            waitingMsg.id = 'waiting-for-table-owner';
+            waitingMsg.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">Waiting for table owner to continue...</p>';
+            document.getElementById('scoringPopup').appendChild(waitingMsg);
+
+            // State change handling is done in handleTableStateChange()
+        }
+    }
+
+    // Set up listener for submission state changes (call this during initialization)
     // In setupSubmissionListener(), add more logging:
     async setupSubmissionListener() {
         if (!this.isMultiDevice) return;
@@ -482,27 +530,27 @@ class MultiDeviceIntegration {
     }
 
     // Add this helper method to check ownership
-async isTableOwner() {
-    console.log('🔍 isTableOwner START');
-    try {
-        const ownerSnapshot = await firebase.database().ref(`tables/${this.currentTableId}/state/TABLE_OWNER`).once('value');
-        const tableOwner = ownerSnapshot.val();
+    async isTableOwner() {
+        console.log('🔍 isTableOwner START');
+        try {
+            const ownerSnapshot = await firebase.database().ref(`tables/${this.currentTableId}/state/TABLE_OWNER`).once('value');
+            const tableOwner = ownerSnapshot.val();
 
-        const myUniquePlayerName = window.currentPlayerUniquePlayerName;
+            const myUniquePlayerName = window.currentPlayerUniquePlayerName;
 
-        console.log('🔍 Ownership check debug:', {
-            tableOwner,
-            myUniquePlayerName,
-            tableId: this.currentTableId,
-            match: tableOwner === myUniquePlayerName
-        });
+            console.log('🔍 Ownership check debug:', {
+                tableOwner,
+                myUniquePlayerName,
+                tableId: this.currentTableId,
+                match: tableOwner === myUniquePlayerName
+            });
 
-        return tableOwner === myUniquePlayerName;
-    } catch (error) {
-        console.error('❌ Error in isTableOwner:', error);
-        return false;
-    }
-    }
+            return tableOwner === myUniquePlayerName;
+        } catch (error) {
+            console.error('❌ Error in isTableOwner:', error);
+            return false;
+        }
+        }
 
     // Sync all dealt hands to Firebase for cloud storage
     async syncHandsToFirebase() {

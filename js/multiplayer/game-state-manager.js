@@ -102,6 +102,14 @@ async function handleTableStateChange(tableState) {
             }
             break;
 
+        case 'round_complete':
+            if (!window.isOwner) {
+                closeScoringPopup();
+                const waitingEl = document.getElementById('waiting-for-table-owner');
+                if (waitingEl) waitingEl.remove();
+            }
+            break;
+
                 default:
                     console.log('🎮 Unknown table state:', tableState);
             }

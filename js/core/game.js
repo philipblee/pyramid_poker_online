@@ -207,14 +207,14 @@ class PyramidPokerGame {
         }
 
         // Check if we're in the middle of a round
-        if (this.gameState === 'playing') {
-            const readyCount = this.playerManager.getReadyCount();
-            if (readyCount < this.playerManager.players.length) {
-                if (!confirm(`Round ${this.currentRound} is still in progress (${readyCount}/${this.playerManager.players.length} players ready). Start Round ${this.currentRound + 1} anyway?`)) {
-                    return;
-                }
-            }
-        }
+//        if (this.gameState === 'playing') {
+//            const readyCount = this.playerManager.getReadyCount();
+//            if (readyCount < this.playerManager.players.length) {
+//                if (!confirm(`Round ${this.currentRound} is still in progress (${readyCount}/${this.playerManager.players.length} players ready). Start Round ${this.currentRound + 1} anyway?`)) {
+//                    return;
+//                }
+//            }
+//        }
 
         // Advance to next round
         this.currentRound++;

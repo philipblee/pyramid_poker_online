@@ -341,17 +341,7 @@ console.log(`🎯 Matrix created for round ${game.currentRound}. Total children 
     popup.style.display = 'block';
 }
 
-// Close scoring popup and clear all hands for next round (unchanged)
-function closeScoringPopup() {
-
-    // Save game stats before closing popup
-    saveGameStats();
-
-    document.getElementById('scoringPopup').style.display = 'none';
-
-    // Clear all hand areas for next round
-    clearAllHandAreas();
-}
+            window.multiDeviceIntegration.setupMultiDeviceEnhancements();
 
 // Clear all hand areas (unchanged)
 function clearAllHandAreas() {
