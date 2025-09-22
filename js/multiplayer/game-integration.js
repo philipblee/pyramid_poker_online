@@ -299,7 +299,7 @@ class GameIntegration {
 
         // Phase 3: Retrieve all arrangements before scoring
         if (this.isMultiDevice) {
-            await this.retrieveAllArrangementsFromFirebase();
+            await this.RetrieveAllArrangementsFromFirebase();
         }
 
         // Trigger existing scoring system
