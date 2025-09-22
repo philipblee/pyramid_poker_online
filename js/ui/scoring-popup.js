@@ -341,7 +341,51 @@ console.log(`🎯 Matrix created for round ${game.currentRound}. Total children 
     popup.style.display = 'block';
 }
 
-            window.multiDeviceIntegration.setupMultiDeviceEnhancements();
+// Close scoring popup and clear all hands for next round (unchanged)function closeScoringPopup() {
+async function closeScoringPopup() {
+    // Save game stats before closing popup
+    saveGameStats();
+
+    document.getElementById('scoringPopup').style.display = 'none';
+
+    // Clear all hand areas for next round
+    clearAllHandAreas();
+
+    resetGameUI();
+
+    // Clear previous round's game data from Firestore
+    if (window.isOwner && window.multiDeviceIntegration) {
+        const tableId = window.multiDeviceIntegration.tableId;
+        await firebase.firestore().collection('tables').doc(tableId.toString()).update({
+            'currentGame': firebase.firestore.FieldValue.delete()
+        });
+    }
+
+    // Start next round
+    if (window.isOwner) {
+        game.startNewRound();
+        setTableState('dealing');
+    }
+}
+
+function resetGameUI() {
+    // Reset auto button to "Auto"
+    const autoArrange = document.getElementById('autoArrange');
+    if (autoArrange) {
+        autoArrange.textContent = 'Auto';
+        autoArrange.disabled = false;
+    }
+
+    // Reset submit button to disabled "Submit"
+    const submitHand = document.getElementById('submitHand');
+    if (submitHand) {
+        submitHand.textContent = 'Submit';
+        submitHand.disabled = true;
+    }
+
+    // Clear any submission indicators
+    // Add other UI resets as needed
+}
 
 // Clear all hand areas (unchanged)
 function clearAllHandAreas() {

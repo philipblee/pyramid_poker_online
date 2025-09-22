@@ -477,6 +477,14 @@ async function joinTable(table) {
 
         console.log('🔍 userName, isOwner:', uniquePlayerName, isOwner);
 
+        // Clear previous round's game data from Firestore
+        if (window.isOwner && window.multiDeviceIntegration) {
+            const tableId = window.multiDeviceIntegration.tableId;
+            await firebase.firestore().collection('tables').doc(tableId.toString()).update({
+                'currentGame': firebase.firestore.FieldValue.delete()
+            });
+        }
+
         // Add player to Firebase table (using .then() instead of await)
         window.multiDeviceIntegration.addPlayerToTable(table.id, playerInfo)
             // After the .then() in joinTable()
