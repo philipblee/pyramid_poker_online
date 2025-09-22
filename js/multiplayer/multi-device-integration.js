@@ -600,67 +600,6 @@ async isTableOwner() {
     }
 
 
-
-/*
-    // In RetrieveAllArrangementsFromFirebase()
-    async RetrieveAllArrangementsFromFirebase() {
-        console.log('☁️ Loading arrangements from Firestore...');
-
-        const doc = await this.tableManager.tablesRef.doc(this.currentTableId.toString()).get();
-        const data = doc.data();
-        const firebaseArrangements = data?.currentGame?.arrangements || {};
-
-        // Store arrangements with unique keys
-        window.game.submittedHands.clear();
-        const arrangementEntries = Object.entries(firebaseArrangements);
-
-        arrangementEntries.forEach(([key, arrangement], index) => {
-            const uniqueKey = `arrangement_${index}`;
-            console.log(`🔍 Storing arrangement with unique key: ${uniqueKey}`);
-            window.game.submittedHands.set(uniqueKey, arrangement);
-        });
-
-        console.log('🔍 submittedHands size:', window.game.submittedHands.size);
-        console.log('🔍 submittedHands keys:', Array.from(window.game.submittedHands.keys()));
-
-        // After storing arrangements with unique keys
-        console.log('🔍 Creating dual-value Map behavior...');
-
-        let callCount = 0;
-        const arrangements = [
-            window.game.submittedHands.get('arrangement_0'),
-            window.game.submittedHands.get('arrangement_1')
-        ];
-
-        console.log('🔍 Retrieved arrangements for dual behavior:');
-        console.log('🔍 arrangement_0:', arrangements[0] ? 'exists' : 'missing');
-        console.log('🔍 arrangement_1:', arrangements[1] ? 'exists' : 'missing');
-
-        // Store original get method
-        window.game.submittedHands._originalGet = window.game.submittedHands.get;
-
-        // Override get to return alternating arrangements for the same player name
-        window.game.submittedHands.get = function(playerName) {
-            const arrangement = arrangements[callCount % 2];
-            console.log(`🔍 Get call ${callCount} for "${playerName}" returning arrangement_${callCount % 2}`);
-            console.log(`🔍 Returned arrangement has back:`, !!arrangement?.back, 'cards:', arrangement?.back?.length);
-            callCount++;
-            return arrangement;
-        };
-
-        // Clear the unique keys and set up the original player names
-        console.log('🔍 Before clearing - submittedHands size:', window.game.submittedHands.size);
-        console.log('🔍 Before clearing - keys:', Array.from(window.game.submittedHands.keys()));
-
-        window.game.submittedHands.clear();
-        window.game.submittedHands.set('peter@gmail.com', 'placeholder');
-
-        console.log('🔍 After setup - submittedHands size:', window.game.submittedHands.size);
-        console.log('🔍 After setup - keys:', Array.from(window.game.submittedHands.keys()));
-        console.log('🔍 callCount reset to:', callCount);
-    }
-*/
-
     async storePlayerArrangementToFirebase(playerName) {
         console.log(`☁️ Storing player arrangement to Firebase for: ${playerName}`);
 
