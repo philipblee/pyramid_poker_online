@@ -361,11 +361,19 @@ async function closeScoringPopup() {
         });
     }
 
-    // Start next round
-    if (window.isOwner) {
-        game.startNewRound();
-        setTableState('dealing');
-    }
+//    game.startNewRound  // test without this first
+
+//    startNewRound() {
+//
+//        // DEBUG: Check the values before the comparison
+//        console.log(`🔍 ROUND CHECK: currentRound=${this.currentRound}, maxRounds=${this.maxRounds}`);
+//        console.log(`🔍 COMPARISON: ${this.currentRound} >= ${this.maxRounds} = ${this.currentRound >= this.maxRounds}`);
+//
+//        // Must have existing players to start a new round
+//        if (this.playerManager.players.length < 2) {
+//            alert('Need at least 2 players to start a round. Click "New Game" to configure players.');
+//            return;
+//        }
 }
 
 function resetGameUI() {
