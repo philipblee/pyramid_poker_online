@@ -268,18 +268,19 @@ class MultiDeviceIntegration {
      */
 
     async proceedToScoring() {
+        // Skip if already processed this round
+        if (this.lastScoringRound === window.game.currentRound) {
+            console.log(`Already processed scoring for round ${window.game.currentRound}`);
+            return;
+        }
+
         console.log('🏆 Proceeding to scoring phase...');
+        this.lastScoringRound = window.game.currentRound;
 
         await this.RetrieveAllArrangementsFromFirebase();
 
-        // Both devices calculate scores once
         if (window.game && window.game.calculateScores) {
             window.game.calculateScores();
-        }
-
-        // Only owner syncs results to Firebase
-        if (window.isOwner) {
-            await this.syncResultsToFirebase();
         }
     }
 
