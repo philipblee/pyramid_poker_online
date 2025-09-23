@@ -146,11 +146,11 @@ class PyramidPokerGame {
             }
         }
 
-        // NEW: Initialize tournament
-        console.log('🏆 Starting new tournament...');
-        this.currentRound = 1;
-        this.roundHistory = [];
-        this.tournamentScores.clear();
+//        // NEW: Initialize tournament
+//        console.log('🏆 Starting new tournament...');
+//        this.currentRound = 1;
+//        this.roundHistory = [];
+//        this.tournamentScores.clear();
 
         // Initialize tournament scores for all players
         for (let player of this.playerManager.players) {
@@ -213,7 +213,10 @@ class PyramidPokerGame {
         }
 
         // Advance to next round
+        console.log(`🔄 BEFORE increment: currentRound = ${this.currentRound}`);
         this.currentRound++;
+        console.log(`🔄 AFTER increment: currentRound = ${this.currentRound}`);
+
         console.log(`🔄 Starting Round ${this.currentRound} of ${this.maxRounds}...`);
 
         // Setup new round (same as before but with round tracking)
@@ -782,10 +785,10 @@ class PyramidPokerGame {
     }
 
     calculateScores() {
-        console.log('🚀 calculateScores() START - this.maxRounds:', this.maxRounds);
+//        console.log('🚀 calculateScores() START - this.maxRounds:', this.maxRounds);
 
         const playerNames = this.playerManager.getPlayerNames();
-        console.log('🔍 After getPlayerNames() - this.maxRounds:', this.maxRounds);
+//        console.log('🔍 After getPlayerNames() - this.maxRounds:', this.maxRounds);
 
         const roundScores = new Map();
         const detailedResults = [];
@@ -797,7 +800,7 @@ class PyramidPokerGame {
             bonusPoints.set(name, 0);
         });
 
-        console.log('🔍 After initialization - this.maxRounds:', this.maxRounds);
+//        console.log('🔍 After initialization - this.maxRounds:', this.maxRounds);
 
         // Head-to-head comparisons (same as before)
         for (let i = 0; i < playerNames.length; i++) {
@@ -808,8 +811,8 @@ class PyramidPokerGame {
                 const hand1 = this.submittedHands.get(player1);
                 const hand2 = this.submittedHands.get(player2);
 
-                console.log(`🔍 Player in calculateScores ${player1} hand:`, hand1);
-                console.log(`🔍 Player in calculateScores ${player2} hand:`, hand2);
+//                console.log(`🔍 Player in calculateScores ${player1} hand:`, hand1);
+//                console.log(`🔍 Player in calculateScores ${player2} hand:`, hand2);
 
                 const result = this.compareHands(hand1, hand2);
 
@@ -827,13 +830,13 @@ class PyramidPokerGame {
         }
 
         console.log('Detailed Results from calculateScores()', detailedResults)
-
-        console.log('🔍 After head-to-head comparisons - this.maxRounds:', this.maxRounds);
+        console.log(`📊 Storing round ${this.currentRound}, history length: ${this.roundHistory.length}`);
+//        console.log('🔍 After head-to-head comparisons - this.maxRounds:', this.maxRounds);
 
         // NEW: Only store round history ONCE per round
         const roundAlreadyStored = this.roundHistory.some(round => round.roundNumber === this.currentRound);
 
-        console.log('🔍 After roundAlreadyStored check - this.maxRounds:', this.maxRounds);
+//        console.log('🔍 After roundAlreadyStored check - this.maxRounds:', this.maxRounds);
 
         if (!roundAlreadyStored) {
             const roundData = {
@@ -852,7 +855,7 @@ class PyramidPokerGame {
             });
         }
 
-        console.log('🔍 After round history update - this.maxRounds:', this.maxRounds);
+//        console.log('🔍 After round history update - this.maxRounds:', this.maxRounds);
 
         // Update individual round scores (keep existing for current round display)
         roundScores.forEach((roundScore, playerName) => {
@@ -861,8 +864,8 @@ class PyramidPokerGame {
             }
         });
 
-        console.log('🔍 After updatePlayerScore - this.maxRounds:', this.maxRounds);
-        console.log('🔍 Just before showScoringPopup - this.maxRounds:', this.maxRounds);
+//        console.log('🔍 After updatePlayerScore - this.maxRounds:', this.maxRounds);
+//        console.log('🔍 Just before showScoringPopup - this.maxRounds:', this.maxRounds);
 
         // In calculateScores(), after generating detailed results
         window.game.detailedResults = detailedResults; // Store for later extraction
@@ -871,8 +874,8 @@ class PyramidPokerGame {
 
         updateDisplay(this);
 
-        console.log(`🔍 Round Check: currentRound=${this.currentRound}, maxRounds=${this.maxRounds}, this.currentRound=${this.currentRound}`);
-        console.log(`🔍 Comparison: currentRound >= maxRounds = ${this.currentRound >= this.maxRounds}`);
+//        console.log(`🔍 Round Check: currentRound=${this.currentRound}, maxRounds=${this.maxRounds}, this.currentRound=${this.currentRound}`);
+//        console.log(`🔍 Comparison: currentRound >= maxRounds = ${this.currentRound >= this.maxRounds}`);
 
         // NEW - No popup, just return to display
         if (this.currentRound >= this.maxRounds) {

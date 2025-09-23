@@ -270,36 +270,16 @@ class MultiDeviceIntegration {
     async proceedToScoring() {
         console.log('🏆 Proceeding to scoring phase...');
 
-        // Load arrangements from Firestore
         await this.RetrieveAllArrangementsFromFirebase();
 
-        // Debug: Check what's actually in submittedHands before scoring
-        console.log('🔍 submittedHands before calculateScores:', window.game.submittedHands);
-        console.log('🔍 submittedHands size:', window.game.submittedHands.size);
-        window.game.submittedHands.forEach((value, key) => {
-            console.log(`🔍 ${key}: has back =`, !!value?.back, 'has middle =', !!value?.middle, 'has front =', !!value?.front);
-        });
-
-        // Call scoring
+        // Both devices calculate scores once
         if (window.game && window.game.calculateScores) {
             window.game.calculateScores();
         }
 
-        // In proceedToScoring(), after calculateScores() and before syncResultsToFirebase()
-        console.log('🔍 Cleaning up dual-value Map behavior...');
-        if (window.game.submittedHands._originalGet) {
-            window.game.submittedHands.get = window.game.submittedHands._originalGet;
-            delete window.game.submittedHands._originalGet;
-            console.log('✅ Original Map.get method restored');
-
-            // Also reset any other temporary properties
-            console.log('🔍 submittedHands after restoration:', window.game.submittedHands.size);
-        }
-
-        // In proceedToScoring() after calculateScores() finishes
+        // Only owner syncs results to Firebase
         if (window.isOwner) {
-            window.game.calculateScores();
-            await this.syncResultsToFirebase(); // Add this call
+            await this.syncResultsToFirebase();
         }
     }
 
@@ -334,25 +314,25 @@ class MultiDeviceIntegration {
                 });
             }
 
-            console.log('🔍 PLAYER IDENTITY CHECK:');
-            console.log('- playerName:', playerName);
-            console.log('- Expected for this device:'), // what should it be?
-            console.log('- playerHands before storage:', window.game.playerHands);
-            console.log('- playerHands has this key?', window.game.playerHands.has(playerName));
+//            console.log('🔍 PLAYER IDENTITY CHECK:');
+//            console.log('- playerName:', playerName);
+//            console.log('- Expected for this device:'), // what should it be?
+//            console.log('- playerHands before storage:', window.game.playerHands);
+//            console.log('- playerHands has this key?', window.game.playerHands.has(playerName));
 
             try {
                 console.log(`📝 Storing arrangement for human player: ${playerName}`);
 
                 // RIGHT BEFORE calling storePlayerArrangementToFirebase:
-                console.log('🔍 PRE-STORAGE DEBUG for:', playerName);
-                console.log('🔍 Current playerHands Map:', window.game.playerHands);
-                console.log('🔍 PlayerHands has key?', window.game.playerHands.has(playerName));
-                console.log('🔍 Direct playerHands.get():', window.game.playerHands.get(playerName));
-
-                // Also check what's visually arranged:
-                console.log('🔍 DOM back hand:', document.querySelector('.back-hand')?.children.length);
-                console.log('🔍 DOM middle hand:', document.querySelector('.middle-hand')?.children.length);
-                console.log('🔍 DOM front hand:', document.querySelector('.front-hand')?.children.length);
+//                console.log('🔍 PRE-STORAGE DEBUG for:', playerName);
+//                console.log('🔍 Current playerHands Map:', window.game.playerHands);
+//                console.log('🔍 PlayerHands has key?', window.game.playerHands.has(playerName));
+//                console.log('🔍 Direct playerHands.get():', window.game.playerHands.get(playerName));
+//
+//                // Also check what's visually arranged:
+//                console.log('🔍 DOM back hand:', document.querySelector('.back-hand')?.children.length);
+//                console.log('🔍 DOM middle hand:', document.querySelector('.middle-hand')?.children.length);
+//                console.log('🔍 DOM front hand:', document.querySelector('.front-hand')?.children.length);
 
                 await this.storePlayerArrangementToFirebase(playerName);
 
@@ -531,19 +511,21 @@ class MultiDeviceIntegration {
 
     // Add this helper method to check ownership
     async isTableOwner() {
-        console.log('🔍 isTableOwner START');
+//        console.log('🔍 isTableOwner START');
         try {
             const ownerSnapshot = await firebase.database().ref(`tables/${this.currentTableId}/state/TABLE_OWNER`).once('value');
             const tableOwner = ownerSnapshot.val();
 
             const myUniquePlayerName = window.currentPlayerUniquePlayerName;
 
-            console.log('🔍 Ownership check debug:', {
-                tableOwner,
-                myUniquePlayerName,
-                tableId: this.currentTableId,
-                match: tableOwner === myUniquePlayerName
-            });
+//            console.log('🔍 Ownership check debug:', {
+//                tableOwner,
+//                myUniquePlayerName,
+//                tableId: this.currentTableId,
+//                match: tableOwner === myUniquePlayerName
+//            }
+//            )
+            ;
 
             return tableOwner === myUniquePlayerName;
         } catch (error) {
@@ -649,20 +631,22 @@ class MultiDeviceIntegration {
 
 
     async storePlayerArrangementToFirebase(playerName) {
+
         console.log(`☁️ Storing player arrangement to Firebase for: ${playerName}`);
 
         // DEBUG 1: Check what we're looking for
-        console.log('🔍 DEBUG - Input playerName:', playerName);
-        console.log('🔍 DEBUG - typeof playerName:', typeof playerName);
+//        console.log('🔍 DEBUG - Input playerName:', playerName);
+//        console.log('🔍 DEBUG - typeof playerName:', typeof playerName);
 
         // DEBUG 2: Check if playerHands exists and has the player
-        console.log('🔍 DEBUG - window.game.playerHands exists:', !!window.game.playerHands);
-        console.log('🔍 DEBUG - playerHands keys:', window.game.playerHands ? Array.from(window.game.playerHands.keys()) : 'No playerHands');
+//        console.log('🔍 DEBUG - window.game.playerHands exists:', !!window.game.playerHands);
+//        console.log('🔍 DEBUG - playerHands keys:', window.game.playerHands ? Array.from(window.game.playerHands.keys()) : 'No playerHands');
 
         const playerHand = window.game.playerHands.get(playerName);
         console.log('🔍 DEBUG - Retrieved playerHand:', playerHand);
         console.log('🔍 DEBUG - playerHand exists:', !!playerHand);
 
+        // these logs increase performance of joinTable
         if (playerHand) {
             console.log('🔍 DEBUG - playerHand.back length:', playerHand.back?.length);
             console.log('🔍 DEBUG - playerHand.middle length:', playerHand.middle?.length);
@@ -689,7 +673,7 @@ class MultiDeviceIntegration {
 
 //        console.log('🔍 DEBUG - Final arrangementData:', JSON.stringify(arrangementData, null, 2));
 
-        console.log(`🕐 BEFORE Firebase write: ${uniquePlayerName} at ${Date.now()}`);
+//        console.log(`🕐 BEFORE Firebase write: ${uniquePlayerName} at ${Date.now()}`);
 
         await this.tableManager.tablesRef.doc(this.currentTableId.toString()).set({
             'currentGame': {
@@ -697,7 +681,7 @@ class MultiDeviceIntegration {
             }
         }, { merge: true });
 
-        console.log(`🕐 AFTER Firebase write: ${uniquePlayerName} at ${Date.now()}`);
+//        console.log(`🕐 AFTER Firebase write: ${uniquePlayerName} at ${Date.now()}`);
 
         console.log(`✅ Stored arrangement for ${uniquePlayerName}`);
     }
