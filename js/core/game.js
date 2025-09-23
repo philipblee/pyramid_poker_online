@@ -152,10 +152,10 @@ class PyramidPokerGame {
 //        this.roundHistory = [];
 //        this.tournamentScores.clear();
 
-        // Initialize tournament scores for all players
-        for (let player of this.playerManager.players) {
-            this.tournamentScores.set(player.name, 0);
-        }
+//        // Initialize tournament scores for all players
+//        for (let player of this.playerManager.players) {
+//            this.tournamentScores.set(player.name, 0);
+//        }
 
         // Setup first round
         this.deckManager.createNewDeck();
