@@ -10,7 +10,7 @@ async function handleTableStateChange(tableState) {
             window.game.initializeTournament();
 
             // transition from Lobby to dealing
-            transitionFromLobbyToDealing
+            transitionFromLobbyToDealing();
 
             // Then transition to DEALING
             setTableState(TABLE_STATES.DEALING);
@@ -18,7 +18,7 @@ async function handleTableStateChange(tableState) {
 
         case TABLE_STATES.DEALING:
             console.log('🎮 Game started! Moving to dealing phase...');
-            transitionFromLobbyToDealing();
+            transitionToDealingPhase();
 
             // After dealing setup, immediately advance to playing
             setTimeout(() => {
