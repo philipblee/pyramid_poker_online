@@ -22,6 +22,7 @@ class PyramidPokerGame {
         this.initializeEventListeners();
         updateDisplay(this);
         createParticles();
+        console.log(`"log from game constructor TABLE_STATES.NEW_TOURNAMENT:" ${TABLE_STATES.NEW_TOURNAMENT}`)
     }
 
     // Getters for backward compatibility
@@ -251,7 +252,12 @@ class PyramidPokerGame {
     startNewTournament() {
         console.log('🏆 Starting completely new tournament...');
 
-        // Clear all tournament-level data
+        if (gameConfig.config.gameDeviceMode === 'multi-device'){
+            setTableState(TABLE_STATES.NEW_TOURNAMENT)
+            return;
+        }
+
+        // Clear all tournament-level data - not needed after
         this.currentRound = 0;  // or 1, depending on your preference
         this.roundHistory = [];
         this.roundRobinResults = [];  // <-- This is the key line for your bug
@@ -1176,6 +1182,18 @@ class PyramidPokerGame {
                 highScore: Math.max(current.highScore, gameScore),
                 updatedAt: new Date()
             });
+        }
+    }
+
+    initializeTournament() {
+        console.log('🏆 from window.game.initializeTournament: Starting new tournament...');
+        this.currentRound = 1;
+        this.roundHistory = [];
+        this.tournamentScores.clear();
+
+        // Initialize tournament scores for all players
+        for (let player of this.playerManager.players) {
+            this.tournamentScores.set(player.name, 0);
         }
     }
 }

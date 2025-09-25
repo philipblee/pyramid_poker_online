@@ -73,13 +73,15 @@ function startMultiHumanCloudGame() {
 
     // Write to tableState to match your listener
     firebase.database().ref(`tables/${currentTable.id}`).update({
-        tableState: TABLE_STATES.DEALING,
+        tableState: TABLE_STATES.NEW_TOURNAMENT,  // Changed from DEALING
         gameStarted: Date.now(),
         currentRound: 1
     }).then(() => {
-        console.log('✅ Table state set to DEALING - all players should be notified');
+        console.log('✅ Table state set to NEW_TOURNAMENT - all players should be notified');
 
-        // Use the new multi-device setup
+        // Remove the tournament initialization code from here
+        // It will now be handled by the NEW_TOURNAMENT state case
+
         setupMultiDeviceMultiHuman().then(() => {
             launchGameInterface();
         });

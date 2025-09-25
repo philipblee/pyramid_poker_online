@@ -361,19 +361,11 @@ async function closeScoringPopup() {
         });
     }
 
-//    game.startNewRound  // test without this first
-
-//    startNewRound() {
-//
-//        // DEBUG: Check the values before the comparison
-//        console.log(`🔍 ROUND CHECK: currentRound=${this.currentRound}, maxRounds=${this.maxRounds}`);
-//        console.log(`🔍 COMPARISON: ${this.currentRound} >= ${this.maxRounds} = ${this.currentRound >= this.maxRounds}`);
-//
-//        // Must have existing players to start a new round
-//        if (this.playerManager.players.length < 2) {
-//            alert('Need at least 2 players to start a round. Click "New Game" to configure players.');
-//            return;
-//        }
+    // Start next round
+    if (window.isOwner) {
+        game.startNewRound();
+        setTableState('dealing');
+    }
 }
 
 function resetGameUI() {
@@ -423,26 +415,6 @@ function clearAllHandAreas() {
 
     console.log('🧹 Cleared all hand areas for next round');
 
-//    setTimeout(() => {
-//        const newRoundButton = document.querySelector('button[onclick*="newRound"]') ||
-//                              document.getElementById('newRoundButton') ||
-//                              document.querySelector('.new-round-btn');
-//        if (newRoundButton) {
-//            console.log('🎮 Auto-starting new round...');
-//            newRoundButton.click();
-//        } else {
-//            console.log('🎮 New round button not found, trying direct function call...');
-//            // Try calling the function directly if button not found
-//            if (typeof newRound === 'function') {
-//                newRound();
-//            } else if (typeof game !== 'undefined' && game.startNewRound) {
-//                game.startNewRound();
-//            }
-//        }
-//    }, 200); // Small delay to let popup close and hands clear
-
-    console.log('🎮 Starting new round...');
-    game.startNewRound();
 }
 
 // ADD THIS FUNCTION - Save game statistics to Firebase

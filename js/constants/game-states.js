@@ -10,6 +10,7 @@ const LOBBY_STATES = {
 // In js/constants/game-states.js - add this state
 const TABLE_STATES = {
     LOBBY: 'lobby',
+    NEW_TOURNAMENT: 'new_tournament',
     COUNTDOWN: 'countdown',  // NEW: 30-second ready timer
     DEALING: 'dealing',
     PLAYING: 'playing',
