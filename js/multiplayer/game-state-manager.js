@@ -69,6 +69,13 @@ async function handleTableStateChange(tableState) {
 
     switch(tableState) {
 
+        case TABLE_STATES.NEW_TOURNAMENT:
+            console.log('🎮 Handling NEW_TOURNAMENT state...');
+            window.game.initializeTournament();
+            // Then transition to DEALING
+            setTableState(TABLE_STATES.DEALING);
+            break;
+
         case TABLE_STATES.DEALING:
             console.log('🎮 Game started! Moving to dealing phase...');
             transitionFromLobbyToDealing();
@@ -102,7 +109,7 @@ async function handleTableStateChange(tableState) {
             }
             break;
 
-        case 'round_complete':
+        case TABLE_STATES.ROUND_COMPLETE:
             if (!window.isOwner) {
                 closeScoringPopup();
                 const waitingEl = document.getElementById('waiting-for-table-owner');

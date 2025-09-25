@@ -22,6 +22,7 @@ class PyramidPokerGame {
         this.initializeEventListeners();
         updateDisplay(this);
         createParticles();
+        console.log(`"log from game constructor TABLE_STATES.NEW_TOURNAMENT:" ${TABLE_STATES.NEW_TOURNAMENT}`)
     }
 
     // Getters for backward compatibility
@@ -1173,6 +1174,18 @@ class PyramidPokerGame {
                 highScore: Math.max(current.highScore, gameScore),
                 updatedAt: new Date()
             });
+        }
+    }
+
+    initializeTournament() {
+        console.log('🏆 from window.game.initializeTournament: Starting new tournament...');
+        this.currentRound = 1;
+        this.roundHistory = [];
+        this.tournamentScores.clear();
+
+        // Initialize tournament scores for all players
+        for (let player of this.playerManager.players) {
+            this.tournamentScores.set(player.name, 0);
         }
     }
 }
