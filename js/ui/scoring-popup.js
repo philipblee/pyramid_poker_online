@@ -348,8 +348,6 @@ async function closeScoringPopup() {
 
     document.getElementById('scoringPopup').style.display = 'none';
 
-    // Clear all hand areas for next round
-    clearAllHandAreas();
 
     resetGameUI();
 
@@ -361,15 +359,43 @@ async function closeScoringPopup() {
         });
     }
 
-    // Start next round
-    if (window.isOwner) {
-        game.startNewRound();
-        setTableState('dealing');
+    // Clear all hand areas for next round
+    clearAllHandAreas();
+
+        if (window.gameConfig.config.gameDeviceMode === 'single-device') {
+            // Single-player: use fallback logic
+            setTimeout(() => {
+            const newRoundButton = document.querySelector('button[onclick*="newRound"]') ||
+                                  document.getElementById('newRoundButton') ||
+                                  document.querySelector('.new-round-btn');
+
+            if (newRoundButton) {
+                console.log('🎮 Auto-starting new round...');
+                newRoundButton.click();
+            } else {
+                console.log('🎮 New round button not found, trying direct function call...');
+                // Try calling the function directly if button not found
+                if (typeof newRound === 'function') {
+                    newRound();
+                } else if (typeof game !== 'undefined' && game.startNewRound) {
+                    game.startNewRound();
+                }
+            }
+            }, 200); // Small delay to let popup close and hands clear
+
+         } else if (window.isOwner) {
+            // Multi-device owner: controls round progression
+            game.startNewRound();
+            setTableState('dealing');
+
+        } else {
+            // Multi-device non-owner: just advance currentRound
+            // Owner's setTableState should trigger retrieveHandFromFirebase
+             game.startNewRound();
+        }
     }
-}
 
 function resetGameUI() {
-
     // Reset auto arrange state
     if (game.autoArrangeUsed) {
         game.autoArrangeUsed = false;
@@ -414,25 +440,6 @@ function clearAllHandAreas() {
     });
 
     console.log('🧹 Cleared all hand areas for next round');
-
-    setTimeout(() => {
-        const newRoundButton = document.querySelector('button[onclick*="newRound"]') ||
-                              document.getElementById('newRoundButton') ||
-                              document.querySelector('.new-round-btn');
-
-        if (newRoundButton) {
-            console.log('🎮 Auto-starting new round...');
-            newRoundButton.click();
-        } else {
-            console.log('🎮 New round button not found, trying direct function call...');
-            // Try calling the function directly if button not found
-            if (typeof newRound === 'function') {
-                newRound();
-            } else if (typeof game !== 'undefined' && game.startNewRound) {
-                game.startNewRound();
-            }
-        }
-    }, 200); // Small delay to let popup close and hands clear
 
 }
 
