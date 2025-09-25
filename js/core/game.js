@@ -249,7 +249,12 @@ class PyramidPokerGame {
     startNewTournament() {
         console.log('🏆 Starting completely new tournament...');
 
-        // Clear all tournament-level data
+        if (gameConfig.config.gameDeviceMode === 'multi-device'){
+            setTableState(TABLE_STATES.NEW_TOURNAMENT)
+            return;
+        }
+
+        // Clear all tournament-level data - not needed after
         this.currentRound = 0;  // or 1, depending on your preference
         this.roundHistory = [];
         this.roundRobinResults = [];  // <-- This is the key line for your bug
