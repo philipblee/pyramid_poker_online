@@ -1,69 +1,5 @@
 //game-state-manager.js handles game transitions for multi-human, multi-device coordination
 
-function transitionFromLobbyToDealing() {
-    console.log('🎮 Transitioning from lobby to dealing phase...');
-
-    // Hide lobby UI
-    const lobbyView = document.getElementById('lobbyView') ||
-                     document.querySelector('.lobby-container') ||
-                     document.querySelector('.table-selection');
-
-    if (lobbyView) {
-        lobbyView.style.display = 'none';
-        console.log('✅ Lobby view hidden');
-    }
-
-    // Show game UI
-    const gameView = document.getElementById('gameView') ||
-                     document.querySelector('.game-area') ||
-                     document.getElementById('gameArea');
-
-    if (gameView) {
-        gameView.style.display = 'block';
-        console.log('✅ Game view shown');
-    }
-
-    // Update status
-    const statusElement = document.getElementById('status');
-    if (statusElement) {
-        statusElement.textContent = 'Game started! Cards are being dealt...';
-    }
-
-    // Trigger the game start for this device
-    if (typeof launchGameInterface === 'function') {
-        console.log('🚀 Launching game interface...');
-        launchGameInterface();
-    }
-
-    console.log('✅ Transition complete - Player should see game interface');
-}
-
-function transitionToPlaying() {
-    console.log('=== ENTERING transitionToPlayingPhase ===');
-    console.log('🎮 Transitioning to playing phase...');
-
-    console.log('🎮 Transitioning to playing phase...');
-    console.log('🎮 About to call setTableState(PLAYING)');
-
-    console.log('Owner check:', window.isOwner);
-    if (window.multiDeviceIntegration && window.isOwner) {
-       console.log('Owner confirmed - setting state to PLAYING');
-       setTableState(TABLE_STATES.PLAYING);
-    } else {
-       console.log('In transitionToPlaying this instance is Not the owner');
-    }
-    // Enable game controls, show "arrange your cards" message
-}
-
-function transitionToScoringPhase() {
-    console.log('🎮 Transitioning to scoring phase...');
-
-    // ADD THIS - Set state to SCORING:
-    if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
-        setTableState(TABLE_STATES.SCORING);
-    }
-}
-
 async function handleTableStateChange(tableState) {
     console.log('🎮 Handling table state change:', tableState);
 
@@ -72,6 +8,10 @@ async function handleTableStateChange(tableState) {
         case TABLE_STATES.NEW_TOURNAMENT:
             console.log('🎮 Handling NEW_TOURNAMENT state...');
             window.game.initializeTournament();
+
+            // transition from Lobby to dealing
+            transitionFromLobbyToDealing
+
             // Then transition to DEALING
             setTableState(TABLE_STATES.DEALING);
             break;
@@ -125,6 +65,79 @@ async function handleTableStateChange(tableState) {
                     console.log('🎮 Unknown table state:', tableState);
             }
         }
+
+function transitionFromLobbyToDealing() {
+    console.log('🎮 Transitioning from lobby to dealing phase...');
+
+    // Hide lobby UI
+    const lobbyView = document.getElementById('lobbyView') ||
+                     document.querySelector('.lobby-container') ||
+                     document.querySelector('.table-selection');
+
+    if (lobbyView) {
+        lobbyView.style.display = 'none';
+        console.log('✅ Lobby view hidden');
+    }
+
+    // Show game UI
+    const gameView = document.getElementById('gameView') ||
+                     document.querySelector('.game-area') ||
+                     document.getElementById('gameArea');
+
+    if (gameView) {
+        gameView.style.display = 'block';
+        console.log('✅ Game view shown');
+    }
+
+    // Update status
+    const statusElement = document.getElementById('status');
+    if (statusElement) {
+        statusElement.textContent = 'Game started! Cards are being dealt...';
+    }
+
+    // Trigger the game start for this device
+    if (typeof launchGameInterface === 'function') {
+        console.log('🚀 Launching game interface...');
+        launchGameInterface();
+    }
+
+    console.log('✅ Transition complete - Player should see game interface');
+}
+
+function transitionToDealingPhase() {
+    console.log('🎮 Transitioning to dealing phase...');
+
+    // ADD THIS - Set state to SCORING:
+    if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
+        setTableState(TABLE_STATES.PLAYING);
+    }
+}
+
+function transitionToPlaying() {
+    console.log('=== ENTERING transitionToPlayingPhase ===');
+    console.log('🎮 Transitioning to playing phase...');
+
+    console.log('🎮 Transitioning to playing phase...');
+    console.log('🎮 About to call setTableState(PLAYING)');
+
+    console.log('Owner check:', window.isOwner);
+    if (window.multiDeviceIntegration && window.isOwner) {
+       console.log('Owner confirmed - setting state to PLAYING');
+       setTableState(TABLE_STATES.PLAYING);
+    } else {
+       console.log('In transitionToPlaying this instance is Not the owner');
+    }
+    // Enable game controls, show "arrange your cards" message
+}
+
+function transitionToScoringPhase() {
+    console.log('🎮 Transitioning to scoring phase...');
+
+    // ADD THIS - Set state to SCORING:
+    if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
+        setTableState(TABLE_STATES.SCORING);
+    }
+}
 
 // In game-state-manager.js or wherever global functions are:
 async function setTableState(newState) {

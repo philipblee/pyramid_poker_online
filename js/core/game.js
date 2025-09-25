@@ -264,6 +264,10 @@ class PyramidPokerGame {
 
     // load all current playerHand
     loadCurrentPlayerHand() {
+        // this console.log is necessary for single player to work.  do not comment outg
+        console.log(`Log from loadCurrentPlayerHand - method is called; this.gameState = " ${this.gameState}`)
+
+
         if (this.gameState !== 'playing') return;
 
         const currentPlayer = this.playerManager.getCurrentPlayer();
