@@ -1,5 +1,71 @@
 //game-state-manager.js handles game transitions for multi-human, multi-device coordination
 
+async function handleTableStateChange(tableState) {
+    console.log('🎮 Handling table state change:', tableState);
+
+    switch(tableState) {
+
+        case TABLE_STATES.NEW_TOURNAMENT:
+            console.log('🎮 Handling NEW_TOURNAMENT state...');
+            window.game.initializeTournament();
+
+            // since it's a new tournament, call transition from lobby to dealing
+            transitionFromLobbyToDealing();
+
+            // Then transition to DEALING
+            setTableState(TABLE_STATES.DEALING);
+            break;
+
+        case TABLE_STATES.DEALING:
+            console.log('🎮 Game started! Moving to dealing phase...');
+            transitionToDealingPhase();
+
+            // After dealing setup, immediately advance to playing
+            setTimeout(() => {
+                console.log('🎮 Dealing complete, moving to playing phase...');
+                transitionToPlayingPhase();
+            }, 1000);
+            break;
+
+        case TABLE_STATES.PLAYING:
+            console.log('🎮 Cards dealt! Players can now arrange hands...');
+            // transitionToPlayingPhase();
+
+            // ADD THIS:
+            if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
+                window.multiDeviceIntegration.setupSubmissionListener();
+            }
+            break;
+
+        case TABLE_STATES.ALL_SUBMITTED:
+            console.log('🎮 All players submitted! Moving to scoring...');
+            transitionToScoringPhase();
+            break;
+
+        case TABLE_STATES.SCORING:
+            if (!window.isOwner) {
+                console.log('Non-owner proceeding to scoring with Firebase data...');
+                await window.multiDeviceIntegration.proceedToScoring();
+            }
+            break;
+
+        case TABLE_STATES.ROUND_COMPLETE:
+            if (!window.isOwner) {
+                closeScoringPopup();
+                const waitingEl = document.getElementById('waiting-for-table-owner');
+                if (waitingEl) waitingEl.remove();
+            }
+            break;
+
+        case TABLE_STATES.TOURNAMENT_COMPLETE:
+            game.showTournamentSummary();
+            break;
+
+                default:
+                    console.log('🎮 Unknown table state:', tableState);
+            }
+        }
+
 function transitionFromLobbyToDealing() {
     console.log('🎮 Transitioning from lobby to dealing phase...');
 
@@ -38,7 +104,16 @@ function transitionFromLobbyToDealing() {
     console.log('✅ Transition complete - Player should see game interface');
 }
 
-function transitionToPlaying() {
+function transitionToDealingPhase() {
+    console.log('🎮 Transitioning to dealing phase...');
+
+    // ADD THIS - Set state to SCORING:
+    if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
+        setTableState(TABLE_STATES.PLAYING);
+    }
+}
+
+function transitionToPlayingPhase() {
     console.log('=== ENTERING transitionToPlayingPhase ===');
     console.log('🎮 Transitioning to playing phase...');
 
@@ -50,7 +125,7 @@ function transitionToPlaying() {
        console.log('Owner confirmed - setting state to PLAYING');
        setTableState(TABLE_STATES.PLAYING);
     } else {
-       console.log('In transitionToPlaying this instance is Not the owner');
+       console.log('In transitionToPlayingPhase this instance is Not the owner');
     }
     // Enable game controls, show "arrange your cards" message
 }
@@ -63,68 +138,6 @@ function transitionToScoringPhase() {
         setTableState(TABLE_STATES.SCORING);
     }
 }
-
-async function handleTableStateChange(tableState) {
-    console.log('🎮 Handling table state change:', tableState);
-
-    switch(tableState) {
-
-        case TABLE_STATES.NEW_TOURNAMENT:
-            console.log('🎮 Handling NEW_TOURNAMENT state...');
-            window.game.initializeTournament();
-            // Then transition to DEALING
-            setTableState(TABLE_STATES.DEALING);
-            break;
-
-        case TABLE_STATES.DEALING:
-            console.log('🎮 Game started! Moving to dealing phase...');
-            transitionFromLobbyToDealing();
-
-            // After dealing setup, immediately advance to playing
-            setTimeout(() => {
-                console.log('🎮 Dealing complete, moving to playing phase...');
-                transitionToPlaying();
-            }, 1000);
-            break;
-
-        case TABLE_STATES.PLAYING:
-            console.log('🎮 Cards dealt! Players can now arrange hands...');
-            // transitionToPlaying();
-
-            // ADD THIS:
-            if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
-                window.multiDeviceIntegration.setupSubmissionListener();
-            }
-            break;
-
-        case TABLE_STATES.ALL_SUBMITTED:
-            console.log('🎮 All players submitted! Moving to scoring...');
-            transitionToScoringPhase();
-            break;
-
-        case TABLE_STATES.SCORING:
-            if (!window.isOwner) {
-                console.log('Non-owner proceeding to scoring with Firebase data...');
-                await window.multiDeviceIntegration.proceedToScoring();
-            }
-            break;
-
-        case TABLE_STATES.ROUND_COMPLETE:
-            if (!window.isOwner) {
-                closeScoringPopup();
-                const waitingEl = document.getElementById('waiting-for-table-owner');
-                if (waitingEl) waitingEl.remove();
-            }
-            break;
-
-        case TABLE_STATES.TOURNAMENT_COMPLETE:
-            game.showTournamentSummary();
-            break;
-
-                default:
-                    console.log('🎮 Unknown table state:', tableState);
-            }
-        }
 
 // In game-state-manager.js or wherever global functions are:
 async function setTableState(newState) {
@@ -145,6 +158,7 @@ async function setTableState(newState) {
         console.log('❌ Error setting state:', error);
     }
 }
+
 // Add this function to lobby.js
 async function setupLobbyStateListener(tableId) {
     firebase.database().ref(`tables/${tableId}/state/LOBBY_STATE`).on('value', (snapshot) => {
@@ -163,23 +177,23 @@ async function setupLobbyStateListener(tableId) {
     });
 }
 
-// In the Continue button click handler
-function onScoringComplete() {
-    if (window.isOwner) {
-        console.log('Owner clicked Continue on Scoring Popup');
-        transitionToRoundComplete();
-    } else {
-        console.log('Non-owner waiting for owner to click Continue');
-        closeScoringPopup();
-    }
-}
-
-// In game-state-manager.js (or wherever state transitions are defined)
-async function transitionToRoundComplete() {
-    console.log('🔄 Transitioning to ROUND_COMPLETE state...');
-
-    // Only update Realtime Database (what listeners actually read)
-    await firebase.database().ref(`tables/${this.currentTableId}/tableState`).set('round_complete');
-
-    console.log('✅ Successfully transitioned to ROUND_COMPLETE state');
-}
+//// In the Continue button click handler
+//function TransitionToRoundComplete() {
+//    if (window.isOwner) {
+//        console.log('Owner clicked Continue on Scoring Popup');
+//        transitionToRoundComplete();
+//    } else {
+//        console.log('Non-owner waiting for owner to click Continue');
+//        closeScoringPopup();
+//    }
+//}
+//
+//// In game-state-manager.js (or wherever state transitions are defined)
+//async function transitionToRoundComplete() {
+//    console.log('🔄 Transitioning to ROUND_COMPLETE state...');
+//
+//    // Only update Realtime Database (what listeners actually read)
+//    await firebase.database().ref(`tables/${this.currentTableId}/tableState`).set('round_complete');
+//
+//    console.log('✅ Successfully transitioned to ROUND_COMPLETE state');
+//}
