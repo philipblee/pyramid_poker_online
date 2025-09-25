@@ -78,7 +78,15 @@ function startMultiHumanCloudGame() {
         currentRound: 1
     }).then(() => {
         console.log('✅ Table state set to DEALING - all players should be notified');
+        // Add after setupMultiDeviceMultiHuman().then(() => {...}):
+        window.game.currentRound = 1;  // May be redundant with Firebase, but ensures consistency
+        window.game.roundHistory = [];
+        window.game.tournamentScores.clear();
 
+        // Initialize tournament scores for all players
+        for (let player of window.game.playerManager.players) {
+            window.game.tournamentScores.set(player.name, 0);
+        }
         // Use the new multi-device setup
         setupMultiDeviceMultiHuman().then(() => {
             launchGameInterface();
