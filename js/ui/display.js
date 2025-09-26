@@ -187,16 +187,22 @@ function updatePlayerList(game) {
             `;
             roundHeader.innerHTML = `📋 Round ${roundNum}`;
 
+//          Comment this out because the clickable rounds are buggy
             // Add hover effect and click handler for completed rounds
-            if (game.roundHistory.find(round => round.roundNumber === roundNum)) {
-                roundHeader.style.cursor = 'pointer';
-                roundHeader.onclick = () => showHistoricalRound(game, roundNum);
-                roundHeader.onmouseover = () => roundHeader.style.background = 'rgba(78, 205, 196, 0.2)';
-                roundHeader.onmouseout = () => roundHeader.style.background = 'rgba(78, 205, 196, 0.1)';
-            } else {
-                roundHeader.style.cursor = 'default';
-                roundHeader.style.opacity = '0.7';
-            }
+//            if (game.roundHistory.find(round => round.roundNumber === roundNum)) {
+//                roundHeader.style.cursor = 'pointer';
+//                roundHeader.onclick = () => showHistoricalRound(game, roundNum);
+//                roundHeader.onmouseover = () => roundHeader.style.background = 'rgba(78, 205, 196, 0.2)';
+//                roundHeader.onmouseout = () => roundHeader.style.background = 'rgba(78, 205, 196, 0.1)';
+//            } else {
+//                roundHeader.style.cursor = 'default';
+//                roundHeader.style.opacity = '0.7';
+//            }
+
+            // Disable all round buttons (buggy - fix later)
+            roundHeader.style.cursor = 'default';
+            roundHeader.style.opacity = '0.7';
+            // Remove click handlers and hover effects
 
             roundSection.appendChild(roundHeader);
 
@@ -224,15 +230,36 @@ function updatePlayerList(game) {
                     readyIndicator = '✓ ';
                 }
 
+//              comment this out and replace with section with spaces in score for unplayed rounds
+//                const score = roundScores.get(player.name) || 0;
+//
+//                // Color logic for round scores
+//                const scoreColor = score < 0 ? '#ff6b6b' : '#4ecdc4';
+//
+//                playerDiv.innerHTML = `
+//                    <span>${readyIndicator}${player.name}</span>
+//                    <span style="color: ${scoreColor};">${score > 0 ? '+' : ''}${score} pts</span>
+//                `;
 
-                const score = roundScores.get(player.name) || 0;
+                // Check if this round has been completed
+                const roundCompleted = game.roundHistory.find(round => round.roundNumber === roundNum);
 
-                // Color logic for round scores
-                const scoreColor = score < 0 ? '#ff6b6b' : '#4ecdc4';
+                let scoreDisplay, scoreColor;
+
+                if (roundCompleted) {
+                    // Round completed - show actual round score
+                    const score = roundScores.get(player.name) || 0;
+                    scoreColor = score < 0 ? '#ff6b6b' : '#4ecdc4';
+                    scoreDisplay = `${score > 0 ? '+' : ''}${score} pts`;
+                } else {
+                // Round not played yet - show dash
+                scoreColor = '#ffffff'; // White for maximum visibility
+                scoreDisplay = '-';
+                }
 
                 playerDiv.innerHTML = `
                     <span>${readyIndicator}${player.name}</span>
-                    <span style="color: ${scoreColor};">${score > 0 ? '+' : ''}${score} pts</span>
+                    <span style="color: ${scoreColor};">${scoreDisplay}</span>
                 `;
 
 
