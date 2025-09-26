@@ -70,11 +70,11 @@ class LoginModal {
     }
 
     attachEventListeners() {
-        console.log('🔧 Setting up event listeners...');
+//        console.log('🔧 Setting up event listeners...');
 
         // Connect the main login button in the UI
         const loginButton = document.getElementById('loginButton');
-        console.log('🔧 Login button found:', loginButton);
+//        console.log('🔧 Login button found:', loginButton);
 
         if (loginButton) {
             loginButton.addEventListener('click', () => {
@@ -94,7 +94,7 @@ class LoginModal {
 
         //Do you have a logout() method in your login-modal.js? If not, we'll need to add one:
 
-            console.log('🔧 Login button connected!');
+//            console.log('🔧 Login button connected!');
         } else {
             console.log('🔧 WARNING: Login button not found!');
         }

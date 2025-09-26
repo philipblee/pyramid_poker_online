@@ -62,7 +62,7 @@ class FirebaseAuth {
         window.firebaseAuth.onAuthStateChanged((user) => {
             this.currentUser = user;
             if (user) {
-                console.log('🔥 User signed in:', user.email);
+//                console.log('🔥 User signed in:', user.email);
                 this.updateUI(true);
             } else {
                 console.log('🔥 User signed out');
@@ -108,7 +108,7 @@ class FirebaseAuth {
         // Update your existing UI here
         // This connects to your current login system
         if (isLoggedIn) {
-            console.log('🔥 Update UI to show logged-in state');
+//            console.log('🔥 Update UI to show logged-in state');
         } else {
             console.log('🔥 Update UI to show logged-out state');
         }
@@ -117,4 +117,4 @@ class FirebaseAuth {
 
 // IMPORTANT: Initialize the Firebase Auth Manager
 window.firebaseAuthManager = new FirebaseAuth();
-console.log('🔥 Firebase Auth Manager initialized');
+//console.log('🔥 Firebase Auth Manager initialized');

@@ -46,11 +46,11 @@ class PlayerManager {
 
     // Update addDefaultPlayers() method - Firebase auth section
     addDefaultPlayers() {
-        console.log('gameConfig object:', window.gameConfig);
-        console.log('getConfig function:', typeof window.gameConfig?.getConfig);
+//        console.log('gameConfig object:', window.gameConfig);
+//        console.log('getConfig function:', typeof window.gameConfig?.getConfig);
 
         const config = window.gameConfig.getConfig();
-        console.log('Retrieved config:', config);
+//        console.log('Retrieved config:', config);
 
         if (config.gameMode === 'single-human') {
             // Create 1 human player + configured number of AI players
@@ -160,7 +160,7 @@ class PlayerManager {
         this.players = [];
         this.scores.clear();
         this.addDefaultPlayers();
-        console.log('Players reset with current config');
+//        console.log('Players reset with current config');
     }
 
     addPlayer(playerName) {

@@ -216,7 +216,7 @@ function createTableCard(table) {
     const maxPlayers = settings.maxHumanPlayers || 1;
     const isFull = currentPlayers >= maxPlayers;
 
-    console.log('🔍 isFull calculation:', isFull, `(${currentPlayers}/${maxPlayers})`);
+//    console.log('🔍 isFull calculation:', isFull, `(${currentPlayers}/${maxPlayers})`);
 
     // Set onclick only if table isn't full
     if (!isFull) {
@@ -302,7 +302,7 @@ async function joinTable(table) {
 
 
     // NEW: Check for stale table data and clean up if needed
-    console.log('🧹 Checking for stale table data...');
+//    console.log('🧹 Checking for stale table data...');
     const playersSnapshot = await firebase.database().ref(`tables/${table.id}/players`).once('value');
     const existingPlayers = playersSnapshot.val() || {};
     const playerCount = Object.keys(existingPlayers).length;
@@ -351,8 +351,8 @@ async function joinTable(table) {
             gameDeviceMode: table.settings.gameDeviceMode.replace(' ', '-'),
             tableId: table.id
         });
-        console.log('✅ gameConfig.config updated with table settings');
-        console.log('🔍 gameDeviceMode now:', window.gameConfig.config.gameDeviceMode);
+//        console.log('✅ gameConfig.config updated with table settings');
+//        console.log('🔍 gameDeviceMode now:', window.gameConfig.config.gameDeviceMode);
     } else {
         console.error('❌ window.gameConfig not found during joinTable!');
     }
@@ -378,11 +378,11 @@ async function joinTable(table) {
         const currentHumanPlayers = snapshot.val() || 0;
         const maxHumanPlayers = table.settings.maxHumanPlayers || 6;
 
-        console.log('🔍 REAL current players from Firebase:', currentHumanPlayers);
+//        console.log('🔍 REAL current players from Firebase:', currentHumanPlayers);
         // Check if table is full (applies to ALL table types)
-        console.log('🔍 Calculated - current:', currentHumanPlayers, 'max:', maxHumanPlayers);
-        console.log('🔍 Is full?', currentHumanPlayers >= maxHumanPlayers);
-        console.log('🔍 Max players:', maxHumanPlayers);
+//        console.log('🔍 Calculated - current:', currentHumanPlayers, 'max:', maxHumanPlayers);
+//        console.log('🔍 Is full?', currentHumanPlayers >= maxHumanPlayers);
+//        console.log('🔍 Max players:', maxHumanPlayers);
 
         if (currentHumanPlayers >= maxHumanPlayers) {
             alert(`Table "${table.name}" is full (${currentHumanPlayers}/${maxHumanPlayers} players)`);
@@ -419,7 +419,7 @@ async function joinTable(table) {
         firebase.database().ref(`tables/${table.id}/settings/humanPlayers`)
             .transaction((current) => (current || 0) + 1)
             .then(() => {
-                console.log('✅ Human player counter incremented');
+//                console.log('✅ Human player counter incremented');
                 table.settings.humanPlayers += 1
             });
     updateTableDisplay();

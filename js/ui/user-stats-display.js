@@ -64,7 +64,7 @@ class UserStatsDisplay {
         // Verify creation
         const testElement = document.getElementById('gamesPlayed');
         if (testElement) {
-            console.log('✅ Stats modal created successfully with all elements');
+//            console.log('✅ Stats modal created successfully with all elements');
         } else {
             console.error('❌ Stats modal created but missing inner elements');
         }
