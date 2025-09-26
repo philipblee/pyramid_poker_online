@@ -353,6 +353,9 @@ class PyramidPokerGame {
     async handleAITurn() {
         const currentPlayer = this.playerManager.getCurrentPlayer();
 
+        // DISABLE BUTTONS when AI starts
+        this.disablePlayerButtons();
+
         // Show spinner immediately
         showLoadingSpinner();
 
@@ -394,9 +397,26 @@ class PyramidPokerGame {
             const currentPlayer = this.playerManager.getCurrentPlayer();
             currentPlayer.aiTurnInProgress = false;
 
+            // RE-ENABLE BUTTONS
+            this.enablePlayerButtons();
+
     }, 1200); // After all your timeouts complete
 
+
     }
+
+    // Add these helper functions to your game.js
+    disablePlayerButtons() {
+        document.getElementById('submitHand').disabled = true;
+        document.getElementById('autoArrange').disabled = true;
+    }
+
+    enablePlayerButtons() {
+        // reenable buttons after AI Turn
+        document.getElementById('submitHand').disabled = false;
+        document.getElementById('autoArrange').disabled = false;
+    }
+
 
     submitAIPlayerHand() {
         // For AI players, add a small delay to let DOM update after auto-arrange
