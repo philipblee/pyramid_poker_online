@@ -72,7 +72,7 @@ class PyramidPokerGame {
             // Use setTimeout to allow UI to update before computation
             setTimeout(() => {
                 try {
-                    console.log('Log from handleAutoArrange: 🧠 Starting auto-arrange optimization...');
+//                    console.log('Log from handleAutoArrange: 🧠 Starting auto-arrange optimization...');
 
                     // Your existing auto-arrange logic
                     this.autoArrangeManager.autoArrangeHand();
@@ -82,7 +82,7 @@ class PyramidPokerGame {
                     // Hide spinner when done
                     hideLoadingSpinner();
 
-                    console.log('Log from handleAutoArrange: ✅ Auto-arrange applied successfully');
+//                    console.log('Log from handleAutoArrange: ✅ Auto-arrange applied successfully');
 
                 } catch (error) {
                     console.error('❌ Auto-arrange failed:', error);
@@ -143,7 +143,7 @@ class PyramidPokerGame {
             } else {
                 // For single-device, use the original logic
                 const targetPlayerCount = 1 + window.gameConfig.config.computerPlayers; // 1 human + N AI
-                console.log(`🎮 Single-device configured for ${targetPlayerCount} players (1 human + ${window.gameConfig.config.computerPlayers} AI)`);
+//                console.log(`🎮 Single-device configured for ${targetPlayerCount} players (1 human + ${window.gameConfig.config.computerPlayers} AI)`);
             }
         }
 
@@ -190,8 +190,8 @@ class PyramidPokerGame {
     startNewRound() {
 
         // DEBUG: Check the values before the comparison
-        console.log(`🔍 ROUND CHECK: currentRound=${this.currentRound}, maxRounds=${this.maxRounds}`);
-        console.log(`🔍 COMPARISON: ${this.currentRound} >= ${this.maxRounds} = ${this.currentRound >= this.maxRounds}`);
+//        console.log(`🔍 ROUND CHECK: currentRound=${this.currentRound}, maxRounds=${this.maxRounds}`);
+//        console.log(`🔍 COMPARISON: ${this.currentRound} >= ${this.maxRounds} = ${this.currentRound >= this.maxRounds}`);
 
         // Must have existing players to start a new round
         if (this.playerManager.players.length < 2) {
@@ -214,9 +214,9 @@ class PyramidPokerGame {
         }
 
         // Advance to next round
-        console.log(`🔄 BEFORE increment: currentRound = ${this.currentRound}`);
+//        console.log(`🔄 BEFORE increment: currentRound = ${this.currentRound}`);
         this.currentRound++;
-        console.log(`🔄 AFTER increment: currentRound = ${this.currentRound}`);
+//        console.log(`🔄 AFTER increment: currentRound = ${this.currentRound}`);
 
         console.log(`🔄 Starting Round ${this.currentRound} of ${this.maxRounds}...`);
 
