@@ -150,8 +150,8 @@ function updatePlayerList(game) {
     if (game.currentRound > 0) {
 
         // In display.js where tournament standings are built
-        console.log(`📺 Tournament Display: currentRound=${game.currentRound}, roundHistory.length=${game.roundHistory.length}`);
-        console.log(`📺 Will loop from roundNum=1 to roundNum=${game.currentRound}`);
+//        console.log(`📺 Tournament Display: currentRound=${game.currentRound}, roundHistory.length=${game.roundHistory.length}`);
+//        console.log(`📺 Will loop from roundNum=1 to roundNum=${game.currentRound}`);
 
         // Show all rounds from 1 to current round
         for (let roundNum = 1; roundNum <= game.currentRound; roundNum++) {

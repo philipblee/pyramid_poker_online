@@ -373,7 +373,7 @@ async function closeScoringPopup() {
                 console.log('🎮 Auto-starting new round...');
                 newRoundButton.click();
             } else {
-                console.log('🎮 New round button not found, trying direct function call...');
+//                console.log('🎮 New round button not found, trying direct function call...');
                 // Try calling the function directly if button not found
                 if (typeof newRound === 'function') {
                     newRound();
@@ -459,16 +459,16 @@ function saveGameStats() {
     try {
         // Calculate final scores and rankings
         const playerScores = calculateFinalScores();
-        console.log('🔍 DEBUG - All player scores:', playerScores);
+//        console.log('🔍 DEBUG - All player scores:', playerScores);
 
         const playerName = getPlayerName();
-        console.log('🔍 DEBUG - Player name:', playerName);
+//        console.log('🔍 DEBUG - Player name:', playerName);
 
         const playerScore = playerScores[playerName] || 0;
-        console.log('🔍 DEBUG - Player score:', playerScore);
+//        console.log('🔍 DEBUG - Player score:', playerScore);
 
         const playerRank = calculatePlayerRank(playerScores, playerName);
-        console.log('🔍 DEBUG - Player rank:', playerRank);
+//        console.log('🔍 DEBUG - Player rank:', playerRank);
 
         // Get game configuration
         const gameConfig = window.gameConfig ? window.gameConfig.getConfig() : {};
@@ -485,7 +485,7 @@ function saveGameStats() {
             opponents: Object.keys(playerScores).filter(name => name !== playerName)
         };
 
-        console.log('📊 Saving game stats:', gameData);
+//        console.log('📊 Saving game stats:', gameData);
         window.userStatsManager.saveGameResult(gameData);
 
     } catch (error) {
@@ -499,7 +499,7 @@ function calculateFinalScores() {
 
     // FIRST: Use captured scores from popup (this is the correct data!)
     if (window.lastGameScores && Object.keys(window.lastGameScores).length > 0) {
-        console.log('🔍 Using captured scores from popup:', window.lastGameScores);
+//        console.log('🔍 Using captured scores from popup:', window.lastGameScores);
         return window.lastGameScores;
     }
 
@@ -513,7 +513,7 @@ function getPlayerName() {
     if (window.game && window.game.players) {
         const humanPlayer = window.game.players.find(p => !p.isAI);
         if (humanPlayer) {
-            console.log('🔍 Found human player:', humanPlayer.name);
+//            console.log('🔍 Found human player:', humanPlayer.name);
             return humanPlayer.name;
         }
     }
