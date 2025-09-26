@@ -780,7 +780,7 @@ class MultiDeviceIntegration {
         // Add cloud indicator
         const cloudIndicator = document.createElement('div');
         cloudIndicator.id = 'multi-device-status';
-        cloudIndicator.innerHTML = '☁️ Cloud Game - Single Player vs AI';
+        cloudIndicator.innerHTML = '☁️ Cloud Game ';
         cloudIndicator.style.cssText = `
             background: linear-gradient(45deg, #4CAF50, #45a049);
             color: white;
