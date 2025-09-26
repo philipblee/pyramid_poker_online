@@ -39,15 +39,15 @@ function getCardCountFromSubmittedHands(game, playerName, position) {
 // Enhanced showScoringPopup with proper large hand support
 function showScoringPopup(game, detailedResults, roundScores, specialPoints, roundNumber = null) {
 
-    console.log(`🎯 showScoringPopup called - Round ${game.currentRound}, Call count:`, ++window.popupCallCount || (window.popupCallCount = 1));
+//    console.log(`🎯 showScoringPopup called - Round ${game.currentRound}, Call count:`, ++window.popupCallCount || (window.popupCallCount = 1));
 
-    console.log('🔍 showScoringPopup called with:', {
-        game,
-        detailedResults,
-        roundScores,
-        specialPoints,
-        roundNumber
-    });
+//    console.log('🔍 showScoringPopup called with:', {
+//        game,
+//        detailedResults,
+//        roundScores,
+//        specialPoints,
+//        roundNumber
+//    });
 
     // CAPTURE SCORES FOR STATS - Check all possible score sources
     window.lastGameDetailedResults = detailedResults;
@@ -80,9 +80,9 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
         }
     }
 
-    console.log('🔍 Final captured scores:', window.lastGameScores);
+//    console.log('🔍 Final captured scores:', window.lastGameScores);
     // In showScoringPopup, after line 80, add:
-    console.log('🔍 Final captured scores DETAILS:', JSON.stringify(window.lastGameScores, null, 2));
+//    console.log('🔍 Final captured scores DETAILS:', JSON.stringify(window.lastGameScores, null, 2));
 
     const popup = document.getElementById('scoringPopup');
     const allPlayerHands = document.getElementById('allPlayerHands');
@@ -91,26 +91,26 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
     roundRobinResults.innerHTML = '';  // ADD THIS LINE
 
     // After roundRobinResults.innerHTML = '';
-    console.log('After clearing roundRobinResults:', roundRobinResults.children.length);
+//    console.log('After clearing roundRobinResults:', roundRobinResults.children.length);
 
     // And later when you create the matrix:
-    console.log('Adding matrix to:', roundRobinResults);
-    console.log('roundRobinResults children before matrix:', roundRobinResults.children.length);
+//    console.log('Adding matrix to:', roundRobinResults);
+//    console.log('roundRobinResults children before matrix:', roundRobinResults.children.length);
 
     // After adding the matrix:
-    console.log('roundRobinResults children after matrix:', roundRobinResults.children.length);
+//    console.log('roundRobinResults children after matrix:', roundRobinResults.children.length);
 
     // After the existing debug logs, add this:
     try {
         // Your matrix creation code
         const matrixDiv = document.createElement('div');
-        console.log('Created matrixDiv:', matrixDiv);
+//        console.log('Created matrixDiv:', matrixDiv);
 
         matrixDiv.innerHTML = `
 //            <h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">Head-to-Head Matrix</h3>
             <div id="scoringMatrix"></div>
         `;
-        console.log('Set matrixDiv innerHTML');
+//        console.log('Set matrixDiv innerHTML');
 
 //        commented out this block because roundRobinResults keep appending
 //        roundRobinResults.appendChild(matrixDiv);
@@ -162,7 +162,7 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
     });
 
 
-console.log(`🎯 Matrix created for round ${game.currentRound}. Total children in roundRobinResults:`, roundRobinResults.children.length);
+//console.log(`🎯 Matrix created for round ${game.currentRound}. Total children in roundRobinResults:`, roundRobinResults.children.length);
 
     // Fill matrix with results
     detailedResults.forEach(result => {
