@@ -6,7 +6,7 @@ async function handleTableStateChange(tableState) {
     switch(tableState) {
 
         case TABLE_STATES.NEW_TOURNAMENT:
-            console.log('🎮 Handling NEW_TOURNAMENT state...');
+            console.log('🎮 Move to NEW_TOURNAMENT phase...');
             window.game.initializeTournament();
 
             // transition from Lobby to dealing
@@ -17,19 +17,18 @@ async function handleTableStateChange(tableState) {
             break;
 
         case TABLE_STATES.DEALING:
-            console.log('🎮 Game started! Moving to dealing phase...');
+            console.log('🎮 Move to DEALING phase...');
             transitionToDealingPhase();
 
             // After dealing setup, immediately advance to playing
             setTimeout(() => {
-                console.log('🎮 Dealing complete, moving to playing phase...');
+                console.log('🎮 Transition to PLAYING ...');
                 transitionToPlaying();
             }, 1000);
             break;
 
         case TABLE_STATES.PLAYING:
-            console.log('🎮 Cards dealt! Players can now arrange hands...');
-            // transitionToPlaying();
+            console.log('🎮 Moved to PLAYING phase. Players can arrange hands...');
 
             // ADD THIS:
             if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
@@ -38,26 +37,32 @@ async function handleTableStateChange(tableState) {
             break;
 
         case TABLE_STATES.ALL_SUBMITTED:
-            console.log('🎮 All players submitted! Moving to scoring...');
+            console.log('🎮 All players submitted! Transition to scoring...');
             transitionToScoringPhase();
             break;
 
         case TABLE_STATES.SCORING:
             if (!window.isOwner) {
-                console.log('Non-owner proceeding to scoring with Firebase data...');
+                console.log('Non-owner proceed to SCORING phase...');
                 await window.multiDeviceIntegration.proceedToScoring();
+            }
+
+            else {
+                console.log('Owner proceed to SCORING phase...');
             }
             break;
 
         case TABLE_STATES.ROUND_COMPLETE:
             if (!window.isOwner) {
                 closeScoringPopup();
+                console.log('Owner closeScoringPopup proceed to ROUND COMPLETE...');
                 const waitingEl = document.getElementById('waiting-for-table-owner');
                 if (waitingEl) waitingEl.remove();
             }
             break;
 
         case TABLE_STATES.TOURNAMENT_COMPLETE:
+            console.log('TOURNAMENT_COMPLETE showTournamentSummary...');
             game.showTournamentSummary();
             break;
 
@@ -114,24 +119,22 @@ function transitionToDealingPhase() {
 }
 
 function transitionToPlaying() {
-    console.log('=== ENTERING transitionToPlayingPhase ===');
-    console.log('🎮 Transitioning to playing phase...');
+    console.log('=== ENTERING transitionToPlaying ===');
 
-    console.log('🎮 Transitioning to playing phase...');
     console.log('🎮 About to call setTableState(PLAYING)');
 
     console.log('Owner check:', window.isOwner);
     if (window.multiDeviceIntegration && window.isOwner) {
-       console.log('Owner confirmed - setting state to PLAYING');
+       console.log('Owner confirmed - set tableState to PLAYING');
        setTableState(TABLE_STATES.PLAYING);
     } else {
-       console.log('In transitionToPlaying this instance is Not the owner');
+       console.log('In transitionToPlaying this instance is not the owner');
     }
     // Enable game controls, show "arrange your cards" message
 }
 
 function transitionToScoringPhase() {
-    console.log('🎮 Transitioning to scoring phase...');
+    console.log('🎮 TransitionToScoringPhase...');
 
     // ADD THIS - Set state to SCORING:
     if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
