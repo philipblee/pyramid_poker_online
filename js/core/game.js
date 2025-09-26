@@ -576,7 +576,7 @@ class PyramidPokerGame {
                 submitBtn.disabled = false;
 
                 const readyCount = this.playerManager.getReadyCount();
-                statusDiv.innerHTML = `${currentPlayer.name}'s turn - <span style="color: #4ecdc4; font-weight: bold;">✓ SETUP VALID</span> - Ready to submit! (${readyCount}/${this.playerManager.players.length} players ready)`;
+                statusDiv.innerHTML = `Round ${this.currentRound} of ${this.maxRounds}.  Player ${currentPlayer.name}'s turn - <span style="color: #4ecdc4; font-weight: bold;">✓ SETUP VALID</span> - Ready to submit!`;
             } else {
                 // Invalid order
                 backHand.classList.add('invalid');

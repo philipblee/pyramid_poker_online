@@ -97,7 +97,8 @@ function updateStatus(game) {
     } else if (game.gameState === 'playing') {
         const currentPlayer = game.playerManager.getCurrentPlayer();
         const readyCount = game.playerManager.getReadyCount();
-        status.textContent = `Round ${game.currentRound} of ${game.maxRounds}: ${currentPlayer.name}'s turn - Arrange your cards! (${readyCount}/${game.playerManager.players.length} players ready)`;
+        status.textContent = `Round ${game.currentRound} of ${game.maxRounds}: ${currentPlayer.name}'s turn - Arrange your cards!`;
+//        status.textContent = `Round ${game.currentRound} of ${game.maxRounds}: ${currentPlayer.name}'s turn - Arrange your cards! (${readyCount}/${game.playerManager.players.length} players ready)`;
     } else if (game.gameState === 'scoring') {
         status.textContent = `Round ${game.currentRound} of ${game.maxRounds} complete! Check the scores below.`;
     }
