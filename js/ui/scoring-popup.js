@@ -56,28 +56,11 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
 
     // Try detailedResults first
     if (detailedResults && detailedResults.length > 0) {
-//        console.log('🔍 Using detailedResults:', detailedResults);
+        console.log('🔍 Using detailedResults:', detailedResults);
         detailedResults.forEach(result => {
             window.lastGameScores[result.player1] = (window.lastGameScores[result.player1] || 0) + result.player1Score;
             window.lastGameScores[result.player2] = (window.lastGameScores[result.player2] || 0) + result.player2Score;
         });
-    }
-
-    // Try roundScores if detailedResults didn't work
-    if (Object.keys(window.lastGameScores).length === 0 && roundScores) {
-        console.log('🔍 Using roundScores:', roundScores);
-        // roundScores might be an object like {Player1: 15, Player2: -3}
-        if (typeof roundScores === 'object') {
-            window.lastGameScores = {...roundScores};
-        }
-    }
-
-    // Try specialPoints if nothing else worked
-    if (Object.keys(window.lastGameScores).length === 0 && specialPoints) {
-        console.log('🔍 Using specialPoints:', specialPoints);
-        if (typeof specialPoints === 'object') {
-            window.lastGameScores = {...specialPoints};
-        }
     }
 
 //    console.log('🔍 Final captured scores:', window.lastGameScores);

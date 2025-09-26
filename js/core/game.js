@@ -22,7 +22,6 @@ class PyramidPokerGame {
         this.initializeEventListeners();
         updateDisplay(this);
         createParticles();
-        console.log(`"log from game constructor TABLE_STATES.NEW_TOURNAMENT:" ${TABLE_STATES.NEW_TOURNAMENT}`)
     }
 
     // Getters for backward compatibility

@@ -2,7 +2,7 @@
 function startGame() {
     if (!currentTable) return;
 
-    console.log('🔥 STARTGAME FUNCTION CALLED!'); // ← Add this
+//    console.log('🔥 STARTGAME FUNCTION CALLED!'); // ← Add this
 //    console.log('🎮 Starting game with table settings:', tableSettings);
 
     // STEP 1: Update the CORRECT gameConfig object
