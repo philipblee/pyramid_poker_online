@@ -109,6 +109,7 @@ function updatePlayerList(game) {
     playerList.innerHTML = '';
 
     // 1. FIRST: Tournament standings (if tournament is active)
+
     if (game.currentRound > 0) {
         const standingsSection = document.createElement('div');
         standingsSection.className = 'tournament-standings';
@@ -147,6 +148,11 @@ function updatePlayerList(game) {
 
     // 2. SECOND: All completed rounds + current round (stacked vertically)
     if (game.currentRound > 0) {
+
+        // In display.js where tournament standings are built
+        console.log(`📺 Tournament Display: currentRound=${game.currentRound}, roundHistory.length=${game.roundHistory.length}`);
+        console.log(`📺 Will loop from roundNum=1 to roundNum=${game.currentRound}`);
+
         // Show all rounds from 1 to current round
         for (let roundNum = 1; roundNum <= game.currentRound; roundNum++) {
             const roundSection = document.createElement('div');
