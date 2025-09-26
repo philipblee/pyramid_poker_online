@@ -359,11 +359,11 @@ class PyramidPokerGame {
 
         await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
 
-        console.log(`Log from handleAITurn: 🤖 AI ${currentPlayer.name} is thinking...`);
+//        console.log(`Log from handleAITurn: 🤖 AI ${currentPlayer.name} is thinking...`);
 
         // Step 1: Show AI is thinking (1 second)
         setTimeout(() => {
-            console.log(`Log from handleAITurn: 🧠 AI ${currentPlayer.name} running auto-arrange...`);
+//            console.log(`Log from handleAITurn: 🧠 AI ${currentPlayer.name} running auto-arrange...`);
             this.autoArrangeManager.autoArrangeHand();
 
             // Step 2: Let player see the AI's arranged hand (3 seconds)
@@ -835,8 +835,8 @@ class PyramidPokerGame {
             }
         }
 
-        console.log('Detailed Results from calculateScores()', detailedResults)
-        console.log(`📊 Storing round ${this.currentRound}, history length: ${this.roundHistory.length}`);
+//        console.log('Detailed Results from calculateScores()', detailedResults)
+//        console.log(`📊 Storing round ${this.currentRound}, history length: ${this.roundHistory.length}`);
 //        console.log('🔍 After head-to-head comparisons - this.maxRounds:', this.maxRounds);
 
         // NEW: Only store round history ONCE per round
@@ -901,9 +901,9 @@ class PyramidPokerGame {
         console.log('🏆 Showing tournament summary...');
 
         // DEBUG: Check what's actually in round history
-        console.log('Round history length:', this.roundHistory.length);
+//        console.log('Round history length:', this.roundHistory.length);
         this.roundHistory.forEach((round, index) => {
-            console.log(`Round ${index + 1}:`, round.roundNumber, 'Scores:', [...round.roundScores.entries()]);
+//            console.log(`Round ${index + 1}:`, round.roundNumber, 'Scores:', [...round.roundScores.entries()]);
         });
 
         // Create sorted tournament standings
@@ -979,7 +979,7 @@ class PyramidPokerGame {
         `;
 
         // log start of new tournament
-        console.log ("Log from game.js - User clicked startNewTournament")
+//        console.log ("Log from game.js - User clicked startNewTournament")
 
         content.innerHTML = html;
         modal.appendChild(content);
@@ -989,7 +989,7 @@ class PyramidPokerGame {
         this.gameState = 'waiting';
         this.currentRound = 0;
         this.roundRobinResults = [];
-        console.log('🎯 After reset - roundRobinResults:', this.roundRobinResults); // <-- ADD THIS
+//        console.log('🎯 After reset - roundRobinResults:', this.roundRobinResults); // <-- ADD THIS
         updateDisplay(this);
         }
 
