@@ -56,7 +56,7 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
 
     // Try detailedResults first
     if (detailedResults && detailedResults.length > 0) {
-        console.log('🔍 Using detailedResults:', detailedResults);
+//        console.log('🔍 Using detailedResults:', detailedResults);
         detailedResults.forEach(result => {
             window.lastGameScores[result.player1] = (window.lastGameScores[result.player1] || 0) + result.player1Score;
             window.lastGameScores[result.player2] = (window.lastGameScores[result.player2] || 0) + result.player2Score;

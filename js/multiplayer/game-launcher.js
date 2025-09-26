@@ -172,7 +172,7 @@ function launchGameInterface() {
         window.game.playerManager.resetPlayers();
     }
 
-    console.log('🎮 Settings used for launching game:', gameConfig.config);
+//    console.log('🎮 Settings used for launching game:', gameConfig.config);
 
     // Show your existing game area
     const gameArea = document.getElementById('gameArea');

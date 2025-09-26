@@ -363,12 +363,12 @@ class PyramidPokerGame {
 
         // Step 1: Show AI is thinking (1 second)
         setTimeout(() => {
-//            console.log(`Log from handleAITurn: 🧠 AI ${currentPlayer.name} running auto-arrange...`);
+            console.log(`Logging: 🧠 ${currentPlayer.name} run auto-arrange...`);
             this.autoArrangeManager.autoArrangeHand();
 
             // Step 2: Let player see the AI's arranged hand (3 seconds)
             setTimeout(() => {
-                console.log(`Log from handleAITurn: 👀 AI ${currentPlayer.name} displaying final arrangement...`);
+//                console.log(`Log from handleAITurn: 👀 AI ${currentPlayer.name} displaying final arrangement...`);
 
                 // Hide spinner once arrangement is visible
                 hideLoadingSpinner();
@@ -377,7 +377,7 @@ class PyramidPokerGame {
 
             // Step 3: Let player read the hand details (2 more seconds)
             setTimeout(async () => {
-                console.log(`Log from handleAITurn: ✅ AI ${currentPlayer.name} submitting hand...`);
+//                console.log(`Log from handleAITurn: ✅ AI ${currentPlayer.name} submitting hand...`);
                 this.submitAIPlayerHand();
 
                 // Store AI arrangement to Firebase
