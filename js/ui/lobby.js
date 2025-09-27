@@ -482,7 +482,7 @@ async function joinTable(table) {
         window.multiDeviceIntegration.addPlayerToTable(table.id, playerInfo)
             // After the .then() in joinTable()
             .then(async () => {
-                console.log('✅ Player added successfully');
+//                console.log('✅ Player added successfully');
 
                 // Set up listener for real-time updates
                 window.multiDeviceIntegration.setupPlayerListListener(table.id, updatePlayerListUI);
@@ -837,7 +837,7 @@ function updateWildCardsDisplay(value) {
     document.getElementById('wildCardsValue').textContent = value;
 }
 function updatePlayerListUI(players, tableId) {
-    console.log('🖥️ Updating player list UI:', players);
+//    console.log('🖥️ Updating player list UI:', players);
 
     // NEW: Sync Firebase players to local PlayerManager
     if (window.game?.playerManager) {
@@ -846,13 +846,13 @@ function updatePlayerListUI(players, tableId) {
             id: firebasePlayer.id,
             isAI: false
         }));
-        console.log(`✅ Synced ${window.game.playerManager.players.length} Firebase players to PlayerManager`);
+//        console.log(`✅ Synced ${window.game.playerManager.players.length} Firebase players to PlayerManager`);
     }
 
     // DEBUG: Find the player manager object (remove after testing)
-    console.log('🔍 window.playerManager:', window.playerManager);
-    console.log('🔍 window.game:', window.game);
-    console.log('🔍 window.game?.playerManager:', window.game?.playerManager);
+//    console.log('🔍 window.playerManager:', window.playerManager);
+//    console.log('🔍 window.game:', window.game);
+//    console.log('🔍 window.game?.playerManager:', window.game?.playerManager);
 
     // NEW: Sync Firebase players to local player manager array
     if (window.playerManager) {
@@ -867,9 +867,9 @@ function updatePlayerListUI(players, tableId) {
 
     // ADD THIS DEBUG BLOCK:
     players.forEach((player, index) => {
-        console.log(`🔍 Player ${index}:`, player);
-        console.log(`🔍 Player ${index} name:`, player.name);
-        console.log(`🔍 Player ${index} type:`, typeof player.name);
+//        console.log(`🔍 Player ${index}:`, player);
+//        console.log(`🔍 Player ${index} name:`, player.name);
+//        console.log(`🔍 Player ${index} type:`, typeof player.name);
     });
 
     const playerCount = players.length;

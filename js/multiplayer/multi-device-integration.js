@@ -7,7 +7,7 @@ class MultiDeviceIntegration {
 
         console.log('🔧 MultiDeviceIntegration constructor called');
         console.log('  tableId:', tableId);
-        console.log('  tableManager:', tableManager);
+//        console.log('  tableManager:', tableManager);
 
         this.currentTableId = tableId;
         this.tableId = tableId
@@ -17,7 +17,7 @@ class MultiDeviceIntegration {
         this.currentTableStateRef = null;  // Firebase reference for cleanup
 
         // Debug the isMultiDevice setting
-        console.log('  window.gameConfig exists:', !!window.gameConfig);
+//        console.log('  window.gameConfig exists:', !!window.gameConfig);
         console.log('  window.gameConfig:', window.gameConfig);
 //        console.log('  gameConfig.config:', window.gameConfig?.config);
 //        console.log('  gameDeviceMode value:', window.gameConfig?.config?.gameDeviceMode);
@@ -25,7 +25,7 @@ class MultiDeviceIntegration {
 //        console.log('  comparison result:', window.gameConfig?.config?.gameDeviceMode === 'multi-device');
 
         this.isMultiDevice = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
-        console.log('  final isMultiDevice:', this.isMultiDevice);
+//        console.log('  final isMultiDevice:', this.isMultiDevice);
 
         // ... existing properties
         this.playersData = new Map(); // Track all players
@@ -56,7 +56,7 @@ class MultiDeviceIntegration {
 
     // state listener
     setupTableStateListener(tableId, callback) {
-        console.log('🔥 Setting up table state listener for table:', tableId);
+//        console.log('🔥 Setting up table state listener for table:', tableId);
 
         // Reference to the table's state
         const tableStateRef = firebase.database().ref(`tables/${tableId}/tableState`);
@@ -88,7 +88,7 @@ class MultiDeviceIntegration {
 
     // list listener
     setupPlayerListListener(tableId, callback) {
-        console.log('🔥 Setting up player list listener for table:', tableId);
+//        console.log('🔥 Setting up player list listener for table:', tableId);
 
         // Reference to the table's players
         const playersRef = firebase.database().ref(`tables/${tableId}/players`);
@@ -98,7 +98,7 @@ class MultiDeviceIntegration {
             const playersData = snapshot.val() || {};
             const playersArray = Object.values(playersData);
 
-            console.log('🔥 Player list updated:', playersArray);
+//            console.log('🔥 Player list updated:', playersArray);
             callback(playersArray);
         });
 
@@ -127,7 +127,7 @@ class MultiDeviceIntegration {
             // Track locally
             this.playersData.set(playerInfo.id, playerInfo);
 
-            console.log('✅ Player added successfully');
+//            console.log('✅ Player added successfully');
             return playerInfo.id;
 
         } catch (error) {
@@ -411,9 +411,9 @@ class MultiDeviceIntegration {
     async setupSubmissionListener() {
         if (!this.isMultiDevice) return;
 
-        console.log('👂 Setting up submission state listener...');
-        console.log('👂 Table ID:', this.currentTableId);
-        console.log('👂 Is Owner:', this.isOwner);
+//        console.log('👂 Setting up submission state listener...');
+//        console.log('👂 Table ID:', this.currentTableId);
+//        console.log('👂 Is Owner:', this.isOwner);
 
         const tableRef = this.tableManager.tablesRef.doc(this.currentTableId.toString());
 
@@ -443,13 +443,13 @@ class MultiDeviceIntegration {
         if (this.submissionListener) {
             this.submissionListener();
             this.submissionListener = null;
-            console.log('🧹 Cleaned up submission listener');
+//            console.log('🧹 Cleaned up submission listener');
         }
     }
 
     // Add multi-device enhancements to existing UI
     async setupMultiDeviceEnhancements() {
-        console.log('🌐 Setting up multi-device enhancements');
+//        console.log('🌐 Setting up multi-device enhancements');
 
         // this.enhanceNewGameButton();
         this.enhanceSubmitButton();
@@ -459,7 +459,7 @@ class MultiDeviceIntegration {
         // Submission coordination
         this.setupSubmissionListener();
 
-        console.log('✅ Multi-device enhancements setup complete');
+//        console.log('✅ Multi-device enhancements setup complete');
         return Promise.resolve();
     }
 
