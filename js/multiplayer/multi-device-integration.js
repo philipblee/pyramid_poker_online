@@ -359,7 +359,7 @@ class MultiDeviceIntegration {
     // enhanceContinueButton changes tableState to round_complete, then only owner can click continue to progress
     enhanceContinueButton() {
 
-        console.log('🔍 enhanceContinueButton - window.isOwner:', window.isOwner);
+//        console.log('🔍 enhanceContinueButton - window.isOwner:', window.isOwner);
 
         const continueButton = document.querySelector('#scoringPopup .btn.btn-primary');
         const closeButton = document.querySelector('#scoringPopup .close-popup');

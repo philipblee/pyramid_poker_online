@@ -1,7 +1,7 @@
 //game-state-manager.js handles game transitions for multi-human, multi-device coordination
 
 async function handleTableStateChange(tableState) {
-    console.log('🎮 Handling table state change:', tableState);
+//    console.log('🎮 Handling table state change:', tableState);
 
     switch(tableState) {
 
@@ -22,13 +22,13 @@ async function handleTableStateChange(tableState) {
 
             // After dealing setup, immediately advance to playing
             setTimeout(() => {
-                console.log('🎮 Dealing complete, moving to playing phase...');
+//                console.log('🎮 Dealing complete, moving to playing phase...');
                 transitionToPlayingPhase();
             }, 1000);
             break;
 
         case TABLE_STATES.PLAYING:
-            console.log('🎮 Cards dealt! Players can now arrange hands...');
+//            console.log('🎮 Cards dealt! Players can now arrange hands...');
             // transitionToPlayingPhase();
 
             // ADD THIS:
@@ -38,7 +38,7 @@ async function handleTableStateChange(tableState) {
             break;
 
         case TABLE_STATES.ALL_SUBMITTED:
-            console.log('🎮 All players submitted! Moving to scoring...');
+//            console.log('🎮 All players submitted! Moving to scoring...');
             transitionToScoringPhase();
             break;
 
@@ -67,7 +67,7 @@ async function handleTableStateChange(tableState) {
         }
 
 function transitionFromLobbyToDealing() {
-    console.log('🎮 Transitioning from lobby to dealing phase...');
+//    console.log('🎮 Transitioning from lobby to dealing phase...');
 
     // Hide lobby UI
     const lobbyView = document.getElementById('lobbyView') ||
@@ -86,7 +86,7 @@ function transitionFromLobbyToDealing() {
 
     if (gameView) {
         gameView.style.display = 'block';
-        console.log('✅ Game view shown');
+//        console.log('✅ Game view shown');
     }
 
     // Update status
@@ -97,15 +97,15 @@ function transitionFromLobbyToDealing() {
 
     // Trigger the game start for this device
     if (typeof launchGameInterface === 'function') {
-        console.log('🚀 Launching game interface...');
+//        console.log('🚀 Launching game interface...');
         launchGameInterface();
     }
 
-    console.log('✅ Transition complete - Player should see game interface');
+//    console.log('✅ Transition complete - Player should see game interface');
 }
 
 function transitionToDealingPhase() {
-    console.log('🎮 Transitioning to dealing phase...');
+//    console.log('🎮 Transitioning to dealing phase...');
 
     // ADD THIS - Set state to SCORING:
     if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
@@ -114,15 +114,15 @@ function transitionToDealingPhase() {
 }
 
 function transitionToPlayingPhase() {
-    console.log('=== ENTERING transitionToPlayingPhase ===');
-    console.log('🎮 Transitioning to playing phase...');
-
-    console.log('🎮 Transitioning to playing phase...');
-    console.log('🎮 About to call setTableState(PLAYING)');
-
-    console.log('Owner check:', window.isOwner);
+//    console.log('=== ENTERING transitionToPlayingPhase ===');
+//    console.log('🎮 Transitioning to playing phase...');
+//
+//    console.log('🎮 Transitioning to playing phase...');
+//    console.log('🎮 About to call setTableState(PLAYING)');
+//
+//    console.log('Owner check:', window.isOwner);
     if (window.multiDeviceIntegration && window.isOwner) {
-       console.log('Owner confirmed - setting state to PLAYING');
+//       console.log('Owner confirmed - setting state to PLAYING');
        setTableState(TABLE_STATES.PLAYING);
     } else {
        console.log('In transitionToPlayingPhase this instance is Not the owner');
@@ -131,7 +131,7 @@ function transitionToPlayingPhase() {
 }
 
 function transitionToScoringPhase() {
-    console.log('🎮 Transitioning to scoring phase...');
+//    console.log('🎮 Transitioning to scoring phase...');
 
     // ADD THIS - Set state to SCORING:
     if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
@@ -153,7 +153,7 @@ async function setTableState(newState) {
 
     try {
         await firebase.database().ref(`tables/${tableId}/tableState`).set(newState);
-        console.log('✅ State set successfully');
+//        console.log('✅ State set successfully');
     } catch (error) {
         console.log('❌ Error setting state:', error);
     }
@@ -163,7 +163,7 @@ async function setTableState(newState) {
 async function setupLobbyStateListener(tableId) {
     firebase.database().ref(`tables/${tableId}/state/LOBBY_STATE`).on('value', (snapshot) => {
         const lobbyState = snapshot.val();
-        console.log('🏛️ Lobby state changed:', lobbyState);
+//        console.log('🏛️ Lobby state changed:', lobbyState);
 
         if (lobbyState === 'ready') {
             // Trigger button update for all players

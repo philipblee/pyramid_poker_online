@@ -98,21 +98,21 @@ async function setupMultiDeviceMultiHuman() {
         currentUser.displayName || currentUser.email || 'Anonymous Player' :
         'Guest Player';
 
-    console.log('🎮 Setting up local player:', userName);
+//    console.log('🎮 Setting up local player:', userName);
 
     // Only reset players in single-device mode
     if (window.gameConfig.config.gameDeviceMode === 'single-device') {
         window.game.playerManager.resetPlayers();
         window.game.playerManager.addPlayer(userName, true);
     } else {
-        console.log('🌐 Multi-device mode: players already synced from Firebase');
+//        console.log('🌐 Multi-device mode: players already synced from Firebase');
     }
 
     return Promise.resolve();
 }
 
 async function setupMultiHumanPlayers() {
-    console.log('🌐 Setting up players for multi-device mode...');
+//    console.log('🌐 Setting up players for multi-device mode...');
 
     // Get current user info to identify THIS player
     const currentUser = firebase.auth().currentUser;

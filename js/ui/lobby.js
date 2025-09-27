@@ -284,7 +284,7 @@ async function claimOwnershipIfNeeded(tableId, playerName) {
     if (!currentOwner) {
         // No owner, claim it
         await ownerRef.set(playerName);
-        console.log('👑 Claimed table ownership');
+//        console.log('👑 Claimed table ownership');
         return true;
     } else if (currentOwner === playerName) {
         // We already own it
@@ -425,11 +425,11 @@ async function joinTable(table) {
         table.settings.gameDeviceMode === 'multi-device' &&
         table.settings.gameConnectMode === 'online') {
 
-        console.log('🌐 Joining multi-human table:', table.name);
+//        console.log('🌐 Joining multi-human table:', table.name);
 
         // Initialize MultiDeviceIntegration if not already done
         if (!window.multiDeviceIntegration) {
-            console.log('🔧 Initializing MultiDeviceIntegration...');
+//            console.log('🔧 Initializing MultiDeviceIntegration...');
             window.multiDeviceIntegration = new MultiDeviceIntegration(table.id, {
                 tablesRef: firebase.firestore().collection('tables')
             });
@@ -916,7 +916,7 @@ function updatePlayerListUI(players, tableId) {
     // Update start game button
     updateStartGameButton(players.length);
 
-    console.log('Updated all player slots');
+//    console.log('Updated all player slots');
 
     // In your updatePlayerListUI function, add this at the end:
     tableOwnerManager(players ? players.length : 0, players,tableId);
