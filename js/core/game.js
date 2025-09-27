@@ -32,10 +32,10 @@ class PyramidPoker {
 
     initializeEventListeners() {
         // NEW: Make "newGame" button open config screen
-        document.getElementById('newGame').addEventListener('click', () => this.startNewGame());
+//        document.getElementById('newGame').addEventListener('click', () => this.startNewGame());
 
         // NEW: Add "newRound" button to deal new hands to existing players
-        document.getElementById('newRound').addEventListener('click', () => this.startNewRound());
+//        document.getElementById('newRound').addEventListener('click', () => this.startNewRound());
         document.getElementById('autoArrange').addEventListener('click', () => this.handleAutoArrangeToggle());
         document.getElementById('sortByRank').addEventListener('click', () => this.resetAndSortByRank());
         document.getElementById('sortBySuit').addEventListener('click', () => this.resetAndSortBySuit());

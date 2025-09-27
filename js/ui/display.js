@@ -309,15 +309,15 @@ function updateButtonStates(game) {
 
     if (game.gameState === 'waiting') {
 //        addPlayerBtn.disabled = false;
-        newGameBtn.disabled = game.playerManager.players.length < 2;
-        newRoundBtn.disabled = false; // No tournament started
+//        newGameBtn.disabled = game.playerManager.players.length < 2;
+//        newRoundBtn.disabled = false; // No tournament started
         autoBtn.disabled = true;
         rankBtn.disabled = true;
         suitBtn.disabled = true;
         submitBtn.disabled = true;
     } else if (game.gameState === 'playing') {
 //        addPlayerBtn.disabled = true;
-        newGameBtn.disabled = false;
+//        newGameBtn.disabled = false;
 
         // NEW LOGIC: Check if any players have started playing (moved cards around)
         const gameInProgress = game.playerManager.getReadyCount() > 0 ||
@@ -325,14 +325,14 @@ function updateButtonStates(game) {
                                   hand.back.length > 0 || hand.middle.length > 0 || hand.front.length > 0
                               );
 
-        newRoundBtn.disabled = gameInProgress || game.currentRound >= game.maxRounds;
+//        newRoundBtn.disabled = gameInProgress || game.currentRound >= game.maxRounds;
         autoBtn.disabled = false;
         rankBtn.disabled = false;
         suitBtn.disabled = false;
     } else if (game.gameState === 'scoring') {
 //        addPlayerBtn.disabled = false;
-        newGameBtn.disabled = false;
-        newRoundBtn.disabled = game.currentRound >= game.maxRounds; // Enable for next round
+//        newGameBtn.disabled = false;
+//        newRoundBtn.disabled = game.currentRound >= game.maxRounds; // Enable for next round
         autoBtn.disabled = true;
         rankBtn.disabled = true;
         suitBtn.disabled = true;
