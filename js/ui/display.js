@@ -135,7 +135,7 @@ function updatePlayerList(game) {
                 padding: 8px 12px; margin: 3px 0;
                 background: rgba(255, 215, 0, 0.1); border-radius: 6px;
                 border: 1px solid rgba(255, 215, 0, 0.3);
-                font-size: 13px; font-weight: bold;
+                font-size: 14px; font-weight: bold;
             `;
             standingDiv.innerHTML = `
                 <span style="color: #ffd700;">${medal} ${playerName}</span>
@@ -178,7 +178,7 @@ function updatePlayerList(game) {
             // Create clickable round header
             const roundHeader = document.createElement('div');
             roundHeader.style.cssText = `
-                color: #4ecdc4; font-size: 12px; font-weight: bold;
+                color: #4ecdc4; font-size: 14px; font-weight: bold;
                 margin: 15px 0 5px 0; cursor: pointer;
                 padding: 5px 8px; border-radius: 4px;
                 background: rgba(78, 205, 196, 0.1);
@@ -186,18 +186,6 @@ function updatePlayerList(game) {
                 transition: background 0.2s ease;
             `;
             roundHeader.innerHTML = `📋 Round ${roundNum}`;
-
-//          Comment this out because the clickable rounds are buggy
-            // Add hover effect and click handler for completed rounds
-//            if (game.roundHistory.find(round => round.roundNumber === roundNum)) {
-//                roundHeader.style.cursor = 'pointer';
-//                roundHeader.onclick = () => showHistoricalRound(game, roundNum);
-//                roundHeader.onmouseover = () => roundHeader.style.background = 'rgba(78, 205, 196, 0.2)';
-//                roundHeader.onmouseout = () => roundHeader.style.background = 'rgba(78, 205, 196, 0.1)';
-//            } else {
-//                roundHeader.style.cursor = 'default';
-//                roundHeader.style.opacity = '0.7';
-//            }
 
             // Disable all round buttons (buggy - fix later)
             roundHeader.style.cursor = 'default';
@@ -213,7 +201,7 @@ function updatePlayerList(game) {
                 playerDiv.style.cssText = `
                     display: flex; justify-content: space-between;
                     padding: 3px 12px; margin: 1px 0;
-                    font-size: 11px; color: #ecf0f1;
+                    font-size: 14px; color: #ecf0f1;
                     background: rgba(255, 255, 255, 0.05);
                     border-radius: 3px;
                 `;
@@ -230,16 +218,6 @@ function updatePlayerList(game) {
                     readyIndicator = '✓ ';
                 }
 
-//              comment this out and replace with section with spaces in score for unplayed rounds
-//                const score = roundScores.get(player.name) || 0;
-//
-//                // Color logic for round scores
-//                const scoreColor = score < 0 ? '#ff6b6b' : '#4ecdc4';
-//
-//                playerDiv.innerHTML = `
-//                    <span>${readyIndicator}${player.name}</span>
-//                    <span style="color: ${scoreColor};">${score > 0 ? '+' : ''}${score} pts</span>
-//                `;
 
                 // Check if this round has been completed
                 const roundCompleted = game.roundHistory.find(round => round.roundNumber === roundNum);
