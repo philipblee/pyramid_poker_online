@@ -16,13 +16,13 @@ class PlayerManager {
         const snapshot = await activeEmailsRef.once('value');
         const activeEmailsArray = snapshot.val() || [];
 
-        console.log(`🔧 Current activeEmails from Firebase:`, activeEmailsArray);
+//        console.log(`🔧 Current activeEmails from Firebase:`, activeEmailsArray);
 
         // If the base email doesn't exist, use it as-is
         if (!activeEmailsArray.includes(originalEmail)) {
             activeEmailsArray.push(originalEmail);
             await activeEmailsRef.set(activeEmailsArray);
-            console.log(`🔧 Using original email: ${originalEmail}`);
+//            console.log(`🔧 Using original email: ${originalEmail}`);
             return originalEmail;
         }
 

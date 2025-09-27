@@ -371,7 +371,7 @@ async function joinTable(table) {
         const currentHumanPlayers = snapshot.val() || 0;
         const maxHumanPlayers = table.settings.maxHumanPlayers || 6;
 
-        console.log('🔍 Current human players from Firebase:', currentHumanPlayers);
+//        console.log('🔍 Current human players from Firebase:', currentHumanPlayers);
         // Check if table is full (applies to ALL table types)
 //        console.log('🔍 Calculated - current:', currentHumanPlayers, 'max:', maxHumanPlayers);
 //        console.log('🔍 Is full?', currentHumanPlayers >= maxHumanPlayers);
@@ -383,7 +383,7 @@ async function joinTable(table) {
             return;
         }
 
-        console.log('✅ JOIN ALLOWED - proceeding with fresh data');
+//        console.log('✅ JOIN ALLOWED - proceeding with fresh data');
 
 
         // In joinTable() after determining isOwner
@@ -443,9 +443,9 @@ async function joinTable(table) {
         let uniquePlayerName = currentUser ? currentUser.email : 'Guest Player';
 
         if (currentUser && currentUser.email && window.game?.playerManager) {
-            console.log('🔧 Log in joinTable - Generating unique player name...');
+//            console.log('🔧 Log in joinTable - Generating unique player name...');
             uniquePlayerName = await window.game.playerManager.generateUniquePlayerName(currentUser.email, table.id);
-            console.log('🔧 Log in joinTable - Generated uniquePlayerName:', uniquePlayerName);
+//            console.log('🔧 Log in joinTable - Generated uniquePlayerName:', uniquePlayerName);
             // Add this line:
             window.uniquePlayerName = uniquePlayerName;
             console.log('🔧 Log in joinTable - Set window.uniquePlayerName to:', window.uniquePlayerName);
@@ -461,8 +461,8 @@ async function joinTable(table) {
             isOwner: isOwner
         };
 
-        console.log('log in joinTable Creating playerInfo with isOwner:', isOwner);
-        console.log('log in joinTable Final playerInfo:', playerInfo);
+//        console.log('log in joinTable Creating playerInfo with isOwner:', isOwner);
+//        console.log('log in joinTable Final playerInfo:', playerInfo);
 
         window.isOwner = playerInfo.isOwner;
 
@@ -883,7 +883,7 @@ function updatePlayerListUI(players, tableId) {
 
     // Update individual player slots
     const playerSlots = document.querySelectorAll('.player-slot');
-    console.log('🔧 Found player slots:', playerSlots.length);
+//    console.log('🔧 Found player slots:', playerSlots.length);
 
     playerSlots.forEach((slot, index) => {
         if (index < players.length) {
@@ -905,7 +905,7 @@ function updatePlayerListUI(players, tableId) {
         }
     });
 
-    console.log('✅ Updated all player slots');
+//    console.log('✅ Updated all player slots');
 
     // Update the player count display
 //    const playerCountElement = document.getElementById('currentPlayerCount');

@@ -5,8 +5,8 @@
 class MultiDeviceIntegration {
     constructor(tableId = null, tableManager = null) {
 
-        console.log('🔧 MultiDeviceIntegration constructor called');
-        console.log('  tableId:', tableId);
+//        console.log('🔧 MultiDeviceIntegration constructor called');
+//        console.log('  tableId:', tableId);
 //        console.log('  tableManager:', tableManager);
 
         this.currentTableId = tableId;
@@ -35,7 +35,6 @@ class MultiDeviceIntegration {
 
         // ADD OWNER DETECTION:
         this.isOwner = window.isOwner;
-        console.log('🏗️ Constructor - Setting isOwner:', this.isOwner);
 
     }
 
@@ -109,7 +108,7 @@ class MultiDeviceIntegration {
     // Add this method to your MultiDeviceIntegration class
     async addPlayerToTable(tableId, playerInfo) {
         try {
-            console.log('🔥 Adding player to Firebase table:', tableId, playerInfo);
+//            console.log('🔥 Adding player to Firebase table:', tableId, playerInfo);
 
             // Reference to the table's players collection (v8 compatible syntax)
             const tableRef = firebase.database().ref(`tables/${tableId}/players`);
@@ -418,7 +417,7 @@ class MultiDeviceIntegration {
         const tableRef = this.tableManager.tablesRef.doc(this.currentTableId.toString());
 
         this.submissionListener = tableRef.onSnapshot(async (doc) => {
-            console.log('📡 FIRESTORE LISTENER TRIGGERED!');
+//            console.log('📡 FIRESTORE LISTENER TRIGGERED!');
 
             if (this.isOwner) {
                 const stateSnapshot = await firebase.database().ref(`tables/${this.tableId}/tableState`).once('value');
