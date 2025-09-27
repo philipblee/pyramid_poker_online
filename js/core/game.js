@@ -1,7 +1,7 @@
 // js/core/game.js
 // Main game orchestration - much cleaner!
 
-class PyramidPokerGame {
+class PyramidPoker {
     constructor() {
         // Initialize managers
         this.playerManager = new PlayerManager();
@@ -354,6 +354,7 @@ class PyramidPokerGame {
         const currentPlayer = this.playerManager.getCurrentPlayer();
 
         // DISABLE BUTTONS when AI starts
+        console.log('🤖 AI turn starting - disabling buttons');
         this.disablePlayerButtons();
 
         // Show spinner immediately
@@ -365,7 +366,6 @@ class PyramidPokerGame {
 
         // Step 1: Show AI is thinking (1 second)
         setTimeout(() => {
-            console.log(`Logging: 🧠 ${currentPlayer.name} run auto-arrange...`);
             this.autoArrangeManager.autoArrangeHand();
 
             // Step 2: Let player see the AI's arranged hand (3 seconds)
@@ -413,6 +413,7 @@ class PyramidPokerGame {
 
     enablePlayerButtons() {
         // reenable buttons after AI Turn
+        console.log('✅ Enabling player buttons');
         document.getElementById('submitHand').disabled = false;
         document.getElementById('autoArrange').disabled = false;
     }
@@ -1218,7 +1219,7 @@ class PyramidPokerGame {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    game = new PyramidPokerGame();
+    game = new PyramidPoker();
 
     // Add safety check for loadVersionInfo
     if (typeof loadVersionInfo === 'function') {
