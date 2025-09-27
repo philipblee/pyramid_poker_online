@@ -147,10 +147,10 @@ class PyramidPoker {
         }
 
         // NEW: Initialize tournament
-        console.log('🏆 Starting new tournament...');
         this.currentRound = 1;
         this.roundHistory = [];
         this.tournamentScores.clear();
+        console.log(`🏆 Starting Tournament - Round ${this.currentRound} of ${this.maxRounds}`);
 
         // Initialize tournament scores for all players
         for (let player of this.playerManager.players) {
@@ -275,6 +275,7 @@ class PyramidPoker {
 
         const currentPlayer = this.playerManager.getCurrentPlayer();
         const playerData = this.playerHands.get(currentPlayer.name);
+//        console.log(`loadCurrentPlayerHand called for ${currentPlayer.name}`)
 
         if (!playerData) return;
 
@@ -354,7 +355,6 @@ class PyramidPoker {
         const currentPlayer = this.playerManager.getCurrentPlayer();
 
         // DISABLE BUTTONS when AI starts
-        console.log('🤖 AI turn starting - disabling buttons');
         this.disablePlayerButtons();
 
         // Show spinner immediately
@@ -413,7 +413,6 @@ class PyramidPoker {
 
     enablePlayerButtons() {
         // reenable buttons after AI Turn
-        console.log('✅ Enabling player buttons');
         document.getElementById('submitHand').disabled = false;
         document.getElementById('autoArrange').disabled = false;
     }

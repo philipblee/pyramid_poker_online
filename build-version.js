@@ -27,7 +27,7 @@ function generateVersion() {
         // Write version.json for the game to load
         fs.writeFileSync('version.json', JSON.stringify(versionInfo, null, 2));
 
-        console.log('Version generated:', fullVersion);
+        // console.log('Version generated:', fullVersion);
         return versionInfo;
 
     } catch (error) {

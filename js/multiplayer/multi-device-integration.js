@@ -300,7 +300,7 @@ class MultiDeviceIntegration {
             const humanPlayer = window.game.players.find(p => !p.isAI);
 //            const playerName = humanPlayer ? humanPlayer.name : 'fallback@gmail.com';
 
-            const playerName = window.currentPlayerUniquePlayerName;
+            const playerName = window.uniquePlayerName;
 
             // Read from where single instance actually stored the data (playerHands[0])
             const playerData = window.game.playerHands.get(window.game.players[0].name);
@@ -517,7 +517,7 @@ class MultiDeviceIntegration {
             const ownerSnapshot = await firebase.database().ref(`tables/${this.currentTableId}/state/TABLE_OWNER`).once('value');
             const tableOwner = ownerSnapshot.val();
 
-            const myUniquePlayerName = window.currentPlayerUniquePlayerName;
+            const myUniquePlayerName = window.uniquePlayerName;
 
 //            console.log('🔍 Ownership check debug:', {
 //                tableOwner,

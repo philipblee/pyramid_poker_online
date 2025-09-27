@@ -116,7 +116,7 @@ const defaultTables = [
 
     {
         id: 7,
-        name: '7. Online - 2 Wild Card',
+        name: '7. Online - 2 Wild Card - 6 Players',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'multiple-humans',
@@ -130,35 +130,36 @@ const defaultTables = [
         icon: '☁️'
     },
 
-//    {
-//        id: 8,
-//        name: '8. Online - 2 Wild Card',
-//        settings: {
-//                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
-//                    gameMode: 'multiple-humans',
-//                    gameConnectMode: 'online',
-//                    gameDeviceMode: 'multi-device',
-//                    computerPlayers: 2,
-//                    rounds: 3,
-//                    wildCardCount: 2,
-//                    winProbabilityMethod: 'netEV' },
-//        icon: '☁️'
-//    },
-//
-//    {
-//        id: 9,
-//        name: '9. Online - 2 Wild Card',
-//        settings: {
-//                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
-//                    gameMode: 'multiple-humans',
-//                    gameConnectMode: 'online',
-//                    gameDeviceMode: 'multi-device',
-//                    computerPlayers: 5,
-//                    rounds: 3,
-//                    wildCardCount: 2,
-//                    winProbabilityMethod: 'netEV' },
-//        icon: '☁️'
-//    }
+    {
+        id: 8,
+        name: '8. Online - 2 Wild Card - 2 Players',
+        settings: {
+                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
+                    gameMode: 'multiple-humans',
+                    gameConnectMode: 'online',
+                    gameDeviceMode: 'multi-device',
+                    computerPlayers: 0,
+                    rounds: 3,
+                    wildCardCount: 2,
+                    maxPlayers: 2,
+                    winProbabilityMethod: 'netEV' },
+        icon: '☁️'
+    },
+
+    {
+        id: 9,
+        name: '9. Online - 2 Wild Card',
+        settings: {
+                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
+                    gameMode: 'multiple-humans',
+                    gameConnectMode: 'online',
+                    gameDeviceMode: 'multi-device',
+                    computerPlayers: 5,
+                    rounds: 3,
+                    wildCardCount: 2,
+                    winProbabilityMethod: 'netEV' },
+        icon: '☁️'
+    }
 
 ];
 
@@ -357,14 +358,6 @@ async function joinTable(table) {
         console.error('❌ window.gameConfig not found during joinTable!');
     }
 
-//    // Get current player count to determine my index
-//    const currentCountSnapshot = await firebase.database()
-//        .ref(`tables/${table.id}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`)
-//        .once('value');
-//    const myPlayerIndex = currentCountSnapshot.val() || 0;
-//    window.myPlayerIndex = myPlayerIndex;
-//    console.log(`Set device player index to: ${myPlayerIndex}`);
-
 
     // In joinTable() after successful join
     firebase.database().ref(`tables/${table.id}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`)
@@ -378,7 +371,7 @@ async function joinTable(table) {
         const currentHumanPlayers = snapshot.val() || 0;
         const maxHumanPlayers = table.settings.maxHumanPlayers || 6;
 
-//        console.log('🔍 REAL current players from Firebase:', currentHumanPlayers);
+        console.log('🔍 Current human players from Firebase:', currentHumanPlayers);
         // Check if table is full (applies to ALL table types)
 //        console.log('🔍 Calculated - current:', currentHumanPlayers, 'max:', maxHumanPlayers);
 //        console.log('🔍 Is full?', currentHumanPlayers >= maxHumanPlayers);
@@ -454,8 +447,8 @@ async function joinTable(table) {
             uniquePlayerName = await window.game.playerManager.generateUniquePlayerName(currentUser.email, table.id);
             console.log('🔧 Log in joinTable - Generated uniquePlayerName:', uniquePlayerName);
             // Add this line:
-            window.currentPlayerUniquePlayerName = uniquePlayerName;
-            console.log('🔧 Log in joinTable - Set window.currentPlayerUniquePlayerName to:', window.currentPlayerUniquePlayerName);
+            window.uniquePlayerName = uniquePlayerName;
+            console.log('🔧 Log in joinTable - Set window.uniquePlayerName to:', window.uniquePlayerName);
         }
 
         const isOwner = await claimOwnershipIfNeeded(table.id, uniquePlayerName);

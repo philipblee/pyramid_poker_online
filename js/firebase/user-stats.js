@@ -67,7 +67,7 @@ class UserStatsManager {
             // Update user statistics
             await this.updateUserStats(currentUser.uid, gameData);
 
-            console.log('📊 Game stats saved successfully');
+//            console.log('📊 Game stats saved successfully');
         } catch (error) {
             console.error('❌ Failed to save game stats:', error);
         }

@@ -33,7 +33,7 @@ Click to copy version info`;
         }
 
         // Log for debugging
-        console.log('🎮 Pyramid Poker Online Version Info:', versionInfo);
+//        console.log('🎮 Pyramid Poker Online Version Info:', versionInfo);
 
     } catch (error) {
         console.warn('Could not load version info:', error);
