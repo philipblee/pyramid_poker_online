@@ -141,7 +141,7 @@ function transitionToScoringPhase() {
 
 // In game-state-manager.js or wherever global functions are:
 async function setTableState(newState) {
-    console.log('👑 setTableState called with:', newState);
+//    console.log('👑 setTableState called with:', newState);
 
     if (!window.multiDeviceIntegration || !window.isOwner) {
         console.log('❌ Only owner can change table state');
@@ -149,7 +149,7 @@ async function setTableState(newState) {
     }
 
     const tableId = window.multiDeviceIntegration.tableId;
-    console.log('👑 Setting table state to:', newState, 'for table:', tableId);
+//    console.log('👑 Setting table state to:', newState, 'for table:', tableId);
 
     try {
         await firebase.database().ref(`tables/${tableId}/tableState`).set(newState);

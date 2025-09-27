@@ -63,7 +63,7 @@ class MultiDeviceIntegration {
         // Listen for changes
         this.tableStateListener = tableStateRef.on('value', (snapshot) => {
             const tableState = snapshot.val();
-            console.log('🔥 Table state updated:', tableState);
+//            console.log('🔥 Table state updated:', tableState);
 
             // Store the current state value
             this.tableState = tableState;  // Add this line
@@ -79,7 +79,7 @@ class MultiDeviceIntegration {
         firebase.database().ref(`tables/${tableId}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`)
             .on('value', (snapshot) => {
                 const playerCount = snapshot.val() || 0;
-                console.log(`🔍 Shared player count: ${playerCount}`);
+//                console.log(`🔍 Shared player count: ${playerCount}`);
                 updateStartGameButton(playerCount);
             });
         });
@@ -164,9 +164,9 @@ class MultiDeviceIntegration {
 
     // Check if all players have submitted their arrangements
     async checkAllPlayersSubmitted() {
-            console.log('=== ENTERING checkAllPlayersSubmitted ===');
+//            console.log('=== ENTERING checkAllPlayersSubmitted ===');
 
-        console.log('👑 Owner checking if all players have submitted...');
+//        console.log('👑 Owner checking if all players have submitted...');
 //
 //        // Debug: Check what data we're working with
         const playersSnapshot = await firebase.database().ref(`tables/${this.tableId}/players`).once('value');
@@ -188,36 +188,37 @@ class MultiDeviceIntegration {
         // COUNT ARRANGEMENTS, NOT SUBMISSIONS:
         const arrangements = arrangementsData || {};
         const submittedCount = Object.keys(arrangements).length;
-        console.log('🔍 DEBUG - arrangements keys:', Object.keys(arrangements));
-        console.log('🔍 DEBUG - arrangementsData type:', typeof arrangementsData);
-        console.log('🔍 DEBUG - Arrangements count:', submittedCount);
-        console.log('🔍 DEBUG - Total players needed:', totalPlayers);
-
-        console.log('🔍 submittedCount >= totalPlayers:', submittedCount >= totalPlayers);
-        console.log('🔍 this.tableState !== all_submitted:', this.tableState !== 'all_submitted');
-        console.log('🔍 this.isOwner:', this.isOwner);
-        console.log('🔍 Full condition result:', (submittedCount >= totalPlayers && this.tableState !== 'all_submitted' && this.isOwner));
+//        console.log('🔍 DEBUG - arrangements keys:', Object.keys(arrangements));
+//        console.log('🔍 DEBUG - arrangementsData type:', typeof arrangementsData);
+//        console.log('🔍 DEBUG - Arrangements count:', submittedCount);
+//        console.log('🔍 DEBUG - Total players needed:', totalPlayers);
+//
+//        console.log('🔍 submittedCount >= totalPlayers:', submittedCount >= totalPlayers);
+//        console.log('🔍 this.tableState !== all_submitted:', this.tableState !== 'all_submitted');
+//        console.log('🔍 this.isOwner:', this.isOwner);
+//        console.log('🔍 Full condition result:', (submittedCount >= totalPlayers && this.tableState !== 'all_submitted' && this.isOwner));
 
 
         if (submittedCount >= totalPlayers && this.tableState !== 'all_submitted' && this.isOwner) {
-            console.log('🎉 All players have submitted! Transitioning...');
+//            console.log('🎉 All players have submitted! Transitioning...');
             await this.transitionToAllSubmitted();
         } else if (this.tableState === 'all_submitted' && this.isOwner) {
-            console.log(`⏳ Waiting for more submissions (${submittedCount}/${totalPlayers})`);
-        } else {console.log ("log from checkAllPlayerSubmitted - if there are enough players and I am owner, you should not see this")}
-
+//            console.log(`⏳ Waiting for more submissions (${submittedCount}/${totalPlayers})`);
+        } else {
+//        console.log ("log from checkAllPlayerSubmitted - if there are enough players and I am owner, you should not see this")
+        }
     }
 
     // Transition to ALL_SUBMITTED state
     async transitionToAllSubmitted() {
 
-        console.log('=== ENTERING transitionToAllSubmitted ===');
+//        console.log('=== ENTERING transitionToAllSubmitted ===');
 
         try {
             // Update table state in Realtime Database
-            console.log('About to write to Firebase, tableId:', this.currentTableId);
+//            console.log('About to write to Firebase, tableId:', this.currentTableId);
             await firebase.database().ref(`tables/${this.currentTableId}/tableState`).set('all_submitted');
-            console.log('Firebase write completed successfully');
+//            console.log('Firebase write completed successfully');
 
             // Show "All players submitted" message
             this.showAllSubmittedMessage();
@@ -273,7 +274,7 @@ class MultiDeviceIntegration {
             return;
         }
 
-        console.log('🏆 Proceeding to scoring phase...');
+//        console.log('🏆 Proceeding to scoring phase...');
         this.lastScoringRound = window.game.currentRound;
 
         await this.RetrieveAllArrangementsFromFirebase();
@@ -321,7 +322,7 @@ class MultiDeviceIntegration {
 //            console.log('- playerHands has this key?', window.game.playerHands.has(playerName));
 
             try {
-                console.log(`📝 Storing arrangement for human player: ${playerName}`);
+//                console.log(`📝 Storing arrangement for human player: ${playerName}`);
 
                 // RIGHT BEFORE calling storePlayerArrangementToFirebase:
 //                console.log('🔍 PRE-STORAGE DEBUG for:', playerName);
@@ -423,10 +424,10 @@ class MultiDeviceIntegration {
                 const stateSnapshot = await firebase.database().ref(`tables/${this.tableId}/tableState`).once('value');
                 const currentState = stateSnapshot.val(); // Should return "dealing" or "playing"
 
-                console.log('📡 Current TABLE_STATE:', currentState);
+//                console.log('📡 Current TABLE_STATE:', currentState);
 
                 if (this.tableState === TABLE_STATES.PLAYING) {
-                    console.log('📡 Owner checking submissions (PLAYING state)');
+//                    console.log('📡 Owner checking submissions (PLAYING state)');
                     this.checkAllPlayersSubmitted();
                 } else {
                     console.log('📡 Skipping check - not in PLAYING state:', currentState);
@@ -615,7 +616,7 @@ class MultiDeviceIntegration {
     }
 
     async RetrieveAllArrangementsFromFirebase() {
-        console.log('☁️ Loading correct arrangements from Firestore...');
+//        console.log('☁️ Loading correct arrangements from Firestore...');
 
         const doc = await this.tableManager.tablesRef.doc(this.currentTableId.toString()).get();
         const data = doc.data();
@@ -626,13 +627,13 @@ class MultiDeviceIntegration {
             window.game.submittedHands.set(playerEmail, arrangement);
         });
 
-        console.log('✅ Loaded arrangements with correct keys');
+//        console.log('✅ Loaded arrangements with correct keys');
     }
 
 
     async storePlayerArrangementToFirebase(playerName) {
 
-        console.log(`☁️ Storing player arrangement to Firebase for: ${playerName}`);
+//        console.log(`☁️ Storing player arrangement to Firebase for: ${playerName}`);
 
         // DEBUG 1: Check what we're looking for
 //        console.log('🔍 DEBUG - Input playerName:', playerName);
@@ -643,24 +644,24 @@ class MultiDeviceIntegration {
 //        console.log('🔍 DEBUG - playerHands keys:', window.game.playerHands ? Array.from(window.game.playerHands.keys()) : 'No playerHands');
 
         const playerHand = window.game.playerHands.get(playerName);
-        console.log('🔍 DEBUG - Retrieved playerHand:', playerHand);
-        console.log('🔍 DEBUG - playerHand exists:', !!playerHand);
+//        console.log('🔍 DEBUG - Retrieved playerHand:', playerHand);
+//        console.log('🔍 DEBUG - playerHand exists:', !!playerHand);
 
         // these logs increase performance of joinTable
         if (playerHand) {
-            console.log('🔍 DEBUG - playerHand.back length:', playerHand.back?.length);
-            console.log('🔍 DEBUG - playerHand.middle length:', playerHand.middle?.length);
-            console.log('🔍 DEBUG - playerHand.front length:', playerHand.front?.length);
+//            console.log('🔍 DEBUG - playerHand.back length:', playerHand.back?.length);
+//            console.log('🔍 DEBUG - playerHand.middle length:', playerHand.middle?.length);
+//            console.log('🔍 DEBUG - playerHand.front length:', playerHand.front?.length);
         }
 
         // DEBUG 3: Check players array and ID matching
-        console.log('🔍 DEBUG - window.game.players:', window.game.players?.map(p => ({name: p.name, id: p.id})));
+//        console.log('🔍 DEBUG - window.game.players:', window.game.players?.map(p => ({name: p.name, id: p.id})));
 
         const player = window.game.players.find(p => p.name === playerName);
-        console.log('🔍 DEBUG - Found matching player:', player);
+//        console.log('🔍 DEBUG - Found matching player:', player);
 
         const uniquePlayerName = playerName;
-        console.log('🔍 DEBUG - Using uniquePlayerName:', uniquePlayerName);
+//        console.log('🔍 DEBUG - Using uniquePlayerName:', uniquePlayerName);
 
         const arrangementData = {
             [uniquePlayerName]: {
@@ -683,13 +684,13 @@ class MultiDeviceIntegration {
 
 //        console.log(`🕐 AFTER Firebase write: ${uniquePlayerName} at ${Date.now()}`);
 
-        console.log(`✅ Stored arrangement for ${uniquePlayerName}`);
+//        console.log(`✅ Stored arrangement for ${uniquePlayerName}`);
     }
     // Sync tournament results to Firebase for cloud storage
     async syncResultsToFirebase() {
         if (!this.isMultiDevice) return;
 
-        console.log('☁️ Syncing results to Firebase...');
+//        console.log('☁️ Syncing results to Firebase...');
 
         // Get results from existing game system
         const results = this.extractGameResults();
@@ -704,7 +705,7 @@ class MultiDeviceIntegration {
         // Update player stats in Firebase
         await this.updatePlayerStats(results);
 
-        console.log('✅ Results synced to Firebase');
+//        console.log('✅ Results synced to Firebase');
     }
 
     // Extract results from existing game system
