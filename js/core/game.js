@@ -362,7 +362,7 @@ class PyramidPoker {
 
         await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
 
-//        console.log(`Log from handleAITurn: 🤖 AI ${currentPlayer.name} is thinking...`);
+        console.log(`🤖 ${currentPlayer.name} is playing...`);
 
         // Step 1: Show AI is thinking (1 second)
         setTimeout(() => {
