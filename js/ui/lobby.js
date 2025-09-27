@@ -451,6 +451,7 @@ async function joinTable(table) {
             console.log('🔧 Log in joinTable - Set window.uniquePlayerName to:', window.uniquePlayerName);
         }
 
+        // this  is needed.  isOwner is false for owner without it
         const isOwner = await claimOwnershipIfNeeded(table.id, uniquePlayerName);
 
         const playerInfo = {

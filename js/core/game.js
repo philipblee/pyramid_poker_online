@@ -150,13 +150,14 @@ class PyramidPoker {
         this.currentRound = 1;
         this.roundHistory = [];
         this.tournamentScores.clear();
-        console.log(`🏆 Starting Tournament - Round ${this.currentRound} of ${this.maxRounds}`);
+        console.log(`Round ${this.currentRound} of ${this.maxRounds}`);
 
         // Initialize tournament scores for all players
         for (let player of this.playerManager.players) {
             this.tournamentScores.set(player.name, 0);
         }
 
+        // This block is essential for single-player.  Without it, single-player breaks
         // Setup first round
         this.deckManager.createNewDeck();
         this.gameState = 'playing';
