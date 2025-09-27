@@ -6,7 +6,7 @@ class PyramidPoker {
         // Initialize managers
         this.playerManager = new PlayerManager();
         this.deckManager = new DeckManager();
-        this.autoArrangeManager = new AutoArrangeManager(this);
+        this.autoArrangeManager = new AutoArrange(this);
 
         // Game state
         this.gameState = 'waiting';

@@ -1,7 +1,7 @@
 // js/hands/auto-arrange.js
 // Streamlined version using find-best-setup
 
-class AutoArrangeManager {
+class AutoArrange {
     constructor(game) {
         this.game = game;
         this.arrangementValidator = new ArrangementValidator(game);
