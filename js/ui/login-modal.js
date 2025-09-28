@@ -77,14 +77,25 @@ class LoginModal {
 //        console.log('🔧 Login button found:', loginButton);
 
         if (loginButton) {
-            loginButton.addEventListener('click', () => {
+            loginButton.addEventListener('click', async () => {  // Make it async
                 console.log('🔧 Login button clicked!');
 
-                // Check if user is logged in
                 const currentUser = window.firebaseAuth ? window.firebaseAuth.currentUser : null;
 
                 if (currentUser) {
-                    // User is logged in - logout
+                    // User is logged in - clean up table first, then logout
+
+                    // Clean up table membership before logging out
+                    if (typeof currentTable !== 'undefined' && currentTable) {
+                        console.log('🧹 Cleaning up table membership before logout...');
+                        try {
+                            await leaveTable();
+                        } catch (error) {
+                            console.error('❌ Error cleaning up table:', error);
+                        }
+                    }
+
+                    // Now proceed with logout
                     this.logout();
                 } else {
                     // User is logged out - show login modal

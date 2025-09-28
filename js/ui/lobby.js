@@ -476,6 +476,19 @@ async function joinTable(table) {
                 console.error('❌ Error adding player:', error);
             });
 
+        // Set up listener to detect if table gets deleted while we're in it
+        firebase.database().ref(`tables/${table.id}`).on('value', (snapshot) => {
+            if (!snapshot.exists() && currentTable && currentTable.id === table.id) {
+                // Table was deleted while we were in it
+                console.log('🚨 Table deleted by owner, returning to lobby');
+                currentTable = null;
+                showLobbyScreen();
+
+                // Clean up this listener since table no longer exists
+                firebase.database().ref(`tables/${table.id}`).off('value');
+            }
+        });
+
         // Show the multi-human player section
         const playerSection = document.getElementById('multiHumanPlayers');
         if (playerSection) {
@@ -550,10 +563,74 @@ function onSettingsSaved(newSettings) {
     }
 }
 
-// Leave table
-function leaveTable() {
-    currentTable = null;
-    showLobbyScreen();
+// Leave table v1
+//function leaveTable() {
+//    currentTable = null;
+//    showLobbyScreen();
+//}
+
+// Leave table v2
+async function leaveTable() {
+    console.log('🚪 Leave table clicked');
+
+    if (!currentTable) {
+        console.log('❌ Not currently in a table');
+        return;
+    }
+
+    try {
+        const tableId = currentTable.id;
+        console.log('🔍 Leaving table:', tableId);
+
+        const currentUser = window.firebaseAuth.currentUser;
+        if (!currentUser) {
+            console.log('❌ No user logged in');
+            return;
+        }
+
+        // Check if leaving player is the owner
+        const stateSnapshot = await firebase.database().ref(`tables/${tableId}/state`).once('value');
+        const state = stateSnapshot.val() || {};
+        const isOwner = state.TABLE_OWNER === currentUser.email;
+
+        if (isOwner) {
+            console.log('🗑️ Player is owner, removing entire table...');
+            await firebase.database().ref(`tables/${tableId}`).remove();
+            console.log('✅ Table deleted');
+        } else {
+            // Non-owner leaving - just remove the player
+            const playersSnapshot = await firebase.database().ref(`tables/${tableId}/players`).once('value');
+            const players = playersSnapshot.val() || {};
+
+            let playerKeyToRemove = null;
+            for (const [playerKey, playerData] of Object.entries(players)) {
+                if (playerData.name === currentUser.email) {
+                    playerKeyToRemove = playerKey;
+                    break;
+                }
+            }
+
+            if (playerKeyToRemove) {
+                await firebase.database().ref(`tables/${tableId}/players/${playerKeyToRemove}`).remove();
+                console.log('✅ Removed player:', playerKeyToRemove);
+
+                // Update both player count locations
+                await firebase.database().ref(`tables/${tableId}/settings/humanPlayers`)
+                    .transaction((current) => Math.max(0, (current || 1) - 1));
+                await firebase.database().ref(`tables/${tableId}/state/num_human_players`)
+                    .transaction((current) => Math.max(0, (current || 1) - 1));
+                console.log('✅ Decremented human player count');
+            }
+        }
+
+        // Clear local state
+        currentTable = null;
+        showLobbyScreen();
+        console.log('🎉 Successfully left table');
+
+    } catch (error) {
+        console.error('❌ Error leaving table:', error);
+    }
 }
 
 // Return to table after game ends (call this from your game end code)
