@@ -179,7 +179,7 @@
 
 /* Leaderboard Entries */
 .leaderboard-entries {
-    space-y: 8px;
+    margin-top: 8px;
 }
 
 .leaderboard-entry {
@@ -288,6 +288,5 @@
     background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
     color: white;
     box-shadow: 0 4px 12px rgba(78,205,196,0.3);
-}
-
-.le
+'}
+'
