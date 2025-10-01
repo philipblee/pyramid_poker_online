@@ -151,18 +151,6 @@ function FindBestSetupOneWild(cardObjects) {
 
     if (successful.length > 0) {
         const best = successful[0];
-//        console.log(`\n🏆 Best Result (Smart):`);
-//        console.log(`   Wild card: ${best.wildCard}`);
-//        console.log(`   Score: ${best.score}`);
-//        console.log(`   Back: ${best.arrangement.back.handType}`);
-//        console.log(`   Middle: ${best.arrangement.middle.handType}`);
-//        console.log(`   Front: ${best.arrangement.front.handType}`);
-
-        // Show top 5 results for smart approach
-//        console.log(`\n🥇 Top 5 Results (Smart):`);
-//        successful.slice(0, 5).forEach((result, index) => {
-//            console.log(`   ${index + 1}. ${result.wildCard}: ${result.score} points`);
-//        });
 
         // Show optimal score distribution
         const optimalScore = best.score;

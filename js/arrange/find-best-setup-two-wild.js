@@ -59,27 +59,12 @@ function FindBestSetupTwoWild(cardObjects) {
 //    console.log(`🔄 Starting to process ${allCombinations.length} combinations...`);
 
     allCombinations.forEach((combination, index) => {
-//        console.log(`Processing combination ${index}...`); // Add this first
-        // Progress indicator every 10 combinations
-        //if ((index + 1) % 10 === 0) {
-            // console.log(`   Progress: ${index + 1}/${allCombinations.length} combinations processed...`);
-        //}
 
         try {
             // Create two substituted cards
             const substitutedCard1 = createCardFromObject(combination[0], wildCards[0].id);
             const substitutedCard2 = createCardFromObject(combination[1], wildCards[1].id);
             const cards = [...nonWildCards, substitutedCard1, substitutedCard2];
-
-            // ADD THIS LOGGING (just for first few combinations):
-            if (index < 3) {
-//                console.log(`🔍 Combo ${index} ID Analysis:`);
-//                console.log('  Original wild card IDs:', wildCards.map(w => w.id));
-//                console.log('  Substituted card 1 ID:', substitutedCard1.id);
-//                console.log('  Substituted card 2 ID:', substitutedCard2.id);
-//                console.log('  Card 1 full:', substitutedCard1);
-//                console.log('  Card 2 full:', substitutedCard2);
-            }
 
             // Run HandDetector (auto-sorted)
             const detector = new HandDetector(cards);
@@ -150,12 +135,6 @@ function FindBestSetupTwoWild(cardObjects) {
 
     if (successful.length > 0) {
         const best = successful[0];
-//        console.log(`\n🏆 Best Result (Smart Two-Wild):`);
-//        console.log(`   Wild cards: ${best.wildCards.join(', ')}`);
-//        console.log(`   Score: ${best.score}`);
-//        console.log(`   Back: ${best.arrangement.back.handType} (${best.arrangement.back.cardCount} cards)`);
-//        console.log(`   Middle: ${best.arrangement.middle.handType} (${best.arrangement.middle.cardCount} cards)`);
-//        console.log(`   Front: ${best.arrangement.front.handType} (${best.arrangement.front.cardCount} cards)`);
 
         // Show top 5 results for smart approach
         // console.log(`\n🥇 Top 5 Results (Smart Two-Wild):`);

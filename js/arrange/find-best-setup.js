@@ -452,14 +452,6 @@ class FindBestSetup {
      * @param {number} wildCount - Number of wild cards
      */
     logResult(result, wildCount) {
-//        if (result && result.success) {
-//            console.log(`✅ FindBestSetup SUCCESS (${wildCount} wilds): Score ${result.score}`);
-//            if (result.statistics) {
-//                console.log(`   Dispatch time: ${result.statistics.dispatchTime?.toFixed(2)}ms`);
-//            }
-//        } else {
-//            console.log(`❌ FindBestSetup FAILED (${wildCount} wilds):`, result?.error || 'Unknown error');
-//        }
     }
 
     /**

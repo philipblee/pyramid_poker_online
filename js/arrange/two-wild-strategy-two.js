@@ -82,16 +82,6 @@ function twoWildStrategyTwo(cards) {
         ) === index;
     });
 
-//    console.log(`\n📋 Strategy 2 Results:`);
-//    console.log(`   Total 2-card combinations found: ${validTwoCardCombinations.length}`);
-//    console.log(`   After deduplication: ${dedupedCombinations.length}`);
-
-    // Debug: Show complete list of 2-card combinations (in order)
-    //    console.log(`\n🔍 DEBUG: Complete list of 2-card combinations (in order):`);
-    //    dedupedCombinations.forEach((combo, index) => {
-    //        console.log(`   ${index + 1}: [${combo[0].rank}${combo[0].suit}, ${combo[1].rank}${combo[1].suit}]`);
-    //    });
-
     const totalEnd = performance.now();
 //    console.log(`⏱️ Total timing: ${(totalEnd - startTime).toFixed(2)}ms`);
 
@@ -102,13 +92,6 @@ function twoWildStrategyTwo(cards) {
         return bValue - aValue; // Descending order (highest first)
     });
 
-//    console.log(`\n📋 Strategy 2 Results:`);
-//    console.log(`   Total 2-card combinations found: ${validTwoCardCombinations.length}`);
-//    console.log(`   After deduplication: ${dedupedCombinations.length}`);
-//    console.log(`   After sorting by rank: ${sortedCombinations.length}`);
-
-    // Debug: Show complete list of 2-card combinations (in sorted order)
-//    console.log(`\n🔍 DEBUG: Complete list of 2-card combinations (sorted by rank):`);
     sortedCombinations.forEach((combo, index) => {
         const totalValue = combo[0].value + combo[1].value;
 //        console.log(`   ${index + 1}: [${combo[0].rank}${combo[0].suit}, ${combo[1].rank}${combo[1].suit}] (${totalValue})`);

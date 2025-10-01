@@ -59,11 +59,6 @@ function twoWildStrategyOne(cardObjects) {
                improvements: improvementDetails
            });
 
-//           if (improvementDetails.length === 1) {
-//               console.log(`   ✅ ${combination.map(c => c.rank + c.suit).join(', ')}: ${improvementDetails[0]}`);
-//           } else {
-//               console.log(`   ✅ ${combination.map(c => c.rank + c.suit).join(', ')}: ${improvementDetails.length} improvements`);
-//           }
        } else {
            rejectedCombinations.push(combination);
 //           console.log(`   ✅ Rejected Combination: ${combination.map(c => c.rank + c.suit).join(', ')}`);
@@ -186,63 +181,3 @@ function testTwoWildCandidates() {
 
    return result;
 }
-
-/**
-* Compare original strategy one vs two-wild-candidates with timing
-* @param {Array} cards - Test cards (15 non-wild cards)
-*/
-//function compareStrategyOneVsTwoWildCandidates(cards) {
-//   console.log('\n🔬 ======== COMPARING STRATEGY 1 VS TWO-WILD-CANDIDATES ========');
-//
-//   // Time original version (HandDetector 312 times)
-//   console.log('\n📊 Timing Original Strategy 1...');
-//   const originalStart = performance.now();
-//   const originalResults = twoWildStrategyOne(cards);
-//   const originalEnd = performance.now();
-//   const originalTime = originalEnd - originalStart;
-//
-//   // Time new version (called once)
-//   console.log('\n📊 Timing Two-Wild-Candidates...');
-//   const newStart = performance.now();
-//   const newResult = twoWildCandidates(cards);
-//   const newResults = newResult.wildCandidates;
-//   const newEnd = performance.now();
-//   const newTime = newEnd - newStart;
-//
-//   // Calculate speedup
-//   const speedup = originalTime / newTime;
-//   const timeSaved = originalTime - newTime;
-//
-//   // Compare results
-//   console.log('\n📋 ======== COMPARISON RESULTS ========');
-//   console.log(`Original Strategy 1: ${originalResults.length} combinations`);
-//   console.log(`Two-Wild-Candidates: ${newResults.length} combinations`);
-//
-//   // Check if results match
-//   const originalCombos = new Set(originalResults.map(combo =>
-//       combo.map(c => c.rank + c.suit).sort().join(',')
-//   ));
-//   const newCombos = new Set(newResults.map(combo =>
-//       combo.map(c => c.rank + c.suit).sort().join(',')
-//   ));
-//
-//   const match = originalCombos.size === newCombos.size &&
-//                 [...originalCombos].every(combo => newCombos.has(combo));
-//
-//   console.log(`Results match: ${match ? '✅ YES' : '❌ NO'}`);
-//
-//   console.log('\n⚡ ======== TIMING RESULTS ========');
-//   console.log(`Original Strategy 1: ${originalTime.toFixed(2)}ms`);
-//   console.log(`Two-Wild-Candidates: ${newTime.toFixed(2)}ms`);
-//   console.log(`Time saved: ${timeSaved.toFixed(2)}ms`);
-//   console.log(`Speedup: ${speedup.toFixed(1)}x faster`);
-//   console.log(`Efficiency gain: ${((timeSaved / originalTime) * 100).toFixed(1)}% reduction`);
-//
-//   if (!match) {
-//       console.log('\n⚠️ Differences found:');
-//       console.log('Original only:', [...originalCombos].filter(c => !newCombos.has(c)));
-//       console.log('New only:', [...newCombos].filter(c => !originalCombos.has(c)));
-//   }
-//
-//   return { originalTime, newTime, speedup, timeSaved, match };
-//}
