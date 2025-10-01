@@ -112,39 +112,6 @@ function isStraight(values) {
     return true;
 }
 
-// Get bonus points for different hands in different positions
-function getBackBonus(evaluation) {
-    if (evaluation.hand_rank[0] === 10) return ' (+5 bonus)'; // Five of a Kind
-    if (evaluation.hand_rank[0] === 8) return ' (+3 bonus)';  // Four of a Kind
-    if (evaluation.hand_rank[0] === 9) return ' (+4 bonus)';  // Straight Flush
-    return '';
-}
-
-function getMiddleBonus(evaluation) {
-    if (evaluation.hand_rank[0] === 10) return ' (+5 bonus)'; // Five of a Kind
-    if (evaluation.hand_rank[0] === 7) return ' (+1 bonus)';  // Full House
-    if (evaluation.hand_rank[0] === 8) return ' (+7 bonus)';  // Four of a Kind
-    if (evaluation.hand_rank[0] === 9) return ' (+9 bonus)';  // Straight Flush
-    return '';
-}
-
-function getFrontBonus(evaluation) {
-    // Check if this is a 3-card hand evaluation
-    if (evaluation.hand_rank.length <= 3) {
-        if (evaluation.hand_rank[0] === 4) return ' (+2 bonus)'; // Three of a kind in 3-card front
-        return '';
-    }
-
-    // 5-card front hand bonuses
-    if (evaluation.hand_rank[0] === 10) return ' (+17 bonus)'; // Five of a Kind
-    if (evaluation.hand_rank[0] === 9) return ' (+14 bonus)';  // Straight Flush
-    if (evaluation.hand_rank[0] === 8) return ' (+11 bonus)';  // Four of a Kind
-    if (evaluation.hand_rank[0] === 7) return ' (+4 bonus)';   // Full House
-    if (evaluation.hand_rank[0] === 6) return ' (+3 bonus)';   // Flush
-    if (evaluation.hand_rank[0] === 5) return ' (+3 bonus)';   // Straight
-    return '';
-}
-
 // Get human-readable hand name
 function getHandName(evaluation) {
     return evaluation.name;
