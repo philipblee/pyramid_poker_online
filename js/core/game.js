@@ -921,9 +921,8 @@ class PyramidPoker {
         console.log('🏆 Showing tournament summary...');
 
         // DEBUG: Check what's actually in round history
-//        console.log('Round history length:', this.roundHistory.length);
         this.roundHistory.forEach((round, index) => {
-//            console.log(`Round ${index + 1}:`, round.roundNumber, 'Scores:', [...round.roundScores.entries()]);
+            // console.log(`Round ${index + 1}:`, round.roundNumber, 'Scores:', [...round.roundScores.entries()]);
         });
 
         // Create sorted tournament standings
@@ -989,29 +988,90 @@ class PyramidPoker {
             html += `</div>`;
         }
 
-    //  commented out "start new tournament" block - trying something different
-        html += `
-            </div>
-            <button onclick="this.parentElement.parentElement.remove(); game.startNewTournament();"
-                    style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
-                Start New Tournament
-            </button>
-        `;
+        html += `</div>`;
 
-        // log start of new tournament
-//        console.log ("Log from game.js - User clicked startNewTournament")
+        // ✨ NEW: Add "Return to Table" button or waiting message
+        const canReturn = gameConfig.config.gameDeviceMode !== 'multi-device' || window.isOwner;
+
+        if (canReturn) {
+            // Owner (or single-player) can return to table
+            html += `
+                <button onclick="game.returnToTable();"
+                        style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px;">
+                    Return to Table
+                </button>
+            `;
+        } else {
+            // Non-owner waits
+            html += `
+                <p style="color: #ffd700; margin-top: 20px; font-size: 16px;">
+                    Waiting for table owner to continue...
+                </p>
+            `;
+        }
 
         content.innerHTML = html;
         modal.appendChild(content);
         document.body.appendChild(modal);
 
-        // Reset to waiting state when closed
-        this.gameState = 'waiting';
-        this.currentRound = 0;
-        this.roundRobinResults = [];
-//        console.log('🎯 After reset - roundRobinResults:', this.roundRobinResults); // <-- ADD THIS
-        updateDisplay(this);
+        // ✨ REMOVED: Don't reset state here anymore - only when Return to Table is clicked
+    }
+
+    returnToTable() {
+        console.log('🔙 Returning to table/lobby...');
+
+        // Close the tournament summary modal
+        const modals = document.querySelectorAll('div[style*="position: fixed"]');
+        modals.forEach(modal => {
+            if (modal.textContent.includes('TOURNAMENT COMPLETE')) {
+                modal.remove();
+            }
+        });
+
+        if (gameConfig.config.gameDeviceMode === 'multi-device') {
+            // MULTIPLAYER: Return to lobby state
+            setTableState(TABLE_STATES.LOBBY);
+            console.log('✅ Owner set tableState back to LOBBY');
+        } else {
+            // SINGLE PLAYER: Reset to lobby state
+            this.gameState = 'waiting'; // Already set in showTournamentSummary
+            this.currentRound = 0;
+            updateDisplay(this);
+            console.log('✅ Single-player returned to lobby');
         }
+        }
+
+    returnToTable() {
+        console.log('🔙 Returning to table/lobby...');
+
+        // Close the tournament summary modal
+        const modals = document.querySelectorAll('div[style*="position: fixed"]');
+        modals.forEach(modal => {
+            if (modal.textContent.includes('TOURNAMENT COMPLETE')) {
+                modal.remove();
+            }
+        });
+
+        if (gameConfig.config.gameDeviceMode === 'multi-device') {
+            // MULTIPLAYER: Only owner sets state, non-owners just do cleanup
+            if (window.isOwner) {
+                setTableState(TABLE_STATES.LOBBY);
+                console.log('✅ Owner set tableState back to LOBBY');
+            } else {
+                // Non-owner just does local cleanup
+                console.log('✅ Non-owner cleaned up locally');
+            }
+        } else {
+            // SINGLE PLAYER: Reset to waiting state
+            this.gameState = 'waiting';
+            this.currentRound = 0;
+            updateDisplay(this);
+            console.log('✅ Single-player returned to waiting');
+        }
+
+        // Show table screen for everyone
+        showTableScreen();
+    }
 
     compareHands(hand1, hand2) {
         let player1Score = 0;

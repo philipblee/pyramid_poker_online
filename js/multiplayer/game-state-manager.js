@@ -5,6 +5,12 @@ async function handleTableStateChange(tableState) {
 
     switch(tableState) {
 
+
+        case TABLE_STATES.LOBBY:
+            console.log('🎮 Returning to lobby/table screen...');
+            window.game.returnToTable();
+            break;
+
         case TABLE_STATES.NEW_TOURNAMENT:
             console.log('🎮 Handling NEW_TOURNAMENT state...');
             window.game.initializeTournament();
