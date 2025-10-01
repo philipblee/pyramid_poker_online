@@ -206,14 +206,8 @@ static getPointsForHand(hand, position, cardCount = null) {
     // DEBUGGING AND ANALYSIS
     // =============================================================================
 
+    // keep empty stub just in case
     static debugHandScoring(hand, position, cardCount, label = "") {
-//        console.log(`\n🎯 ${label} Hand Scoring Debug:`);
-//        console.log(`Position: ${position}`);
-//        console.log(`Hand: ${hand.name}`);
-//        console.log(`Cards: ${cardCount}`);
-//        console.log(`Points if Win: ${this.getPointsForHand(hand, position, cardCount)}`);
-//        console.log(`Win Probability: ${this.formatWinProbability(this.estimateWinProbability(hand, position))}`);
-//        console.log(`Expected Points: ${this.formatExpectedPoints(this.getExpectedPoints(hand, {length: cardCount}, position))}`);
     }
 
     // =============================================================================
