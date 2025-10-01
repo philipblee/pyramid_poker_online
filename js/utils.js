@@ -16,63 +16,6 @@ function createParticles() {
     }
 }
 
-// Helper function to get card value for sorting/comparison
-function getCardValue(rank) {
-    if (rank === 'A') return 14;
-    if (rank === 'K') return 13;
-    if (rank === 'Q') return 12;
-    if (rank === 'J') return 11;
-    return parseInt(rank);
-}
-
-// Shuffle deck using Fisher-Yates algorithm
-function shuffleDeck(deck) {
-    for (let i = deck.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [deck[i], deck[j]] = [deck[j], deck[i]];
-    }
-    return deck;
-}
-
-// Create a complete deck with two standard decks plus configurable wild cards
-function createDeck() {
-    const suits = ['♠', '♥', '♦', '♣'];
-    const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-    const deck = [];
-
-    // Create two complete decks
-    for (let deckNum = 1; deckNum <= 2; deckNum++) {
-        for (let suit of suits) {
-            for (let rank of ranks) {
-                deck.push({
-                    suit,
-                    rank,
-                    value: getCardValue(rank),
-                    id: `${rank}${suit}_${deckNum}`,
-                    isWild: false
-                });
-            }
-        }
-    }
-
-    // Add configurable number of wild cards
-    const wildCardCount = window.gameConfig ? window.gameConfig.getWildCardCount() : 2; // Default to 2 if config not loaded
-
-//    console.log(`🃏 Creating deck with ${wildCardCount} wild cards`);
-
-    for (let i = 1; i <= wildCardCount; i++) {
-        deck.push({
-            suit: '🃏',
-            rank: '🃏',        // Changed from 'WILD' to '🃏'
-            value: 15,
-            id: `WILD_JOKER_${i}`,
-            isWild: true
-        });
-    }
-
-    return shuffleDeck(deck);
-}
-
 // Convert element ID to hand key for game logic
 function getHandKey(elementId) {
     switch (elementId) {

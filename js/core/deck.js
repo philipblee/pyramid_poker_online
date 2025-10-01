@@ -7,9 +7,58 @@ class DeckManager {
     }
 
     createNewDeck() {
-        this.deck = createDeck(); // Uses existing createDeck function from utils
+        const suits = ['♠', '♥', '♦', '♣'];
+        const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        const deck = [];
+
+        // Create two complete decks
+        for (let deckNum = 1; deckNum <= 2; deckNum++) {
+            for (let suit of suits) {
+                for (let rank of ranks) {
+                    deck.push({
+                        suit,
+                        rank,
+                        value: this.getCardValue(rank),
+                        id: `${rank}${suit}_${deckNum}`,
+                        isWild: false
+                    });
+                }
+            }
+        }
+
+        // Add wild cards
+        const wildCardCount = window.gameConfig ? window.gameConfig.getWildCardCount() : 2;
+        for (let i = 1; i <= wildCardCount; i++) {
+            deck.push({
+                suit: '🃏',
+                rank: '🃏',
+                value: 15,
+                id: `WILD_JOKER_${i}`,
+                isWild: true
+            });
+        }
+
+        this.deck = this.shuffleDeck(deck);
         return this.deck;
     }
+
+    getCardValue(rank) {
+        if (rank === 'A') return 14;
+        if (rank === 'K') return 13;
+        if (rank === 'Q') return 12;
+        if (rank === 'J') return 11;
+        return parseInt(rank);
+    }
+
+    shuffleDeck(deck = null) {
+        const deckToShuffle = deck || this.deck;
+        for (let i = deckToShuffle.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deckToShuffle[i], deckToShuffle[j]] = [deckToShuffle[j], deckToShuffle[i]];
+        }
+        return deckToShuffle;
+    }
+
 
     dealCards(numCards) {
         if (this.deck.length < numCards) {
@@ -20,15 +69,6 @@ class DeckManager {
 
     getRemainingCards() {
         return this.deck.length;
-    }
-
-    shuffleDeck() {
-        // Fisher-Yates shuffle algorithm
-        for (let i = this.deck.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
-        }
-        return this.deck;
     }
 
     resetDeck() {
