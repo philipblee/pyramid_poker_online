@@ -39,16 +39,6 @@ function getCardCountFromSubmittedHands(game, playerName, position) {
 // Enhanced showScoringPopup with proper large hand support
 function showScoringPopup(game, detailedResults, roundScores, specialPoints, roundNumber = null) {
 
-//    console.log(`🎯 showScoringPopup called - Round ${game.currentRound}, Call count:`, ++window.popupCallCount || (window.popupCallCount = 1));
-
-//    console.log('🔍 showScoringPopup called with:', {
-//        game,
-//        detailedResults,
-//        roundScores,
-//        specialPoints,
-//        roundNumber
-//    });
-
     // CAPTURE SCORES FOR STATS - Check all possible score sources
     window.lastGameDetailedResults = detailedResults;
     window.lastGameRoundScores = roundScores;

@@ -207,11 +207,6 @@ function createTableCard(table) {
 
     card.onclick = () => joinTable(table);
     const settings = table.settings;
-    // ADD THIS DEBUG BLOCK:
-//    console.log('🔍 Creating card for table:', table.name);
-//    console.log('🔍 Table settings:', settings);
-//    console.log('🔍 humanPlayers:', settings.humanPlayers);
-//    console.log('🔍 maxHumanPlayers:', settings.maxHumanPlayers);
 
     const currentPlayers = settings.humanPlayers || 0;
     const maxPlayers = settings.maxHumanPlayers || 1;
@@ -326,12 +321,6 @@ async function joinTable(table) {
     firebase.database().ref(`tables/${table.id}/settings/humanPlayers`).once('value', (snapshot) => {
         const currentHumanPlayers = snapshot.val() || 0;
         const maxHumanPlayers = table.settings.maxHumanPlayers || 6;
-
-//        console.log('🔍 Current human players from Firebase:', currentHumanPlayers);
-        // Check if table is full (applies to ALL table types)
-//        console.log('🔍 Calculated - current:', currentHumanPlayers, 'max:', maxHumanPlayers);
-//        console.log('🔍 Is full?', currentHumanPlayers >= maxHumanPlayers);
-//        console.log('🔍 Max players:', maxHumanPlayers);
 
         if (currentHumanPlayers >= maxHumanPlayers) {
             alert(`Table "${table.name}" is full (${currentHumanPlayers}/${maxHumanPlayers} players)`);
@@ -562,12 +551,6 @@ function onSettingsSaved(newSettings) {
         showTableScreen();
     }
 }
-
-// Leave table v1
-//function leaveTable() {
-//    currentTable = null;
-//    showLobbyScreen();
-//}
 
 // Leave table v2
 async function leaveTable() {

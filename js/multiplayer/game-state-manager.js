@@ -120,13 +120,7 @@ function transitionToDealingPhase() {
 }
 
 function transitionToPlayingPhase() {
-//    console.log('=== ENTERING transitionToPlayingPhase ===');
-//    console.log('🎮 Transitioning to playing phase...');
-//
-//    console.log('🎮 Transitioning to playing phase...');
-//    console.log('🎮 About to call setTableState(PLAYING)');
-//
-//    console.log('Owner check:', window.isOwner);
+
     if (window.multiDeviceIntegration && window.isOwner) {
 //       console.log('Owner confirmed - setting state to PLAYING');
        setTableState(TABLE_STATES.PLAYING);
@@ -182,24 +176,3 @@ async function setupLobbyStateListener(tableId) {
         }
     });
 }
-
-//// In the Continue button click handler
-//function TransitionToRoundComplete() {
-//    if (window.isOwner) {
-//        console.log('Owner clicked Continue on Scoring Popup');
-//        transitionToRoundComplete();
-//    } else {
-//        console.log('Non-owner waiting for owner to click Continue');
-//        closeScoringPopup();
-//    }
-//}
-//
-//// In game-state-manager.js (or wherever state transitions are defined)
-//async function transitionToRoundComplete() {
-//    console.log('🔄 Transitioning to ROUND_COMPLETE state...');
-//
-//    // Only update Realtime Database (what listeners actually read)
-//    await firebase.database().ref(`tables/${this.currentTableId}/tableState`).set('round_complete');
-//
-//    console.log('✅ Successfully transitioned to ROUND_COMPLETE state');
-//}

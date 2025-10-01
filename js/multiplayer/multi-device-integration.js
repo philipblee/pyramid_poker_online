@@ -188,17 +188,6 @@ class MultiDeviceIntegration {
         // COUNT ARRANGEMENTS, NOT SUBMISSIONS:
         const arrangements = arrangementsData || {};
         const submittedCount = Object.keys(arrangements).length;
-//        console.log('🔍 DEBUG - arrangements keys:', Object.keys(arrangements));
-//        console.log('🔍 DEBUG - arrangementsData type:', typeof arrangementsData);
-//        console.log('🔍 DEBUG - Arrangements count:', submittedCount);
-//        console.log('🔍 DEBUG - Total players needed:', totalPlayers);
-//
-//        console.log('🔍 submittedCount >= totalPlayers:', submittedCount >= totalPlayers);
-//        console.log('🔍 this.tableState !== all_submitted:', this.tableState !== 'all_submitted');
-//        console.log('🔍 this.isOwner:', this.isOwner);
-//        console.log('🔍 Full condition result:', (submittedCount >= totalPlayers && this.tableState !== 'all_submitted' && this.isOwner));
-
-
         if (submittedCount >= totalPlayers && this.tableState !== 'all_submitted' && this.isOwner) {
 //            console.log('🎉 All players have submitted! Transitioning...');
             await this.transitionToAllSubmitted();
@@ -315,25 +304,7 @@ class MultiDeviceIntegration {
                 });
             }
 
-//            console.log('🔍 PLAYER IDENTITY CHECK:');
-//            console.log('- playerName:', playerName);
-//            console.log('- Expected for this device:'), // what should it be?
-//            console.log('- playerHands before storage:', window.game.playerHands);
-//            console.log('- playerHands has this key?', window.game.playerHands.has(playerName));
-
             try {
-//                console.log(`📝 Storing arrangement for human player: ${playerName}`);
-
-                // RIGHT BEFORE calling storePlayerArrangementToFirebase:
-//                console.log('🔍 PRE-STORAGE DEBUG for:', playerName);
-//                console.log('🔍 Current playerHands Map:', window.game.playerHands);
-//                console.log('🔍 PlayerHands has key?', window.game.playerHands.has(playerName));
-//                console.log('🔍 Direct playerHands.get():', window.game.playerHands.get(playerName));
-//
-//                // Also check what's visually arranged:
-//                console.log('🔍 DOM back hand:', document.querySelector('.back-hand')?.children.length);
-//                console.log('🔍 DOM middle hand:', document.querySelector('.middle-hand')?.children.length);
-//                console.log('🔍 DOM front hand:', document.querySelector('.front-hand')?.children.length);
 
                 await this.storePlayerArrangementToFirebase(playerName);
 
@@ -519,13 +490,6 @@ class MultiDeviceIntegration {
 
             const myUniquePlayerName = window.uniquePlayerName;
 
-//            console.log('🔍 Ownership check debug:', {
-//                tableOwner,
-//                myUniquePlayerName,
-//                tableId: this.currentTableId,
-//                match: tableOwner === myUniquePlayerName
-//            }
-//            )
             ;
 
             return tableOwner === myUniquePlayerName;
