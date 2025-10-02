@@ -614,6 +614,12 @@ body {
         width: auto;
         margin-bottom: 8px;
     }
+
+    /* Fix staging area width on mobile */
+    .staging-area,
+    #playerHand {
+        max-width: 100%;
+    }
 }
 
 /* Adjust hand box widths and indents based on max cards */
