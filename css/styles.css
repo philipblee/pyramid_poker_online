@@ -948,3 +948,12 @@ body {
     opacity: 0.6;
     background-color: #f8f8f8;
 }
+
+/* Mobile portrait: fit 5 cards per row */
+@media (max-width: 600px) and (orientation: portrait) {
+    .card {
+        width: 58px;
+        height: 81px; /* proportional to maintain card aspect ratio */
+        font-size: 20px; /* slightly smaller font to match */
+    }
+}
