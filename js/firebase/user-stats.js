@@ -12,7 +12,9 @@ class UserStatsManager {
             email: email,
             createdAt: new Date(),
             lastGameAt: null,
-
+            displayName: email,
+            avatar: `avatar-${Math.floor(Math.random() * 8) + 1}`,
+            chips: 1000,
             // Game Statistics
             gamesPlayed: 0,
             totalScore: 0,

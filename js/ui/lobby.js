@@ -503,7 +503,7 @@ async function leaveTable() {
     }
 
     try {
-        const tableId = currentTable.id;
+        const tableId = currentTable.tableId;
         console.log('🔍 Leaving table:', tableId);
 
         const currentUser = window.firebaseAuth.currentUser;
