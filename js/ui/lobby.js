@@ -375,7 +375,7 @@ async function joinTable(table) {
 
         // Clear previous round's game data
         if (window.isOwner && window.multiDeviceIntegration) {
-            const tableId = window.multiDeviceIntegration.tableId;
+            const tableId = currentTable.tableId;
             await firebase.firestore().collection('tables').doc(tableId.toString()).update({
                 'currentGame': firebase.firestore.FieldValue.delete()
             });

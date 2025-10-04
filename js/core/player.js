@@ -227,7 +227,7 @@ class PlayerManager {
 
         if (isMultiDevice) {
             // Get shared player count from Firebase
-            const snapshot = await firebase.database().ref(`tables/${currentTable.id}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`).once('value');
+            const snapshot = await firebase.database().ref(`tables/${currentTable.tableId}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`).once('value');
             const playerCount = snapshot.val() || 0;
 
             if (playerCount < 2) {

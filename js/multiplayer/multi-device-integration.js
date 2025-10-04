@@ -1072,7 +1072,7 @@ class MultiDeviceIntegration {
 
     // Add Firebase listener for score updates
     setupScoreListener() {
-        firebase.database().ref(`tables/${currentTable.id}/scores`).on('value', (snapshot) => {
+        firebase.database().ref(`tables/${currentTable.tableId}/scores`).on('value', (snapshot) => {
             const scoresData = snapshot.val() || {};
             this.updateLocalScoreDisplay(scoresData);
         });

@@ -42,7 +42,7 @@ async function startSingleHumanGame() {
         // Create tableManager and initialize
         const tableManager = {
             tablesRef: firebase.firestore().collection('tables'),
-            currentTable: currentTable.id,
+            currentTable: currentTable.tableId,
             currentUser: { id: 'player-1' }
         };
 
@@ -69,10 +69,10 @@ async function startSingleHumanGame() {
 }
 
 function startMultiHumanCloudGame() {
-    console.log('🚀 Starting multi-human cloud game for table:', currentTable.id);
+    console.log('🚀 Starting multi-human cloud game for table:', currentTable.tableId);
 
     // Write to tableState to match your listener
-    firebase.database().ref(`tables/${currentTable.id}`).update({
+    firebase.database().ref(`tables/${currentTable.tableId}`).update({
         tableState: TABLE_STATES.NEW_TOURNAMENT,  // Changed from DEALING
         gameStarted: Date.now(),
         currentRound: 1
@@ -134,7 +134,7 @@ async function setupMultiHumanPlayers() {
         console.log('🌐 Other players will be managed by their own devices via Firebase');
 
         // Get total player count for game setup
-        const playersSnapshot = await firebase.database().ref(`tables/${currentTable.id}/players`).once('value');
+        const playersSnapshot = await firebase.database().ref(`tables/${currentTable.tableId}/players`).once('value');
         const playersData = playersSnapshot.val() || {};
         const totalPlayers = Object.keys(playersData).length;
 
