@@ -71,7 +71,7 @@ class PlayerManager {
             const aiNames = ['Peter AI', 'Tony AI', 'Johnny AI', 'Phil AI',
                         'Tse Ming AI', 'Edmond AI', 'Ming AI', 'Jill AI',
                         'Stephanie AI', 'Victoria AI', 'Clare AI', 'Linda AI',
-                        'Christopher AI', 'Edmond AI', 'Ming AI', 'Terry AI',
+                        'Chris AI', 'Edmond AI', 'Terry AI',
                         'Moonie AI'];
 
             // Create new shuffled array each time
