@@ -48,8 +48,8 @@ async function startSingleHumanGame() {
 
         console.log('🎮 Starting single-human online game');
 
-        window.multiDevice = new MultiDeviceIntegration();
-        await window.multiDevice.initialize(tableManager);
+        window.multiDeviceIntegration = new MultiDeviceIntegration();
+        await window.multiDeviceIntegration.initialize(tableManager);
         window.game.startNewGame();
 
         // ✅ Clean Firebase coordination using multiDevice methods:

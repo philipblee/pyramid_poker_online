@@ -481,13 +481,19 @@ async function joinTable(table) {
             if (!snapshot.exists() && currentTable && currentTable.id === table.id) {
                 // Table was deleted while we were in it
                 console.log('🚨 Table deleted by owner, returning to lobby');
+
+                // Clean up Firebase listeners
+                if (window.multiDeviceIntegration) {
+                    window.multiDeviceIntegration.cleanup();
+                }
+
                 currentTable = null;
                 showLobbyScreen();
 
                 // Clean up this listener since table no longer exists
                 firebase.database().ref(`tables/${table.id}`).off('value');
             }
-        });
+});
 
         // Show the multi-human player section
         const playerSection = document.getElementById('multiHumanPlayers');
@@ -623,10 +629,15 @@ async function leaveTable() {
             }
         }
 
-        // Clear local state
-        currentTable = null;
-        showLobbyScreen();
-        console.log('🎉 Successfully left table');
+        // Clean up Firebase listeners
+                if (window.multiDeviceIntegration) {
+                    window.multiDeviceIntegration.cleanup();
+                }
+
+            // Clear local state
+            currentTable = null;
+            showLobbyScreen();
+            console.log('🎉 Successfully left table');
 
     } catch (error) {
         console.error('❌ Error leaving table:', error);

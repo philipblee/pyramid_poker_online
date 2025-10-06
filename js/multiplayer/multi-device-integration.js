@@ -77,13 +77,25 @@ class MultiDeviceIntegration {
         // Store reference to remove listener later
         this.currentTableStateRef = tableStateRef;
 
-        // In setupTableStateListener
-        firebase.database().ref(`tables/${tableId}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`)
-            .on('value', (snapshot) => {
-                const playerCount = snapshot.val() || 0;
-//                console.log(`🔍 Shared player count: ${playerCount}`);
-                updateStartGameButton(playerCount);
-            });
+//        // In setupTableStateListener
+//        firebase.database().ref(`tables/${tableId}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`)
+//            .on('value', (snapshot) => {
+//                const playerCount = snapshot.val() || 0;
+////                console.log(`🔍 Shared player count: ${playerCount}`);
+//                updateStartGameButton(playerCount);
+//            });
+
+        // Setup player count listener
+        const playerCountRef = firebase.database().ref(`tables/${tableId}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`);
+        this.playerCountListener = playerCountRef.on('value', (snapshot) => {
+            const playerCount = snapshot.val() || 0;
+            console.log(`🔍 Shared player count: ${playerCount}`);
+            updateStartGameButton(playerCount);
+        });
+
+        // Store ref for cleanup
+        this.playerCountRef = playerCountRef;
+
 
     }
 
@@ -1137,11 +1149,25 @@ class MultiDeviceIntegration {
 
     // Cleanup - restore original handlers
     cleanup() {
-        const newGameBtn = document.getElementById('newGame');
-        const submitBtn = document.getElementById('submitHand');
+        console.log('🧹 Cleaning up Firebase listeners...');
 
-        // Restore original handlers would go here if needed
-        // For now, just mark as not multi-device
+        // Remove table state listener
+        if (this.currentTableStateRef && this.tableStateListener) {
+            this.currentTableStateRef.off('value', this.tableStateListener);
+            console.log('🔕 Table state listener removed');
+        }
+
+        // Remove player count listener
+        if (this.playerCountRef && this.playerCountListener) {
+            this.playerCountRef.off('value', this.playerCountListener);
+            console.log('🔕 Player count listener removed');
+        }
+
+        // Clear references
+        this.tableStateListener = null;
+        this.currentTableStateRef = null;
+        this.playerCountListener = null;
+        this.playerCountRef = null;
         this.isMultiDevice = false;
 
         // Remove status indicator
@@ -1150,7 +1176,7 @@ class MultiDeviceIntegration {
             statusIndicator.remove();
         }
 
-        console.log('🧹 Multi-device integration cleaned up');
+        console.log('✅ Cleanup complete');
     }
 }
 
