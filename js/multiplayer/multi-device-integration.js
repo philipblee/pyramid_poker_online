@@ -77,14 +77,6 @@ class MultiDeviceIntegration {
         // Store reference to remove listener later
         this.currentTableStateRef = tableStateRef;
 
-//        // In setupTableStateListener
-//        firebase.database().ref(`tables/${tableId}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`)
-//            .on('value', (snapshot) => {
-//                const playerCount = snapshot.val() || 0;
-////                console.log(`🔍 Shared player count: ${playerCount}`);
-//                updateStartGameButton(playerCount);
-//            });
-
         // Setup player count listener
         const playerCountRef = firebase.database().ref(`tables/${tableId}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`);
         this.playerCountListener = playerCountRef.on('value', (snapshot) => {
@@ -116,7 +108,7 @@ class MultiDeviceIntegration {
         });
 
         // Store reference to remove listener later
-        this.currentPlayersRef = playersRef;
+        this.playersRef = playersRef;
     }
 
     // Add this method to your MultiDeviceIntegration class
@@ -1163,12 +1155,20 @@ class MultiDeviceIntegration {
             console.log('🔕 Player count listener removed');
         }
 
+        // Remove players list listener
+        if (this.playersRef && this.playerListListener) {
+            this.playersRef.off('value', this.playerListListener);
+            console.log('🔕 Players list listener removed');
+        }
+
         // Clear references
         this.tableStateListener = null;
         this.currentTableStateRef = null;
         this.playerCountListener = null;
         this.playerCountRef = null;
         this.isMultiDevice = false;
+        this.playerListListener = null;
+        this.playersRef = null;
 
         // Remove status indicator
         const statusIndicator = document.getElementById('multi-device-status');
