@@ -72,6 +72,8 @@ class MultiDeviceIntegration {
                 callback(tableState);
             }
 
+        });
+
         // Store reference to remove listener later
         this.currentTableStateRef = tableStateRef;
 
@@ -82,7 +84,7 @@ class MultiDeviceIntegration {
 //                console.log(`🔍 Shared player count: ${playerCount}`);
                 updateStartGameButton(playerCount);
             });
-        });
+
     }
 
     // list listener
