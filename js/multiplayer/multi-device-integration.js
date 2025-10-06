@@ -1124,19 +1124,6 @@ class MultiDeviceIntegration {
         });
     }
 
-    // Add to multi-device-integration.js
-    setupHandListener() {
-        const currentUser = firebase.auth().currentUser;
-        const userName = currentUser ? currentUser.displayName || currentUser.email : 'Guest Player';
-
-        firebase.database().ref(`tables/${this.currentTableId}/hands/${userName}`).on('value', (snapshot) => {
-            const handData = snapshot.val();
-            if (handData) {
-                this.updateLocalPlayerHand(handData);
-            }
-        });
-    }
-
     updateLocalPlayerHand(handData) {
         // Update the local game with the player's hand from Firebase
         if (window.game && window.game.playerManager) {
