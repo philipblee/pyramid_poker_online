@@ -389,10 +389,11 @@ async function joinTable(table) {
             window.multiDeviceIntegration = new MultiDeviceIntegration(table.id, {
                 tablesRef: firebase.firestore().collection('tables')
             });
-
-            // ADD back:
-            window.multiDeviceIntegration.setupMultiDeviceEnhancements();
         }
+
+        // ADD back:
+        window.multiDeviceIntegration.currentTableId = table.id;
+        window.multiDeviceIntegration.setupMultiDeviceEnhancements();
 
         // In joinTable()
         const currentUser = firebase.auth().currentUser;

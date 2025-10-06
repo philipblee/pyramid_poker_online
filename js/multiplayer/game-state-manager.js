@@ -37,10 +37,6 @@ async function handleTableStateChange(tableState) {
 //            console.log('🎮 Cards dealt! Players can now arrange hands...');
             // transitionToPlayingPhase();
 
-            // ADD THIS:
-            if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
-                window.multiDeviceIntegration.setupSubmissionListener();
-            }
             break;
 
         case TABLE_STATES.ALL_SUBMITTED:

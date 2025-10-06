@@ -1143,6 +1143,12 @@ class MultiDeviceIntegration {
     cleanup() {
         console.log('🧹 Cleaning up Firebase listeners...');
 
+        // Remove Firestore submission listener
+        if (this.submissionListener) {
+            this.submissionListener();  // Firestore unsubscribe
+            console.log('🔕 Submission listener removed');
+        }
+
         // Remove table state listener
         if (this.currentTableStateRef && this.tableStateListener) {
             this.currentTableStateRef.off('value', this.tableStateListener);
@@ -1166,15 +1172,18 @@ class MultiDeviceIntegration {
         this.currentTableStateRef = null;
         this.playerCountListener = null;
         this.playerCountRef = null;
-        this.isMultiDevice = false;
         this.playerListListener = null;
         this.playersRef = null;
+
+        // firestore listener
+        this.submissionListener = null;
 
         // Remove status indicator
         const statusIndicator = document.getElementById('multi-device-status');
         if (statusIndicator) {
             statusIndicator.remove();
         }
+
 
         console.log('✅ Cleanup complete');
     }
