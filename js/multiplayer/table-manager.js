@@ -73,52 +73,6 @@ class TableManager {
         return tableId;
     }
 
-    // Join existing table
-    async joinTable(tableId) {
-        const tableDoc = await this.tablesRef.doc(tableId).get();
-
-        if (!tableDoc.exists) {
-            throw new Error('Table not found');
-        }
-
-        const tableData = tableDoc.data();
-
-        if (tableData.status !== 'waiting') {
-            throw new Error('Cannot join table - tournament in progress');
-        }
-
-        const currentPlayerCount = this.getHumanPlayerCount(tableData.players);
-        if (currentPlayerCount >= tableData.settings.maxPlayers) {
-            throw new Error('Table is full');
-        }
-
-        // Add player to table
-        const playerData = {
-            name: this.currentUser.name,
-            type: 'human',
-            ready: false,
-            connected: true,
-            totalScore: 0,
-            currentTournamentScore: 0,
-            roundScores: [],
-            joinedAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-
-        await this.tablesRef.doc(tableId).update({
-            [`players.${this.currentUser.id}`]: playerData
-        });
-
-        // Update user's current table
-        await this.activePlayersRef.doc(this.currentUser.id).update({
-            currentTable: tableId
-        });
-
-        this.currentTable = tableId;
-        this.setupTableListeners(tableId);
-
-        return tableId;
-    }
-
     // Leave current table
     async leaveTable() {
         if (!this.currentTable) return;
@@ -219,20 +173,6 @@ class TableManager {
         });
     }
 
-    // Set up real-time listeners for current table
-    setupTableListeners(tableId) {
-        // Listen for table changes
-        const unsubscribe = this.tablesRef.doc(tableId).onSnapshot((doc) => {
-            if (doc.exists) {
-                const tableData = doc.data();
-                this.onPlayersChanged(tableData.players);
-                this.onTableStatusChanged(tableData.status);
-                this.onTournamentStateChanged(tableData.currentTournament);
-            }
-        });
-
-        this.listeners.push(unsubscribe);
-    }
 
     // Clean up Firestore listeners
     cleanupListeners() {

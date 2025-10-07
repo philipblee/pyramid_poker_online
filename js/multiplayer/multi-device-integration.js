@@ -622,18 +622,20 @@ class MultiDeviceIntegration {
     }
 
     async RetrieveAllArrangementsFromFirebase() {
-//        console.log('☁️ Loading correct arrangements from Firestore...');
-
+        console.log('☁️ Loading correct arrangements from Firestore...');
+        console.log(`  Debug RetrieveAllArrangementsFromFirebase 1 - this.currentTableId: ${this.currentTableId}`)
         const doc = await this.tableManager.tablesRef.doc(this.currentTableId.toString()).get();
         const data = doc.data();
-        const firebaseArrangements = data?.currentGame?.arrangements || {};
 
+        const firebaseArrangements = data?.currentGame?.arrangements || {};
+        console.log(`  Debug RetrieveAllArrangementsFromFirebase 2 Number of Arrangements: ${firebaseArrangements.length}`)
         window.game.submittedHands.clear();
         Object.entries(firebaseArrangements).forEach(([playerEmail, arrangement]) => {
             window.game.submittedHands.set(playerEmail, arrangement);
+            console.log(`  Debug RetrieveAllArrangementsFromFirebase 3 : ${playerEmail} ${arrangement}`)
         });
 
-//        console.log('✅ Loaded arrangements with correct keys');
+        console.log('✅ Loaded arrangements with correct keys');
     }
 
 
