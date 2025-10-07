@@ -73,26 +73,6 @@ class TableManager {
         return tableId;
     }
 
-    // Leave current table
-    async leaveTable() {
-        if (!this.currentTable) return;
-
-        // Remove player from table
-        await this.tablesRef.doc(this.currentTable).update({
-            [`players.${this.currentUser.id}`]: firebase.firestore.FieldValue.delete()
-        });
-
-        // Update user's status
-        await this.activePlayersRef.doc(this.currentUser.id).update({
-            currentTable: null
-        });
-
-        // Clean up listeners
-        this.cleanupListeners();
-
-        this.currentTable = null;
-    }
-
     // Update player ready status
     async updatePlayerReady(ready) {
         if (!this.currentTable) return;
@@ -171,28 +151,6 @@ class TableManager {
                 roundResults: {}
             }
         });
-    }
-
-
-    // Clean up Firestore listeners
-    cleanupListeners() {
-        this.listeners.forEach(unsubscribe => unsubscribe());
-        this.listeners = [];
-    }
-
-    // Utility functions
-    getHumanPlayerCount(players) {
-        if (!players) return 0;
-        return Object.values(players).filter(p => p.type === 'human').length;
-    }
-
-    // Callback functions (to be overridden by game integration)
-    onPlayersChanged(players) {
-        console.log('Table players changed:', players);
-    }
-
-    onTableStatusChanged(status) {
-        console.log('Table status changed:', status);
     }
 
     onTournamentStateChanged(tournament) {
