@@ -57,6 +57,10 @@ class MultiDeviceIntegration {
     setupTableStateListener(tableId, callback) {
 //        console.log('🔥 Setting up table state listener for table:', tableId);
 
+        console.log('🔴 setupTableStateListener CALLED');
+        console.trace('📍 Call stack:'); // Shows full stack trace
+
+
         // Reference to the table's state
         const tableStateRef = firebase.database().ref(`tables/${tableId}/tableState`);
 

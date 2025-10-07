@@ -369,7 +369,8 @@ async function closeScoringPopup() {
          } else if (window.isOwner) {
             // Multi-device owner: controls round progression
             game.startNewRound();
-            setTableState('dealing');
+            // comment this out because it's redundant as it's already set to dealing somewhere else
+//            setTableState('dealing');
 
         } else {
             // Multi-device non-owner: just advance currentRound
