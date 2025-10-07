@@ -13,18 +13,6 @@ class TableManager {
         this.activePlayersRef = this.db.collection('activePlayers');
     }
 
-    // Initialize with current user
-    async initialize(userId, userName) {
-        this.currentUser = { id: userId, name: userName };
-
-        // Set user as active in Firestore
-        await this.activePlayersRef.doc(userId).set({
-            name: userName,
-            lastActive: firebase.firestore.FieldValue.serverTimestamp(),
-            currentTable: null
-        });
-    }
-
     // Create new table with custom settings
     async createTable(customSettings = {}) {
         const defaultSettings = {
@@ -157,41 +145,6 @@ class TableManager {
         console.log('Tournament state changed:', tournament);
     }
 
-    // Add to TableManager class
-    async startRound(roundNumber) {
-        if (!this.currentTable) return;
-
-        // Deal cards to all human players
-        const tableDoc = await this.tablesRef.doc(this.currentTable).get();
-        const tableData = tableDoc.data();
-
-        // Create deck and deal 17 cards to each human player
-        const deck = new Deck(tableData.settings.wildCards || 2, 2);
-        deck.shuffle();
-
-        const humanPlayers = Object.entries(tableData.players)
-            .filter(([playerId, player]) => player.type === 'human');
-
-        const roundData = {
-            roundNumber: roundNumber,
-            playerCards: {},
-            submissions: {},
-            submissionCount: 0,
-            totalHumans: humanPlayers.length,
-            status: 'arranging' // arranging -> scoring -> complete
-        };
-
-        // Deal 17 cards to each human player
-        humanPlayers.forEach(([playerId, player]) => {
-            roundData.playerCards[playerId] = deck.deal(17);
-        });
-
-        // Update Firebase with round data
-        await this.tablesRef.doc(this.currentTable).update({
-            [`currentTournament.rounds.${roundNumber}`]: roundData,
-            [`currentTournament.currentRound`]: roundNumber
-        });
-    }
 
     // Add to TableManager class
     async submitPlayerHand(roundNumber, playerHand) {
