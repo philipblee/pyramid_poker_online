@@ -275,6 +275,11 @@ class TournamentSync {
 
     // Submit player arrangement
     async submitArrangement(arrangement) {
+
+        console.log('📝 Player is window.isOwner', window.isOwner)
+        console.log('📝 Player writing arrangement. Tournament:', this.currentTournament, 'Round:', this.currentRound);
+        console.log('📝 Writing to table:', this.currentTableId);
+
         if (!this.currentTableId) return;
 
         const submission = {
