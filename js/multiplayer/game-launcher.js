@@ -82,9 +82,10 @@ function startMultiHumanCloudGame() {
         // Remove the tournament initialization code from here
         // It will now be handled by the NEW_TOURNAMENT state case
 
-        setupMultiDeviceMultiHuman().then(() => {
-            launchGameInterface();
-        });
+        // this is causing deck to be dealt twice.  comment out to test
+//        setupMultiDeviceMultiHuman().then(() => {
+//            launchGameInterface();
+//        });
     });
 }
 
