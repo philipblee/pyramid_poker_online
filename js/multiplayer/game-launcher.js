@@ -79,13 +79,6 @@ function startMultiHumanCloudGame() {
     }).then(() => {
         console.log('✅ Table state set to NEW_TOURNAMENT - all players should be notified');
 
-        // Remove the tournament initialization code from here
-        // It will now be handled by the NEW_TOURNAMENT state case
-
-        // this is causing deck to be dealt twice.  comment out to test
-//        setupMultiDeviceMultiHuman().then(() => {
-//            launchGameInterface();
-//        });
     });
 }
 
