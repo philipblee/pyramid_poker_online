@@ -201,7 +201,9 @@ class PyramidPoker {
 
         // In startNewRound(), after the maxRounds check:
         if (this.currentRound >= this.maxRounds) {
-            this.showTournamentSummary();
+            if (!this.multiDeviceMode) {  // ← Add this guard
+                this.showTournamentSummary();
+            }
             if (window.isOwner) {
                 setTableState(TABLE_STATES.TOURNAMENT_COMPLETE);
             }
