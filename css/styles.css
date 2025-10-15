@@ -38,11 +38,13 @@ body {
 }
 
 .container {
-    max-width: 1400px;
+    max-width: 100%;
+    width: 100%;
     margin: 0 auto;
-    padding: 15px;
+    padding: 10px; /* slightly less padding on mobile */
     position: relative;
     z-index: 1;
+    box-sizing: border-box; /* makes padding included in width calculation */
 }
 
 .header {
@@ -614,6 +616,12 @@ body {
         width: auto;
         margin-bottom: 8px;
     }
+
+    /* Fix staging area width on mobile */
+    .staging-area,
+    #playerHand {
+        max-width: 100%;
+    }
 }
 
 /* Adjust hand box widths and indents based on max cards */
@@ -947,4 +955,13 @@ body {
 .table-card.table-full {
     opacity: 0.6;
     background-color: #f8f8f8;
+}
+
+/* Mobile portrait: fit 5 cards per row */
+@media (max-width: 600px) and (orientation: portrait) {
+    .card {
+        width: 54px;  /* was 58px */
+        height: 75px; /* was 81px - proportional */
+        font-size: 19px; /* was 20px */
+    }
 }
