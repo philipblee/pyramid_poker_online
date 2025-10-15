@@ -1,7 +1,7 @@
 {
-  "version": "v5.1-9-g6f20aef",
-  "commit": "6f20aef",
-  "branch": "refactor-reduce-listeners",
-  "buildDate": "2025-10-09T12:02:14.497Z",
-  "lastCommit": "2025-10-07 15:09:28 -0400"
+  "version": "v5.2-dirty",
+  "commit": "6afa5a9",
+  "branch": "main",
+  "buildDate": "2025-10-15T17:22:45.046Z",
+  "lastCommit": "2025-10-11 05:31:26 -0400"
 }
