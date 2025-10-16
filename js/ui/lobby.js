@@ -6,7 +6,7 @@ let tableSettings = {
     gameConnectMode: 'offline',
     gameDeviceMode: 'single-device',
     gameMode: 'single-human',
-    gameVariant: 'no surrender',
+    gameVariant: 'no-surrender',
     computerPlayers: 4,
     wildCardCount: 2,
     deckCount: 2,
@@ -224,7 +224,7 @@ function createTableCard(table) {
 //        console.log('🔍 Adding click handler for table:', table.name);
         card.onclick = () => joinTable(table);
     } else {
-//        console.log('🔍 Table is full, NOT adding click handler');
+        console.log('🔍 Table is full, NOT adding click handler');
         card.classList.add('table-full');
         card.style.cursor = 'not-allowed';
     }
@@ -534,13 +534,26 @@ function updateTableDisplay() {
 
     document.getElementById('tableTitle').textContent = `🪑 Sitting at ${currentTable.name}`;
 
-    const modeText = tableSettings.gameMode === 'online' ? 'Online (Cloud Sync)' : 'Offline (Local Device)';
+    // This is where the Current Table Settings are displayed
+//    const modeText = tableSettings.gameConnectMode === 'online' ? 'Online' : 'Offline';
+    const humanPlayers = tableSettings.humanPlayers + 1
     const settingsHtml = `
-        Mode: ${modeText}<br>
-        AI Players: ${tableSettings.computerPlayers}<br>
-        Rounds: ${tableSettings.rounds}<br>          <!-- NEW -->
+
+        MODE:<br>
+        Connect: ${tableSettings.gameConnectMode}<br>
+        Device: ${tableSettings.gameDeviceMode}<br>
+        Humans: ${tableSettings.gameMode}<br><br>
+
+        PLAYERS:<br>
+        Human Players: ${humanPlayers}<br>
+        AI Players: ${tableSettings.computerPlayers}<br><br>
+
+        TOURNAMENT:<br>
+        Rounds: ${tableSettings.rounds}<br>
+        Decks: ${tableSettings.deckCount}<br>
         Wild Cards: ${tableSettings.wildCardCount}<br>
-        AI Method: ${tableSettings.winProbabilityMethod}         <!-- NEW -->
+        Game Variation: ${tableSettings.gameVariant}<br>
+        AI Method: ${tableSettings.winProbabilityMethod}
     `;
 
     document.getElementById('settingsDisplay').innerHTML = settingsHtml;

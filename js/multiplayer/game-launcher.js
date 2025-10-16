@@ -2,32 +2,37 @@
 function startGame() {
     if (!currentTable) return;
 
-//    console.log('🔥 STARTGAME FUNCTION CALLED!'); // ← Add this
-//    console.log('🎮 Starting game with table settings:', tableSettings);
+    console.log('🔥 STARTGAME FUNCTION CALLED!'); // ← Add this
+    console.log('🎮 Starting game with table settings:', tableSettings);
 
     // STEP 1: Update the CORRECT gameConfig object
     if (window.gameConfig) {
         Object.assign(window.gameConfig.config, tableSettings);
         window.gameConfig.saveToStorage();
-//        console.log('✅ Applied settings to window.gameConfig:', window.gameConfig.config);
+        console.log('✅ Applied settings to window.gameConfig:', window.gameConfig.config);
     } else {
         console.error('❌ window.gameConfig not found!');
     }
 
     // STEP 2: Enhanced branching based on game mode AND connect mode
+    // tables 1-5
     if (window.gameConfig.config.gameMode === 'single-human' && window.gameConfig.config.gameConnectMode === 'offline') {
-//        console.log('🔥 CALLING startSingleHumanGame()!');
+        console.log('🔥 CALLING startSingleHumanGame()!');
         startSingleHumanGame();
 
+    // table 6
     } else if (window.gameConfig.config.gameMode === 'single-human' && window.gameConfig.config.gameConnectMode === 'online') {
-//        console.log('🔥 CALLING startsingleHumanGame()!');
+        console.log('🔥 CALLING startsingleHumanGame()!');
+        startSingleHumanGame();
+
+    // tables 7-9
+    } else if (window.gameConfig.config.gameMode === 'multiple-humans' && window.gameConfig.config.gameConnectMode === 'online') {
+        console.log('🔥 CALLING startMultiHumanCloudGame()!');
         startMultiHumanCloudGame();
 
-    } else if (window.gameConfig.config.gameMode === 'multiple-humans' && window.gameConfig.config.gameConnectMode === 'online') {
-//        console.log('🔥 CALLING startMultiHumanCloudGame()!');
-        startMultiHumanCloudGame();
+    // single-device multi-human - pass device around human users
     } else if (window.gameConfig.config.gameMode === 'multiple-humans' && window.gameConfig.config.gameConnectMode === 'offline') {
-//        console.log('🔥 CALLING startMultiHumanOfflineGame()!');
+        console.log('🔥 CALLING startMultiHumanOfflineGame()!');
         startMultiHumanOfflineGame();
     } else {
         console.log('❌ No matching game mode found');
