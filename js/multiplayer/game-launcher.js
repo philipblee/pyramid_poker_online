@@ -53,7 +53,7 @@ async function startSingleHumanGame() {
         window.game.startNewGame();
 
         // ✅ Clean Firebase coordination using multiDevice methods:
-        await window.multiDevice.syncHandsToFirebase();
+        await window.multiDevice.storeAllHandsToFirebase();
         await window.multiDevice.retrieveAllHandsFromFirebase();
 
         console.log('✅ Single-human game synced and retrieved from Firebase');

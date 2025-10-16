@@ -506,7 +506,7 @@ class MultiDeviceIntegration {
                 }
 
                 // Add: sync dealt hands to Firebase for cloud storage
-                await this.syncHandsToFirebase();
+                await this.storeAllHandsToFirebase();
                 console.log('✅ Owner: Game started and all hands synced to Firebase');
 
                 // All players retrieve hands from Firebase
@@ -546,7 +546,7 @@ class MultiDeviceIntegration {
         }
 
     // Sync all dealt hands to Firebase for cloud storage
-    async syncHandsToFirebase() {
+    async storeAllHandsToFirebase() {
 
         if (!this.isMultiDevice || !window.game.playerHands) return;
 
@@ -562,7 +562,7 @@ class MultiDeviceIntegration {
             };
         });
 
-        // In syncHandsToFirebase(), before the Firebase call:
+        // In storeAllHandsToFirebase(), before the Firebase call:
         console.log('🔍 About to sync hands to Firebase:', handsData);
         console.log('🔍 Sample hand cards:', handsData[Object.keys(handsData)[0]]?.cards?.slice(0,2));
 
@@ -973,7 +973,7 @@ class MultiDeviceIntegration {
         // Deal cards and start multiplayer game
         // Use existing startNewGame() but with multiplayer sync
         window.game.startNewGame();
-        await this.syncHandsToFirebase();
+        await this.storeAllHandsToFirebase();
 
         // NEW: Load current player's hand from Firebase
         await window.game.loadCurrentPlayerHandFromFirebase();
