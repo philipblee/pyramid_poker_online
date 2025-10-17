@@ -38,21 +38,6 @@ class MultiDeviceIntegration {
 
     }
 
-    // NEW: Create or join table
-    async createOrJoinTable(tableId = null) {
-        if (!tableId) {
-            // Create new table
-            tableId = this.generateTableId();
-            await this.createNewTable(tableId);
-        } else {
-            // Join existing table
-            await this.joinExistingTable(tableId);
-        }
-
-        this.currentTableId = tableId;
-        await this.setupTableListener();
-    }
-
     // state listener
     setupTableStateListener(tableId, callback) {
 //        console.log('🔥 Setting up table state listener for table:', tableId);
