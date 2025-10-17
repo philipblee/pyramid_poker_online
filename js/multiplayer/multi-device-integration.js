@@ -661,7 +661,7 @@ class MultiDeviceIntegration {
                 timestamp: Date.now()
             }
         };
-    );
+    ;
 
         await this.tableManager.tablesRef.doc(this.currentTableId.toString()).set({
             'currentGame': {
