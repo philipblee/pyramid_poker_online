@@ -243,9 +243,7 @@ class MultiDeviceIntegration {
         }
     }
 
-    /**
-     * Update UI to show submission status
-     */
+    // Update UI to show submission status
     updateSubmissionStatus(submittedCount, totalPlayers) {
         const statusElement = document.getElementById('status');
         if (statusElement) {
@@ -262,9 +260,7 @@ class MultiDeviceIntegration {
         }
     }
 
-    /**
-     * Show "All players submitted" message
-     */
+    // Show "All players submitted" message
     showAllSubmittedMessage() {
         const statusElement = document.getElementById('status');
         if (statusElement) {
@@ -273,10 +269,7 @@ class MultiDeviceIntegration {
         }
     }
 
-    /**
-     * Proceed to scoring phase
-     */
-
+    // Proceed to scoring phase
     async proceedToScoring() {
         // Skip if already processed this round
         if (this.lastScoringRound === window.game.currentRound) {
@@ -294,9 +287,7 @@ class MultiDeviceIntegration {
         }
     }
 
-    /**
-     * Enhanced submit button with submission coordination
-     */
+    // Enhanced submit button with submission coordination
     enhanceSubmitButton() {
         const submitBtn = document.getElementById('submitHand');
         if (!submitBtn) return;
@@ -417,7 +408,6 @@ class MultiDeviceIntegration {
     }
 
     // Set up listener for submission state changes (call this during initialization)
-    // In setupSubmissionListener(), add more logging:
     async setupSubmissionListener() {
         if (!this.isMultiDevice) return;
 
@@ -446,9 +436,7 @@ class MultiDeviceIntegration {
         });
     }
 
-    /**
-     * Clean up listeners (call this when leaving the game)
-     */
+    // Clean up listeners (call this when leaving the game)
     cleanupSubmissionListener() {
         if (this.submissionListener) {
             this.submissionListener();
@@ -641,7 +629,6 @@ class MultiDeviceIntegration {
 
         console.log('✅ Loaded arrangements with correct keys');
     }
-
 
     async storePlayerArrangementToFirebase(playerName) {
         const playerHand = window.game.playerHands.get(playerName);
@@ -840,8 +827,6 @@ class MultiDeviceIntegration {
             console.log(`👑 Ownership transferred to ${newOwner[1].name}`);
         }
     }
-
-    // Add to MultiDeviceIntegration class
 
     // Show lobby screen
     showLobbyScreen(tableId) {
