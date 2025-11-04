@@ -1,8 +1,11 @@
+// js/multiplayer/game-launcher.js
+// FIXED: Table 6 single-player vs AI freeze issue
+
 // Start game
 function startGame() {
     if (!currentTable) return;
 
-    console.log('🔥 STARTGAME FUNCTION CALLED!'); // ← Add this
+    console.log('🔥 STARTGAME FUNCTION CALLED!');
     console.log('🎮 Starting game with table settings:', tableSettings);
 
     // STEP 1: Update the CORRECT gameConfig object
@@ -20,9 +23,9 @@ function startGame() {
         console.log('🔥 CALLING startSingleHumanGame()!');
         startSingleHumanGame();
 
-    // table 6
+    // table 6 - FIXED: Now treated as single-player vs AI
     } else if (window.gameConfig.config.gameMode === 'single-human' && window.gameConfig.config.gameConnectMode === 'online') {
-        console.log('🔥 CALLING startsingleHumanGame()!');
+        console.log('🔥 CALLING startSingleHumanGame() - Table 6 single-player vs AI!');
         startSingleHumanGame();
 
     // tables 7-9
@@ -39,36 +42,35 @@ function startGame() {
     }
 }
 
+// FIXED: Table 6 now starts immediately without MultiDeviceIntegration
 async function startSingleHumanGame() {
 
-    console.log('🔥 startSingleHumanGame() CALLED!'); // ← Add this
+    console.log('🔥 startSingleHumanGame() CALLED!');
 
     if (tableSettings.gameConnectMode === 'online') {
-        // Create tableManager and initialize
-        const tableManager = {
-            tablesRef: firebase.firestore().collection('tables'),
-            currentTable: currentTable.id,
-            currentUser: { id: 'player-1' }
-        };
+        // 🎯 FIX: Table 6 is single-player vs AI, NOT multi-player
+        // Don't use MultiDeviceIntegration - just start immediately like Tables 1-5
+        console.log('🎮 Table 6: Single-player vs AI - starting immediately');
+        console.log('📝 Note: MultiDeviceIntegration bypassed - no waiting for other players');
 
-        console.log('🎮 Starting single-human online game');
+        // 🏆 FIX: Set ownership for single-player (fixes "Waiting for table owner" issue)
+        window.isOwner = true;
+        console.log('✅ Set window.isOwner = true for single-player Table 6');
 
-        window.multiDeviceIntegration = new MultiDeviceIntegration();
-        await window.multiDeviceIntegration.initialize(tableManager);
-        window.game.startNewGame();
-
-        // ✅ Clean Firebase coordination using multiDevice methods:
-        await window.multiDevice.storeAllHandsToFirebase();
-        await window.multiDevice.retrieveAllHandsFromFirebase();
-
-        console.log('✅ Single-human game synced and retrieved from Firebase');
-
-        // ✅ MISSING: Continue with normal game flow
-        window.game.loadCurrentPlayerHand(); // Load human player's cards into UI
-        // Or call whatever function starts the card arrangement phase
+        // Start game immediately without waiting for other players
         launchGameInterface();
 
+        // TODO: Add simple Firebase storage for game persistence later (optional)
+        // But don't use MultiDeviceIntegration which expects multiple players
+
     } else {
+        // Tables 1-5: offline single-player
+        console.log('🎮 Tables 1-5: Offline single-player');
+
+        // 🏆 FIX: Set ownership for single-player (all single-player games need this)
+        window.isOwner = true;
+        console.log('✅ Set window.isOwner = true for offline single-player');
+
         launchGameInterface();
     }
 }
@@ -83,7 +85,6 @@ function startMultiHumanCloudGame() {
         currentRound: 1
     }).then(() => {
         console.log('✅ Table state set to NEW_TOURNAMENT - all players should be notified');
-
     });
 }
 
@@ -97,21 +98,21 @@ async function setupMultiDeviceMultiHuman() {
         currentUser.displayName || currentUser.email || 'Anonymous Player' :
         'Guest Player';
 
-//    console.log('🎮 Setting up local player:', userName);
+    console.log('🎮 Setting up local player:', userName);
 
     // Only reset players in single-device mode
     if (window.gameConfig.config.gameDeviceMode === 'single-device') {
         window.game.playerManager.resetPlayers();
         window.game.playerManager.addPlayer(userName, true);
     } else {
-//        console.log('🌐 Multi-device mode: players already synced from Firebase');
+        console.log('🌐 Multi-device mode: players already synced from Firebase');
     }
 
     return Promise.resolve();
 }
 
 async function setupMultiHumanPlayers() {
-//    console.log('🌐 Setting up players for multi-device mode...');
+    console.log('🌐 Setting up players for multi-device mode...');
 
     // Get current user info to identify THIS player
     const currentUser = firebase.auth().currentUser;
@@ -148,7 +149,7 @@ async function setupMultiHumanPlayers() {
 
 // Launch your existing game interface
 function launchGameInterface() {
-//    console.log('🎮 Launching game interface with tablesettings:', tableSettings);
+    console.log('🎮 Launching game interface with table settings:', tableSettings);
 
     // Hide lobby, show your existing game interface
     document.getElementById('lobbyScreen').style.display = 'none';
@@ -171,7 +172,7 @@ function launchGameInterface() {
         window.game.playerManager.resetPlayers();
     }
 
-//    console.log('🎮 Settings used for launching game:', gameConfig.config);
+    console.log('🎮 Settings used for launching game:', gameConfig.config);
 
     // Show your existing game area
     const gameArea = document.getElementById('gameArea');
@@ -188,3 +189,23 @@ function launchGameInterface() {
         console.warn('No startNewGame function found');
     }
 }
+
+// IMPLEMENTATION NOTES:
+//
+// 🎯 KEY FIX: Table 6 now bypasses MultiDeviceIntegration entirely
+//
+// ✅ BEFORE: Table 6 used MultiDeviceIntegration expecting multiple players
+//    - Created Firebase listeners waiting for other players
+//    - Set up multi-device coordination
+//    - Froze waiting for players who would never join
+//
+// ✅ AFTER: Table 6 treated as single-player vs AI
+//    - Starts immediately like Tables 1-5
+//    - No Firebase coordination or waiting
+//    - AI opponents managed locally
+//    - Optional Firebase storage can be added later for persistence
+//
+// 🔧 NEXT STEPS:
+//    1. Test Table 6 - should start immediately
+//    2. Add Firebase sync inside startNewGame()/startNewRound() for persistence
+//    3. Verify AI opponents play automatically in sequence
