@@ -346,6 +346,10 @@ class MultiDeviceIntegration {
     enhanceContinueButton() {
 
 //        console.log('🔍 enhanceContinueButton - window.isOwner:', window.isOwner);
+        console.log('🔍 enhanceContinueButton CALLED!');
+        console.log('🔍 window.isOwner:', window.isOwner);
+        console.trace();
+
 
         const continueButton = document.querySelector('#scoringPopup .btn.btn-primary');
         const closeButton = document.querySelector('#scoringPopup .close-popup');
