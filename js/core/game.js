@@ -110,6 +110,10 @@ class PyramidPoker {
 
     async startNewGame() {
 
+        // Set multiDeviceMode based on gameConfig
+        this.multiDeviceMode = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
+        console.log('🔧 Constructor set multiDeviceMode:', this.multiDeviceMode);
+
         // Add this when a new game starts
         resetGameTimer();
 
@@ -172,19 +176,40 @@ class PyramidPoker {
         // IN startNewGame() method, ADD this block after the card dealing loop:
 
         // Deal cards to all players
-        for (let player of this.playerManager.players) {
-            const hand = this.deckManager.dealCards(17);
-            const analysis = new Analysis(hand);
+        if (!this.multiDeviceMode || window.isOwner) {
+            // Existing dealing loop stays exactly the same
+            for (let player of this.playerManager.players) {
+                const hand = this.deckManager.dealCards(17);
+                const analysis = new Analysis(hand);
 
-            this.playerHands.set(player.name, {
-                cards: hand,
-                originalCards: [...hand],  // Save original dealt cards
-                back: [],
-                middle: [],
-                front: []
-            });
-            player.ready = false;
+                this.playerHands.set(player.name, {
+                    cards: hand,
+                    originalCards: [...hand],  // Save original dealt cards
+                    back: [],
+                    middle: [],
+                    front: []
+                });
+                player.ready = false;
+            }
+
+            // Right before the Firebase sync setTimeout, add:
+            console.log('🔍 DEBUG before Firebase sync:');
+            console.log('  - playerHands size:', this.playerHands.size);
+
+            // Add Firebase sync only if multi-device owner
+            if (this.multiDeviceMode && window.multiDeviceIntegration) {
+                setTimeout(async () => {
+                    console.log('🔍 DEBUG inside Firebase sync timeout:');
+                    console.log('  - playerHands size:', this.playerHands.size);
+                    await window.multiDeviceIntegration.storeAllHandsToFirebase();
+                    console.log('✅ Owner synced all hands to Firebase');
+                }, 500);
+            }
+        } else {
+            setTimeout(() => this.handleNonOwnerCardRetrieval(), 1500);
+
         }
+
 
         // ☁️ NEW: Add Firebase sync for Table 6 persistence
         if (window.table6FirebaseSync && gameConfig.config.gameConnectMode === 'online') {
@@ -197,8 +222,35 @@ class PyramidPoker {
             }
         }
 
+        // Only load hand immediately for owner/single-player
+        // Non-owners will load after Firebase retrieval completes
+        if (!this.multiDeviceMode || window.isOwner) {
+            this.loadCurrentPlayerHand();
+            updateDisplay(this);
+        }
+    }
+
+    async handleNonOwnerCardRetrieval() {
+        console.log('📱 Non-owner retrieving cards from Firebase');
+        await window.multiDeviceIntegration.retrieveAllHandsFromFirebase();
+        console.log('✅ Non-owner retrieved hands from Firebase');
+
+        // 🎯 SIMPLE FIX: Load MY cards into the local Player 0 slot
+        const myPlayerName = window.uniquePlayerName;
+        const myActualHand = this.playerHands.get(myPlayerName);
+        const localPlayer0Name = this.playerManager.players[0].name;
+
+        console.log('🔄 Loading my cards into local Player 0 slot');
+        console.log('  - My name:', myPlayerName);
+        console.log('  - Local Player 0 name:', localPlayer0Name);
+
+        // Overwrite local Player 0 with my actual cards from Firebase
+        this.playerHands.set(localPlayer0Name, myActualHand);
+
+        // Now everything works exactly like single-player!
         this.loadCurrentPlayerHand();
         updateDisplay(this);
+        console.log('✅ Non-owner loaded correct hand into UI (as Player 0)');
     }
 
     async startNewRound() {
@@ -249,18 +301,34 @@ class PyramidPoker {
 
         // IN startNewRound() method, ADD this block after the card dealing loop:
 
-        // Deal new cards to all existing players
-        for (let player of this.playerManager.players) {
-            const hand = this.deckManager.dealCards(17);
+        // Deal cards to all players
+        if (!this.multiDeviceMode || window.isOwner) {
+            // Existing dealing loop stays exactly the same
+            // Deal new cards to all existing players
+            for (let player of this.playerManager.players) {
+                const hand = this.deckManager.dealCards(17);
 
-            this.playerHands.set(player.name, {
-                cards: hand,
-                originalCards: [...hand],  // Save original dealt cards
-                back: [],
-                middle: [],
-                front: []
-            });
+                this.playerHands.set(player.name, {
+                    cards: hand,
+                    originalCards: [...hand],  // Save original dealt cards
+                    back: [],
+                    middle: [],
+                    front: []
+                });
+            }
+            
+            // Add Firebase sync only if multi-device owner
+            if (this.multiDeviceMode && window.multiDeviceIntegration) {
+                setTimeout(async () => {
+                    await window.multiDeviceIntegration.storeAllHandsToFirebase();
+                    console.log('✅ Owner synced all hands to Firebase');
+                }, 500);
+            }
+
+        } else {
+            setTimeout(() => this.handleNonOwnerCardRetrieval(), 1500);
         }
+
 
         // ☁️ NEW: Add Firebase sync for Table 6 persistence
         if (window.table6FirebaseSync && gameConfig.config.gameConnectMode === 'online') {
