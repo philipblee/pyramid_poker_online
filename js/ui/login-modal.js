@@ -155,7 +155,7 @@ class LoginModal {
         if (user) {
             console.log('🔑 User logged in:', user.email);
             // Show stats button for logged-in users
-            this.showStatsButton(user);
+//            this.showStatsButton(user);
         } else {
             console.log('🔑 User logged out');
             this.hideStatsButton();
