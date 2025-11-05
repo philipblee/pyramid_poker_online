@@ -163,6 +163,23 @@ class LoginModal {
 
         // ADD THIS LINE:
         this.updateLoginButtonText();
+        this.updateWelcomeScreen(user);
+    }
+
+    // ADD THIS ENTIRE NEW METHOD after updateLoginState:
+    updateWelcomeScreen(user) {
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const lobbyScreen = document.getElementById('lobbyScreen');
+
+        if (user) {
+            // Logged in - hide welcome, show lobby
+            if (welcomeScreen) welcomeScreen.style.display = 'none';
+            if (lobbyScreen) lobbyScreen.style.display = 'block';
+        } else {
+            // Logged out - show welcome, hide lobby
+            if (welcomeScreen) welcomeScreen.style.display = 'block';
+            if (lobbyScreen) lobbyScreen.style.display = 'none';
+        }
     }
 
     showStatsButton(user) {
@@ -382,6 +399,34 @@ function handleLoginSubmit() {
         window.loginModal.handleLogin();
     }
 }
+
+function startGuestMode() {
+    alert('Guest mode is coming soon! For now, please create a free account to play.');
+}
+
+//function startGuestMode() {
+//    console.log('🎮 Starting guest mode...');
+//
+//    // Simply hide welcome and show lobby - no auth system integration
+//    const welcomeScreen = document.getElementById('welcomeScreen');
+//    const lobbyScreen = document.getElementById('lobbyScreen');
+//
+//    if (welcomeScreen) welcomeScreen.style.display = 'none';
+//    if (lobbyScreen) lobbyScreen.style.display = 'block';
+//
+//    // Update displays
+//    const currentUserElement = document.getElementById('currentUser');
+//    if (currentUserElement) {
+//        currentUserElement.textContent = 'Guest Player (Offline)';
+//    }
+//
+//    // Initialize lobby
+//    if (typeof populateLobby === 'function') {
+//        populateLobby();
+//    }
+//
+//console.log('✅ Guest mode activated - simple approach');
+//}
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {

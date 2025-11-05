@@ -231,6 +231,308 @@
         </div>
     </div>
 
+    <style>
+    /* Welcome Screen - Non-conflicting styles */
+    .welcome-screen {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #1a252f 0%, #2c3e50 50%, #34495e 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .welcome-container {
+        max-width: 1000px;
+        width: 100%;
+        text-align: center;
+        color: white;
+    }
+
+    .welcome-hero h1 {
+        font-size: 48px;
+        color: #ffd700;
+        margin: 20px 0;
+    }
+
+    .logo-symbol {
+        font-size: 80px;
+        color: #4ecdc4;
+        margin-bottom: 20px;
+    }
+
+    .tagline {
+        font-size: 20px;
+        color: #bdc3c7;
+    }
+
+    .login-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin: 40px 0;
+    }
+
+    .login-option {
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid #4ecdc4;
+        border-radius: 20px;
+        padding: 30px;
+        text-align: left;
+    }
+
+    .welcome-btn {
+        background: #4ecdc4;
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .welcome-btn:hover {
+        background: #44a08d;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+        .login-options {
+            grid-template-columns: 1fr;
+        }
+    }
+    </style>
+
+<!--    <style>
+        /* Welcome Screen Styles */
+        .welcome-screen {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a252f 0%, #2c3e50 50%, #34495e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-container {
+            max-width: 1000px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .welcome-hero {
+            margin-bottom: 50px;
+        }
+
+        .logo-symbol {
+            font-size: 80px;
+            color: #4ecdc4;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+        }
+
+        .welcome-hero h1 {
+            font-size: 48px;
+            color: #ffd700;
+            margin: 0 0 15px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .tagline {
+            font-size: 20px;
+            color: #bdc3c7;
+            margin: 0;
+        }
+
+        .welcome-message h2 {
+            font-size: 36px;
+            color: #ecf0f1;
+            margin-bottom: 15px;
+        }
+
+        .welcome-message p {
+            font-size: 18px;
+            color: #bdc3c7;
+        }
+
+        .login-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .login-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .primary-option {
+            border-color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.1);
+        }
+
+        .secondary-option {
+            border-color: #95a5a6;
+        }
+
+        .login-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .option-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .option-icon {
+            font-size: 40px;
+            margin-right: 15px;
+        }
+
+        .option-header h3 {
+            font-size: 24px;
+            color: #ecf0f1;
+            margin: 0;
+        }
+
+        .option-content p {
+            color: #bdc3c7;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .feature-list li {
+            color: #95a5a6;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border-radius: 10px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #44a08d, #4ecdc4);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #7f8c8d, #95a5a6);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(149, 165, 166, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .login-options {
+                grid-template-columns: 1fr;
+            }
+            .welcome-hero h1 {
+                font-size: 36px;
+            }
+            .logo-symbol {
+                font-size: 60px;
+            }
+        }
+    </style>-->
+
+    <!-- Welcome Screen (shows only when not logged in) -->
+    <div class="welcome-screen" id="welcomeScreen" style="display: none;">
+        <div class="welcome-container">
+            <div class="welcome-hero">
+                <div class="welcome-logo">
+                    <div class="logo-symbol">🔺</div>
+                    <h1>Pyramid Poker Online</h1>
+                    <p class="tagline">Master the art of strategic hand arrangement</p>
+                </div>
+            </div>
+
+            <div class="welcome-content">
+                <div class="welcome-message">
+                    <h2>🎯 Ready to Play?</h2>
+                    <p>Choose how you'd like to experience Pyramid Poker:</p>
+                </div>
+
+                <div class="login-options">
+                    <div class="login-option primary-option">
+                        <div class="option-header">
+                            <div class="option-icon">🏆</div>
+                            <h3>Create Account</h3>
+                        </div>
+                        <div class="option-content">
+                            <p>Save your progress, compete in tournaments, and join the leaderboards!</p>
+                            <ul class="feature-list">
+                                <li>✓ Save chip bankroll</li>
+                                <li>✓ Tournament history</li>
+                                <li>✓ Multi-player tables</li>
+                                <li>✓ Statistics tracking</li>
+                            </ul>
+                            <button class="btn btn-primary" onclick="openLoginModal()">
+                                Login / Sign Up
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="login-option secondary-option">
+                        <div class="option-header">
+                            <div class="option-icon">🎮</div>
+                            <h3>Quick Play</h3>
+                        </div>
+                        <div class="option-content">
+                            <p>Jump right in! Play offline against AI opponents with no registration required.</p>
+                            <ul class="feature-list">
+                                <li>✓ Instant play</li>
+                                <li>✓ No registration</li>
+                                <li>✓ AI opponents</li>
+                                <li>✓ Local progress</li>
+                            </ul>
+                            <button class="btn btn-secondary" onclick="startGuestMode()">
+                                Play as Guest
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Sitting at Lobby Screen -->
     <div class="lobby-screen" id="lobbyScreen" style="display: none;">
         <div class="lobby-header">
@@ -519,7 +821,48 @@
         <!--    .then(() => console.log('currentGame from tables/6 deleted'));-->
 
         });
+
+<!--        // Welcome screen functions-->
+<!--        function openLoginModal() {-->
+<!--            if (window.loginModal) {-->
+<!--                window.loginModal.show();-->
+<!--            }-->
+<!--        }-->
+
+<!--        function startGuestMode() {-->
+<!--            console.log('🎮 Guest mode not implemented yet');-->
+<!--            alert('Guest mode coming soon! Please use Login for now.');-->
+<!--        }-->
+
+<!--        // Update your login-modal.js updateLoginState method to control welcome screen-->
+<!--        function updateWelcomeScreenVisibility() {-->
+<!--            const welcomeScreen = document.getElementById('welcomeScreen');-->
+<!--            const lobbyScreen = document.getElementById('lobbyScreen');-->
+<!--            const currentUser = window.firebaseAuth?.currentUser;-->
+
+<!--            if (currentUser) {-->
+<!--                // User is logged in - hide welcome, show lobby-->
+<!--                if (welcomeScreen) welcomeScreen.style.display = 'none';-->
+<!--                if (lobbyScreen) lobbyScreen.style.display = 'block';-->
+<!--            } else {-->
+<!--                // User is logged out - show welcome, hide lobby-->
+<!--                if (welcomeScreen) welcomeScreen.style.display = 'block';-->
+<!--                if (lobbyScreen) lobbyScreen.style.display = 'none';-->
+<!--            }-->
+<!--        }-->
+
+<!--        // Call this on page load and auth state changes-->
+<!--        if (window.firebaseAuth) {-->
+<!--            window.firebaseAuth.onAuthStateChanged(() => {-->
+<!--                updateWelcomeScreenVisibility();-->
+<!--            });-->
+<!--        }-->
+
+<!--        // Call immediately on page load-->
+<!--        document.addEventListener('DOMContentLoaded', updateWelcomeScreenVisibility);-->
+
     </script>
+
 
     <!-- Add these SDKs (before your existing scripts) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
