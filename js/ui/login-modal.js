@@ -150,26 +150,19 @@ class LoginModal {
 
     }
 
-    logout() {
-        firebase.auth().signOut().then(() => {
-            console.log('🔧 User logged out successfully');
-            this.updateLoginButtonText(); // Will show "Login" again
-        }).catch((error) => {
-            console.error('🔧 Logout error:', error);
-        });
-    }
-
     updateLoginState(user) {
         // Update any existing UI elements based on login state
         if (user) {
             console.log('🔑 User logged in:', user.email);
-
             // Show stats button for logged-in users
             this.showStatsButton(user);
         } else {
             console.log('🔑 User logged out');
             this.hideStatsButton();
         }
+
+        // ADD THIS LINE:
+        this.updateLoginButtonText();
     }
 
     showStatsButton(user) {
@@ -210,13 +203,6 @@ class LoginModal {
         }
         if (existingLeaderboardButton) {
             existingLeaderboardButton.remove();
-        }
-    }
-
-    hideStatsButton() {
-        const existingStatsButton = document.getElementById('statsButton');
-        if (existingStatsButton) {
-            existingStatsButton.remove();
         }
     }
 
