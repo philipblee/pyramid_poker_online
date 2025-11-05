@@ -108,7 +108,7 @@ class PyramidPoker {
         console.log('🔄 Restored to original dealt state');
     }
 
-    startNewGame() {
+    async startNewGame() {
 
         // Add this when a new game starts
         resetGameTimer();
@@ -164,12 +164,16 @@ class PyramidPoker {
         this.playerManager.currentPlayerIndex = 0;
         this.submittedHands.clear();
 
+        /*
+        MODIFICATION 1: Add Firebase sync to startNewGame()
+        Location: After dealing cards to all players, before this.loadCurrentPlayerHand()
+        */
+
+        // IN startNewGame() method, ADD this block after the card dealing loop:
+
         // Deal cards to all players
         for (let player of this.playerManager.players) {
             const hand = this.deckManager.dealCards(17);
-
-//            console.log(`\n🎴 Cards dealt to ${player.name}:`);
-//            console.log('Current format:', hand);
             const analysis = new Analysis(hand);
 
             this.playerHands.set(player.name, {
@@ -182,12 +186,22 @@ class PyramidPoker {
             player.ready = false;
         }
 
-        this.loadCurrentPlayerHand();
+        // ☁️ NEW: Add Firebase sync for Table 6 persistence
+        if (window.table6FirebaseSync && gameConfig.config.gameConnectMode === 'online') {
+            try {
+                await window.table6FirebaseSync.storeAllHandsToFirebase();
+                console.log('✅ [startNewGame] Hands synced to Firebase for persistence');
+            } catch (error) {
+                console.error('❌ [startNewGame] Firebase sync failed:', error);
+                // Continue without Firebase - game still works locally
+            }
+        }
 
+        this.loadCurrentPlayerHand();
         updateDisplay(this);
     }
 
-    startNewRound() {
+    async startNewRound() {
 
         // DEBUG: Check the values before the comparison
 //        console.log(`🔍 ROUND CHECK: currentRound=${this.currentRound}, maxRounds=${this.maxRounds}`);
@@ -228,10 +242,12 @@ class PyramidPoker {
         this.playerManager.currentPlayerIndex = 0;
         this.submittedHands.clear();
 
-        // Reset all players' ready status
-        for (let player of this.playerManager.players) {
-            player.ready = false;
-        }
+        /*
+        MODIFICATION 2: Add Firebase sync to startNewRound()
+        Location: After dealing new cards to all players, before this.loadCurrentPlayerHand()
+        */
+
+        // IN startNewRound() method, ADD this block after the card dealing loop:
 
         // Deal new cards to all existing players
         for (let player of this.playerManager.players) {
@@ -246,9 +262,39 @@ class PyramidPoker {
             });
         }
 
+        // ☁️ NEW: Add Firebase sync for Table 6 persistence
+        if (window.table6FirebaseSync && gameConfig.config.gameConnectMode === 'online') {
+            try {
+                await window.table6FirebaseSync.storeAllHandsToFirebase();
+                console.log(`✅ [startNewRound] Round ${this.currentRound} hands synced to Firebase`);
+            } catch (error) {
+                console.error('❌ [startNewRound] Firebase sync failed:', error);
+                // Continue without Firebase - game still works locally
+            }
+        }
+
         this.loadCurrentPlayerHand();
 
         updateDisplay(this);
+
+        // Add at end of startNewRound()
+        console.log('🔍 Round', this.currentRound, 'setup complete:');
+        console.log('- Players:', this.players.map(p => `${p.name}(ready:${p.ready})`));
+        console.log('- PlayerHands size:', this.playerHands.size);
+        console.log('- SubmittedHands size:', this.submittedHands.size);
+        this.playerHands.forEach((hand, name) => {
+            console.log(`- ${name}: ${hand.cards.length} cards`);
+        });
+
+        // Reset all players' ready status to false
+        for (let player of this.playerManager.players) {
+            player.ready = false;
+        }
+
+        // 🔧 DEBUG - Verify the reset worked
+        console.log('🔧 After ready reset:');
+        this.players.forEach(p => console.log(`${p.name}: ready=${p.ready}`));
+
     }
 
     startNewTournament() {
@@ -906,9 +952,27 @@ class PyramidPoker {
 //        console.log(`🔍 Comparison: currentRound >= maxRounds = ${this.currentRound >= this.maxRounds}`);
 
         // NEW - No popup, just return to display
+        /*
+        MODIFICATION 4: Optional - Add Firebase cleanup when tournament completes
+        Location: In calculateScores() when tournament ends
+        */
+
+        // IN calculateScores() method, after tournament complete logic:
+
         if (this.currentRound >= this.maxRounds) {
             console.log('🏆 Tournament Complete! Check final standings in sidebar.');
-            // Just return to normal display - tournament standings show the results
+
+            // ☁️ NEW: Clean up Firebase data when tournament completes
+            if (window.table6FirebaseSync && gameConfig.config.gameConnectMode === 'online') {
+                try {
+                    window.table6FirebaseSync.clearFirebaseData();
+                    console.log('🧹 Firebase data cleared after tournament completion');
+                } catch (error) {
+                    console.error('❌ Firebase cleanup failed:', error);
+                }
+            }
+
+            return;
         }
         // ADD THIS RETURN at the end:
         return {

@@ -57,6 +57,14 @@ async function startSingleHumanGame() {
         window.isOwner = true;
         console.log('✅ Set window.isOwner = true for single-player Table 6');
 
+        // ☁️ NEW: Create simple Firebase sync for Table 6 persistence
+        if (typeof window.createSimpleFirebaseSync === 'function') {
+            window.table6FirebaseSync = window.createSimpleFirebaseSync(currentTable.id);
+            console.log('✅ Created simple Firebase sync for Table 6');
+        } else {
+            console.log('⚠️ Simple Firebase sync not available - proceeding without cloud storage');
+        }
+
         // Start game immediately without waiting for other players
         launchGameInterface();
 
@@ -180,14 +188,77 @@ function launchGameInterface() {
         gameArea.style.display = 'block';
     }
 
-    // Call your existing startNewGame function
-    if (typeof startNewGame === 'function') {
-        startNewGame();
-    } else if (window.game && typeof window.game.startNewGame === 'function') {
-        window.game.startNewGame();
-    } else {
-        console.warn('No startNewGame function found');
+    // 🔧 FIX: Check for actual game object (could be 'game' or 'window.game')
+    let retryCount = 0;
+    const maxRetries = 5; // Only retry 5 times (1 second total)
+
+    function attemptGameStart() {
+        retryCount++;
+
+        console.log(`🔍 DEBUG - Attempt ${retryCount}/${maxRetries} - Checking available game objects:`);
+        console.log('  - typeof startNewGame:', typeof startNewGame);
+        console.log('  - window.game exists:', !!window.game);
+        console.log('  - global game exists:', typeof game !== 'undefined' && !!game);
+
+        // Check what actually exists
+        if (typeof game !== 'undefined' && game) {
+            console.log('  - global game.startNewGame:', typeof game.startNewGame);
+            console.log('  - global game.initializeTournament:', typeof game.initializeTournament);
+            console.log('  - global game constructor:', game.constructor?.name);
+        }
+
+        if (window.game) {
+            console.log('  - window.game.startNewGame:', typeof window.game.startNewGame);
+            console.log('  - window.game.initializeTournament:', typeof window.game.initializeTournament);
+        }
+
+        // Try different game object locations
+        if (typeof startNewGame === 'function') {
+            console.log('✅ Found global startNewGame function - calling it');
+            startNewGame();
+        } else if (typeof game !== 'undefined' && game && typeof game.startNewGame === 'function') {
+            console.log('✅ Found global game.startNewGame function - calling it');
+            game.startNewGame();
+        } else if (window.game && typeof window.game.startNewGame === 'function') {
+            console.log('✅ Found window.game.startNewGame function - calling it');
+            window.game.startNewGame();
+        } else if (typeof game !== 'undefined' && game && typeof game.initializeTournament === 'function') {
+            console.log('✅ Using global game.initializeTournament as fallback');
+            game.initializeTournament();
+        } else if (window.game && typeof window.game.initializeTournament === 'function') {
+            console.log('✅ Using window.game.initializeTournament as fallback');
+            window.game.initializeTournament();
+        } else if (retryCount < maxRetries) {
+            console.log(`⏳ Game object not ready yet, retrying ${retryCount}/${maxRetries} in 200ms...`);
+            setTimeout(attemptGameStart, 200);
+        } else {
+            console.error('❌ GIVING UP: Could not find game object after', maxRetries, 'attempts');
+            console.error('🔧 Possible fixes:');
+            console.error('  1. Ensure game.js is loaded before game-launcher.js');
+            console.error('  2. Check that PyramidPoker class is instantiated');
+            console.error('  3. Verify DOMContentLoaded has fired');
+
+            // 🔧 MANUAL FALLBACK: Try to create game object if PyramidPoker class exists
+            if (typeof PyramidPoker !== 'undefined') {
+                console.log('🔧 FALLBACK: PyramidPoker class found, attempting to create game object...');
+                try {
+                    window.game = new PyramidPoker();
+                    console.log('✅ FALLBACK: Created window.game object');
+                    if (typeof window.game.startNewGame === 'function') {
+                        console.log('✅ FALLBACK: Calling startNewGame on newly created object');
+                        window.game.startNewGame();
+                    }
+                } catch (error) {
+                    console.error('❌ FALLBACK FAILED:', error);
+                }
+            } else {
+                console.error('❌ PyramidPoker class not found - game.js not loaded?');
+            }
+        }
     }
+
+    // Start the attempt
+    attemptGameStart();
 }
 
 // IMPLEMENTATION NOTES:
