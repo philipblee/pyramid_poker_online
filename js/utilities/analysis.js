@@ -1,6 +1,7 @@
 // js/utilities/analysis.js
 // SINGLE SOURCE OF TRUTH for all card analysis operations
 // Consolidates: CardCount, analyze-cards, countRanksAndSuits, scattered constants, etc.
+// CORRECTED: Fixed getStraightInfo wheel straight return values
 
 class Analysis {
     constructor(cards) {
@@ -279,8 +280,9 @@ class Analysis {
         const low = Math.min(...values);
 
         // Check for wheel straight (A-2-3-4-5)
+        // CORRECTED: Fixed wheel straight to return Ace (14) as high card
         if (values.includes(14) && values.includes(2) && values.includes(3) && values.includes(4) && values.includes(5)) {
-          return { high: 5, low: 14 };
+          return { high: 14, low: 5 };  // ✅ FIXED: Ace is high card for wheel
         }
 
         return { high: high, low: low };

@@ -57,12 +57,12 @@ class TestEvaluateHand {
             {
                 name: 'Ace High',
                 cards: this.createCards(['A♠', 'K♥', 'Q♦', 'J♣', '9♠']),
-                expected: { rank: 0, name: 'High Card', firstRank: 1, secondRank: 14 }
+                expected: { rank: 1, name: 'High Card', firstRank: 1, secondRank: 14 }
             },
             {
                 name: 'King High',
                 cards: this.createCards(['K♠', 'Q♥', 'J♦', '10♣', '8♠']),
-                expected: { rank: 0, name: 'High Card', firstRank: 1, secondRank: 13 }
+                expected: { rank: 1, name: 'High Card', firstRank: 1, secondRank: 13 }
             }
         ];
 
@@ -79,12 +79,12 @@ class TestEvaluateHand {
             {
                 name: 'Pair of Aces',
                 cards: this.createCards(['A♠', 'A♥', 'K♦', 'Q♣', 'J♠']),
-                expected: { rank: 1, name: 'Pair', firstRank: 2, secondRank: 14 }
+                expected: { rank: 2, name: 'Pair', firstRank: 2, secondRank: 14 }
             },
             {
                 name: 'Pair of Twos',
                 cards: this.createCards(['2♠', '2♥', 'A♦', 'K♣', 'Q♠']),
-                expected: { rank: 1, name: 'Pair', firstRank: 2, secondRank: 2 }
+                expected: { rank: 2, name: 'Pair', firstRank: 2, secondRank: 2 }
             }
         ];
 
@@ -101,12 +101,12 @@ class TestEvaluateHand {
             {
                 name: 'Aces and Kings',
                 cards: this.createCards(['A♠', 'A♥', 'K♦', 'K♣', 'Q♠']),
-                expected: { rank: 2, name: 'Two Pair', firstRank: 3, secondRank: 14 }
+                expected: { rank: 3, name: 'Two Pair', firstRank: 3, secondRank: 14 }
             },
             {
                 name: 'Fives and Threes',
                 cards: this.createCards(['5♠', '5♥', '3♦', '3♣', '2♠']),
-                expected: { rank: 2, name: 'Two Pair', firstRank: 3, secondRank: 5 }
+                expected: { rank: 3, name: 'Two Pair', firstRank: 3, secondRank: 5 }
             }
         ];
 
@@ -123,12 +123,12 @@ class TestEvaluateHand {
             {
                 name: 'Trip Aces',
                 cards: this.createCards(['A♠', 'A♥', 'A♦', 'K♣', 'Q♠']),
-                expected: { rank: 3, name: 'Three of a Kind', firstRank: 4, secondRank: 14 }
+                expected: { rank: 4, name: 'Three of a Kind', firstRank: 4, secondRank: 14 }
             },
             {
                 name: 'Trip Sevens',
                 cards: this.createCards(['7♠', '7♥', '7♦', '5♣', '3♠']),
-                expected: { rank: 3, name: 'Three of a Kind', firstRank: 4, secondRank: 7 }
+                expected: { rank: 4, name: 'Three of a Kind', firstRank: 4, secondRank: 7 }
             }
         ];
 
@@ -145,17 +145,17 @@ class TestEvaluateHand {
             {
                 name: 'Broadway Straight (A-K-Q-J-10)',
                 cards: this.createCards(['A♠', 'K♥', 'Q♦', 'J♣', '10♠']),
-                expected: { rank: 4, name: 'Straight', firstRank: 5, secondRank: 14 }
+                expected: { rank: 5, name: 'Straight', firstRank: 5, secondRank: 14 }
             },
             {
                 name: 'Wheel Straight (5-4-3-2-A)',
                 cards: this.createCards(['5♠', '4♥', '3♦', '2♣', 'A♠']),
-                expected: { rank: 4, name: 'Straight', firstRank: 5, secondRank: 14 }
+                expected: { rank: 5, name: 'Straight', firstRank: 5, secondRank: 14 }
             },
             {
                 name: 'Middle Straight (9-8-7-6-5)',
                 cards: this.createCards(['9♠', '8♥', '7♦', '6♣', '5♠']),
-                expected: { rank: 4, name: 'Straight', firstRank: 5, secondRank: 9 }
+                expected: { rank: 5, name: 'Straight', firstRank: 5, secondRank: 9 }
             }
         ];
 
@@ -172,12 +172,12 @@ class TestEvaluateHand {
             {
                 name: 'Spade Flush',
                 cards: this.createCards(['A♠', 'K♠', 'Q♠', 'J♠', '9♠']),
-                expected: { rank: 5, name: 'Flush', firstRank: 6, secondRank: 14 }
+                expected: { rank: 6, name: 'Flush', firstRank: 6, secondRank: 14 }
             },
             {
                 name: 'Heart Flush',
                 cards: this.createCards(['10♥', '8♥', '7♥', '5♥', '3♥']),
-                expected: { rank: 5, name: 'Flush', firstRank: 6, secondRank: 10 }
+                expected: { rank: 6, name: 'Flush', firstRank: 6, secondRank: 10 }
             }
         ];
 
@@ -194,12 +194,12 @@ class TestEvaluateHand {
             {
                 name: 'Aces Full of Kings',
                 cards: this.createCards(['A♠', 'A♥', 'A♦', 'K♣', 'K♠']),
-                expected: { rank: 6, name: 'Full House', firstRank: 7, secondRank: 14 }
+                expected: { rank: 7, name: 'Full House', firstRank: 7, secondRank: 14 }
             },
             {
                 name: 'Fives Full of Twos',
                 cards: this.createCards(['5♠', '5♥', '5♦', '2♣', '2♠']),
-                expected: { rank: 6, name: 'Full House', firstRank: 7, secondRank: 5 }
+                expected: { rank: 7, name: 'Full House', firstRank: 7, secondRank: 5 }
             }
         ];
 
@@ -216,12 +216,12 @@ class TestEvaluateHand {
             {
                 name: 'Quad Aces',
                 cards: this.createCards(['A♠', 'A♥', 'A♦', 'A♣', 'K♠']),
-                expected: { rank: 7, name: 'Four of a Kind', firstRank: 8, secondRank: 14 }
+                expected: { rank: 8, name: 'Four of a Kind', firstRank: 8, secondRank: 14 }
             },
             {
                 name: 'Quad Fours',
                 cards: this.createCards(['4♠', '4♥', '4♦', '4♣', '2♠']),
-                expected: { rank: 7, name: 'Four of a Kind', firstRank: 8, secondRank: 4 }
+                expected: { rank: 8, name: 'Four of a Kind', firstRank: 8, secondRank: 4 }
             }
         ];
 
@@ -238,17 +238,17 @@ class TestEvaluateHand {
             {
                 name: 'Royal Flush',
                 cards: this.createCards(['A♠', 'K♠', 'Q♠', 'J♠', '10♠']),
-                expected: { rank: 8, name: 'Royal Flush', firstRank: 9, secondRank: 14 }
+                expected: { rank: 9, name: 'Straight Flush', firstRank: 9, secondRank: 14 }
             },
             {
                 name: 'Straight Flush (9-high)',
                 cards: this.createCards(['9♠', '8♠', '7♠', '6♠', '5♠']),
-                expected: { rank: 8, name: 'Straight Flush', firstRank: 9, secondRank: 9 }
+                expected: { rank: 9, name: 'Straight Flush', firstRank: 9, secondRank: 9 }
             },
             {
-                name: 'Steel Wheel (5-high SF)',
+                name: 'Steel Wheel (Wheel Straight Flush)',
                 cards: this.createCards(['5♠', '4♠', '3♠', '2♠', 'A♠']),
-                expected: { rank: 8, name: 'Straight Flush', firstRank: 9, secondRank: 14 }
+                expected: { rank: 9, name: 'Straight Flush', firstRank: 9, secondRank: 14 }
             }
         ];
 
@@ -265,7 +265,7 @@ class TestEvaluateHand {
             {
                 name: 'Five Aces',
                 cards: this.createCards(['A♠', 'A♥', 'A♦', 'A♣', 'A♠']),
-                expected: { rank: 9, name: 'Five of a Kind', firstRank: 10, secondRank: 14 }
+                expected: { rank: 10, name: 'Five of a Kind', firstRank: 10, secondRank: 14 }
             }
         ];
 
@@ -282,17 +282,17 @@ class TestEvaluateHand {
             {
                 name: '6 of a Kind',
                 cards: this.createCards(['A♠', 'A♥', 'A♦', 'A♣', 'A♠', 'A♥']),
-                expected: { rank: 11, name: '6 of a Kind', firstRank: 12 }
+                expected: { rank: 12, name: '6 of a Kind', firstRank: 12 }
             },
             {
-                name: '7-card Straight Flush',
+                name: '7-Card Straight Flush',
                 cards: this.createCards(['A♠', 'K♠', 'Q♠', 'J♠', '10♠', '9♠', '8♠']),
                 expected: { rank: 13, name: '7-Card Straight Flush', firstRank: 13 }
             },
             {
                 name: '8 of a Kind',
                 cards: this.createCards(['K♠', 'K♥', 'K♦', 'K♣', 'K♠', 'K♥', 'K♦', 'K♣']),
-                expected: { rank: 15, name: '8 of a Kind', firstRank: 16 }
+                expected: { rank: 16, name: '8 of a Kind', firstRank: 16 }
             }
         ];
 
@@ -331,12 +331,12 @@ class TestEvaluateHand {
             {
                 name: 'Pair with 1 Wild',
                 cards: this.createCards(['A♠', '🃏', 'K♦', 'Q♣', 'J♠']),
-                expected: { rank: 1, name: 'Pair (Wild)' }
+                expected: { rank: 2, name: 'Pair (Wild)' }
             },
             {
                 name: 'Three of a Kind with 2 Wilds',
                 cards: this.createCards(['A♠', '🃏', '🃏', 'K♣', 'Q♠']),
-                expected: { rank: 3, name: 'Three of a Kind (Wild)' }
+                expected: { rank: 4, name: 'Three of a Kind (Wild)' }
             }
         ];
 

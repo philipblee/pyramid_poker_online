@@ -6,7 +6,7 @@ function evaluateHand(cards) {
     const analysis = new Analysis(cards);
     const handType = getHandType(analysis);
     return handType;
-}
+    }
 
 function getHandType(analysis) {
     const cards = analysis.cards;
@@ -16,7 +16,7 @@ function getHandType(analysis) {
     const numberOfCards = cards.length
     const counts = Object.keys(valueCounts).map(Number).sort((a, b) => b - a);
     const isFlush = analysis.isAllSameSuit(suits);
-    const isStraight = analysis.isSequentialValues(values);
+    const isStraight = analysis.isSequentialValues(values) || analysis.isWheelStraight();
 
     if (isFlush && isStraight && numberOfCards === 5) {
         return getStraightFlushHand(analysis);
@@ -91,20 +91,20 @@ function getStraightFlushHand(analysis) {
 
 function getSixCardStraightFlushHand(analysis) {
     const straightInfo = analysis.getStraightInfo();
-    const name = straightInfo.high === 14 && straightInfo.low === 13 ? 'Six-Card Royal Flush' : 'Straight Flush';
+    const name = straightInfo.high === 14 && straightInfo.low === 13 ? 'Six-Card Royal Flush' : '6-Card Straight Flush';
     return { rank: 11, hand_rank: [11, straightInfo.high, straightInfo.low], name: name };
 }
 
 
 function getSevenCardStraightFlushHand(analysis) {
     const straightInfo = analysis.getStraightInfo();
-    const name = straightInfo.high === 14 && straightInfo.low === 13 ? 'Seven-Card Royal Flush' : 'Straight Flush';
+    const name = straightInfo.high === 14 && straightInfo.low === 13 ? 'Seven-Card Royal Flush' : '7-Card Straight Flush';
     return { rank: 13, hand_rank: [13, straightInfo.high, straightInfo.low], name: name };
 }
 
 function getEightCardStraightFlushHand(analysis) {
     const straightInfo = analysis.getStraightInfo();
-    const name = straightInfo.high === 14 && straightInfo.low === 13 ? 'Eight-Card Royal Flush' : 'Straight Flush';
+    const name = straightInfo.high === 14 && straightInfo.low === 13 ? 'Eight-Card Royal Flush' : '8-Card Straight Flush';
     return { rank: 15, hand_rank: [15, straightInfo.high, straightInfo.low], name: name };
 }
 
@@ -129,21 +129,21 @@ function getSixOfAKindHand(analysis, valueCounts) {
     const sixRank = valueCounts[6][0];
     const sixCards = analysis.cards.filter(c => c.value === sixRank);
     const suitValues = getSuitValues([...sixCards]);
-    return { rank: 12, hand_rank: [12, sixRank, ...suitValues], name: 'Six of a Kind' };
+    return { rank: 12, hand_rank: [12, sixRank, ...suitValues], name: '6 of a Kind' };
 }
 
 function getSevenOfAKindHand(analysis, valueCounts) {
     const sevenRank = valueCounts[7][0];
     const sevenCards = analysis.cards.filter(c => c.value === sevenRank);
     const suitValues = getSuitValues([...sevenCards]);
-    return { rank: 14, hand_rank: [14, sevenRank, ...suitValues], name: 'Seven of a Kind' };
+    return { rank: 14, hand_rank: [14, sevenRank, ...suitValues], name: '7 of a Kind' };
 }
 
 function getEightOfAKindHand(analysis, valueCounts) {
     const eightRank = valueCounts[8][0];
     const eightCards = analysis.cards.filter(c => c.value === eightRank);
     const suitValues = getSuitValues([...eightCards]);
-    return { rank: 16, hand_rank: [16, eightRank, ...suitValues], name: 'Eight of a Kind' };
+    return { rank: 16, hand_rank: [16, eightRank, ...suitValues], name: '8 of a Kind' };
 }
 
 function getFullHouseHand(analysis, valueCounts) {
