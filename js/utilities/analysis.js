@@ -274,18 +274,40 @@ class Analysis {
         return valuesByCount;
     }
 
+    // CORRECTED: getStraightInfo should return second-highest card, not lowest
+    // ALTERNATIVE: Better naming to avoid confusion
     getStraightInfo() {
         const values = this.getSortedValues();
-        const high = Math.max(...values);
-        const low = Math.min(...values);
+        const highCard = Math.max(...values);
 
         // Check for wheel straight (A-2-3-4-5)
-        // CORRECTED: Fixed wheel straight to return Ace (14) as high card
         if (values.includes(14) && values.includes(2) && values.includes(3) && values.includes(4) && values.includes(5)) {
-          return { high: 14, low: 5 };  // ✅ FIXED: Ace is high card for wheel
+          return { high: 14, secondHigh: 5 };  // Clear naming
         }
 
-        return { high: high, low: low };
+        const secondHighCard = values[1];
+        return { high: highCard, secondHigh: secondHighCard };  // Much clearer!
+    }
+
+    // EXAMPLES of what this returns:
+    //
+    // Royal (A-K-Q-J-10):     { high: 14, low: 13 }  → [9, 14, 13]
+    // King-high (K-Q-J-10-9): { high: 13, low: 12 }  → [9, 13, 12]
+    // Wheel (A-5-4-3-2):      { high: 14, low: 5 }   → [9, 14, 5]
+    //
+    // This allows perfect distinction between straight types!
+
+
+    // Then in your straight functions:
+    getStraightHand(analysis) {
+        const straightInfo = analysis.getStraightInfo();
+        return { rank: 5, hand_rank: [5, straightInfo.high, straightInfo.secondHigh], name: 'Straight' };
+    }
+
+    getStraightFlushHand(analysis) {
+        const straightInfo = analysis.getStraightInfo();
+        const name = straightInfo.high === 14 && straightInfo.secondHigh === 13 ? 'Royal Flush' : 'Straight Flush';
+        return { rank: 9, hand_rank: [9, straightInfo.high, straightInfo.secondHigh], name: name };
     }
 
     isAllSameSuit(suits = this.getSuits()) {

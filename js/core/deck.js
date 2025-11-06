@@ -17,15 +17,15 @@ class DeckManager {
         }
 
         // 🔍 ADD THESE LOGS:
-        console.log(`🎴 dealCards() called - requesting ${numCards} cards`);
-        console.log(`🎴 Deck size before deal: ${this.deck.length}`);
+//        console.log(`🎴 dealCards() called - requesting ${numCards} cards`);
+//        console.log(`🎴 Deck size before deal: ${this.deck.length}`);
 
         const dealtCards = this.deck.splice(0, numCards);
 
         // 🔍 ADD THESE LOGS:
         const wildsDealt = dealtCards.filter(c => c.isWild).length;
-        console.log(`🎴 Cards dealt: ${numCards}, Wilds in dealt cards: ${wildsDealt}`);
-        console.log(`🎴 Deck size after deal: ${this.deck.length}`);
+//        console.log(`🎴 Cards dealt: ${numCards}, Wilds in dealt cards: ${wildsDealt}`);
+//        console.log(`🎴 Deck size after deal: ${this.deck.length}`);
 
         return dealtCards;
     }

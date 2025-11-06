@@ -5,14 +5,14 @@
 function startGame() {
     if (!currentTable) return;
 
-    console.log('🔥 STARTGAME FUNCTION CALLED!');
-    console.log('🎮 Starting game with table settings:', tableSettings);
+//    console.log('🔥 STARTGAME FUNCTION CALLED!');
+//    console.log('🎮 Starting game with table settings:', tableSettings);
 
     // STEP 1: Update the CORRECT gameConfig object
     if (window.gameConfig) {
         Object.assign(window.gameConfig.config, tableSettings);
         window.gameConfig.saveToStorage();
-        console.log('✅ Applied settings to window.gameConfig:', window.gameConfig.config);
+//        console.log('✅ Applied settings to window.gameConfig:', window.gameConfig.config);
     } else {
         console.error('❌ window.gameConfig not found!');
     }
@@ -20,7 +20,7 @@ function startGame() {
     // STEP 2: Enhanced branching based on game mode AND connect mode
     // tables 1-5
     if (window.gameConfig.config.gameMode === 'single-human' && window.gameConfig.config.gameConnectMode === 'offline') {
-        console.log('🔥 CALLING startSingleHumanGame()!');
+//        console.log('🔥 CALLING startSingleHumanGame()!');
         startSingleHumanGame();
 
     // table 6 - FIXED: Now treated as single-player vs AI
@@ -45,7 +45,7 @@ function startGame() {
 // FIXED: Table 6 now starts immediately without MultiDeviceIntegration
 async function startSingleHumanGame() {
 
-    console.log('🔥 startSingleHumanGame() CALLED!');
+//    console.log('🔥 startSingleHumanGame() CALLED!');
 
     if (tableSettings.gameConnectMode === 'online') {
         // 🎯 FIX: Table 6 is single-player vs AI, NOT multi-player
@@ -73,18 +73,18 @@ async function startSingleHumanGame() {
 
     } else {
         // Tables 1-5: offline single-player
-        console.log('🎮 Tables 1-5: Offline single-player');
+//        console.log('🎮 Tables 1-5: Offline single-player');
 
         // 🏆 FIX: Set ownership for single-player (all single-player games need this)
         window.isOwner = true;
-        console.log('✅ Set window.isOwner = true for offline single-player');
+//        console.log('✅ Set window.isOwner = true for offline single-player');
 
         launchGameInterface();
     }
 }
 
 function startMultiHumanCloudGame() {
-    console.log('🚀 Starting multi-human cloud game for table:', currentTable.id);
+//    console.log('🚀 Starting multi-human cloud game for table:', currentTable.id);
 
     // Write to tableState to match your listener
     firebase.database().ref(`tables/${currentTable.id}`).update({
