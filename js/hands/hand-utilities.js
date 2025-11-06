@@ -67,7 +67,7 @@ function handUtilities() {
         const pointTables = {
             'front': {
                 1: 1,   // High Card/Pair/Two Pair
-                3: 3,   // Three of a Kind
+                4: 3,   // Three of a Kind
                 5: 4,   // Straight
                 6: 4,   // Flush
                 7: 5,   // Full House
@@ -78,7 +78,7 @@ function handUtilities() {
             },
             'middle': {
                 1: 1,   // High Card/Pair/Two Pair
-                3: 1,   // Three of a Kind
+                4: 1,   // Three of a Kind
                 5: 1,   // Straight
                 6: 1,   // Flush
                 7: 2,   // Full House
@@ -92,7 +92,7 @@ function handUtilities() {
             },
             'back': {
                 1: 1,   // High Card/Pair/Two Pair
-                3: 1,   // Three of a Kind
+                4: 1,   // Three of a Kind
                 5: 1,   // Straight
                 6: 1,   // Flush
                 7: 1,   // Full House
@@ -100,7 +100,7 @@ function handUtilities() {
                 9: 5,   // Straight Flush
                 10: 6,  // Five of a Kind
                 11: 8,  // 6-card Straight Flush
-                12: 11, // 6 of a Kind
+                12: 10, // 6 of a Kind
                 13: 11, // 7-card Straight Flush
                 14: 14, // 7 of a Kind
                 15: 14, // 8-card Straight Flush
@@ -118,4 +118,3 @@ function handUtilities() {
         getPointValue
     };
 }
-
