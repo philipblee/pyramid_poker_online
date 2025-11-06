@@ -66,7 +66,8 @@ function handUtilities() {
     const getPointValue = (handTypeCode, position) => {
         const pointTables = {
             'front': {
-                1: 1,   // High Card/Pair/Two Pair
+                1: 1,   // High Card
+                2: 1,   // Pair
                 4: 3,   // Three of a Kind
                 5: 4,   // Straight
                 6: 4,   // Flush
@@ -77,7 +78,9 @@ function handUtilities() {
                 // No front hands above 10
             },
             'middle': {
-                1: 1,   // High Card/Pair/Two Pair
+                1: 1,   // High Card
+                2: 1,   // Pair
+                3: 1,   // Two Pair
                 4: 1,   // Three of a Kind
                 5: 1,   // Straight
                 6: 1,   // Flush
@@ -91,7 +94,9 @@ function handUtilities() {
                 14: 28  // 7 of a Kind
             },
             'back': {
-                1: 1,   // High Card/Pair/Two Pair
+                1: 1,   // High Card
+                2: 1,   // Pair
+                3: 1,   // Two Pair
                 4: 1,   // Three of a Kind
                 5: 1,   // Straight
                 6: 1,   // Flush
