@@ -109,6 +109,16 @@ class PyramidPoker {
     }
 
     async startNewGame() {
+        // Add this when a new game starts
+        resetGameTimer();
+
+        // 🔧 FIX: Refresh ALL settings from current config (not stale constructor values)
+        this.maxRounds = gameConfig.config.rounds;
+        // Add any other cached settings here if we find them
+
+        console.log(`🎯 Refreshed game settings - maxRounds: ${this.maxRounds}`);
+        console.log(`🎯 Current gameConfig:`, gameConfig.config);
+
 
         // Set multiDeviceMode based on gameConfig
         this.multiDeviceMode = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
@@ -468,9 +478,44 @@ class PyramidPoker {
         }
     }
 
+
+    // Replace enablePlayerButtons() with these:
+    saveButtonStates() {
+        this.savedButtonStates = {
+            autoArrange: document.getElementById('autoArrange').disabled,
+            sortByRank: document.getElementById('sortByRank').disabled,
+            sortBySuit: document.getElementById('sortBySuit').disabled,
+            submitHand: document.getElementById('submitHand').disabled
+        };
+    }
+
+    restoreButtonStates() {
+        if (!this.savedButtonStates) return;
+
+        document.getElementById('autoArrange').disabled = this.savedButtonStates.autoArrange;
+        document.getElementById('sortByRank').disabled = this.savedButtonStates.sortByRank;
+        document.getElementById('sortBySuit').disabled = this.savedButtonStates.sortBySuit;
+        document.getElementById('submitHand').disabled = this.savedButtonStates.submitHand;
+
+        this.savedButtonStates = null;
+    }
+
+
+    // Keep this one - it's fine
+    disablePlayerButtons() {
+        document.getElementById('submitHand').disabled = true;
+        document.getElementById('autoArrange').disabled = true;
+        document.getElementById('sortByRank').disabled = true;   // Add missing buttons
+        document.getElementById('sortBySuit').disabled = true;   // Add missing buttons
+    }
+
     async handleAITurn() {
+
+
         const currentPlayer = this.playerManager.getCurrentPlayer();
 
+        // 🔧 SAVE button states before disabling
+        this.saveButtonStates();
         // DISABLE BUTTONS when AI starts
         this.disablePlayerButtons();
 
@@ -509,31 +554,32 @@ class PyramidPoker {
 
         }, 1000); // 1 second thinking time
 
-        // At the very end, clear the flag:
+
+        // At the very end of handleAITurn, replace the enablePlayerButtons() call:
         setTimeout(() => {
             const currentPlayer = this.playerManager.getCurrentPlayer();
             currentPlayer.aiTurnInProgress = false;
 
-            // RE-ENABLE BUTTONS
-            this.enablePlayerButtons();
+            // 🔧 Check if all players are ready (meaning we're going to scoring)
+            const allPlayersReady = this.playerManager.areAllPlayersReady();
+            const isHumanTurn = !currentPlayer.isAI && currentPlayer.type !== 'ai';
 
-    }, 1200); // After all your timeouts complete
+            if (isHumanTurn && !allPlayersReady && this.gameState === 'playing') {
+                // Only restore if it's genuinely the human's turn (not going to scoring)
+                this.restoreButtonStates();
+                updateDisplay(this);
+                console.log('🔄 Restored buttons - human player turn');
+            } else if (allPlayersReady) {
+                // All players ready - going to scoring, keep buttons disabled
+                console.log('🏁 All players ready - keeping buttons disabled for scoring');
+            } else {
+                // Another AI turn - keep buttons disabled
+                console.log('🤖 Next AI player - keeping buttons disabled');
+            }
 
+}, 1200);
 
     }
-
-    // Add these helper functions to your game.js
-    disablePlayerButtons() {
-        document.getElementById('submitHand').disabled = true;
-        document.getElementById('autoArrange').disabled = true;
-    }
-
-    enablePlayerButtons() {
-        // reenable buttons after AI Turn
-        document.getElementById('submitHand').disabled = false;
-        document.getElementById('autoArrange').disabled = false;
-    }
-
 
     submitAIPlayerHand() {
         // For AI players, add a small delay to let DOM update after auto-arrange

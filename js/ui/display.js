@@ -277,6 +277,7 @@ function updateScoring(game) {
 
 // Update button states based on game state
 function updateButtonStates(game) {
+    console.log('🎮 updateButtonStates() called from:', new Error().stack.split('\n')[2].trim());
     const newGameBtn = document.getElementById('newGame');
     const newRoundBtn = document.getElementById('newRound');
 //    const addPlayerBtn = document.getElementById('addPlayer');
@@ -294,8 +295,6 @@ function updateButtonStates(game) {
         suitBtn.disabled = true;
         submitBtn.disabled = true;
     } else if (game.gameState === 'playing') {
-//        addPlayerBtn.disabled = true;
-//        newGameBtn.disabled = false;
 
         // NEW LOGIC: Check if any players have started playing (moved cards around)
         const gameInProgress = game.playerManager.getReadyCount() > 0 ||
@@ -315,6 +314,14 @@ function updateButtonStates(game) {
         rankBtn.disabled = true;
         suitBtn.disabled = true;
         submitBtn.disabled = true;
+
+    // Log what decisions are being made:
+    if (game.gameState === 'playing') {
+        const currentPlayer = game.playerManager.getCurrentPlayer();
+        const isAITurn = currentPlayer && (currentPlayer.type === 'ai' || currentPlayer.isAI);
+        console.log(`🎮 Button decision: gameState=${game.gameState}, currentPlayer=${currentPlayer?.name}, isAI=${isAITurn}`);
+    }
+
     }
 }
 
@@ -354,6 +361,7 @@ function toggleSidebar(game) {
 
 // Update all display elements
 function updateDisplay(game) {
+    console.log('🔍 updateDisplay() called from:', new Error().stack.split('\n')[2].trim());
     updateStatus(game);
     updatePlayerList(game);
     updateScoring(game);
