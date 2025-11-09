@@ -307,6 +307,7 @@ function getEightOfAKindHand(analysis, valueCounts) {
         handStrength: handRankArray     // NEW - same as hand_rank
     };
 }
+
 // ============================================================================
 // UNIVERSAL TIE-BREAKING EXAMPLES
 // ============================================================================
@@ -334,7 +335,155 @@ TIE-BREAKING PROCESS:
 1. Compare hand type (position 0)
 2. Compare primary values (positions 1-N based on hand type)
 3. Compare suit values (final positions) - UNIVERSAL STAGE 3
+
 */
+
+// Evaluate 3-card or 5-card front hands
+function evaluateThreeCardHand(cards) {
+    // Handle 5-card front hands
+    if (cards.length === 5) {
+        // Use the regular 5-card evaluation for 5-card front hands
+        return evaluateHand(cards);
+    }
+
+    // Handle wild cards in 3-card hands
+    const wildCards = cards.filter(c => c.isWild);
+    const normalCards = cards.filter(c => !c.isWild);
+
+    if (wildCards.length > 0) {
+        return evaluateThreeCardHandWithWilds(normalCards, wildCards.length);
+    }
+
+    const sortedCards = [...cards].sort((a, b) => b.value - a.value);
+    const values = sortedCards.map(c => c.value);
+
+    const valueCounts = {};
+    values.forEach(val => valueCounts[val] = (valueCounts[val] || 0) + 1);
+
+    const valuesByCount = {};
+    for (const [value, count] of Object.entries(valueCounts)) {
+        if (!valuesByCount[count]) valuesByCount[count] = [];
+        valuesByCount[count].push(parseInt(value));
+    }
+
+    for (const count in valuesByCount) {
+        valuesByCount[count].sort((a, b) => b - a);
+    }
+
+    // Handle edge cases first
+    if (cards.length === 1) {
+        const handRankArray = [1, 7];
+        return {
+            rank: 1,
+            hand_rank: handRankArray,
+            name: 'High Card',
+            handType: 1,                    // NEW - same as rank
+            handStrength: handRankArray     // NEW - same as hand_rank
+        };
+    }
+
+    if (cards.length === 2) {
+        const handRankArray = [1, 8, 7];
+        return {
+            rank: 1,
+            hand_rank: handRankArray,
+            name: 'High Card',
+            handType: 1,                    // NEW - same as rank
+            handStrength: handRankArray     // NEW - same as hand_rank
+        };
+    }
+
+    if (cards.length !== 3) {
+        const handRankArray = [1, 7];
+        return {
+            rank: 1,
+            hand_rank: handRankArray,
+            name: 'Invalid',
+            handType: 1,                    // NEW - same as rank
+            handStrength: handRankArray     // NEW - same as hand_rank
+        };
+    }
+
+    const counts = Object.keys(valuesByCount).map(Number).sort((a, b) => b - a);
+
+    // Found trip
+    if (counts[0] === 3) {
+        const tripsRank = valuesByCount[3][0];
+        const handRankArray = [4, tripsRank];
+        return {
+            rank: 4,
+            hand_rank: handRankArray,
+            name: 'Three of a Kind',
+            handType: 4,                    // NEW - same as rank
+            handStrength: handRankArray     // NEW - same as hand_rank
+        };
+    }
+
+    // found pair
+    if (counts[0] === 2) {
+        const pairRank = valuesByCount[2][0];
+        const kicker = valuesByCount[1][0];
+        const handRankArray = [2, pairRank, kicker];
+        return {
+            rank: 2,
+            hand_rank: handRankArray,
+            name: 'Pair',
+            handType: 2,                    // NEW - same as rank
+            handStrength: handRankArray     // NEW - same as hand_rank
+        };
+    }
+
+    // else it's a high card
+    const handRankArray = [1, ...values];
+    return {
+        rank: 1,
+        hand_rank: handRankArray,
+        name: 'High Card',
+        handType: 1,                    // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
+}
+
+// Evaluate 3-card hand with wild cards
+function evaluateThreeCardHandWithWilds(normalCards, wildCount) {
+    const values = normalCards.map(c => c.value).sort((a, b) => b - a);
+    const highCard = values[0] || 14;
+
+    if (wildCount >= 2) {
+        const handRankArray = [4, highCard];
+        return {
+            rank: 4,
+            hand_rank: handRankArray,
+            name: 'Three of a Kind (Wild)',
+            handType: 4,                    // NEW - same as rank
+            handStrength: handRankArray     // NEW - same as hand_rank
+        };
+    }
+
+    if (wildCount === 1) {
+        const pairRank = highCard;
+        const kicker = values.find(v => v !== pairRank) || 13;
+        const handRankArray = [2, pairRank, kicker];
+        return {
+            rank: 2,
+            hand_rank: handRankArray,
+            name: 'Pair (Wild)',
+            handType: 2,                    // NEW - same as rank
+            handStrength: handRankArray     // NEW - same as hand_rank
+        };
+    }
+
+    // No wilds - shouldn't happen in this function, but handle gracefully
+    const handRankArray = [1, ...values];
+    return {
+        rank: 1,
+        hand_rank: handRankArray,
+        name: 'High Card',
+        handType: 1,                    // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
+}
+
 
 // ============================================================================
 // CONSISTENT STRUCTURE ACROSS ALL HAND TYPES
