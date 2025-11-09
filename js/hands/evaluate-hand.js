@@ -94,116 +94,219 @@ function getHandType(analysis) {
 function getHighCardHand(analysis) {
     const values = analysis.getSortedValues();
     const allSuitValues = getSuitValues(analysis.cards);
-    return { rank: 1, hand_rank: [1, ...values, ...allSuitValues], name: 'High Card' };
+    const handRankArray = [1, ...values, ...allSuitValues];
+    return {
+        rank: 1,
+        hand_rank: handRankArray,
+        name: 'High Card',
+        handType: 1,                    // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
 }
 
 function getPairHand(analysis, valueCounts) {
     const pairRank = valueCounts[2][0];
     const kickers = valueCounts[1];
     const allSuitValues = getSuitValues(analysis.cards);
-    return { rank: 2, hand_rank: [2, pairRank, ...kickers, ...allSuitValues], name: 'Pair' };
+    const handRankArray = [2, pairRank, ...kickers, ...allSuitValues];
+    return {
+        rank: 2,
+        hand_rank: handRankArray,
+        name: 'Pair',
+        handType: 2,                    // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
 }
 
 function getTwoPairHand(analysis, valueCounts) {
     const pairs = valueCounts[2];
     const kicker = valueCounts[1][0];
     const allSuitValues = getSuitValues(analysis.cards);
-    return { rank: 3, hand_rank: [3, Math.max(...pairs), Math.min(...pairs), kicker, ...allSuitValues], name: 'Two Pair' };
+    const handRankArray = [3, Math.max(...pairs), Math.min(...pairs), kicker, ...allSuitValues];
+    return {
+        rank: 3,
+        hand_rank: handRankArray,
+        name: 'Two Pair',
+        handType: 3,                    // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
 }
 
 function getThreeOfAKindHand(analysis, valueCounts) {
     const tripsRank = valueCounts[3][0];
     const kickers = valueCounts[1];
     const allSuitValues = getSuitValues(analysis.cards);
-    return { rank: 4, hand_rank: [4, tripsRank, ...kickers, ...allSuitValues], name: 'Three of a Kind' };
+    const handRankArray = [4, tripsRank, ...kickers, ...allSuitValues];
+    return {
+        rank: 4,
+        hand_rank: handRankArray,
+        name: 'Three of a Kind',
+        handType: 4,                    // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
 }
 
 function getStraightHand(analysis) {
     const straightInfo = analysis.getStraightInfo();
     const allSuitValues = getSuitValues(analysis.cards);
-    return { rank: 5, hand_rank: [5, straightInfo.high, straightInfo.secondHigh, ...allSuitValues], name: 'Straight' };
+    const handRankArray = [5, straightInfo.high, straightInfo.secondHigh, ...allSuitValues];
+    return {
+        rank: 5,
+        hand_rank: handRankArray,
+        name: 'Straight',
+        handType: 5,                    // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
 }
 
 function getFlushHand(analysis) {
     const values = analysis.getSortedValues();
     const flushSuit = getSuitValues([analysis.cards[0]]); // Just first card suit
-    return { rank: 6, hand_rank: [6, ...values, ...flushSuit], name: 'Flush' };
+    const handRankArray = [6, ...values, ...flushSuit];
+    return {
+        rank: 6,
+        hand_rank: handRankArray,
+        name: 'Flush',
+        handType: 6,                    // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
 }
 
 function getFullHouseHand(analysis, valueCounts) {
     const tripsRank = valueCounts[3][0];
     const pairRank = valueCounts[2][0];
     const allSuitValues = getSuitValues(analysis.cards);
-    return { rank: 7, hand_rank: [7, tripsRank, pairRank, ...allSuitValues], name: 'Full House' };
+    const handRankArray = [7, tripsRank, pairRank, ...allSuitValues];
+    return {
+        rank: 7,
+        hand_rank: handRankArray,
+        name: 'Full House',
+        handType: 7,                    // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
 }
 
 function getFourOfAKindHand(analysis, valueCounts) {
     const quadRank = valueCounts[4][0];
     const kicker = valueCounts[1][0];
     const allSuitValues = getSuitValues(analysis.cards);
-    return { rank: 8, hand_rank: [8, quadRank, kicker, ...allSuitValues], name: 'Four of a Kind' };
+    const handRankArray = [8, quadRank, kicker, ...allSuitValues];
+    return {
+        rank: 8,
+        hand_rank: handRankArray,
+        name: 'Four of a Kind',
+        handType: 8,                    // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
 }
 
-// Same logic for straight flushes:
 function getStraightFlushHand(analysis) {
-    // ADD THIS DEBUG:
-//    console.log('🔍 getStraightFlushHand called with cards:',
-//                analysis.cards.map(c => `${c.rank}${c.suit}`));
-//    console.log('🔍 Card values:', analysis.cards.map(c => c.value));
-
     const straightInfo = analysis.getStraightInfo();
-//    console.log('🔍 straightInfo returned:', straightInfo);
     const name = straightInfo.high === 14 && straightInfo.secondHigh === 13 ? 'Royal Flush' : 'Straight Flush';
     const flushSuit = getSuitValues([analysis.cards[0]]); // Just first card suit
-    return { rank: 9, hand_rank: [9, straightInfo.high, straightInfo.secondHigh, ...flushSuit], name: name };
+    const handRankArray = [9, straightInfo.high, straightInfo.secondHigh, ...flushSuit];
+    return {
+        rank: 9,
+        hand_rank: handRankArray,
+        name: name,
+        handType: 9,                    // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
 }
-
 
 function getFiveOfAKindHand(analysis, valueCounts) {
     const fiveRank = valueCounts[5][0];
     const allSuitValues = getSuitValues(analysis.cards);
-    return { rank: 10, hand_rank: [10, fiveRank, ...allSuitValues], name: 'Five of a Kind' };
+    const handRankArray = [10, fiveRank, ...allSuitValues];
+    return {
+        rank: 10,
+        hand_rank: handRankArray,
+        name: 'Five of a Kind',
+        handType: 10,                   // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
 }
 
 function getSixCardStraightFlushHand(analysis) {
     const straightInfo = analysis.getStraightInfo();
     const name = straightInfo.high === 14 && straightInfo.secondHigh === 13 ? 'Six-Card Royal Flush' : '6-Card Straight Flush';
     const allSuitValues = getSuitValues(analysis.cards);
-    return { rank: 11, hand_rank: [11, straightInfo.high, straightInfo.secondHigh, ...allSuitValues], name: name };
+    const handRankArray = [11, straightInfo.high, straightInfo.secondHigh, ...allSuitValues];
+    return {
+        rank: 11,
+        hand_rank: handRankArray,
+        name: name,
+        handType: 11,                   // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
 }
 
 function getSixOfAKindHand(analysis, valueCounts) {
     const sixRank = valueCounts[6][0];
     const allSuitValues = getSuitValues(analysis.cards);
-    return { rank: 12, hand_rank: [12, sixRank, ...allSuitValues], name: 'Six of a Kind' };
+    const handRankArray = [12, sixRank, ...allSuitValues];
+    return {
+        rank: 12,
+        hand_rank: handRankArray,
+        name: 'Six of a Kind',
+        handType: 12,                   // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
 }
 
 function getSevenCardStraightFlushHand(analysis) {
     const straightInfo = analysis.getStraightInfo();
     const name = straightInfo.high === 14 && straightInfo.secondHigh === 13 ? 'Seven-Card Royal Flush' : '7-Card Straight Flush';
     const allSuitValues = getSuitValues(analysis.cards);
-    return { rank: 13, hand_rank: [13, straightInfo.high, straightInfo.secondHigh, ...allSuitValues], name: name };
+    const handRankArray = [13, straightInfo.high, straightInfo.secondHigh, ...allSuitValues];
+    return {
+        rank: 13,
+        hand_rank: handRankArray,
+        name: name,
+        handType: 13,                   // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
 }
 
 function getSevenOfAKindHand(analysis, valueCounts) {
     const sevenRank = valueCounts[7][0];
     const allSuitValues = getSuitValues(analysis.cards);
-    return { rank: 14, hand_rank: [14, sevenRank, ...allSuitValues], name: 'Seven of a Kind' };
+    const handRankArray = [14, sevenRank, ...allSuitValues];
+    return {
+        rank: 14,
+        hand_rank: handRankArray,
+        name: 'Seven of a Kind',
+        handType: 14,                   // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
 }
 
 function getEightCardStraightFlushHand(analysis) {
     const straightInfo = analysis.getStraightInfo();
     const name = straightInfo.high === 14 && straightInfo.secondHigh === 13 ? 'Eight-Card Royal Flush' : '8-Card Straight Flush';
     const allSuitValues = getSuitValues(analysis.cards);
-    return { rank: 15, hand_rank: [15, straightInfo.high, straightInfo.secondHigh, ...allSuitValues], name: name };
+    const handRankArray = [15, straightInfo.high, straightInfo.secondHigh, ...allSuitValues];
+    return {
+        rank: 15,
+        hand_rank: handRankArray,
+        name: name,
+        handType: 15,                   // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
 }
 
 function getEightOfAKindHand(analysis, valueCounts) {
     const eightRank = valueCounts[8][0];
     const allSuitValues = getSuitValues(analysis.cards);
-    return { rank: 16, hand_rank: [16, eightRank, ...allSuitValues], name: 'Eight of a Kind' };
+    const handRankArray = [16, eightRank, ...allSuitValues];
+    return {
+        rank: 16,
+        hand_rank: handRankArray,
+        name: 'Eight of a Kind',
+        handType: 16,                   // NEW - same as rank
+        handStrength: handRankArray     // NEW - same as hand_rank
+    };
 }
-
 // ============================================================================
 // UNIVERSAL TIE-BREAKING EXAMPLES
 // ============================================================================
