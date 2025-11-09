@@ -22,8 +22,8 @@ function getHandType(analysis) {
     const isStraight = analysis.isSequentialValues(values) || analysis.isWheelStraight();
 
     if (isFlush && isStraight && numberOfCards === 5) {
-        console.log('🔍 Detected 5-card straight flush with cards:',
-                    analysis.cards.map(c => `${c.rank}${c.suit}`));
+//        console.log('🔍 Detected 5-card straight flush with cards:',
+//                    analysis.cards.map(c => `${c.rank}${c.suit}`));
         return getStraightFlushHand(analysis);
     }
 
@@ -147,12 +147,12 @@ function getFourOfAKindHand(analysis, valueCounts) {
 // Same logic for straight flushes:
 function getStraightFlushHand(analysis) {
     // ADD THIS DEBUG:
-    console.log('🔍 getStraightFlushHand called with cards:',
-                analysis.cards.map(c => `${c.rank}${c.suit}`));
-    console.log('🔍 Card values:', analysis.cards.map(c => c.value));
+//    console.log('🔍 getStraightFlushHand called with cards:',
+//                analysis.cards.map(c => `${c.rank}${c.suit}`));
+//    console.log('🔍 Card values:', analysis.cards.map(c => c.value));
 
     const straightInfo = analysis.getStraightInfo();
-    console.log('🔍 straightInfo returned:', straightInfo);
+//    console.log('🔍 straightInfo returned:', straightInfo);
     const name = straightInfo.high === 14 && straightInfo.secondHigh === 13 ? 'Royal Flush' : 'Straight Flush';
     const flushSuit = getSuitValues([analysis.cards[0]]); // Just first card suit
     return { rank: 9, hand_rank: [9, straightInfo.high, straightInfo.secondHigh, ...flushSuit], name: name };
