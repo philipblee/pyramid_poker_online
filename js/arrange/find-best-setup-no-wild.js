@@ -191,17 +191,10 @@ class FindBestSetupNoWildBase {
         const reEvaluatedMiddle = evaluateHand(middleCards);
         const reEvaluatedFront = evaluateThreeCardHand(frontCards);  // Evaluate front cards
 
-        arrangement.back.handStrength = reEvaluatedBack; // object returned from evaluateHand
-        arrangement.back.hand_rank = reEvaluatedBack.hand_rank; // hand_tuple
-        arrangement.back.strength = reEvaluatedBack.rank; // handType 1-16
-
-        arrangement.middle.handStrength = reEvaluatedMiddle;
-        arrangement.middle.hand_rank = reEvaluatedMiddle.hand_rank;
-        arrangement.middle.strength = reEvaluatedMiddle.rank;
-
-        arrangement.front.handStrength = reEvaluatedFront;
-        arrangement.front.hand_rank = reEvaluatedFront.hand_rank;
-        arrangement.front.strength = reEvaluatedFront.rank;
+        // WITH THIS CLEAN CODE:
+        arrangement.back.handEvaluation = reEvaluatedBack;      // ✅ Single assignment
+        arrangement.middle.handEvaluation = reEvaluatedMiddle;  // ✅ Single assignment
+        arrangement.front.handEvaluation = reEvaluatedFront;   // ✅ Single assignment
 
         // calculate score for each hand?
         const scoreBack = this.getHandScore(arrangement.back, 'back')
@@ -307,15 +300,13 @@ class FindBestSetupNoWildBase {
 
             const score = backScore + middleScore + frontScore;
 
-            // DEBUG: Log the detailed scoring breakdown
-//            console.log(`🔍 SCORING DEBUG: Total=${score} (Back=${backScore} + Middle=${middleScore} + Front=${frontScore})`);
-//            console.log(`   Back: ${arrangement.back.handType}(${arrangement.back.rank}) - ${arrangement.back.cards?.length || 0} cards`);
-//            console.log(`   Middle: ${arrangement.middle.handType}(${arrangement.middle.rank}) - ${arrangement.middle.cards?.length || 0} cards`);
-//            console.log(`   Front: ${arrangement.front.handType}(${arrangement.front.rank}) - ${arrangement.front.cards?.length || 0} cards`);
+//            console.log(`   Back: ${arrangement.back.handEvaluation.name}(${arrangement.back.handEvaluation.handType}) - ${arrangement.back.cards?.length || 0} cards`);
+//            console.log(`   Middle: ${arrangement.middle.handEvaluation.name}(${arrangement.middle.handEvaluation.handType}) - ${arrangement.middle.cards?.length || 0} cards`);
+//            console.log(`   Front: ${arrangement.front.handEvaluation.name}(${arrangement.front.handEvaluation.handType}) - ${arrangement.front.cards?.length || 0} cards`);
 //
-//            console.log(`   Back hand_rank: ${arrangement.back.hand_rank}`);
-//            console.log(`   Middle hand_rank: ${arrangement.middle.hand_rank}`);
-//            console.log(`   Front hand_rank: ${arrangement.front.hand_rank}`);
+//            console.log(`   Back handStrength: ${arrangement.back.handEvaluation.handStrength}`);
+//            console.log(`   Middle handStrength: ${arrangement.middle.handEvaluation.handStrength}`);
+//            console.log(`   Front handStrength: ${arrangement.front.handEvaluation.handStrength}`);
 
             if (score > this.bestScore) {
                 this.bestScore = score;
@@ -492,13 +483,13 @@ class FindBestSetupNoWildBase {
 
     areStrategicallySimilar(arr1, arr2) {
         // Same hand types in same positions = strategically similar
-        return arr1.back.handType === arr2.back.handType &&
-               arr1.middle.handType === arr2.middle.handType &&
-               arr1.front.handType === arr2.front.handType &&
-               arr1.back.rank === arr2.back.rank &&  // Same primary rank (e.g., both K-high straights)
-               arr1.middle.rank === arr2.middle.rank &&
-               arr1.front.rank === arr2.front.rank;
-    }
+        return arr1.back.handEvaluation.name === arr2.back.handEvaluation.name &&
+               arr1.middle.handEvaluation.name === arr2.middle.handEvaluation.name &&
+               arr1.front.handEvaluation.name === arr2.front.handEvaluation.name &&
+               arr1.back.handEvaluation.handType === arr2.back.handEvaluation.handType &&
+               arr1.middle.handEvaluation.handType === arr2.middle.handEvaluation.handType &&
+               arr1.front.handEvaluation.handType === arr2.front.handEvaluation.handType;
+        }
 
     updateTopArrangements(arrangement, score) {
         const completedArrangement = this.addKickersToArrangement(arrangement);

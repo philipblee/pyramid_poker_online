@@ -10,6 +10,8 @@ class AutoArrange {
     /**
      * Main auto-arrange - uses find-best-setup
      */
+
+     
     autoArrangeHand() {
         const playerData = this.getPlayerData();
         if (!playerData) return false;

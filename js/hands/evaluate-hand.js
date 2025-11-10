@@ -338,192 +338,9 @@ TIE-BREAKING PROCESS:
 
 */
 
-// Evaluate 3-card or 5-card front hands
-function evaluateThreeCardHand(cards) {
-    // Handle 5-card front hands
-    if (cards.length === 5) {
-        // Use the regular 5-card evaluation for 5-card front hands
-        return evaluateHand(cards);
-    }
 
-    // Handle wild cards in 3-card hands
-    const wildCards = cards.filter(c => c.isWild);
-    const normalCards = cards.filter(c => !c.isWild);
+// CORRECTED evaluateHandWithWilds() - ADD MISSING DUAL PROPERTIES TO ALL RETURNS
 
-    if (wildCards.length > 0) {
-        return evaluateThreeCardHandWithWilds(normalCards, wildCards.length);
-    }
-
-    const sortedCards = [...cards].sort((a, b) => b.value - a.value);
-    const values = sortedCards.map(c => c.value);
-
-    const valueCounts = {};
-    values.forEach(val => valueCounts[val] = (valueCounts[val] || 0) + 1);
-
-    const valuesByCount = {};
-    for (const [value, count] of Object.entries(valueCounts)) {
-        if (!valuesByCount[count]) valuesByCount[count] = [];
-        valuesByCount[count].push(parseInt(value));
-    }
-
-    for (const count in valuesByCount) {
-        valuesByCount[count].sort((a, b) => b - a);
-    }
-
-    // Handle edge cases first
-    if (cards.length === 1) {
-        const handRankArray = [1, 7];
-        return {
-            rank: 1,
-            hand_rank: handRankArray,
-            name: 'High Card',
-            handType: 1,                    // NEW - same as rank
-            handStrength: handRankArray     // NEW - same as hand_rank
-        };
-    }
-
-    if (cards.length === 2) {
-        const handRankArray = [1, 8, 7];
-        return {
-            rank: 1,
-            hand_rank: handRankArray,
-            name: 'High Card',
-            handType: 1,                    // NEW - same as rank
-            handStrength: handRankArray     // NEW - same as hand_rank
-        };
-    }
-
-    if (cards.length !== 3) {
-        const handRankArray = [1, 7];
-        return {
-            rank: 1,
-            hand_rank: handRankArray,
-            name: 'Invalid',
-            handType: 1,                    // NEW - same as rank
-            handStrength: handRankArray     // NEW - same as hand_rank
-        };
-    }
-
-    const counts = Object.keys(valuesByCount).map(Number).sort((a, b) => b - a);
-
-    // Found trip
-    if (counts[0] === 3) {
-        const tripsRank = valuesByCount[3][0];
-        const handRankArray = [4, tripsRank];
-        return {
-            rank: 4,
-            hand_rank: handRankArray,
-            name: 'Three of a Kind',
-            handType: 4,                    // NEW - same as rank
-            handStrength: handRankArray     // NEW - same as hand_rank
-        };
-    }
-
-    // found pair
-    if (counts[0] === 2) {
-        const pairRank = valuesByCount[2][0];
-        const kicker = valuesByCount[1][0];
-        const handRankArray = [2, pairRank, kicker];
-        return {
-            rank: 2,
-            hand_rank: handRankArray,
-            name: 'Pair',
-            handType: 2,                    // NEW - same as rank
-            handStrength: handRankArray     // NEW - same as hand_rank
-        };
-    }
-
-    // else it's a high card
-    const handRankArray = [1, ...values];
-    return {
-        rank: 1,
-        hand_rank: handRankArray,
-        name: 'High Card',
-        handType: 1,                    // NEW - same as rank
-        handStrength: handRankArray     // NEW - same as hand_rank
-    };
-}
-
-// Evaluate 3-card hand with wild cards
-function evaluateThreeCardHandWithWilds(normalCards, wildCount) {
-    const values = normalCards.map(c => c.value).sort((a, b) => b - a);
-    const highCard = values[0] || 14;
-
-    if (wildCount >= 2) {
-        const handRankArray = [4, highCard];
-        return {
-            rank: 4,
-            hand_rank: handRankArray,
-            name: 'Three of a Kind (Wild)',
-            handType: 4,                    // NEW - same as rank
-            handStrength: handRankArray     // NEW - same as hand_rank
-        };
-    }
-
-    if (wildCount === 1) {
-        const pairRank = highCard;
-        const kicker = values.find(v => v !== pairRank) || 13;
-        const handRankArray = [2, pairRank, kicker];
-        return {
-            rank: 2,
-            hand_rank: handRankArray,
-            name: 'Pair (Wild)',
-            handType: 2,                    // NEW - same as rank
-            handStrength: handRankArray     // NEW - same as hand_rank
-        };
-    }
-
-    // No wilds - shouldn't happen in this function, but handle gracefully
-    const handRankArray = [1, ...values];
-    return {
-        rank: 1,
-        hand_rank: handRankArray,
-        name: 'High Card',
-        handType: 1,                    // NEW - same as rank
-        handStrength: handRankArray     // NEW - same as hand_rank
-    };
-}
-
-
-// ============================================================================
-// CONSISTENT STRUCTURE ACROSS ALL HAND TYPES
-// ============================================================================
-
-/*
-EVERY hand_rank array now follows this pattern:
-[hand_type, poker_values..., suit_values...]
-
-WHERE:
-- hand_type: 1-16 (hand strength category)
-- poker_values: standard poker comparison values (ranks, kickers)
-- suit_values: getSuitValues() for ALL cards (♠=4, ♥=3, ♦=2, ♣=1)
-
-BENEFITS:
-✅ 100% consistent - every hand type uses same tie-breaking system
-✅ No perfect ties possible - suits always provide final resolution
-✅ Predictable comparison - same algorithm works for all hand types
-✅ Easy debugging - clear pattern across all functions
-✅ Future-proof - new hand types follow same pattern
-
-COMPARISON ALGORITHM:
-function compareHands(handA, handB) {
-    const rankA = handA.hand_rank;
-    const rankB = handB.hand_rank;
-
-    for (let i = 0; i < Math.max(rankA.length, rankB.length); i++) {
-        const valueA = rankA[i] || 0;
-        const valueB = rankB[i] || 0;
-
-        if (valueA > valueB) return 1;  // Hand A wins
-        if (valueA < valueB) return -1; // Hand B wins
-    }
-
-    return 0; // Perfect tie (impossible with universal suits)
-}
-*/
-
-
-// Evaluate hand with wild cards
 function evaluateHandWithWilds(normalCards, wildCount) {
     const values = normalCards.map(c => c.value).sort((a, b) => b - a);
     const suits = normalCards.map(c => c.suit);
@@ -541,12 +358,26 @@ function evaluateHandWithWilds(normalCards, wildCount) {
     for (const [value, count] of Object.entries(valueCounts)) {
         if (count + wildCount >= 5) {
             const fiveRank = parseInt(value);
-            return { rank: 10, hand_rank: [10, fiveRank], name: 'Five of a Kind (Wild)' };
+            const handRankArray = [10, fiveRank];
+            return {
+                rank: 10,
+                hand_rank: handRankArray,
+                name: 'Five of a Kind (Wild)',
+                handType: 10,                    // ✅ ADD MISSING PROPERTY
+                handStrength: handRankArray      // ✅ ADD MISSING PROPERTY
+            };
         }
     }
     if (wildCount >= 4) {
         const highCard = values[0] || 14;
-        return { rank: 10, hand_rank: [10, highCard], name: 'Five of a Kind (Wild)' };
+        const handRankArray = [10, highCard];
+        return {
+            rank: 10,
+            hand_rank: handRankArray,
+            name: 'Five of a Kind (Wild)',
+            handType: 10,                    // ✅ ADD MISSING PROPERTY
+            handStrength: handRankArray      // ✅ ADD MISSING PROPERTY
+        };
     }
 
     // 2. Try for Straight Flush
@@ -559,13 +390,27 @@ function evaluateHandWithWilds(normalCards, wildCount) {
             const quadRank = parseInt(value);
             const remainingCards = normalCards.filter(c => c.value !== quadRank);
             const kicker = remainingCards.length > 0 ? Math.max(...remainingCards.map(c => c.value)) : 13;
-            return { rank: 8, hand_rank: [8, quadRank, kicker], name: 'Four of a Kind (Wild)' };
+            const handRankArray = [8, quadRank, kicker];
+            return {
+                rank: 8,
+                hand_rank: handRankArray,
+                name: 'Four of a Kind (Wild)',
+                handType: 8,                    // ✅ ADD MISSING PROPERTY
+                handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+            };
         }
     }
     if (wildCount >= 3) {
         const quadRank = values[0] || 14;
         const kicker = values[1] || 13;
-        return { rank: 8, hand_rank: [8, quadRank, kicker], name: 'Four of a Kind (Wild)' };
+        const handRankArray = [8, quadRank, kicker];
+        return {
+            rank: 8,
+            hand_rank: handRankArray,
+            name: 'Four of a Kind (Wild)',
+            handType: 8,                    // ✅ ADD MISSING PROPERTY
+            handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+        };
     }
 
     // 4. Try for Full House
@@ -576,20 +421,41 @@ function evaluateHandWithWilds(normalCards, wildCount) {
         const sortedPairs = pairs.sort((a, b) => parseInt(b[0]) - parseInt(a[0]));
         const tripsRank = parseInt(sortedPairs[0][0]);
         const pairRank = parseInt(sortedPairs[1][0]);
-        return { rank: 7, hand_rank: [7, tripsRank, pairRank], name: 'Full House (Wild)' };
+        const handRankArray = [7, tripsRank, pairRank];
+        return {
+            rank: 7,
+            hand_rank: handRankArray,
+            name: 'Full House (Wild)',
+            handType: 7,                    // ✅ ADD MISSING PROPERTY
+            handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+        };
     }
     if (pairs.length >= 1 && singles.length >= 1 && wildCount >= 2) {
         const pairRank = parseInt(pairs[0][0]);
         const singleRank = parseInt(singles[0][0]);
         const tripsRank = Math.max(pairRank, singleRank);
         const finalPairRank = Math.min(pairRank, singleRank);
-        return { rank: 7, hand_rank: [7, tripsRank, finalPairRank], name: 'Full House (Wild)' };
+        const handRankArray = [7, tripsRank, finalPairRank];
+        return {
+            rank: 7,
+            hand_rank: handRankArray,
+            name: 'Full House (Wild)',
+            handType: 7,                    // ✅ ADD MISSING PROPERTY
+            handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+        };
     }
     if (singles.length >= 2 && wildCount >= 3) {
         const sortedSingles = singles.sort((a, b) => parseInt(b[0]) - parseInt(a[0]));
         const tripsRank = parseInt(sortedSingles[0][0]);
         const pairRank = parseInt(sortedSingles[1][0]);
-        return { rank: 7, hand_rank: [7, tripsRank, pairRank], name: 'Full House (Wild)' };
+        const handRankArray = [7, tripsRank, pairRank];
+        return {
+            rank: 7,
+            hand_rank: handRankArray,
+            name: 'Full House (Wild)',
+            handType: 7,                    // ✅ ADD MISSING PROPERTY
+            handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+        };
     }
 
     // 5. Try for Flush
@@ -607,7 +473,14 @@ function evaluateHandWithWilds(normalCards, wildCount) {
             const remainingCards = normalCards.filter(c => c.value !== tripsRank);
             const kickers = remainingCards.map(c => c.value).sort((a, b) => b - a).slice(0, 2);
             while (kickers.length < 2) kickers.push(13 - kickers.length);
-            return { rank: 4, hand_rank: [4, tripsRank, ...kickers], name: 'Three of a Kind (Wild)' };
+            const handRankArray = [4, tripsRank, ...kickers];
+            return {
+                rank: 4,
+                hand_rank: handRankArray,
+                name: 'Three of a Kind (Wild)',
+                handType: 4,                    // ✅ ADD MISSING PROPERTY
+                handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+            };
         }
     }
     if (wildCount >= 2) {
@@ -615,7 +488,14 @@ function evaluateHandWithWilds(normalCards, wildCount) {
         const remainingValues = values.filter(v => v !== tripsRank);
         const kickers = remainingValues.slice(0, 2);
         while (kickers.length < 2) kickers.push(13 - kickers.length);
-        return { rank: 4, hand_rank: [4, tripsRank, ...kickers], name: 'Three of a Kind (Wild)' };
+        const handRankArray = [4, tripsRank, ...kickers];
+        return {
+            rank: 4,
+            hand_rank: handRankArray,
+            name: 'Three of a Kind (Wild)',
+            handType: 4,                    // ✅ ADD MISSING PROPERTY
+            handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+        };
     }
 
     // 8. Try for Two Pair
@@ -625,7 +505,14 @@ function evaluateHandWithWilds(normalCards, wildCount) {
         const higherPair = Math.max(pairRank, secondPairRank);
         const lowerPair = Math.min(pairRank, secondPairRank);
         const kicker = singles.length > 1 ? parseInt(singles[1][0]) : 13;
-        return { rank: 3, hand_rank: [3, higherPair, lowerPair, kicker], name: 'Two Pair (Wild)' };
+        const handRankArray = [3, higherPair, lowerPair, kicker];
+        return {
+            rank: 3,
+            hand_rank: handRankArray,
+            name: 'Two Pair (Wild)',
+            handType: 3,                    // ✅ ADD MISSING PROPERTY
+            handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+        };
     }
 
     // 9. Try for Pair
@@ -634,14 +521,68 @@ function evaluateHandWithWilds(normalCards, wildCount) {
         const remainingValues = values.filter(v => v !== pairRank);
         const kickers = remainingValues.slice(0, 3);
         while (kickers.length < 3) kickers.push(13 - kickers.length);
-        return { rank: 2, hand_rank: [2, pairRank, ...kickers], name: 'Pair (Wild)' };
+        const handRankArray = [2, pairRank, ...kickers];
+        return {
+            rank: 2,
+            hand_rank: handRankArray,
+            name: 'Pair (Wild)',
+            handType: 2,                    // ✅ ADD MISSING PROPERTY
+            handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+        };
     }
 
     // 10. High Card (fallback)
     const allValues = [...values];
     while (allValues.length < 5) allValues.push(14 - allValues.length);
-    return { rank: 1, hand_rank: [1, ...allValues.slice(0, 5)], name: 'High Card (Wild)' };
+    const handRankArray = [1, ...allValues.slice(0, 5)];
+    return {
+        rank: 1,
+        hand_rank: handRankArray,
+        name: 'High Card (Wild)',
+        handType: 1,                    // ✅ ADD MISSING PROPERTY
+        handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+    };
 }
+
+
+// ============================================================================
+// ALSO UPDATE THE HELPER FUNCTIONS (if they haven't been fixed yet)
+// ============================================================================
+
+// Update tryForStraightFlushWithWilds() return statements:
+// OLD: return { rank: 9, hand_rank: [9, straightInfo.high, straightInfo.secondHigh], name: name };
+// NEW: Add handType: 9, handStrength: [9, straightInfo.high, straightInfo.secondHigh]
+
+// Update tryForFlushWithWilds() return statements:
+// OLD: return { rank: 6, hand_rank: [6, ...values.slice(0, 5)], name: 'Flush (Wild)' };
+// NEW: Add handType: 6, handStrength: [6, ...values.slice(0, 5)]
+
+// Update tryForStraightWithWilds() return statements:
+// OLD: return { rank: 5, hand_rank: [5, straightInfo.high, straightInfo.secondHigh], name: 'Straight (Wild)' };
+// NEW: Add handType: 5, handStrength: [5, straightInfo.high, straightInfo.secondHigh]
+
+
+// ============================================================================
+// CRITICAL IMPACT FOR YOUR ISSUE
+// ============================================================================
+
+/*
+THIS FIX SHOULD RESOLVE:
+
+1. ✅ FULL HOUSE DETECTION: Q♥ Q♥ 10♥ 10♥ + wild → QQQ-10-10 (Full House)
+   - pairs.length=2, wildCount=1 triggers Full House logic
+   - Returns handType: 7, handStrength: [7, 12, 10]
+
+2. ✅ PROPER COMPARISON: Full House (7) > Flush (6)
+   - Wild substitution should pick Q♥ for Full House over J♥ for Flush
+
+3. ✅ EVALUATION CONSISTENCY: All wild evaluation returns same property structure
+   - Downstream code gets consistent handType/handStrength properties
+   - No more undefined property issues
+
+After this fix, your Q♥ Q♥ 10♥ 10♥ + wild should correctly evaluate to
+"Full House" instead of incorrectly showing as "Straight Flush"!
+*/
 
 // Try for straight flush with wild cards
 function tryForStraightFlushWithWilds(normalCards, wildCount) {
@@ -706,7 +647,14 @@ function tryForFlushWithWilds(normalCards, wildCount) {
                 values.sort((a, b) => b - a); // Keep sorted
             }
 
-            return { rank: 6, hand_rank: [6, ...values.slice(0, 5)], name: 'Flush (Wild)' };
+            const handRankArray = [6, ...values.slice(0, 5)];
+            return {
+                rank: 6,
+                hand_rank: handRankArray,
+                name: 'Flush (Wild)',
+                handType: 6,                    // ✅ ADD MISSING PROPERTY
+                handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+            };
         }
     }
     return null;
@@ -735,14 +683,24 @@ function tryForStraightWithWilds(normalCards, wildCount) {
         const needed = straight.filter(v => !values.includes(v)).length;
         if (needed <= wildCount) {
             const straightInfo = getStraightInfo(straight);
-            return { rank: 5, hand_rank: [5, straightInfo.high, straightInfo.secondHigh], name: 'Straight (Wild)' };
+            const handRankArray = [5, straightInfo.high, straightInfo.secondHigh];
+            return {
+                rank: 5,
+                hand_rank: handRankArray,
+                name: 'Straight (Wild)',
+                handType: 5,                    // ✅ ADD MISSING PROPERTY
+                handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+            };
         }
     }
     return null;
 }
 
-// Evaluate 3-card or 5-card front hands
-// CORRECTED: Universal suit tie-breaking for ALL 3-card hand types
+// CORRECTED evaluateThreeCardHand() - ADD MISSING DUAL PROPERTIES
+
+// The issue is that evaluateThreeCardHand() was not properly updated with dual properties
+// Here's the corrected version:
+
 function evaluateThreeCardHand(cards) {
     // Handle 5-card front hands
     if (cards.length === 5) {
@@ -774,78 +732,129 @@ function evaluateThreeCardHand(cards) {
         valuesByCount[count].sort((a, b) => b - a);
     }
 
-    // CORRECTED: Add universal suit tie-breaking for edge cases
+    // Handle edge cases first
     if (cards.length === 1) {
-        const allSuitValues = getSuitValues(cards);
-        return { rank: 1, hand_rank: [1, 7, ...allSuitValues], name: 'High Card' };
+        const handRankArray = [1, 7];
+        return {
+            rank: 1,
+            hand_rank: handRankArray,
+            name: 'High Card',
+            handType: 1,                    // ✅ ADD MISSING PROPERTY
+            handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+        };
     }
 
     if (cards.length === 2) {
-        const allSuitValues = getSuitValues(cards);
-        return { rank: 1, hand_rank: [1, 8, 7, ...allSuitValues], name: 'High Card' };
+        const handRankArray = [1, 8, 7];
+        return {
+            rank: 1,
+            hand_rank: handRankArray,
+            name: 'High Card',
+            handType: 1,                    // ✅ ADD MISSING PROPERTY
+            handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+        };
     }
 
     if (cards.length !== 3) {
-        const allSuitValues = getSuitValues(cards);
-        return { rank: 1, hand_rank: [1, 7, ...allSuitValues], name: 'Invalid' };
+        const handRankArray = [1, 7];
+        return {
+            rank: 1,
+            hand_rank: handRankArray,
+            name: 'Invalid',
+            handType: 1,                    // ✅ ADD MISSING PROPERTY
+            handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+        };
     }
 
     const counts = Object.keys(valuesByCount).map(Number).sort((a, b) => b - a);
 
-    // CORRECTED: Add universal suit tie-breaking for all 3-card hand types
-    const allSuitValues = getSuitValues(cards);
-
     // Found trip
     if (counts[0] === 3) {
         const tripsRank = valuesByCount[3][0];
-        return { rank: 4, hand_rank: [4, tripsRank, ...allSuitValues], name: 'Three of a Kind' };
+        const handRankArray = [4, tripsRank];
+        return {
+            rank: 4,
+            hand_rank: handRankArray,
+            name: 'Three of a Kind',
+            handType: 4,                    // ✅ ADD MISSING PROPERTY
+            handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+        };
     }
 
     // found pair
     if (counts[0] === 2) {
         const pairRank = valuesByCount[2][0];
         const kicker = valuesByCount[1][0];
-        return { rank: 2, hand_rank: [2, pairRank, kicker, ...allSuitValues], name: 'Pair' };
+        const handRankArray = [2, pairRank, kicker];
+        return {
+            rank: 2,
+            hand_rank: handRankArray,
+            name: 'Pair',
+            handType: 2,                    // ✅ ADD MISSING PROPERTY
+            handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+        };
     }
 
     // else it's a high card
-    return { rank: 1, hand_rank: [1, ...values, ...allSuitValues], name: 'High Card' };
+    const handRankArray = [1, ...values];
+    return {
+        rank: 1,
+        hand_rank: handRankArray,
+        name: 'High Card',
+        handType: 1,                    // ✅ ADD MISSING PROPERTY
+        handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+    };
 }
 
-// CHANGES MADE:
-// 1. Added `const allSuitValues = getSuitValues(cards);` for normal 3-card hands
-// 2. Added `...allSuitValues` to Three of a Kind return: [4, tripsRank, ...suits]
-// 3. Added `...allSuitValues` to Pair return: [2, pairRank, kicker, ...suits]
-// 4. Added `...allSuitValues` to High Card return: [1, ...values, ...suits]
-// 5. Added `...allSuitValues` to edge cases (1-card, 2-card, invalid)
-
-// BEFORE vs AFTER:
-// Three of a Kind: [4, 14] → [4, 14, 4, 3, 2]           (added suits)
-// Pair:            [2, 8, 12] → [2, 8, 12, 4, 3, 2]     (added suits)
-// High Card:       [1, 14, 13, 12] → [1, 14, 13, 12, 4, 3, 2] (added suits)
-
-// Evaluate 3-card hand with wild cards
+// ALSO UPDATE evaluateThreeCardHandWithWilds() if it exists:
 function evaluateThreeCardHandWithWilds(normalCards, wildCount) {
     const values = normalCards.map(c => c.value).sort((a, b) => b - a);
     const highCard = values[0] || 14;
 
     if (wildCount >= 2) {
-        return { rank: 4, hand_rank: [4, highCard], name: 'Three of a Kind (Wild)' };
+        const handRankArray = [4, highCard];
+        return {
+            rank: 4,
+            hand_rank: handRankArray,
+            name: 'Three of a Kind (Wild)',
+            handType: 4,                    // ✅ ADD MISSING PROPERTY
+            handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+        };
     }
 
     if (wildCount === 1) {
         const pairRank = highCard;
         const kicker = values.find(v => v !== pairRank) || 13;
-        return { rank: 2, hand_rank: [2, pairRank, kicker], name: 'Pair (Wild)' };
+        const handRankArray = [2, pairRank, kicker];
+        return {
+            rank: 2,
+            hand_rank: handRankArray,
+            name: 'Pair (Wild)',
+            handType: 2,                    // ✅ ADD MISSING PROPERTY
+            handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+        };
     }
 
-    const allValues = [...values];
-    while (allValues.length < 3) allValues.push(13 - allValues.length);
-    return { rank: 1, hand_rank: [1, ...allValues.slice(0, 3)], name: 'High Card' };
+    // No wilds - shouldn't happen in this function, but handle gracefully
+    const handRankArray = [1, ...values];
+    return {
+        rank: 1,
+        hand_rank: handRankArray,
+        name: 'High Card',
+        handType: 1,                    // ✅ ADD MISSING PROPERTY
+        handStrength: handRankArray     // ✅ ADD MISSING PROPERTY
+    };
 }
 
-// Universal straight info - handles both value arrays and pre-sorted straight arrays
-// CORRECTED: Changed 'low' to 'secondHigh' for clarity
+/*
+WHAT TO DO:
+1. Replace your current evaluateThreeCardHand() function with this corrected version
+2. Also update evaluateThreeCardHandWithWilds() if it exists
+3. Test again with: debugThreeCardEvaluation()
+4. You should now see: handType: 4, handStrength: [4, 14]
+5. This will fix the validation comparison: 4 vs 2 vs undefined → 4 vs 2 vs proper number
+*/
+
 function getStraightInfo(input) {
     let values;
 

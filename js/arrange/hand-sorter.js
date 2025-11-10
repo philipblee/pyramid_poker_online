@@ -22,7 +22,7 @@ class HandSorter {
 
         // TO THIS (preserve all properties explicitly):
         const sorted = hands.map(hand => ({ ...hand })).sort((a, b) => {
-            return this.compareHandRanks(b.hand_rank, a.hand_rank);
+             return this.compareHandRanks(b.handEvaluation.handStrength, a.handEvaluation.handStrength);
         });
 
         // Generate metadata
@@ -30,22 +30,22 @@ class HandSorter {
             totalHands: sorted.length,
             strengthRange: {
                 strongest: {
-                    handType: sorted[0]?.handType,
-                    rank: sorted[0]?.hand_rank,
-                    strength: sorted[0]?.strength
+                    handName: sorted[0]?.handEvaluation.name,
+                    handType: sorted[0]?.handEvaluation.handType,
+                    handStrength: sorted[0]?.handEvaluation.handStrength
                 },
                 weakest: {
-                    handType: sorted[sorted.length - 1]?.handType,
-                    rank: sorted[sorted.length - 1]?.hand_rank,
-                    strength: sorted[sorted.length - 1]?.strength
+                    handName: sorted[sorted.length - 1]?.handEvaluation.name,
+                    handType: sorted[sorted.length - 1]?.handEvaluation.handType,
+                    handStrength: sorted[sorted.length - 1]?.handEvaluation.handStrength
                 }
             },
             handTypeDistribution: this.getHandTypeDistribution(sorted)
         };
 
 //        console.log(`✅ HandSorter: Sorted ${sorted.length} hands`);
-//        console.log(`   Strongest: ${metadata.strengthRange.strongest.handType}`);
-//        console.log(`   Weakest: ${metadata.strengthRange.weakest.handType}`);
+//        console.log(`   Strongest: ${metadata.strengthRange.strongest.handName}`);
+//        console.log(`   Weakest: ${metadata.strengthRange.weakest.handName}`);
 
         return {
             sortedHands: sorted,
@@ -91,7 +91,7 @@ class HandSorter {
         const distribution = {};
 
         sortedHands.forEach(hand => {
-            const type = hand.handType;
+            const type = hand.handEvaluation.name;
             distribution[type] = (distribution[type] || 0) + 1;
         });
 
@@ -110,15 +110,15 @@ class HandSorter {
             const current = sortedHands[i];
             const next = sortedHands[i + 1];
 
-            const comparison = this.compareHandRanks(current.hand_rank, next.hand_rank);
+            const comparison = this.compareHandRanks(current.handEvaluation.handStrength, next.handEvaluation.handStrength);
 
             if (comparison < 0) {
                 issues.push({
                     index: i,
-                    current: current.handType,
-                    next: next.handType,
-                    currentRank: current.hand_rank,
-                    nextRank: next.hand_rank,
+                    current: current.handEvaluation.name,
+                    next: next.handEvaluation.name,
+                    currentRank: current.handEvaluation.handStrength,
+                    nextRank: next.handEvaluation.handStrength,
                     message: 'Sort order violation: weaker hand appears before stronger hand'
                 });
             }

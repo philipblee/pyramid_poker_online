@@ -534,13 +534,15 @@ class HandDetector {
         // console.log(`🏠 Created ${fullHouseCount} full houses`);
     }
 
-    // Add a single card hand to our results (modified version of addHand)
+    // Add a single card hand to our results - CLEAN STRUCTURE (Phase 2)
     addSingleCardHand(cards, handType) {
         // Get proper hand ranking from card-evaluation.js
-        const handStrength = evaluateHand(cards);
-        // single card hand
-        const card_value0 = cards[0].value
-        handStrength.hand_rank = [1,card_value0];
+        const handEvaluation = evaluateHand(cards);
+
+        // Fix single card evaluation to ensure proper structure
+        const card_value0 = cards[0].value;
+        handEvaluation.hand_rank = [1, card_value0];
+        handEvaluation.handStrength = [1, card_value0];  // Ensure new property exists
 
         // Determine valid positions for this hand
         const validPositions = this.determineValidPositions(handType, cards.length);
@@ -548,64 +550,70 @@ class HandDetector {
         // Check if hand is incomplete and calculate kickers needed
         const isIncomplete = this.isIncompleteHand(handType, cards.length);
         const kickersNeeded = this.calculateKickersNeeded(handType, cards.length, validPositions);
-        const positionScores = this.calculatePositionScores(handStrength, validPositions, cards.length);
+        const positionScores = this.calculatePositionScores(handEvaluation, validPositions, cards.length);
 
-        // In addHand:
-        // In hand-detector.js addHand() method, right after:
+        // Calculate preCalculatedScore for single cards
         const preCalculatedScore = {
             front: -0.82,
             middle: -1.15,
             back: -1.27
         };
-        // ADD THIS LOG:
-//        console.log(`✅ Created preCalculatedScore for addSingleCardHand: ${handType}:`, preCalculatedScore);
 
+        // ✅ CLEAN STRUCTURE - No redundant properties!
         this.allHands.push({
             cards: [...cards],
-            handType,
             cardCount: cards.length,
-            rank: cards[0].rank,                    // Keep for backward compatibility
-            handStrength: handStrength,             // Full evaluation result
-            hand_rank: handStrength.hand_rank,      // Proper ranking tuple
-            strength: handStrength.rank,            // Numeric strength
-            validPositions: validPositions,         // Where this hand can be placed
-            isIncomplete: isIncomplete,             // NEW: Flag for incomplete hands
-            kickersNeeded: kickersNeeded,           // NEW: Kickers needed for each position
+            handEvaluation: handEvaluation,         // ✅ RENAMED from handStrength
+            validPositions: validPositions,
+            isIncomplete: isIncomplete,
+            kickersNeeded: kickersNeeded,
             positionScores: positionScores,
-            preCalculatedScore: preCalculatedScore   // NEW: for netEV
+            preCalculatedScore: preCalculatedScore
+
+            // ✅ REMOVED REDUNDANT PROPERTIES:
+            // handType - use handEvaluation.name instead
+            // rank - was confusing (card rank vs hand rank)
+            // handStrength - renamed to handEvaluation
+            // hand_rank - use handEvaluation.handStrength instead
+            // strength - use handEvaluation.handType instead
         });
 
         const incompleteStatus = isIncomplete ? `INCOMPLETE - needs ${JSON.stringify(kickersNeeded)}` : 'COMPLETE';
-        // console.log(`🃏 Found: ${handType} ${cards[0].rank} of ${cards[0].suit} (${cards.length} card) - Valid: ${validPositions.join(', ')} - ${incompleteStatus}`);
+        // console.log(`🃏 Single card: ${handEvaluation.name} - Value: ${card_value0} - Valid: ${validPositions.join(', ')} - ${incompleteStatus}`);
     }
 
 
+    // Add a hand to our results - CLEAN STRUCTURE (Phase 2)
     addHand(cards, handType) {
-        // Get proper hand ranking - TODO: Move to separate incomplete-hand-evaluator.js later
-        let handStrength;
+        // Get proper hand ranking from evaluation functions
+        let handEvaluation;
         if (cards.length === 3) {
-            handStrength = evaluateThreeCardHand(cards);
+            handEvaluation = evaluateThreeCardHand(cards);
         } else if (cards.length === 1) {
             // Fix 1-card High Card hands
             const highCard = cards[0].value;
-            handStrength = {
+            handEvaluation = {
                 rank: 0,
                 hand_rank: [1, highCard],  // [1=High Card type, card value]
-                name: 'High Card'
+                name: 'High Card',
+                handType: 1,               // NEW property
+                handStrength: [1, highCard] // NEW property
             };
 
         } else if (cards.length === 2 && handType === 'Pair') {
             // Fix 2-card Pair hands
             const pairRank = cards[0].value;
-            handStrength = {
+            handEvaluation = {
                 rank: 1,
                 hand_rank: [2, pairRank],  // [2=Pair type, pair rank]
-                name: 'Pair'
+                name: 'Pair',
+                handType: 2,               // NEW property
+                handStrength: [2, pairRank] // NEW property
             };
 
         } else if (cards.length === 4 && handType === 'Four of a Kind') {
             // Handle 4-card Four of a Kind - let evaluateHand handle it properly
-            handStrength = evaluateHand(cards);
+            handEvaluation = evaluateHand(cards);
 
         } else if (cards.length === 4 && handType === 'Two Pair') {
             // Fix 4-card Two Pair hands
@@ -617,17 +625,17 @@ class HandDetector {
                 .map(([rank, count]) => parseInt(rank))
                 .sort((a, b) => b - a);
 
-            handStrength = {
+            handEvaluation = {
                 rank: 2,
                 hand_rank: [3, pairs[0], pairs[1]],  // [3=Two Pair type, higher pair, lower pair]
-                name: 'Two Pair'
+                name: 'Two Pair',
+                handType: 3,                         // NEW property
+                handStrength: [3, pairs[0], pairs[1]] // NEW property
             };
         } else {
             // Use standard evaluation for complete hands (5+ cards)
-            handStrength = evaluateHand(cards);
+            handEvaluation = evaluateHand(cards);
         }
-
-        // Rest of method stays the same...
 
         // Determine valid positions for this hand
         const validPositions = this.determineValidPositions(handType, cards.length);
@@ -637,34 +645,34 @@ class HandDetector {
         const kickersNeeded = this.calculateKickersNeeded(handType, cards.length, validPositions);
 
         // Calculate position-specific scores
-        const positionScores = this.calculatePositionScores(handStrength, validPositions, cards.length);
+        const positionScores = this.calculatePositionScores(handEvaluation, validPositions, cards.length);
 
-        // In addHand:
-        // In hand-detector.js addHand() method, right after:
-        const preCalculatedScore = JSON.parse(JSON.stringify(calculateMethodScore(handStrength)));
+        // Calculate preCalculatedScore
+        const preCalculatedScore = JSON.parse(JSON.stringify(calculateMethodScore(handEvaluation)));
 
-//         ADD THIS LOG:
-//        console.log(`✅ Created preCalculatedScore for addHands: ${handType}:`, preCalculatedScore);
-
-
+        // ✅ CLEAN STRUCTURE - No redundant properties!
         this.allHands.push({
             cards: [...cards],
-            handType,
             cardCount: cards.length,
-            rank: handStrength.hand_rank[1] || cards[0].rank,
-            handStrength: { ...handStrength },           // ✅ CREATE NEW OBJECT
-            hand_rank: [...handStrength.hand_rank],      // ✅ CREATE NEW ARRAY
-            strength: handStrength.rank,
+            handEvaluation: { ...handEvaluation },   // ✅ RENAMED from handStrength
             validPositions: validPositions,
             isIncomplete: isIncomplete,
             kickersNeeded: kickersNeeded,
             positionScores: positionScores,
             preCalculatedScore: preCalculatedScore
+
+            // ✅ REMOVED REDUNDANT PROPERTIES:
+            // handType - use handEvaluation.name instead
+            // rank - was confusing (card rank vs hand rank)
+            // handStrength - renamed to handEvaluation
+            // hand_rank - use handEvaluation.handStrength instead
+            // strength - use handEvaluation.handType instead
         });
 
         const incompleteStatus = isIncomplete ? `INCOMPLETE - needs ${JSON.stringify(kickersNeeded)}` : 'COMPLETE';
-        // console.log(`🎯 Found: ${handType} of ${cards[0].rank}s (${cards.length} cards) - Strength: ${handStrength.rank} - Valid: ${validPositions.join(', ')} - ${incompleteStatus}`);
+        // console.log(`🎯 Found: ${handEvaluation.name} (${cards.length} cards) - Type: ${handEvaluation.handType} - Valid: ${validPositions.join(', ')} - ${incompleteStatus}`);
     }
+
 
     /**
      * Format results with optional auto-sorting
@@ -704,7 +712,7 @@ class HandDetector {
             const scoreValues = hand.preCalculatedScore ?
                 `F:${hand.preCalculatedScore.front?.toFixed(2)} M:${hand.preCalculatedScore.middle?.toFixed(2)} B:${hand.preCalculatedScore.back?.toFixed(2)}` :
                 'MISSING';
-//            console.log(`   ${i+1}. ${hand.handType}: preCalculatedScore = ${hasScore} ${scoreValues}`);
+//            console.log(`   ${i+1}. ${hand.handEvaluation.name}: preCalculatedScore = ${hasScore} ${scoreValues}`);
         });
 
         return results;
@@ -762,14 +770,14 @@ function getValidPositionsForHandType(handType) {
     }
 }
 
-function calculateMethodScore(handStrength) {
+function calculateMethodScore(handEvaluation) {
     const methodScore = {};
     const method = gameConfig.config.winProbabilityMethod;
-    const validPositions = getValidPositionsForHandType(handStrength.hand_rank[0]);
+    const validPositions = getValidPositionsForHandType(handEvaluation.hand_rank[0]);
 
     validPositions.forEach(position => {
         if (method === 'netEV') {
-            methodScore[position] = lookupNetEV(position, { hand_rank: handStrength.hand_rank });
+            methodScore[position] = lookupNetEV(position, { hand_rank: handEvaluation.hand_rank });
         }
     });
 
