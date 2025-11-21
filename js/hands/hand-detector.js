@@ -541,6 +541,7 @@ class HandDetector {
         // single card hand
         const card_value0 = cards[0].value
         handStrength.hand_rank = [1,card_value0];
+        handStrength.handStrength = [1, card_value0];    // NEW name - ADD THIS LINE
 
         // Determine valid positions for this hand
         const validPositions = this.determineValidPositions(handType, cards.length);
@@ -566,8 +567,8 @@ class HandDetector {
             cardCount: cards.length,
             rank: cards[0].rank,                    // Keep for backward compatibility
             handStrength: handStrength,             // Full evaluation result
-            hand_rank: handStrength.hand_rank,      // Proper ranking tuple
-            strength: handStrength.rank,            // Numeric strength
+            hand_rank: handStrength.handStrength,      // Proper ranking tuple
+            strength: handStrength.handType,            // Numeric strength
             validPositions: validPositions,         // Where this hand can be placed
             isIncomplete: isIncomplete,             // NEW: Flag for incomplete hands
             kickersNeeded: kickersNeeded,           // NEW: Kickers needed for each position
