@@ -77,7 +77,7 @@ static getPointsForHand(hand, position, cardCount = null) {
 
         if (actualMethod === 'points') {
             const pointsIfWin = hand.positionScores[position];
-            const strengthBonus = this.calculateTiebreaker(hand.hand_rank);
+            const strengthBonus = this.calculateTiebreaker(hand.handStrength);
             return pointsIfWin + strengthBonus;
         } else if (actualMethod === 'netEV') {
             // NEW: Net EV method - uses corrected EV calculations
