@@ -708,9 +708,9 @@ class PyramidPoker {
             const middleTuple = middleStrength.handStrength;
             const frontTuple = frontStrength.handStrength;
 
-            console.log('🔍 backStrength:', backStrength);
-            console.log('🔍 middleStrength:', middleStrength);
-            console.log('🔍 frontStrength:', frontStrength);
+//            console.log('🔍 backStrength:', backStrength);
+//            console.log('🔍 middleStrength:', middleStrength);
+//            console.log('🔍 frontStrength:', frontStrength);
 
             const backVsMiddle = compareTuples(backTuple, middleTuple);
             const middleVsFront = compareTuples(middleTuple, frontTuple);
