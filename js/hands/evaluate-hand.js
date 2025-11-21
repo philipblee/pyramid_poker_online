@@ -449,38 +449,42 @@ function evaluateThreeCardHandWithWilds(normalCards, wildCount) {
     const values = normalCards.map(c => c.value).sort((a, b) => b - a);
     const highCard = values[0] || 14;
 
+    // Get suit values from the normal cards for tie-breaking
+    const allSuitValues = getSuitValues(normalCards);
+
     if (wildCount >= 2) {
-        const handRankArray = [4, highCard];
+        const handRankArray = [4, highCard, ...allSuitValues];
         return {
             rank: 4,
             hand_rank: handRankArray,
             name: 'Three of a Kind (Wild)',
-            handType: 4,                    // NEW - same as rank
-            handStrength: handRankArray     // NEW - same as hand_rank
+            handType: 4,
+            handStrength: handRankArray
         };
     }
 
     if (wildCount === 1) {
         const pairRank = highCard;
         const kicker = values.find(v => v !== pairRank) || 13;
-        const handRankArray = [2, pairRank, kicker];
+        const handRankArray = [2, pairRank, kicker, ...allSuitValues];
         return {
             rank: 2,
             hand_rank: handRankArray,
             name: 'Pair (Wild)',
-            handType: 2,                    // NEW - same as rank
-            handStrength: handRankArray     // NEW - same as hand_rank
+            handType: 2,
+            handStrength: handRankArray
         };
     }
 
-    // No wilds - shouldn't happen in this function, but handle gracefully
-    const handRankArray = [1, ...values];
+    const allValues = [...values];
+    while (allValues.length < 3) allValues.push(13 - allValues.length);
+    const handRankArray = [1, ...allValues.slice(0, 3), ...allSuitValues];
     return {
         rank: 1,
         hand_rank: handRankArray,
         name: 'High Card',
-        handType: 1,                    // NEW - same as rank
-        handStrength: handRankArray     // NEW - same as hand_rank
+        handType: 1,
+        handStrength: handRankArray
     };
 }
 
@@ -541,12 +545,26 @@ function evaluateHandWithWilds(normalCards, wildCount) {
     for (const [value, count] of Object.entries(valueCounts)) {
         if (count + wildCount >= 5) {
             const fiveRank = parseInt(value);
-            return { rank: 10, hand_rank: [10, fiveRank], name: 'Five of a Kind (Wild)' };
+            const handRankArray = [10, fiveRank];
+            return {
+                rank: 10,
+                hand_rank: handRankArray,
+                name: 'Five of a Kind (Wild)',
+                handType: 10,
+                handStrength: handRankArray
+            };
         }
     }
     if (wildCount >= 4) {
         const highCard = values[0] || 14;
-        return { rank: 10, hand_rank: [10, highCard], name: 'Five of a Kind (Wild)' };
+        const handRankArray = [10, highCard];
+        return {
+            rank: 10,
+            hand_rank: handRankArray,
+            name: 'Five of a Kind (Wild)',
+            handType: 10,
+            handStrength: handRankArray
+        };
     }
 
     // 2. Try for Straight Flush
@@ -559,13 +577,27 @@ function evaluateHandWithWilds(normalCards, wildCount) {
             const quadRank = parseInt(value);
             const remainingCards = normalCards.filter(c => c.value !== quadRank);
             const kicker = remainingCards.length > 0 ? Math.max(...remainingCards.map(c => c.value)) : 13;
-            return { rank: 8, hand_rank: [8, quadRank, kicker], name: 'Four of a Kind (Wild)' };
+            const handRankArray = [8, quadRank, kicker];
+            return {
+                rank: 8,
+                hand_rank: handRankArray,
+                name: 'Four of a Kind (Wild)',
+                handType: 8,
+                handStrength: handRankArray
+            };
         }
     }
     if (wildCount >= 3) {
         const quadRank = values[0] || 14;
         const kicker = values[1] || 13;
-        return { rank: 8, hand_rank: [8, quadRank, kicker], name: 'Four of a Kind (Wild)' };
+        const handRankArray = [8, quadRank, kicker];
+        return {
+            rank: 8,
+            hand_rank: handRankArray,
+            name: 'Four of a Kind (Wild)',
+            handType: 8,
+            handStrength: handRankArray
+        };
     }
 
     // 4. Try for Full House
@@ -576,20 +608,41 @@ function evaluateHandWithWilds(normalCards, wildCount) {
         const sortedPairs = pairs.sort((a, b) => parseInt(b[0]) - parseInt(a[0]));
         const tripsRank = parseInt(sortedPairs[0][0]);
         const pairRank = parseInt(sortedPairs[1][0]);
-        return { rank: 7, hand_rank: [7, tripsRank, pairRank], name: 'Full House (Wild)' };
+        const handRankArray = [7, tripsRank, pairRank];
+        return {
+            rank: 7,
+            hand_rank: handRankArray,
+            name: 'Full House (Wild)',
+            handType: 7,
+            handStrength: handRankArray
+        };
     }
     if (pairs.length >= 1 && singles.length >= 1 && wildCount >= 2) {
         const pairRank = parseInt(pairs[0][0]);
         const singleRank = parseInt(singles[0][0]);
         const tripsRank = Math.max(pairRank, singleRank);
         const finalPairRank = Math.min(pairRank, singleRank);
-        return { rank: 7, hand_rank: [7, tripsRank, finalPairRank], name: 'Full House (Wild)' };
+        const handRankArray = [7, tripsRank, finalPairRank];
+        return {
+            rank: 7,
+            hand_rank: handRankArray,
+            name: 'Full House (Wild)',
+            handType: 7,
+            handStrength: handRankArray
+        };
     }
     if (singles.length >= 2 && wildCount >= 3) {
         const sortedSingles = singles.sort((a, b) => parseInt(b[0]) - parseInt(a[0]));
         const tripsRank = parseInt(sortedSingles[0][0]);
         const pairRank = parseInt(sortedSingles[1][0]);
-        return { rank: 7, hand_rank: [7, tripsRank, pairRank], name: 'Full House (Wild)' };
+        const handRankArray = [7, tripsRank, pairRank];
+        return {
+            rank: 7,
+            hand_rank: handRankArray,
+            name: 'Full House (Wild)',
+            handType: 7,
+            handStrength: handRankArray
+        };
     }
 
     // 5. Try for Flush
@@ -607,7 +660,14 @@ function evaluateHandWithWilds(normalCards, wildCount) {
             const remainingCards = normalCards.filter(c => c.value !== tripsRank);
             const kickers = remainingCards.map(c => c.value).sort((a, b) => b - a).slice(0, 2);
             while (kickers.length < 2) kickers.push(13 - kickers.length);
-            return { rank: 4, hand_rank: [4, tripsRank, ...kickers], name: 'Three of a Kind (Wild)' };
+            const handRankArray = [4, tripsRank, ...kickers];
+            return {
+                rank: 4,
+                hand_rank: handRankArray,
+                name: 'Three of a Kind (Wild)',
+                handType: 4,
+                handStrength: handRankArray
+            };
         }
     }
     if (wildCount >= 2) {
@@ -615,7 +675,14 @@ function evaluateHandWithWilds(normalCards, wildCount) {
         const remainingValues = values.filter(v => v !== tripsRank);
         const kickers = remainingValues.slice(0, 2);
         while (kickers.length < 2) kickers.push(13 - kickers.length);
-        return { rank: 4, hand_rank: [4, tripsRank, ...kickers], name: 'Three of a Kind (Wild)' };
+        const handRankArray = [4, tripsRank, ...kickers];
+        return {
+            rank: 4,
+            hand_rank: handRankArray,
+            name: 'Three of a Kind (Wild)',
+            handType: 4,
+            handStrength: handRankArray
+        };
     }
 
     // 8. Try for Two Pair
@@ -625,7 +692,14 @@ function evaluateHandWithWilds(normalCards, wildCount) {
         const higherPair = Math.max(pairRank, secondPairRank);
         const lowerPair = Math.min(pairRank, secondPairRank);
         const kicker = singles.length > 1 ? parseInt(singles[1][0]) : 13;
-        return { rank: 3, hand_rank: [3, higherPair, lowerPair, kicker], name: 'Two Pair (Wild)' };
+        const handRankArray = [3, higherPair, lowerPair, kicker];
+        return {
+            rank: 3,
+            hand_rank: handRankArray,
+            name: 'Two Pair (Wild)',
+            handType: 3,
+            handStrength: handRankArray
+        };
     }
 
     // 9. Try for Pair
@@ -634,13 +708,27 @@ function evaluateHandWithWilds(normalCards, wildCount) {
         const remainingValues = values.filter(v => v !== pairRank);
         const kickers = remainingValues.slice(0, 3);
         while (kickers.length < 3) kickers.push(13 - kickers.length);
-        return { rank: 2, hand_rank: [2, pairRank, ...kickers], name: 'Pair (Wild)' };
+        const handRankArray = [2, pairRank, ...kickers];
+        return {
+            rank: 2,
+            hand_rank: handRankArray,
+            name: 'Pair (Wild)',
+            handType: 2,
+            handStrength: handRankArray
+        };
     }
 
     // 10. High Card (fallback)
     const allValues = [...values];
     while (allValues.length < 5) allValues.push(14 - allValues.length);
-    return { rank: 1, hand_rank: [1, ...allValues.slice(0, 5)], name: 'High Card (Wild)' };
+    const handRankArray = [1, ...allValues.slice(0, 5)];
+    return {
+        rank: 1,
+        hand_rank: handRankArray,
+        name: 'High Card (Wild)',
+        handType: 1,
+        handStrength: handRankArray
+    };
 }
 
 // Try for straight flush with wild cards
@@ -677,7 +765,14 @@ function tryForStraightFlushWithWilds(normalCards, wildCount) {
                 if (needed <= wildCount) {
                     const straightInfo = getStraightInfo(straight);
                     const name = straight[0] === 14 && straight[1] === 13 ? 'Royal Flush (Wild)' : 'Straight Flush (Wild)';
-                    return { rank: 9, hand_rank: [9, straightInfo.high, straightInfo.secondHigh], name: name };
+                    const handRankArray = [9, straightInfo.high, straightInfo.secondHigh];
+                    return {
+                        rank: 9,
+                        hand_rank: handRankArray,
+                        name: name,
+                        handType: 9,
+                        handStrength: handRankArray
+                    };
                 }
             }
         }
@@ -706,7 +801,14 @@ function tryForFlushWithWilds(normalCards, wildCount) {
                 values.sort((a, b) => b - a); // Keep sorted
             }
 
-            return { rank: 6, hand_rank: [6, ...values.slice(0, 5)], name: 'Flush (Wild)' };
+            const handRankArray = [6, ...values.slice(0, 5)];
+            return {
+                rank: 6,
+                hand_rank: handRankArray,
+                name: 'Flush (Wild)',
+                handType: 6,
+                handStrength: handRankArray
+            };
         }
     }
     return null;
@@ -735,7 +837,14 @@ function tryForStraightWithWilds(normalCards, wildCount) {
         const needed = straight.filter(v => !values.includes(v)).length;
         if (needed <= wildCount) {
             const straightInfo = getStraightInfo(straight);
-            return { rank: 5, hand_rank: [5, straightInfo.high, straightInfo.secondHigh], name: 'Straight (Wild)' };
+            const handRankArray = [5, straightInfo.high, straightInfo.secondHigh];
+            return {
+                rank: 5,
+                hand_rank: handRankArray,
+                name: 'Straight (Wild)',
+                handType: 5,
+                handStrength: handRankArray
+            };
         }
     }
     return null;
