@@ -699,21 +699,25 @@ class PyramidPoker {
 
             const handUtils = handUtilities();
 
-            const backPoints = handUtils.getPointValue(backStrength.rank, 'back');
-            const middlePoints = handUtils.getPointValue(middleStrength.rank, 'middle');
-            const frontPoints = handUtils.getPointValue(frontStrength.rank, 'front');
+            const backPoints = handUtils.getPointValue(backStrength.handType, 'back');
+            const middlePoints = handUtils.getPointValue(middleStrength.handType, 'middle');
+            const frontPoints = handUtils.getPointValue(frontStrength.handType, 'front');
 
             // Validate hand order (Back >= Middle >= Front)
-            const backTuple = backStrength.hand_rank;
-            const middleTuple = middleStrength.hand_rank;
-            const frontTuple = frontStrength.hand_rank;
+            const backTuple = backStrength.handStrength;
+            const middleTuple = middleStrength.handStrength;
+            const frontTuple = frontStrength.handStrength;
+
+            console.log('🔍 backStrength:', backStrength);
+            console.log('🔍 middleStrength:', middleStrength);
+            console.log('🔍 frontStrength:', frontStrength);
 
             const backVsMiddle = compareTuples(backTuple, middleTuple);
             const middleVsFront = compareTuples(middleTuple, frontTuple);
 
             // Special validation for 5-card front hands
             let frontIsValid = true;
-            if (frontCount === 5 && frontStrength.hand_rank[0] < 5) {
+            if (frontCount === 5 && frontStrength.handType < 5) {
                 frontIsValid = false;
             }
 
@@ -1261,7 +1265,7 @@ class PyramidPoker {
         // Back hand comparison
         const back1 = evaluateHand(hand1.back);
         const back2 = evaluateHand(hand2.back);
-        const backComparison = compareTuples(back1.hand_rank, back2.hand_rank);
+        const backComparison = compareTuples(back1.handStrength, back2.handStrength);
         let backResult = 'tie';
 
         if (backComparison > 0) {
@@ -1286,7 +1290,7 @@ class PyramidPoker {
         // Middle hand comparison
         const middle1 = evaluateHand(hand1.middle);
         const middle2 = evaluateHand(hand2.middle);
-        const middleComparison = compareTuples(middle1.hand_rank, middle2.hand_rank);
+        const middleComparison = compareTuples(middle1.handStrength, middle2.handStrength);
         let middleResult = 'tie';
 
         if (middleComparison > 0) {
@@ -1311,7 +1315,7 @@ class PyramidPoker {
         // Front hand comparison
         const front1 = evaluateThreeCardHand(hand1.front);
         const front2 = evaluateThreeCardHand(hand2.front);
-        const frontComparison = compareTuples(front1.hand_rank, front2.hand_rank);
+        const frontComparison = compareTuples(front1.handStrength, front2.handStrength);
         let frontResult = 'tie';
 
         if (frontComparison > 0) {

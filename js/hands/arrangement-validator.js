@@ -44,14 +44,14 @@ class ArrangementValidator {
      * Validate that hands are in correct strength order
      */
     validateHandOrder(backStrength, middleStrength, frontStrength) {
-        const backVsMiddle = compareTuples(backStrength.hand_rank, middleStrength.hand_rank);
-        const middleVsFront = compareTuples(middleStrength.hand_rank, frontStrength.hand_rank);
+        const backVsMiddle = compareTuples(backStrength.handStrength, middleStrength.handStrength);
+        const middleVsFront = compareTuples(middleStrength.handStrength, frontStrength.handStrength);
 
         if (backVsMiddle < 0 || middleVsFront < 0) {
             console.log('❌ Final validation: Invalid hand order');
-            console.log(`Back: ${backStrength.name} (${backStrength.hand_rank.join(', ')})`);
-            console.log(`Middle: ${middleStrength.name} (${middleStrength.hand_rank.join(', ')})`);
-            console.log(`Front: ${frontStrength.name} (${frontStrength.hand_rank.join(', ')})`);
+            console.log(`Back: ${backStrength.name} (${backStrength.handStrength.join(', ')})`);
+            console.log(`Middle: ${middleStrength.name} (${middleStrength.handStrength.join(', ')})`);
+            console.log(`Front: ${frontStrength.name} (${frontStrength.handStrength.join(', ')})`);
             return false;
         }
 
@@ -111,7 +111,7 @@ class ArrangementValidator {
     validateFrontHandConstraint(arrangement, frontStrength) {
         const frontCount = arrangement.front.length;
 
-        if (frontCount === 5 && frontStrength.hand_rank[0] < 5) {
+        if (frontCount === 5 && frontStrength.handType < 5) {
             console.log('❌ Final validation: 5-card front hand must be at least a straight');
             return false;
         }

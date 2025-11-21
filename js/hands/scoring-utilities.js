@@ -9,7 +9,7 @@ class ScoringUtilities {
 
 static getPointsForHand(hand, position, cardCount = null) {
     const utilities = handUtilities();
-    const handTypeCode = hand.hand_rank[0];  // Get the numeric code (1-16)
+    const handTypeCode = hand.handType;  // Get the numeric code (1-16)
     return utilities.getPointValue(handTypeCode, position.toLowerCase());
 }
 
@@ -19,7 +19,7 @@ static getPointsForHand(hand, position, cardCount = null) {
 
     static estimateWinProbability(handStrength, position, playerCount = 4) {
         // Estimate based on hand rank (0-10 scale) and position
-        const rank = handStrength.hand_rank[0];
+        const rank = handStrength.handType;
 
         // Base probabilities for 4-player game (adjustable for different player counts)
         const baseProbabilities = {
@@ -94,7 +94,7 @@ static getPointsForHand(hand, position, cardCount = null) {
 
                 // Estimate loss penalty based on position and hand strength
                 let lossPenalty;
-                const handType = hand.hand_rank[0];
+                const handType = hand.handType;
 
                 if (position.toLowerCase() === 'front') {
                     // Front position loss penalties
@@ -175,9 +175,9 @@ static getPointsForHand(hand, position, cardCount = null) {
 
     static isValidArrangement(backStrength, middleStrength, frontStrength) {
         // Check if arrangement meets game rules: Back >= Middle >= Front
-        const backRank = backStrength.hand_rank[0];
-        const middleRank = middleStrength.hand_rank[0];
-        const frontRank = frontStrength.hand_rank[0];
+        const backRank = backStrength.handType;
+        const middleRank = middleStrength.handType;
+        const frontRank = frontStrength.handType;
 
         // Allow some flexibility for same rank (e.g., back flush vs middle flush)
         return backRank >= middleRank && middleRank >= frontRank - 1;
@@ -188,9 +188,9 @@ static getPointsForHand(hand, position, cardCount = null) {
             return "✅ Valid arrangement";
         }
 
-        const backRank = backStrength.hand_rank[0];
-        const middleRank = middleStrength.hand_rank[0];
-        const frontRank = frontStrength.hand_rank[0];
+        const backRank = backStrength.handType;
+        const middleRank = middleStrength.handType;
+        const frontRank = frontStrength.handType;
 
         if (backRank < middleRank) {
             return "❌ Back hand must be >= Middle hand";

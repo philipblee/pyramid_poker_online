@@ -434,7 +434,7 @@ function evaluateThreeCardHand(cards) {
     }
 
     // else it's a high card
-    const handRankArray = [1, ...values];
+    const handRankArray = [1, ...values, ...allSuitValues];  // ✅ With suits
     return {
         rank: 1,
         hand_rank: handRankArray,
@@ -774,22 +774,6 @@ function evaluateThreeCardHand(cards) {
         valuesByCount[count].sort((a, b) => b - a);
     }
 
-    // CORRECTED: Add universal suit tie-breaking for edge cases
-    if (cards.length === 1) {
-        const allSuitValues = getSuitValues(cards);
-        return { rank: 1, hand_rank: [1, 7, ...allSuitValues], name: 'High Card' };
-    }
-
-    if (cards.length === 2) {
-        const allSuitValues = getSuitValues(cards);
-        return { rank: 1, hand_rank: [1, 8, 7, ...allSuitValues], name: 'High Card' };
-    }
-
-    if (cards.length !== 3) {
-        const allSuitValues = getSuitValues(cards);
-        return { rank: 1, hand_rank: [1, 7, ...allSuitValues], name: 'Invalid' };
-    }
-
     const counts = Object.keys(valuesByCount).map(Number).sort((a, b) => b - a);
 
     // CORRECTED: Add universal suit tie-breaking for all 3-card hand types
@@ -798,19 +782,43 @@ function evaluateThreeCardHand(cards) {
     // Found trip
     if (counts[0] === 3) {
         const tripsRank = valuesByCount[3][0];
-        return { rank: 4, hand_rank: [4, tripsRank, ...allSuitValues], name: 'Three of a Kind' };
+        const handRankArray = [4, tripsRank, ...allSuitValues];
+        return {
+            rank: 4,
+            hand_rank: handRankArray,
+            name: 'Three of a Kind',
+            handType: 4,
+            handStrength: handRankArray
+        };
     }
 
     // found pair
     if (counts[0] === 2) {
         const pairRank = valuesByCount[2][0];
         const kicker = valuesByCount[1][0];
-        return { rank: 2, hand_rank: [2, pairRank, kicker, ...allSuitValues], name: 'Pair' };
+        const handRankArray = [2, pairRank, kicker, ...allSuitValues];
+        return {
+            rank: 2,
+            hand_rank: handRankArray,
+            name: 'Pair',
+            handType: 2,
+            handStrength: handRankArray
+        };
     }
 
     // else it's a high card
-    return { rank: 1, hand_rank: [1, ...values, ...allSuitValues], name: 'High Card' };
+    const handRankArray = [1, ...values, ...allSuitValues];
+    return {
+        rank: 1,
+        hand_rank: handRankArray,
+        name: 'High Card',
+        handType: 1,
+        handStrength: handRankArray
+    }
+
+
 }
+
 
 // CHANGES MADE:
 // 1. Added `const allSuitValues = getSuitValues(cards);` for normal 3-card hands
@@ -829,19 +837,42 @@ function evaluateThreeCardHandWithWilds(normalCards, wildCount) {
     const values = normalCards.map(c => c.value).sort((a, b) => b - a);
     const highCard = values[0] || 14;
 
+    const allSuitValues = getSuitValues(normalCards);
+
     if (wildCount >= 2) {
-        return { rank: 4, hand_rank: [4, highCard], name: 'Three of a Kind (Wild)' };
+        const handRankArray = [4, highCard, ...allSuitValues];
+        return {
+            rank: 4,
+            hand_rank: handRankArray,
+            name: 'Three of a Kind (Wild)',
+            handType: 4,
+            handStrength: handRankArray
+        };
     }
 
     if (wildCount === 1) {
         const pairRank = highCard;
         const kicker = values.find(v => v !== pairRank) || 13;
-        return { rank: 2, hand_rank: [2, pairRank, kicker], name: 'Pair (Wild)' };
+        const handRankArray = [2, pairRank, kicker, ...allSuitValues];
+        return {
+            rank: 2,
+            hand_rank: handRankArray,
+            name: 'Pair (Wild)',
+            handType: 2,
+            handStrength: handRankArray
+        };
     }
 
     const allValues = [...values];
     while (allValues.length < 3) allValues.push(13 - allValues.length);
-    return { rank: 1, hand_rank: [1, ...allValues.slice(0, 3)], name: 'High Card' };
+    const handRankArray = [1, ...allValues.slice(0, 3), ...allSuitValues];
+    return {
+        rank: 1,
+        hand_rank: handRankArray,
+        name: 'High Card',
+        handType: 1,
+        handStrength: handRankArray
+    };
 }
 
 // Universal straight info - handles both value arrays and pre-sorted straight arrays

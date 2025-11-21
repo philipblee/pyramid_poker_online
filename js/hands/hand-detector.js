@@ -765,7 +765,7 @@ function getValidPositionsForHandType(handType) {
 function calculateMethodScore(handStrength) {
     const methodScore = {};
     const method = gameConfig.config.winProbabilityMethod;
-    const validPositions = getValidPositionsForHandType(handStrength.hand_rank[0]);
+    const validPositions = getValidPositionsForHandType(handStrength.handType);
 
     validPositions.forEach(position => {
         if (method === 'netEV') {
