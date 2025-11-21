@@ -1,4 +1,4 @@
-q// js/hands/incomplete-hand-evaluator.js v1
+// js/hands/incomplete-hand-evaluator.js v1
 // Evaluates incomplete hands (1, 2, 4 cards) that need kickers
 // Keeps card-evaluation.js clean for complete hands only
 
@@ -12,7 +12,14 @@ function evaluateIncompleteHand(cards, handType) {
     console.log(`🔧 Evaluating incomplete hand: ${handType} with ${cards.length} cards`);
 
     if (!cards || cards.length === 0) {
-        return { rank: 0, hand_rank: [0, 0], name: 'No Cards' };
+        const handRankArray = [0, 0];
+        return {
+            rank: 0,
+            hand_rank: handRankArray,
+            name: 'No Cards',
+            handType: 0,
+            handStrength: handRankArray
+        };
     }
 
     // Handle wild cards if present
@@ -37,7 +44,14 @@ function evaluateIncompleteHand(cards, handType) {
             return evaluateFourCardHand(values, handType, cards);
         default:
             console.warn(`⚠️ Unexpected card count for incomplete hand: ${cards.length}`);
-            return { rank: 0, hand_rank: [0, 0], name: 'Invalid' };
+            const handRankArray = [0, 0];
+            return {
+                rank: 0,
+                hand_rank: handRankArray,
+                name: 'Invalid',
+                handType: 0,
+                handStrength: handRankArray
+            };
     }
 }
 
@@ -53,11 +67,14 @@ function evaluateOneCardHand(values, handType) {
     }
 
     const highCard = values[0];
+    const handRankArray = [1, highCard];
 
     return {
-        rank: 1,                    // High Card base rank
-        hand_rank: [1, highCard],   // [1=High Card type, high card value]
-        name: 'High Card'
+        rank: 1,
+        hand_rank: handRankArray,
+        name: 'High Card',
+        handType: 1,
+        handStrength: handRankArray
     };
 }
 
@@ -71,10 +88,13 @@ function evaluateTwoCardHand(values, handType) {
     if (handType !== 'Pair') {
         console.warn(`⚠️ Unexpected hand type for 2-card hand: ${handType}`);
         // Handle as high card if not a pair
+        const handRankArray = [1, values[0], values[1] || 0];
         return {
             rank: 1,
-            hand_rank: [1, values[0], values[1] || 0],
-            name: 'High Card'
+            hand_rank: handRankArray,
+            name: 'High Card',
+            handType: 1,
+            handStrength: handRankArray
         };
     }
 
@@ -85,10 +105,13 @@ function evaluateTwoCardHand(values, handType) {
         console.warn(`⚠️ 2-card hand marked as Pair but values don't match: ${values}`);
     }
 
+    const handRankArray = [2, pairRank];
     return {
-        rank: 1,                           // Pair base rank
-        hand_rank: [2, pairRank],          // [2=Pair type, pair rank] - kickers added later
-        name: 'Pair'
+        rank: 2,
+        hand_rank: handRankArray,
+        name: 'Pair',
+        handType: 2,
+        handStrength: handRankArray
     };
 }
 
@@ -110,7 +133,14 @@ function evaluateFourCardHand(values, handType, cards) {
         return evaluateTwoPair(values, valueCounts);
     } else {
         console.warn(`⚠️ Unexpected hand type for 4-card hand: ${handType}`);
-        return { rank: 1, hand_rank: [1, 0], name: 'High Card' };
+        const handRankArray = [1, 0];
+        return {
+            rank: 1,
+            hand_rank: handRankArray,
+            name: 'High Card',
+            handType: 1,
+            handStrength: handRankArray
+        };
     }
 }
 
@@ -127,15 +157,25 @@ function evaluateFourOfAKind(values, valueCounts) {
 
     if (!quadRank) {
         console.warn(`⚠️ 4 of a Kind hand doesn't have 4 matching cards: ${values}`);
-        return { rank: 0, hand_rank: [0, 0], name: 'Invalid' };
+        const handRankArray = [0, 0];
+        return {
+            rank: 0,
+            hand_rank: handRankArray,
+            name: 'Invalid',
+            handType: 0,
+            handStrength: handRankArray
+        };
     }
 
     const quadValue = parseInt(quadRank);
+    const handRankArray = [8, quadValue];
 
     return {
-        rank: 7,                           // Four of a Kind base rank
-        hand_rank: [8, quadValue],         // [8=Four of a Kind type, quad rank] - kicker added later
-        name: '4 of a Kind'
+        rank: 8,
+        hand_rank: handRankArray,
+        name: '4 of a Kind',
+        handType: 8,
+        handStrength: handRankArray
     };
 }
 
@@ -154,16 +194,26 @@ function evaluateTwoPair(values, valueCounts) {
 
     if (pairs.length !== 2) {
         console.warn(`⚠️ Two Pair hand doesn't have exactly 2 pairs: ${values}`);
-        return { rank: 0, hand_rank: [0, 0], name: 'Invalid' };
+        const handRankArray = [0, 0];
+        return {
+            rank: 0,
+            hand_rank: handRankArray,
+            name: 'Invalid',
+            handType: 0,
+            handStrength: handRankArray
+        };
     }
 
     const higherPair = pairs[0];
     const lowerPair = pairs[1];
+    const handRankArray = [3, higherPair, lowerPair];
 
     return {
-        rank: 3,                                      // Two Pair base rank
-        hand_rank: [3, higherPair, lowerPair],        // [3=Two Pair type, higher pair, lower pair] - kicker added later
-        name: 'Two Pair'
+        rank: 3,
+        hand_rank: handRankArray,
+        name: 'Two Pair',
+        handType: 3,
+        handStrength: handRankArray
     };
 }
 
@@ -185,28 +235,37 @@ function evaluateIncompleteHandWithWilds(normalCards, wildCount, handType) {
         case 1:
             // 1 wild card = make highest possible card (Ace)
             const highCard = values[0] || 14;
+            const handRankArray1 = [1, Math.max(highCard, 14)];
             return {
-                rank: 0,
-                hand_rank: [1, Math.max(highCard, 14)],
-                name: 'High Card (Wild)'
+                rank: 1,
+                hand_rank: handRankArray1,
+                name: 'High Card (Wild)',
+                handType: 1,
+                handStrength: handRankArray1
             };
 
         case 2:
             // 1 normal + 1 wild = make pair with the normal card
             if (normalCards.length === 1 && wildCount === 1) {
                 const pairRank = values[0];
+                const handRankArray2 = [2, pairRank];
                 return {
-                    rank: 1,
-                    hand_rank: [2, pairRank],
-                    name: 'Pair (Wild)'
+                    rank: 2,
+                    hand_rank: handRankArray2,
+                    name: 'Pair (Wild)',
+                    handType: 2,
+                    handStrength: handRankArray2
                 };
             }
             // 2 wilds = make pair of Aces
             if (wildCount === 2) {
+                const handRankArray3 = [2, 14];
                 return {
-                    rank: 1,
-                    hand_rank: [2, 14],
-                    name: 'Pair (Wild)'
+                    rank: 2,
+                    hand_rank: handRankArray3,
+                    name: 'Pair (Wild)',
+                    handType: 2,
+                    handStrength: handRankArray3
                 };
             }
             break;
@@ -215,10 +274,13 @@ function evaluateIncompleteHandWithWilds(normalCards, wildCount, handType) {
             // For 4-card incomplete hands with wilds, optimize based on hand type
             if (handType === '4 of a Kind') {
                 const quadRank = values[0] || 14; // Use highest normal card or Ace
+                const handRankArray4 = [8, quadRank];
                 return {
-                    rank: 7,
-                    hand_rank: [8, quadRank],
-                    name: '4 of a Kind (Wild)'
+                    rank: 8,
+                    hand_rank: handRankArray4,
+                    name: '4 of a Kind (Wild)',
+                    handType: 8,
+                    handStrength: handRankArray4
                 };
             } else if (handType === 'Two Pair') {
                 // Make two pairs with highest possible ranks
@@ -226,10 +288,13 @@ function evaluateIncompleteHandWithWilds(normalCards, wildCount, handType) {
                 const secondPair = values[1] || 13;
                 const higherPair = Math.max(firstPair, secondPair);
                 const lowerPair = Math.min(firstPair, secondPair);
+                const handRankArray5 = [3, higherPair, lowerPair];
                 return {
-                    rank: 2,
-                    hand_rank: [3, higherPair, lowerPair],
-                    name: 'Two Pair (Wild)'
+                    rank: 3,
+                    hand_rank: handRankArray5,
+                    name: 'Two Pair (Wild)',
+                    handType: 3,
+                    handStrength: handRankArray5
                 };
             }
             break;
@@ -237,10 +302,13 @@ function evaluateIncompleteHandWithWilds(normalCards, wildCount, handType) {
 
     // Fallback - treat as high card with best possible wild usage
     const bestHighCard = Math.max(values[0] || 0, 14);
+    const handRankArrayFallback = [1, bestHighCard];
     return {
-        rank: 0,
-        hand_rank: [1, bestHighCard],
-        name: 'High Card (Wild)'
+        rank: 1,
+        hand_rank: handRankArrayFallback,
+        name: 'High Card (Wild)',
+        handType: 1,
+        handStrength: handRankArrayFallback
     };
 }
 
