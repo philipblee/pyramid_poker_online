@@ -1,56 +1,4 @@
 // New file: js/firebase/firebase-auth.js
-class FirebaseAuthManager {
-    constructor() {
-        this.currentUser = null;
-        this.isInitialized = false;
-    }
-
-    async initAuth() {
-        return new Promise((resolve) => {
-            auth.onAuthStateChanged((user) => {
-                this.currentUser = user;
-                this.isInitialized = true;
-
-                this.updateLoginButtonText();
-
-                resolve(user);
-            });
-        });
-    }
-
-    // Gradual migration: try Firebase first, fallback to localStorage
-    async login(email, password) {
-        try {
-            const result = await signInWithEmailAndPassword(auth, email, password);
-            await this.syncFromLocalStorage(); // Migrate local data
-            return { success: true, user: result.user };
-        } catch (error) {
-            console.log('Firebase login failed, trying localStorage...');
-            return this.localStorageLogin(email, password);
-        }
-    }
-
-    async register(email, password) {
-        try {
-            const result = await createUserWithEmailAndPassword(auth, email, password);
-            await this.createUserProfile(result.user);
-            return { success: true, user: result.user };
-        } catch (error) {
-            console.log('Firebase registration failed, using localStorage...');
-            return this.localStorageRegister(email, password);
-        }
-    }
-
-    // Keep existing localStorage methods as fallback
-    localStorageLogin(email, password) {
-        // Your existing localStorage login code
-    }
-
-    localStorageRegister(email, password) {
-        // Your existing localStorage registration code
-    }
-}
-
 class FirebaseAuth {
     constructor() {
         this.currentUser = null;
@@ -75,6 +23,14 @@ class FirebaseAuth {
         try {
             const result = await window.firebaseAuth.createUserWithEmailAndPassword(email, password);
             console.log('🔥 Registration successful:', result.user.email);
+
+            // ✅ Encode email for Firebase (replace . and @)
+            const encodedEmail = email.replace(/\./g, ',').replace('@', '_at_');
+
+            await firebase.database().ref(`players/${encodedEmail}/chips`).set(10000);
+            await firebase.database().ref(`players/${encodedEmail}/reloads`).set(0);
+            console.log(`💰 New player ${email} initialized with 10,000 chips`);
+
             return { success: true, user: result.user };
         } catch (error) {
             console.error('🔥 Registration failed:', error.message);

@@ -74,7 +74,7 @@
 class Player {
     constructor(name) {
         this.name = name;
-        this.chips = 1000;      // Starting bankroll
+        this.chips = 10000;      // Starting bankroll
         this.reloads = 0;       // Track chip reloads
         this.roundScore = 0;    // Points this round
         this.tournamentScore = 0; // Total points
@@ -322,23 +322,22 @@ const RANKING_SYSTEMS = {
         name: "Straight > Flush (Pyramid Poker)",
         description: "Straights beat flushes",
         handOrder: [
-            'high-card',      // 0
-            'pair',           // 1
-            'two-pair',       // 2
-            'three-of-a-kind',// 3
-            'flush',          // 4 - Lower
-            'straight',       // 5 - Higher
-            'full-house',     // 6
-            'four-of-a-kind', // 7
-            'straight-flush', // 8
-            'five-of-a-kind', // 9
-            // Special large hands
-            '6-straight-flush', // 10
-            '6-of-a-kind',      // 11
-            '7-straight-flush', // 12
-            '7-of-a-kind',      // 13
-            '8-straight-flush', // 14
-            '8-of-a-kind'       // 15
+            'high-card',      // 1
+            'pair',           // 2
+            'two-pair',       // 3
+            'three-of-a-kind',// 4
+            'flush',          // 5 - Lower
+            'straight',       // 6 - Higher
+            'full-house',     // 7
+            'four-of-a-kind', // 8
+            'straight-flush', // 9
+            'five-of-a-kind', // 10
+            '6-straight-flush', // 11
+            '6-of-a-kind',      // 12
+            '7-straight-flush', // 13
+            '7-of-a-kind',      // 14
+            '8-straight-flush', // 15
+            '8-of-a-kind'       // 16
         ]
     },
 
@@ -350,8 +349,8 @@ const RANKING_SYSTEMS = {
             'pair',
             'two-pair',
             'three-of-a-kind',
-            'straight',       // 4 - Lower
-            'flush',          // 5 - Higher
+            'straight',       // 5 - Lower
+            'flush',          // 6 - Higher
             'full-house',
             'four-of-a-kind',
             'straight-flush',
