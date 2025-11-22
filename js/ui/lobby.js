@@ -164,10 +164,45 @@ const defaultTables = [
 ];
 
 // Initialize lobby (call this after your Firebase login)
-function initializeLobby(userName) {
+async function initializeLobby(userName) {
     document.getElementById('currentUser').textContent = userName;
+
+    // Load and display chip data
+    await updateChipDisplay();
+
     populateLobby();
     showLobbyScreen();
+}
+
+// NEW FUNCTION: Load and display chip data
+async function updateChipDisplay() {
+    const currentUser = firebase.auth().currentUser;
+    if (!currentUser) return;
+
+    const encodedEmail = currentUser.email.replace(/\./g, ',').replace('@', '_at_');
+    const playerRef = firebase.database().ref(`players/${encodedEmail}`);
+
+    try {
+        const snapshot = await playerRef.once('value');
+        const data = snapshot.val() || {};
+
+        const chips = data.chips || 0;
+        const reloads = data.reloads || 0;
+
+        // Update the user-info display
+        const userInfoDiv = document.querySelector('.user-info');
+        if (userInfoDiv) {
+            userInfoDiv.innerHTML = `
+                👤 ${currentUser.email} |
+                💰 ${chips.toLocaleString()} chips |
+                🔄 ${reloads} reloads
+            `;
+        }
+
+        console.log('💰 Chip display updated:', { chips, reloads });
+    } catch (error) {
+        console.error('❌ Failed to load chip data:', error);
+    }
 }
 
 // Show lobby screen
