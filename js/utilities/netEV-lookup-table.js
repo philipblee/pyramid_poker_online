@@ -1,5 +1,6 @@
 // js/utilities/net-ev-lookup.js
 // Net EV Lookup with hierarchical fallback (adapted from empirical-win-netev.js)
+window.lookupCount = 0;
 
 class NetEVLookup {
     constructor() {
@@ -258,51 +259,16 @@ class NetEVLookup {
 
     // Add this method to your NetEV lookup class
     getNetEVByPrefix(position, partialTuple) {
-        // ✅ FIXED: Check the right property
-        if (!this.evMap) {
-            console.log(`❌ NetEV evMap is null/undefined`);
-            return null;
-        }
+        // Build search string once
+        const searchPrefix = `${position.toLowerCase()}:${partialTuple.join(',')}`;
 
-        if (!partialTuple || partialTuple.length === 0) {
-            console.log(`❌ Invalid partial tuple: ${partialTuple}`);
-            return null;
-        }
-
-        const handType = partialTuple[0];
-//        console.log(`🔍 Prefix search for ${position} handType ${handType} with prefix [${partialTuple.join(',')}]`);
-
-        // ✅ SEARCH THROUGH evMap, not lookupData
-        const matchingEntries = [];
-
+        // Simple string match - just like tiered2!
         for (const [key, entry] of this.evMap.entries()) {
-            // Parse the key using your actual createLookupKey format
-            // We need to reverse-engineer the key format
-            if (key.startsWith(`${position.toLowerCase()}:`)) {
-                const keyParts = key.split(':')[1].split(',').map(x => parseInt(x));
-
-                // Check if this key matches our prefix
-                let isMatch = true;
-                for (let i = 0; i < partialTuple.length; i++) {
-                    if (i >= keyParts.length || keyParts[i] !== partialTuple[i]) {
-                        isMatch = false;
-                        break;
-                    }
-                }
-
-                if (isMatch) {
-                    matchingEntries.push({ key, value: entry.netev, tuple: keyParts });
-                }
+            if (key.startsWith(searchPrefix)) {
+                return entry.netev;
             }
         }
 
-        if (matchingEntries.length > 0) {
-            const bestMatch = matchingEntries[0];
-//            console.log(`✅ Prefix match found: [${bestMatch.tuple.join(',')}] = ${bestMatch.value}`);
-            return bestMatch.value;
-        }
-
-        console.log(`❌ No prefix matches found for [${partialTuple.join(',')}]`);
         return null;
     }
 
@@ -319,6 +285,8 @@ const netEVLookup = new NetEVLookup();
  */
 
 function lookupNetEV(position, hand) {
+
+    window.lookupCount++;
 
     if (hand.preCalculatedScore && hand.preCalculatedScore[position] !== null && hand.preCalculatedScore[position] !== undefined) {
         return hand.preCalculatedScore[position];
