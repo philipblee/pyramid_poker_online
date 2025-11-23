@@ -221,13 +221,19 @@ class Analysis {
     }
 
     isSequentialValues() {
-        const values = [...new Set(this.cards.map(c => c.value))].sort((a, b) => a - b);
-        return values.every((val, i) => i === 0 || val === values[i-1] + 1);
+        const values = this.cards.map(c => c.value).sort((a, b) => a - b);
+        return values.every((val, i) => val === values[0] + i);
     }
 
     isWheelStraight() {
-        const values = new Set(this.cards.map(c => c.value));
-        return values.has(14) && values.has(2) && values.has(3) && values.has(4) && values.has(5);
+        const values = this.cards.map(c => c.value).sort((a, b) => a - b);
+        // Wheel is specifically: [2, 3, 4, 5, 14]
+        return values.length === 5 &&
+               values[0] === 2 &&
+               values[1] === 3 &&
+               values[2] === 4 &&
+               values[3] === 5 &&
+               values[4] === 14;
     }
 
     getStraightHigh() {

@@ -34,7 +34,7 @@ const defaultTables = [
                     computerPlayers: 1,
                     rounds: 3,
                     wildCardCount: 2,
-                    winProbabilityMethod: 'netEV' },
+                    winProbabilityMethod: 'tiered2' },
         icon: '🏓'
     },
 
