@@ -29,6 +29,13 @@ class GameConfig {
             // Advanced AI settings
             aiDifficulty: 'normal',          // 'easy', 'normal', 'hard'
             aiPersonality: 'balanced',       // 'aggressive', 'balanced', 'conservative'
+
+            // stakes:
+            stakes: 'no',
+            stakesAnte: 'no',
+            stakesMultiplier: 2,
+
+
         };
 
 //        this.loadFromStorage();
