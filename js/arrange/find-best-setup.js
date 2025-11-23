@@ -288,8 +288,8 @@ class FindBestSetup {
                     handType: `${newCardCount} of a Kind`,
                     cardCount: newCardCount,
                     handStrength: enhancedHandStrength,
-                    hand_rank: enhancedHandStrength.hand_rank,
-                    strength: enhancedHandStrength.rank,
+                    hand_rank: enhancedHandStrength.handStrength, // updated for new fields
+                    strength: enhancedHandStrength.handType,      // updated for new fields
                     validPositions: hand.validPositions,   // Keep original valid positions
                     isIncomplete: false                    // Enhanced hands are always complete
                 };
@@ -329,8 +329,8 @@ class FindBestSetup {
                         handType: `${newCardCount} of a Kind`,
                         cardCount: newCardCount,
                         handStrength: enhancedHandStrength,
-                        hand_rank: enhancedHandStrength.hand_rank,
-                        strength: enhancedHandStrength.rank,
+                        hand_rank: enhancedHandStrength.handStrength,  // ✅ Change
+                        strength: enhancedHandStrength.handType,       // ✅ ChangecedHandStrength.hand_rank,
                         validPositions: hand.validPositions,   // Keep original valid positions
                         isIncomplete: false                    // Enhanced hands are always complete
                         };
