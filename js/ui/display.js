@@ -277,11 +277,8 @@ function updateScoring(game) {
 
 // Update button states based on game state
 function updateButtonStates(game) {
-    console.log('🎮 updateButtonStates() called from:', new Error().stack.split('\n')[2].trim());
-
-    
-
-    const newGameBtn = document.getElementById('newGame');
+//    console.log('🎮 updateButtonStates() called from:', new Error().stack.split('\n')[2].trim());
+      const newGameBtn = document.getElementById('newGame');
     const newRoundBtn = document.getElementById('newRound');
 //    const addPlayerBtn = document.getElementById('addPlayer');
     const autoBtn = document.getElementById('autoArrange');
@@ -364,7 +361,7 @@ function toggleSidebar(game) {
 
 // Update all display elements
 function updateDisplay(game) {
-    console.log('🔍 updateDisplay() called from:', new Error().stack.split('\n')[2].trim());
+//    console.log('🔍 updateDisplay() called from:', new Error().stack.split('\n')[2].trim());
     updateStatus(game);
     updatePlayerList(game);
     updateScoring(game);
