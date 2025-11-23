@@ -361,7 +361,7 @@ class PyramidPoker {
         console.log('- PlayerHands size:', this.playerHands.size);
         console.log('- SubmittedHands size:', this.submittedHands.size);
         this.playerHands.forEach((hand, name) => {
-            console.log(`- ${name}: ${hand.cards.length} cards`);
+//            console.log(`- ${name}: ${hand.cards.length} cards`);
         });
 
         // Reset all players' ready status to false
@@ -370,8 +370,8 @@ class PyramidPoker {
         }
 
         // 🔧 DEBUG - Verify the reset worked
-        console.log('🔧 After ready reset:');
-        this.players.forEach(p => console.log(`${p.name}: ready=${p.ready}`));
+//        console.log('🔧 After ready reset:');
+//        this.players.forEach(p => console.log(`${p.name}: ready=${p.ready}`));
 
     }
 
@@ -763,7 +763,7 @@ class PyramidPoker {
                 submitBtn.disabled = false;
 
                 const readyCount = this.playerManager.getReadyCount();
-                statusDiv.innerHTML = `Round ${this.currentRound} of ${this.maxRounds}.  Player ${currentPlayer.name}'s turn - <span style="color: #4ecdc4; font-weight: bold;">✓ SETUP VALID</span> - Ready to submit!`;
+                statusDiv.innerHTML = `Round ${this.currentRound} of ${this.maxRounds}.  Player ${currentPlayer.name}'s turn - <span style="color: #4ecdc4; font-weight: bold;">✓ SETUP VALID</span>`;
             } else {
                 // Invalid order
                 backHand.classList.add('invalid');

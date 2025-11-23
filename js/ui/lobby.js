@@ -34,6 +34,7 @@ const defaultTables = [
                     computerPlayers: 1,
                     rounds: 3,
                     wildCardCount: 2,
+                    stakes: 'no',
                     winProbabilityMethod: 'netEV' },
         icon: '🏓'
     },
@@ -49,6 +50,7 @@ const defaultTables = [
                     computerPlayers: 2,
                     rounds: 3,
                     wildCardCount: 1,
+                    stakes: 'no',
                     winProbabilityMethod: 'netEV' },
         icon: '🏓'
     },
@@ -63,7 +65,7 @@ const defaultTables = [
                     gameDeviceMode: 'single-device',
                     computerPlayers: 5,
                     rounds: 5,
-                    wildCardCount: 0,
+                    wildCardCount: 2,
                     winProbabilityMethod: 'tiered2' },
         icon: '🏓'
     },
@@ -78,7 +80,7 @@ const defaultTables = [
                     gameDeviceMode: 'single-device',
                     computerPlayers: 5,
                     rounds: 5,
-                    wildCardCount: 0,
+                    wildCardCount: 2,
                     winProbabilityMethod: 'tiered2' },
         icon: '🏓'
     },
@@ -93,7 +95,7 @@ const defaultTables = [
                     gameConnectMode: 'offline',
                     computerPlayers: 5,
                     rounds: 5,
-                    wildCardCount: 0,
+                    wildCardCount: 2,
                     winProbabilityMethod: 'tiered2' },
         icon: '🏓'
     },
