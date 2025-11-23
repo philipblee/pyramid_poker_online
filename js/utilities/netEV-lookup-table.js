@@ -237,23 +237,25 @@ class NetEVLookup {
         }
 
         const positions = new Set();
-        const handTypes = new Set();
-        let totalEntries = 0;
-        let avgFinalEV = 0;
+        let totalNetEV = 0;
+        let totalWins = 0;
+        let totalGames = 0;
 
         this.evMap.forEach(entry => {
             positions.add(entry.position);
-            handTypes.add(entry.handType);
-            avgFinalEV += entry.finalEV;
-            totalEntries++;
+            totalNetEV += entry.netev;
+            totalWins += entry.wins;
+            totalGames += entry.total;
         });
 
         return {
             loaded: true,
-            totalEntries,
+            totalEntries: this.evMap.size,
             positions: Array.from(positions),
-            handTypes: Array.from(handTypes),
-            avgFinalEV: totalEntries > 0 ? (avgFinalEV / totalEntries) : 0
+            avgNetEV: this.evMap.size > 0 ? (totalNetEV / this.evMap.size) : 0,
+            totalWins,
+            totalGames,
+            overallWinRate: totalGames > 0 ? (totalWins / totalGames) : 0
         };
     }
 
