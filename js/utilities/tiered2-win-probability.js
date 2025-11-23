@@ -2,6 +2,8 @@
 // Step 1: CSV Parser for Tiered2 win probability data
 // Parses data/hand_tuple_lookup.csv into usable lookup structure
 
+window.tiered2LookupCount = 0;
+
 class Tiered2WinProbability {
     constructor() {
         this.probabilityMap = new Map();
@@ -267,6 +269,7 @@ const tiered2WinProbability = new Tiered2WinProbability();
  * @returns {number|null} - Win probability or null if no fallback found
  */
 function lookupTiered2WinProbability(position, hand) {
+    window.tiered2LookupCount++;
 //     console.log('🔍 Lookup tiered2 probability:', { position, handRank: hand.hand_rank });
     const handRank = hand.hand_rank || hand;
 
@@ -323,25 +326,6 @@ function lookupTiered2WinProbability(position, hand) {
             }
         }
     }
-
-
-//    console.log('❌ No match found at any level, returning null');
-//    console.log(`   🔍 Position: ${position}`);
-//    console.log(`   🔍 Hand rank tuple: [${handRank.join(', ')}]`);
-//    console.log(`   🔍 Attempted lookups:`);
-
-    // In your lookup code where it fails
-//    debugHandCorruption(hand, "When lookup fails");
-//
-//    console.log (`     lookupTiered2WinProbability: position, hand: ${position}`)
-    // Pretty-printed JSON
-//    console.log("Hand (formatted):", JSON.stringify(hand, null, 2));
-
-    // Show exactly what tuples were tried
-//    for (let length = Math.min(handRank.length, 3); length >= 2; length--) {
-//        let truncatedTuple = handRank.slice(0, length);
-//        console.log(`     Tried: [${truncatedTuple.join(', ')}] - No match`);
-//    }
 
     return null;
 }

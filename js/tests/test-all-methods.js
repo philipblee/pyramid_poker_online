@@ -80,6 +80,8 @@ function testAllMethods() {
             results[toCamelCase(range.name)].tiered.push(caseResults.tiered);
             results[toCamelCase(range.name)].tiered2.push(caseResults.tiered2);
 
+            console.log(`📊 netEV lookups: ${window.lookupCount}, tiered2 lookups: ${window.tiered2LookupCount || 0}`);
+
             // NEW: Compare arrangements between methods
             const comparison = compareArrangements(caseResults, testId);
             results.comparisons.push(comparison);
@@ -383,4 +385,3 @@ function formatHandForDisplay(hand) {
         cards: [...hand.cards].sort((a, b) => b.value - a.value) // High to low
     };
 }
-
