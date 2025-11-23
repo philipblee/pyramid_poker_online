@@ -157,7 +157,7 @@ async function setupMultiHumanPlayers() {
 
 // Launch your existing game interface
 function launchGameInterface() {
-    console.log('🎮 Launching game interface with table settings:', tableSettings);
+//    console.log('🎮 Launching game interface with table settings:', tableSettings);
 
     // Hide lobby, show your existing game interface
     document.getElementById('lobbyScreen').style.display = 'none';
@@ -180,7 +180,7 @@ function launchGameInterface() {
         window.game.playerManager.resetPlayers();
     }
 
-    console.log('🎮 Settings used for launching game:', gameConfig.config);
+//    console.log('🎮 Settings used for launching game:', gameConfig.config);
 
     // Show your existing game area
     const gameArea = document.getElementById('gameArea');
@@ -195,21 +195,21 @@ function launchGameInterface() {
     function attemptGameStart() {
         retryCount++;
 
-        console.log(`🔍 DEBUG - Attempt ${retryCount}/${maxRetries} - Checking available game objects:`);
-        console.log('  - typeof startNewGame:', typeof startNewGame);
-        console.log('  - window.game exists:', !!window.game);
-        console.log('  - global game exists:', typeof game !== 'undefined' && !!game);
+//        console.log(`🔍 DEBUG - Attempt ${retryCount}/${maxRetries} - Checking available game objects:`);
+//        console.log('  - typeof startNewGame:', typeof startNewGame);
+//        console.log('  - window.game exists:', !!window.game);
+//        console.log('  - global game exists:', typeof game !== 'undefined' && !!game);
 
         // Check what actually exists
         if (typeof game !== 'undefined' && game) {
-            console.log('  - global game.startNewGame:', typeof game.startNewGame);
-            console.log('  - global game.initializeTournament:', typeof game.initializeTournament);
-            console.log('  - global game constructor:', game.constructor?.name);
+//            console.log('  - global game.startNewGame:', typeof game.startNewGame);
+//            console.log('  - global game.initializeTournament:', typeof game.initializeTournament);
+//            console.log('  - global game constructor:', game.constructor?.name);
         }
 
         if (window.game) {
-            console.log('  - window.game.startNewGame:', typeof window.game.startNewGame);
-            console.log('  - window.game.initializeTournament:', typeof window.game.initializeTournament);
+//            console.log('  - window.game.startNewGame:', typeof window.game.startNewGame);
+//            console.log('  - window.game.initializeTournament:', typeof window.game.initializeTournament);
         }
 
         // Try different game object locations

@@ -48,7 +48,7 @@ class PlayerManager {
     addDefaultPlayers() {
 
         const config = window.gameConfig.getConfig();
-        console.log('gameConfig:', config);
+//        console.log('gameConfig:', config);
 
         if (config.gameMode === 'single-human') {
             // Create 1 human player + configured number of AI players
@@ -88,7 +88,7 @@ class PlayerManager {
                 this.scores.set(aiName, 0);
             }
 
-            console.log(`Auto-added single player mode: 1 human + ${config.computerPlayers} AI players (${this.players.length} total)`);
+//            console.log(`Auto-added single player mode: 1 human + ${config.computerPlayers} AI players (${this.players.length} total)`);
         } else {
             // Multiplayer mode - create default human players
             if (config.gameDeviceMode === 'single-device'){

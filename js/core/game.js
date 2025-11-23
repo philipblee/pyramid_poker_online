@@ -116,8 +116,8 @@ class PyramidPoker {
         this.maxRounds = gameConfig.config.rounds;
         // Add any other cached settings here if we find them
 
-        console.log(`🎯 Refreshed game settings - maxRounds: ${this.maxRounds}`);
-        console.log(`🎯 Current gameConfig:`, gameConfig.config);
+//        console.log(`🎯 Refreshed game settings - maxRounds: ${this.maxRounds}`);
+//        console.log(`🎯 Current gameConfig:`, gameConfig.config);
 
 
         // Set multiDeviceMode based on gameConfig
