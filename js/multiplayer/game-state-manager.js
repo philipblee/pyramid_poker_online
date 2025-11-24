@@ -22,14 +22,14 @@ async function handleTableStateChange(tableState) {
             setTableState(TABLE_STATES.COUNTDOWN);
             break;
 
-        // In game-state-manager.js
         case TABLE_STATES.COUNTDOWN:
             console.log('⏱️ Starting countdown phase...');
             if (window.isOwner) {
                 await transitionToCountdownPhase();
+            } else {
+                await displayCountdownOnly();  // ADD THIS
             }
             break;
-
 
         case TABLE_STATES.DEALING:
             console.log('🎮 Game started! Moving to dealing phase...');
@@ -61,10 +61,22 @@ async function handleTableStateChange(tableState) {
             break;
 
         case TABLE_STATES.ROUND_COMPLETE:
+            console.log('🔍 ROUND_COMPLETE - currentRound:', window.game?.currentRound, 'maxRounds:', window.game?.maxRounds);
+            console.log('🔍 isOwner:', window.isOwner);
+
             if (!window.isOwner) {
                 closeScoringPopup();
                 const waitingEl = document.getElementById('waiting-for-table-owner');
                 if (waitingEl) waitingEl.remove();
+            } else {
+                // Check if tournament is complete
+                if (window.game?.currentRound >= window.game?.maxRounds) {
+                    console.log('🏆 Tournament complete! Transitioning to TOURNAMENT_COMPLETE');
+                    setTableState(TABLE_STATES.TOURNAMENT_COMPLETE);
+                } else {
+                    console.log('🔍 Owner transitioning to COUNTDOWN for next round');
+                    setTableState(TABLE_STATES.COUNTDOWN);
+                }
             }
             break;
 
@@ -82,7 +94,11 @@ async function transitionToCountdownPhase() {
     console.log('🔍 transitionToCountdownPhase CALLED');
     const config = window.gameConfig?.config;
 
-    transitionFromLobbyToDealing();
+    // Only transition UI on first round (coming from NEW_TOURNAMENT)
+    // For subsequent rounds, we're already in the game interface
+    if (window.game?.currentRound === 0 || !window.game?.currentRound) {
+        transitionFromLobbyToDealing();
+    }
 
     const countdownTime = config.countdownTime || 0;
     if (countdownTime > 0) {
@@ -100,8 +116,10 @@ async function transitionToCountdownPhase() {
 }
 
 async function displayCountdownOnly() {
+    console.log('🔍 displayCountdownOnly CALLED (non-owner)');  // ADD THIS
     const config = window.gameConfig?.config;
-    const countdownTime = config.countDownTime || 0;
+    const countdownTime = config.countdownTime || 0;
+    console.log('🔍 countDownTime:', countdownTime);  // ADD THIS
 
     if (countdownTime > 0) {
         showCountdownModal(countdownTime);
@@ -114,7 +132,6 @@ async function displayCountdownOnly() {
         hideCountdownModal();
     }
 }
-
 
 function transitionFromLobbyToDealing() {
 //    console.log('🎮 Transitioning from lobby to dealing phase...');

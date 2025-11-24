@@ -272,10 +272,10 @@ class PyramidPoker {
     }
 
     async startNewRound() {
-
-        // DEBUG: Check the values before the comparison
-//        console.log(`🔍 ROUND CHECK: currentRound=${this.currentRound}, maxRounds=${this.maxRounds}`);
-//        console.log(`🔍 COMPARISON: ${this.currentRound} >= ${this.maxRounds} = ${this.currentRound >= this.maxRounds}`);
+        console.log('🔍 startNewRound CALLED');
+        console.log('🔍 isOwner:', window.isOwner);
+        console.log('🔍 multiDeviceMode:', this.multiDeviceMode);
+        console.trace('Call stack:');  // This shows where it was called from
 
         // Must have existing players to start a new round
         if (this.playerManager.players.length < 2) {
