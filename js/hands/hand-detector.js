@@ -589,19 +589,25 @@ class HandDetector {
         } else if (cards.length === 1) {
             // Fix 1-card High Card hands
             const highCard = cards[0].value;
+             // 1-card High Card
             handStrength = {
-                rank: 0,
-                hand_rank: [1, highCard],  // [1=High Card type, card value]
-                name: 'High Card'
+                rank: 1,                        // High Card = 1
+                hand_rank: [1, highCard],
+                name: 'High Card',
+                handType: 1,                    // ✅ ADD
+                handStrength: [1, highCard]     // ✅ ADD
             };
 
         } else if (cards.length === 2 && handType === 'Pair') {
             // Fix 2-card Pair hands
             const pairRank = cards[0].value;
+            // 2-card Pair
             handStrength = {
-                rank: 1,
-                hand_rank: [2, pairRank],  // [2=Pair type, pair rank]
-                name: 'Pair'
+                rank: 2,                        // ✅ FIX: Pair = 2, not 1
+                hand_rank: [2, pairRank],
+                name: 'Pair',
+                handType: 2,                    // ✅ ADD
+                handStrength: [2, pairRank]     // ✅ ADD
             };
 
         } else if (cards.length === 4 && handType === 'Four of a Kind') {
@@ -618,10 +624,13 @@ class HandDetector {
                 .map(([rank, count]) => parseInt(rank))
                 .sort((a, b) => b - a);
 
+            // 4-card Two Pair
             handStrength = {
-                rank: 2,
-                hand_rank: [3, pairs[0], pairs[1]],  // [3=Two Pair type, higher pair, lower pair]
-                name: 'Two Pair'
+                rank: 3,                        // ✅ FIX: Two Pair = 3, not 2
+                hand_rank: [3, pairs[0], pairs[1]],
+                name: 'Two Pair',
+                handType: 3,                    // ✅ ADD
+                handStrength: [3, pairs[0], pairs[1]]  // ✅ ADD
             };
         } else {
             // Use standard evaluation for complete hands (5+ cards)
@@ -647,15 +656,20 @@ class HandDetector {
 //         ADD THIS LOG:
 //        console.log(`✅ Created preCalculatedScore for addHands: ${handType}:`, preCalculatedScore);
 
+        console.log('🔍 handStrength object:', handStrength);
+        console.log('🔍 handStrength keys:', Object.keys(handStrength));
 
         this.allHands.push({
             cards: [...cards],
             handType,
             cardCount: cards.length,
-            rank: handStrength.hand_rank[1] || cards[0].rank,
+//            rank: handStrength.hand_rank[1] || cards[0].rank,
+            rank: handStrength.handStrength[1] || cards[0].rank,
             handStrength: { ...handStrength },           // ✅ CREATE NEW OBJECT
-            hand_rank: [...handStrength.hand_rank],      // ✅ CREATE NEW ARRAY
-            strength: handStrength.rank,
+//            hand_rank: [...handStrength.hand_rank],      // ✅ CREATE NEW ARRAY
+            hand_rank: [...handStrength.handStrength],      // ✅ CREATE NEW ARRAY
+//            strength: handStrength.rank,
+            strength: handStrength.handType,
             validPositions: validPositions,
             isIncomplete: isIncomplete,
             kickersNeeded: kickersNeeded,
