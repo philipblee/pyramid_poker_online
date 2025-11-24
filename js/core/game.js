@@ -1455,29 +1455,29 @@ class PyramidPoker {
     }
 }
 
-// Add near other utility functions in game.js
+// this function is used to update GameChipDisplay for table screeb and game screen
 function updateGameChipDisplay() {
     const currentUser = firebase.auth().currentUser;
     if (!currentUser) return;
 
-    const encodedEmail = currentUser.email.replace(/\./g, ',').replace('@', '_at_');
+    const encodedEmail = currentUser.email.replace(/\./g, ',').replace(/@/g, '_at_');
     const playerRef = firebase.database().ref(`players/${encodedEmail}`);
 
-    // Real-time listener
     playerRef.on('value', (snapshot) => {
         const data = snapshot.val() || {};
 
         const chips = data.chips || 0;
         const reloads = data.reloads || 0;
 
-        const userInfoDiv = document.querySelector('.game-user-info');
-        if (userInfoDiv) {
-            userInfoDiv.innerHTML = `
+        // Update ALL matching divs (not just first one)
+        const userInfoDivs = document.querySelectorAll('.game-user-info');  // Changed to querySelectorAll
+        userInfoDivs.forEach(div => {
+            div.innerHTML = `
                 👤 ${currentUser.email} |
                 💰 ${chips.toLocaleString()} chips |
                 🔄 ${reloads} reloads
             `;
-        }
+        });
     });
 }
 

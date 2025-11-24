@@ -218,6 +218,7 @@ function showLobbyScreen() {
 function showTableScreen() {
     document.getElementById('lobbyScreen').style.display = 'none';
     document.getElementById('tableScreen').style.display = 'block';
+    updateGameChipDisplay();
     document.getElementById('gameArea').style.display = 'none';
 }
 
