@@ -400,7 +400,6 @@
 
             <!-- Multi-human player list (add around line 260, before existing buttons) -->
             <div id="multiHumanPlayers" class="multi-human-section" style="display: none;">
-                <h4>Players on Table</h4>
                 <div class="players-list">
                     <div class="player-slot empty">⏳ Waiting for players...</div>
                     <div class="player-slot empty">⏳ Waiting for players...</div>
@@ -409,6 +408,7 @@
                     <div class="player-slot empty">⏳ Waiting for players...</div>
                     <div class="player-slot empty">⏳ Waiting for players...</div>
                 </div>
+                <h4>Number of Players Sitting at this Table</h4>
                 <div class="player-count">Players: <span id="currentPlayerCount">0</span> of 6</div>
             </div>
 
@@ -444,14 +444,11 @@
             <button class="btn btn-secondary" onclick="window.location.href='index.html'">Website</button>
         </div>
 
-
-    <!-- Remove the config button - it will be accessible via New Game -->
-
         <div class="status" id="status">
             Click "New Game" to configure a new game, or "New Round" to deal new hands!
         </div>
 
-        <div class="game-area" id="gameArea">
+        <div class="game-area" id="gameArea2">
             <div class="main-game">
                 <div class="hand-section">
                     <div class="hand-label">
@@ -501,10 +498,12 @@
         </div>
     </div>
 
-    <!-- Countdown overlay -->
-    <div id="countdownOverlay" class="countdown-overlay" style="display: none;">
-        <div class="countdown-number">3</div>
-        <div class="countdown-text">Game starting...</div>
+    <!-- Add countdownModal near the top of your game area, or in a shared location -->
+    <div id="countdownModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px; border-radius: 20px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+            <div style="color: white; font-size: 24px; margin-bottom: 20px; font-weight: 500;">Game Starting</div>
+            <div id="countdownNumber" style="color: #ffd700; font-size: 120px; font-weight: bold; font-family: Arial, sans-serif; text-shadow: 0 0 30px rgba(255,215,0,0.5);">5</div>
+        </div>
     </div>
 
     <!-- Scoring Popup -->
