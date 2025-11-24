@@ -239,17 +239,17 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
                 <div class="hand-row">
                     <div class="hand-label-popup">Back (${backCardCount}):</div>
                     <div class="hand-cards">${renderMiniCards(hand.back)}</div>
-                    <div class="hand-strength-popup">${getHandName(evaluateHand(hand.back))} (${evaluateHand(hand.back).hand_rank.join(', ')})</div>
+                    <div class="hand-strength-popup">${getHandName(evaluateHand(hand.back))} (${evaluateHand(hand.back).handStrength.join(', ')})</div>
                 </div>
                 <div class="hand-row">
                     <div class="hand-label-popup">Middle (${middleCardCount}):</div>
                     <div class="hand-cards">${renderMiniCards(hand.middle)}</div>
-                    <div class="hand-strength-popup">${getHandName(evaluateHand(hand.middle))} (${evaluateHand(hand.middle).hand_rank.join(', ')})</div>
+                    <div class="hand-strength-popup">${getHandName(evaluateHand(hand.middle))} (${evaluateHand(hand.middle).handStrength.join(', ')})</div>
                 </div>
                 <div class="hand-row">
                     <div class="hand-label-popup">Front (${frontCardCount}):</div>
                     <div class="hand-cards">${renderMiniCards(hand.front)}</div>
-                    <div class="hand-strength-popup">${getThreeCardHandName(evaluateThreeCardHand(hand.front))} (${evaluateThreeCardHand(hand.front).hand_rank.join(', ')})</div>
+                    <div class="hand-strength-popup">${getThreeCardHandName(evaluateThreeCardHand(hand.front))} (${evaluateThreeCardHand(hand.front).handStrength.join(', ')})</div>
                 </div>
             `;
             allPlayerHands.appendChild(playerDiv);

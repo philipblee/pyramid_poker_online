@@ -324,9 +324,10 @@ class AutoArrangeTestSuite {
 
             try {
                 const result = evaluateHand(testCards);
-                this.assert('hand_rank' in result, 'evaluateHand Structure', 'Should have hand_rank');
+                this.assert('handStrength' in result, 'evaluateHand Structure', 'Should have handStrength');
+                this.assert('handType' in result, 'evaluateHand Structure', 'Should have handType');
                 this.assert('name' in result, 'evaluateHand Structure', 'Should have name');
-                this.assert(Array.isArray(result.hand_rank), 'evaluateHand hand_rank', 'hand_rank should be array');
+                this.assert(Array.isArray(result.handStrength), 'evaluateHand handStrength', 'handStrength should be array');
 
             } catch (error) {
                 this.assert(false, 'evaluateHand Function', `ERROR: ${error.message}`);
@@ -342,7 +343,8 @@ class AutoArrangeTestSuite {
 
             try {
                 const result = evaluateThreeCardHand(testCards);
-                this.assert('hand_rank' in result, 'evaluateThreeCardHand Structure', 'Should have hand_rank');
+                this.assert('handStrength' in result, 'evaluateThreeCardHand Structure', 'Should have handStrength');
+                this.assert('handType' in result, 'evaluateThreeCardHand Structure', 'Should have handType');
                 this.assert('name' in result, 'evaluateThreeCardHand Structure', 'Should have name');
 
             } catch (error) {
@@ -360,8 +362,8 @@ class AutoArrangeTestSuite {
         if (typeof evaluateHand === 'function') {
             try {
                 const result = evaluateHand(sixCardHand);
-                this.assert(result.hand_rank[0] >= 10, 'Large Hand Evaluation',
-                    `6K should have high rank, got: ${result.hand_rank[0]}`);
+                this.assert(result.handStrength[0] >= 10, 'Large Hand Evaluation',
+                    `6K should have high rank, got: ${result.handStrength[0]}`);
 
             } catch (error) {
                 this.assert(false, 'Large Hand Evaluation', `ERROR: ${error.message}`);
@@ -629,5 +631,3 @@ if (typeof window !== 'undefined') {
         return testSuite.runSmokeTests();
     };
 }
-
-

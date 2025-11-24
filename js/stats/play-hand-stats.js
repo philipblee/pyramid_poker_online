@@ -259,7 +259,7 @@ class PlayHandStats {
      * Extracted from game.js getHandPoints method
      */
     getHandPoints(handEval, cardCount, position) {
-        const handRank = handEval.hand_rank[0];
+        const handRank = handEval.handType;
 
         if (position === 'back') {
             if (cardCount === 5) {
