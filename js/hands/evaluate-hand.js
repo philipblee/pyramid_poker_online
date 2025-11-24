@@ -151,8 +151,8 @@ function getStraightHand(analysis) {
     const allSuitValues = getSuitValues(analysis.cards);
     const handRankArray = [5, straightInfo.high, straightInfo.secondHigh, ...allSuitValues];
     return {
-        rank: 5,
-        hand_rank: handRankArray,
+//        rank: 5,
+//        hand_rank: handRankArray,
         name: 'Straight',
         handType: 5,                    // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank
@@ -164,8 +164,8 @@ function getFlushHand(analysis) {
     const flushSuit = getSuitValues([analysis.cards[0]]); // Just first card suit
     const handRankArray = [6, ...values, ...flushSuit];
     return {
-        rank: 6,
-        hand_rank: handRankArray,
+//        rank: 6,
+//        hand_rank: handRankArray,
         name: 'Flush',
         handType: 6,                    // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank
@@ -178,8 +178,8 @@ function getFullHouseHand(analysis, valueCounts) {
     const allSuitValues = getSuitValues(analysis.cards);
     const handRankArray = [7, tripsRank, pairRank, ...allSuitValues];
     return {
-        rank: 7,
-        hand_rank: handRankArray,
+//        rank: 7,
+//        hand_rank: handRankArray,
         name: 'Full House',
         handType: 7,                    // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank
@@ -192,8 +192,8 @@ function getFourOfAKindHand(analysis, valueCounts) {
     const allSuitValues = getSuitValues(analysis.cards);
     const handRankArray = [8, quadRank, kicker, ...allSuitValues];
     return {
-        rank: 8,
-        hand_rank: handRankArray,
+//        rank: 8,
+//        hand_rank: handRankArray,
         name: 'Four of a Kind',
         handType: 8,                    // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank
@@ -206,8 +206,8 @@ function getStraightFlushHand(analysis) {
     const flushSuit = getSuitValues([analysis.cards[0]]); // Just first card suit
     const handRankArray = [9, straightInfo.high, straightInfo.secondHigh, ...flushSuit];
     return {
-        rank: 9,
-        hand_rank: handRankArray,
+//        rank: 9,
+//        hand_rank: handRankArray,
         name: name,
         handType: 9,                    // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank
@@ -219,8 +219,8 @@ function getFiveOfAKindHand(analysis, valueCounts) {
     const allSuitValues = getSuitValues(analysis.cards);
     const handRankArray = [10, fiveRank, ...allSuitValues];
     return {
-        rank: 10,
-        hand_rank: handRankArray,
+//        rank: 10,
+//        hand_rank: handRankArray,
         name: 'Five of a Kind',
         handType: 10,                   // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank
@@ -233,8 +233,8 @@ function getSixCardStraightFlushHand(analysis) {
     const allSuitValues = getSuitValues(analysis.cards);
     const handRankArray = [11, straightInfo.high, straightInfo.secondHigh, ...allSuitValues];
     return {
-        rank: 11,
-        hand_rank: handRankArray,
+//        rank: 11,
+//        hand_rank: handRankArray,
         name: name,
         handType: 11,                   // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank
@@ -246,8 +246,8 @@ function getSixOfAKindHand(analysis, valueCounts) {
     const allSuitValues = getSuitValues(analysis.cards);
     const handRankArray = [12, sixRank, ...allSuitValues];
     return {
-        rank: 12,
-        hand_rank: handRankArray,
+//        rank: 12,
+//        hand_rank: handRankArray,
         name: 'Six of a Kind',
         handType: 12,                   // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank
@@ -260,8 +260,8 @@ function getSevenCardStraightFlushHand(analysis) {
     const allSuitValues = getSuitValues(analysis.cards);
     const handRankArray = [13, straightInfo.high, straightInfo.secondHigh, ...allSuitValues];
     return {
-        rank: 13,
-        hand_rank: handRankArray,
+//        rank: 13,
+//        hand_rank: handRankArray,
         name: name,
         handType: 13,                   // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank
@@ -273,8 +273,8 @@ function getSevenOfAKindHand(analysis, valueCounts) {
     const allSuitValues = getSuitValues(analysis.cards);
     const handRankArray = [14, sevenRank, ...allSuitValues];
     return {
-        rank: 14,
-        hand_rank: handRankArray,
+//        rank: 14,
+//        hand_rank: handRankArray,
         name: 'Seven of a Kind',
         handType: 14,                   // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank
@@ -287,8 +287,8 @@ function getEightCardStraightFlushHand(analysis) {
     const allSuitValues = getSuitValues(analysis.cards);
     const handRankArray = [15, straightInfo.high, straightInfo.secondHigh, ...allSuitValues];
     return {
-        rank: 15,
-        hand_rank: handRankArray,
+//        rank: 15,
+//        hand_rank: handRankArray,
         name: name,
         handType: 15,                   // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank
@@ -300,8 +300,8 @@ function getEightOfAKindHand(analysis, valueCounts) {
     const allSuitValues = getSuitValues(analysis.cards);
     const handRankArray = [16, eightRank, ...allSuitValues];
     return {
-        rank: 16,
-        hand_rank: handRankArray,
+//        rank: 16,
+//        hand_rank: handRankArray,
         name: 'Eight of a Kind',
         handType: 16,                   // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank

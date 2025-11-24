@@ -293,11 +293,11 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
             matchupHTML += `
                 <div class="comparison-row">
                     <div class="player-result ${p1Class}">
-                        ${detail.player1Hand.name} (${detail.player1Hand.hand_rank.join(', ')}) ${getPointsDisplay(detail.player1Hand, detail.hand, result.player1, true)}
+                        ${detail.player1Hand.name} (${detail.player1Hand.handStrength.join(', ')}) ${getPointsDisplay(detail.player1Hand, detail.hand, result.player1, true)}
                     </div>
                     <div style="color: #ffd700; font-weight: bold;">${detail.hand}</div>
                     <div class="player-result ${p2Class}">
-                        ${detail.player2Hand.name} (${detail.player2Hand.hand_rank.join(', ')}) ${getPointsDisplay(detail.player2Hand, detail.hand, result.player2, false)}
+                        ${detail.player2Hand.name} (${detail.player2Hand.handStrength.join(', ')}) ${getPointsDisplay(detail.player2Hand, detail.hand, result.player2, false)}
                     </div>
                 </div>
             `;
