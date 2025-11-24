@@ -141,6 +141,14 @@ class PyramidPoker {
             return;
         }
 
+        // Add countdown
+        const isSingleHuman = window.gameConfig?.config?.gameMode === 'single-human';
+
+        if (isSingleHuman) {
+            await this.handleCountdown();  // ADD THIS
+        }
+
+
         // Configure players based on GameConfig
         if (window.gameConfig) {
             // Check if we're in multi-device mode
@@ -298,6 +306,14 @@ class PyramidPoker {
 
         console.log(`🔄 Starting Round ${this.currentRound} of ${this.maxRounds}...`);
 
+        // 🆕 ADD COUNTDOWN HERE (before dealing cards)
+        const config = window.gameConfig?.config;
+        const isSingleHuman = config?.gameMode === 'single-human';
+
+        if (isSingleHuman) {
+            await this.handleCountdown();
+        }
+
         // Setup new round (same as before but with round tracking)
         this.deckManager.createNewDeck();
         this.gameState = 'playing';
@@ -375,7 +391,7 @@ class PyramidPoker {
 
     }
 
-    startNewTournament() {
+    async startNewTournament() {
         console.log('🏆 Starting completely new tournament...');
 
         if (gameConfig.config.gameDeviceMode === 'multi-device'){
@@ -391,6 +407,14 @@ class PyramidPoker {
 
         // Reset game state
         this.gameState = 'waiting';
+
+        // 🆕 ADD COUNTDOWN HERE (before dealing cards)
+        const config = window.gameConfig?.config;
+        const isSingleHuman = config?.gameMode === 'single-human';
+
+        if (isSingleHuman) {
+            await this.handleCountdown();
+        }
 
         // Call the regular game start logic
         this.startNewGame();
@@ -1453,6 +1477,30 @@ class PyramidPoker {
             this.tournamentScores.set(player.name, 0);
         }
     }
+
+    async handleCountdown() {
+        const config = window.gameConfig?.config;
+        const countdownTime = config.countdownTime || 0;
+
+        if (countdownTime > 0) {
+            console.log(`⏱️ Starting ${countdownTime} second countdown...`);
+
+            const statusElement = document.getElementById('status');
+
+            for (let i = countdownTime; i > 0; i--) {
+                if (statusElement) {
+                    statusElement.textContent = `Get Ready: New Round starting in ${i}...`;
+                }
+//                console.log(`⏱️ ${i}...`);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+
+            if (statusElement) {
+                statusElement.textContent = 'Dealing cards...';
+            }
+        }
+    }
+
 }
 
 // this function is used to update GameChipDisplay for table screeb and game screen

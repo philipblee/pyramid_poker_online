@@ -22,6 +22,15 @@ async function handleTableStateChange(tableState) {
             setTableState(TABLE_STATES.DEALING);
             break;
 
+        // In game-state-manager.js
+        case TABLE_STATES.COUNTDOWN:
+            console.log('⏱️ Starting countdown phase...');
+            if (window.isOwner) {
+                await transitionToCountdownPhase();
+            }
+            break;
+
+
         case TABLE_STATES.DEALING:
             console.log('🎮 Game started! Moving to dealing phase...');
             transitionToDealingPhase();
@@ -67,6 +76,27 @@ async function handleTableStateChange(tableState) {
                     console.log('🎮 Unknown table state:', tableState);
             }
         }
+
+
+async function transitionToCountdownPhase() {
+    const config = window.gameConfig?.config;
+    const countdownTime = config.countDownTime || 0;
+
+    if (countdownTime > 0) {
+        // Same countdown logic
+        for (let i = countdownTime; i > 0; i--) {
+            if (statusElement) {
+                statusElement.textContent = `Get Ready: New Round starting in ${i}...`;
+            }
+            console.log(`⏱️ ${i}...`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+
+    }
+    setTableState(TABLE_STATES.DEALING);
+}
+
 
 function transitionFromLobbyToDealing() {
 //    console.log('🎮 Transitioning from lobby to dealing phase...');

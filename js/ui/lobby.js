@@ -187,7 +187,6 @@ async function updateChipDisplay() {
     try {
         const snapshot = await playerRef.once('value');
         const data = snapshot.val() || {};
-
         const chips = data.chips || 0;
         const reloads = data.reloads || 0;
 
