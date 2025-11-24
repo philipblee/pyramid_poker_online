@@ -79,26 +79,40 @@ async function handleTableStateChange(tableState) {
 
 
 async function transitionToCountdownPhase() {
+    console.log('🔍 transitionToCountdownPhase CALLED');
     const config = window.gameConfig?.config;
 
-    // Countdown
-    // Skip antes for now - just do countdown
+    transitionFromLobbyToDealing();
+
     const countdownTime = config.countdownTime || 0;
     if (countdownTime > 0) {
-        console.log(`⏱️ Starting ${countdownTime} second countdown...`);
+        showCountdownModal(countdownTime);
 
         for (let i = countdownTime; i > 0; i--) {
-            const statusElement = document.getElementById('status');
-            if (statusElement) {
-                statusElement.textContent = `Get Ready -  Round starting in ${i}...`;
-            }
-            console.log(`⏱️ ${i}...`);
+            updateCountdownNumber(i);
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
+
+        hideCountdownModal();
     }
 
-    // Move to dealing
     setTableState(TABLE_STATES.DEALING);
+}
+
+async function displayCountdownOnly() {
+    const config = window.gameConfig?.config;
+    const countdownTime = config.countDownTime || 0;
+
+    if (countdownTime > 0) {
+        showCountdownModal(countdownTime);
+
+        for (let i = countdownTime; i > 0; i--) {
+            updateCountdownNumber(i);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+        hideCountdownModal();
+    }
 }
 
 
@@ -215,24 +229,3 @@ async function setupLobbyStateListener(tableId) {
         }
     });
 }
-
-//// In the Continue button click handler
-//function TransitionToRoundComplete() {
-//    if (window.isOwner) {
-//        console.log('Owner clicked Continue on Scoring Popup');
-//        transitionToRoundComplete();
-//    } else {
-//        console.log('Non-owner waiting for owner to click Continue');
-//        closeScoringPopup();
-//    }
-//}
-//
-//// In game-state-manager.js (or wherever state transitions are defined)
-//async function transitionToRoundComplete() {
-//    console.log('🔄 Transitioning to ROUND_COMPLETE state...');
-//
-//    // Only update Realtime Database (what listeners actually read)
-//    await firebase.database().ref(`tables/${this.currentTableId}/tableState`).set('round_complete');
-//
-//    console.log('✅ Successfully transitioned to ROUND_COMPLETE state');
-//}

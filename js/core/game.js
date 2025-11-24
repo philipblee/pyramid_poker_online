@@ -1479,28 +1479,24 @@ class PyramidPoker {
         }
     }
 
-    async handleCountdown() {
-        const config = window.gameConfig?.config;
-        const countdownTime = config.countdownTime || 0;
+async handleCountdown() {
+    console.log('🔍 handleCountdown CALLED');
+    const config = window.gameConfig?.config;
+    console.log('🔍 countdownTime:', config?.countdownTime);
 
-        if (countdownTime > 0) {
-            console.log(`⏱️ Starting ${countdownTime} second countdown...`);
+    const countdownTime = config.countdownTime || 0;
 
-            const statusElement = document.getElementById('status');
+    if (countdownTime > 0) {
+        showCountdownModal(countdownTime);
 
-            for (let i = countdownTime; i > 0; i--) {
-                if (statusElement) {
-                    statusElement.textContent = `Get Ready: New Round starting in ${i}...`;
-                }
-//                console.log(`⏱️ ${i}...`);
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-
-            if (statusElement) {
-                statusElement.textContent = 'Dealing cards...';
-            }
+        for (let i = countdownTime; i > 0; i--) {
+            updateCountdownNumber(i);
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
+
+        hideCountdownModal();
     }
+}
 
 }
 
