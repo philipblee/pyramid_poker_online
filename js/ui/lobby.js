@@ -57,7 +57,7 @@ const defaultTables = [
 
     {
         id: 3,
-        name: '3. Offline vs 3 AI Opponents - No Wilds',
+        name: '3. Offline vs 3 AI Opponents - 2 Wilds',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'single-human',
@@ -72,7 +72,7 @@ const defaultTables = [
 
     {
         id: 4,
-        name: '4. Offline vs 5 AI Opponents - No Wilds',
+        name: '4. Offline vs 5 AI Opponents - 2 Wilds',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'single-human',
@@ -87,7 +87,7 @@ const defaultTables = [
 
     {
         id: 5,
-        name: '5. Offline Challenge - No Wilds',
+        name: '5. Offline Challenge - 2 Wilds',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'single-human',
@@ -118,7 +118,7 @@ const defaultTables = [
 
     {
         id: 7,
-        name: '7. Online - 2 Wild Card - 6 Players',
+        name: '7. Online - 2 Wild Card',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'multiple-humans',
@@ -134,7 +134,7 @@ const defaultTables = [
 
     {
         id: 8,
-        name: '8. Online - 2 Wild Card - 2 Players',
+        name: '8. Online - 2 Wild Card',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'multiple-humans',
