@@ -893,8 +893,8 @@ function evaluateThreeCardHand(cards) {
         const tripsRank = valuesByCount[3][0];
         const handRankArray = [4, tripsRank, ...allSuitValues];
         return {
-            rank: 4,
-            hand_rank: handRankArray,
+//            rank: 4,
+//            hand_rank: handRankArray,
             name: 'Three of a Kind',
             handType: 4,
             handStrength: handRankArray
@@ -907,8 +907,8 @@ function evaluateThreeCardHand(cards) {
         const kicker = valuesByCount[1][0];
         const handRankArray = [2, pairRank, kicker, ...allSuitValues];
         return {
-            rank: 2,
-            hand_rank: handRankArray,
+//            rank: 2,
+//            hand_rank: handRankArray,
             name: 'Pair',
             handType: 2,
             handStrength: handRankArray
@@ -918,8 +918,8 @@ function evaluateThreeCardHand(cards) {
     // else it's a high card
     const handRankArray = [1, ...values, ...allSuitValues];
     return {
-        rank: 1,
-        hand_rank: handRankArray,
+//        rank: 1,
+//        hand_rank: handRankArray,
         name: 'High Card',
         handType: 1,
         handStrength: handRankArray
