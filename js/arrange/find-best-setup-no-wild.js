@@ -192,16 +192,16 @@ class FindBestSetupNoWildBase {
         const reEvaluatedFront = evaluateThreeCardHand(frontCards);  // Evaluate front cards
 
         arrangement.back.handStrength = reEvaluatedBack; // object returned from evaluateHand
-        arrangement.back.hand_rank = reEvaluatedBack.hand_rank; // hand_tuple
-        arrangement.back.strength = reEvaluatedBack.rank; // handType 1-16
+        arrangement.back.hand_rank = reEvaluatedBack.handStrength; // hand_tuple
+        arrangement.back.strength = reEvaluatedBack.handType; // handType 1-16
 
         arrangement.middle.handStrength = reEvaluatedMiddle;
-        arrangement.middle.hand_rank = reEvaluatedMiddle.hand_rank;
-        arrangement.middle.strength = reEvaluatedMiddle.rank;
+        arrangement.middle.hand_rank = reEvaluatedMiddle.handStrength;
+        arrangement.middle.strength = reEvaluatedMiddle.handType;
 
         arrangement.front.handStrength = reEvaluatedFront;
-        arrangement.front.hand_rank = reEvaluatedFront.hand_rank;
-        arrangement.front.strength = reEvaluatedFront.rank;
+        arrangement.front.hand_rank = reEvaluatedFront.handStrength;
+        arrangement.front.strength = reEvaluatedFront.handType;
 
         // calculate score for each hand?
         const scoreBack = this.getHandScore(arrangement.back, 'back')

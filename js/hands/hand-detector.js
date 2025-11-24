@@ -656,8 +656,8 @@ class HandDetector {
 //         ADD THIS LOG:
 //        console.log(`✅ Created preCalculatedScore for addHands: ${handType}:`, preCalculatedScore);
 
-        console.log('🔍 handStrength object:', handStrength);
-        console.log('🔍 handStrength keys:', Object.keys(handStrength));
+//        console.log('🔍 handStrength object:', handStrength);
+//        console.log('🔍 handStrength keys:', Object.keys(handStrength));
 
         this.allHands.push({
             cards: [...cards],
