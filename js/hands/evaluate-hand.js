@@ -96,8 +96,8 @@ function getHighCardHand(analysis) {
     const allSuitValues = getSuitValues(analysis.cards);
     const handRankArray = [1, ...values, ...allSuitValues];
     return {
-        rank: 1,
-        hand_rank: handRankArray,
+//        rank: 1,
+//        hand_rank: handRankArray,
         name: 'High Card',
         handType: 1,                    // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank
@@ -110,8 +110,8 @@ function getPairHand(analysis, valueCounts) {
     const allSuitValues = getSuitValues(analysis.cards);
     const handRankArray = [2, pairRank, ...kickers, ...allSuitValues];
     return {
-        rank: 2,
-        hand_rank: handRankArray,
+//        rank: 2,
+//        hand_rank: handRankArray,
         name: 'Pair',
         handType: 2,                    // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank
@@ -124,8 +124,8 @@ function getTwoPairHand(analysis, valueCounts) {
     const allSuitValues = getSuitValues(analysis.cards);
     const handRankArray = [3, Math.max(...pairs), Math.min(...pairs), kicker, ...allSuitValues];
     return {
-        rank: 3,
-        hand_rank: handRankArray,
+//        rank: 3,
+//        hand_rank: handRankArray,
         name: 'Two Pair',
         handType: 3,                    // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank
@@ -138,8 +138,8 @@ function getThreeOfAKindHand(analysis, valueCounts) {
     const allSuitValues = getSuitValues(analysis.cards);
     const handRankArray = [4, tripsRank, ...kickers, ...allSuitValues];
     return {
-        rank: 4,
-        hand_rank: handRankArray,
+//        rank: 4,
+//        hand_rank: handRankArray,
         name: 'Three of a Kind',
         handType: 4,                    // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank
@@ -308,36 +308,6 @@ function getEightOfAKindHand(analysis, valueCounts) {
     };
 }
 
-// ============================================================================
-// UNIVERSAL TIE-BREAKING EXAMPLES
-// ============================================================================
-
-/*
-EXAMPLES of the new hand_rank arrays:
-
-High Card A♠ K♥ Q♦ J♣ 9♠:
-hand_rank: [1, 14, 13, 12, 11, 9, 4, 3, 2, 1, 4]
-           [type, A, K, Q, J, 9, ♠, ♥, ♦, ♣, ♠]
-
-Pair of Aces A♠ A♥ K♦ Q♣ J♠:
-hand_rank: [2, 14, 13, 12, 11, 4, 3, 2, 1, 4]
-           [type, pair_rank, K, Q, J, ♠, ♥, ♦, ♣, ♠]
-
-Four of a Kind A♠ A♥ A♦ A♣ K♠:
-hand_rank: [8, 14, 13, 4, 3, 2, 1, 4]
-           [type, quad_rank, kicker, ♠, ♥, ♦, ♣, ♠]
-
-Royal Flush A♠ K♠ Q♠ J♠ 10♠:
-hand_rank: [9, 14, 13, 4, 4, 4, 4, 4]
-           [type, high, second_high, ♠, ♠, ♠, ♠, ♠]
-
-TIE-BREAKING PROCESS:
-1. Compare hand type (position 0)
-2. Compare primary values (positions 1-N based on hand type)
-3. Compare suit values (final positions) - UNIVERSAL STAGE 3
-
-*/
-
 // Evaluate 3-card or 5-card front hands
 function evaluateThreeCardHand(cards) {
     // Handle 5-card front hands
@@ -374,8 +344,8 @@ function evaluateThreeCardHand(cards) {
     if (cards.length === 1) {
         const handRankArray = [1, 7];
         return {
-            rank: 1,
-            hand_rank: handRankArray,
+//            rank: 1,
+//            hand_rank: handRankArray,
             name: 'High Card',
             handType: 1,                    // NEW - same as rank
             handStrength: handRankArray     // NEW - same as hand_rank
@@ -385,8 +355,8 @@ function evaluateThreeCardHand(cards) {
     if (cards.length === 2) {
         const handRankArray = [1, 8, 7];
         return {
-            rank: 1,
-            hand_rank: handRankArray,
+//            rank: 1,
+//            hand_rank: handRankArray,
             name: 'High Card',
             handType: 1,                    // NEW - same as rank
             handStrength: handRankArray     // NEW - same as hand_rank
@@ -396,8 +366,8 @@ function evaluateThreeCardHand(cards) {
     if (cards.length !== 3) {
         const handRankArray = [1, 7];
         return {
-            rank: 1,
-            hand_rank: handRankArray,
+//            rank: 1,
+//            hand_rank: handRankArray,
             name: 'Invalid',
             handType: 1,                    // NEW - same as rank
             handStrength: handRankArray     // NEW - same as hand_rank
@@ -411,8 +381,8 @@ function evaluateThreeCardHand(cards) {
         const tripsRank = valuesByCount[3][0];
         const handRankArray = [4, tripsRank];
         return {
-            rank: 4,
-            hand_rank: handRankArray,
+//            rank: 4,
+//            hand_rank: handRankArray,
             name: 'Three of a Kind',
             handType: 4,                    // NEW - same as rank
             handStrength: handRankArray     // NEW - same as hand_rank
@@ -425,8 +395,8 @@ function evaluateThreeCardHand(cards) {
         const kicker = valuesByCount[1][0];
         const handRankArray = [2, pairRank, kicker];
         return {
-            rank: 2,
-            hand_rank: handRankArray,
+//            rank: 2,
+//            hand_rank: handRankArray,
             name: 'Pair',
             handType: 2,                    // NEW - same as rank
             handStrength: handRankArray     // NEW - same as hand_rank
@@ -436,8 +406,8 @@ function evaluateThreeCardHand(cards) {
     // else it's a high card
     const handRankArray = [1, ...values, ...allSuitValues];  // ✅ With suits
     return {
-        rank: 1,
-        hand_rank: handRankArray,
+//        rank: 1,
+//        hand_rank: handRankArray,
         name: 'High Card',
         handType: 1,                    // NEW - same as rank
         handStrength: handRankArray     // NEW - same as hand_rank
@@ -455,8 +425,8 @@ function evaluateThreeCardHandWithWilds(normalCards, wildCount) {
     if (wildCount >= 2) {
         const handRankArray = [4, highCard, ...allSuitValues];
         return {
-            rank: 4,
-            hand_rank: handRankArray,
+//            rank: 4,
+//            hand_rank: handRankArray,
             name: 'Three of a Kind (Wild)',
             handType: 4,
             handStrength: handRankArray
@@ -468,8 +438,8 @@ function evaluateThreeCardHandWithWilds(normalCards, wildCount) {
         const kicker = values.find(v => v !== pairRank) || 13;
         const handRankArray = [2, pairRank, kicker, ...allSuitValues];
         return {
-            rank: 2,
-            hand_rank: handRankArray,
+//            rank: 2,
+//            hand_rank: handRankArray,
             name: 'Pair (Wild)',
             handType: 2,
             handStrength: handRankArray
@@ -480,51 +450,13 @@ function evaluateThreeCardHandWithWilds(normalCards, wildCount) {
     while (allValues.length < 3) allValues.push(13 - allValues.length);
     const handRankArray = [1, ...allValues.slice(0, 3), ...allSuitValues];
     return {
-        rank: 1,
-        hand_rank: handRankArray,
+//        rank: 1,
+//        hand_rank: handRankArray,
         name: 'High Card',
         handType: 1,
         handStrength: handRankArray
     };
 }
-
-
-// ============================================================================
-// CONSISTENT STRUCTURE ACROSS ALL HAND TYPES
-// ============================================================================
-
-/*
-EVERY hand_rank array now follows this pattern:
-[hand_type, poker_values..., suit_values...]
-
-WHERE:
-- hand_type: 1-16 (hand strength category)
-- poker_values: standard poker comparison values (ranks, kickers)
-- suit_values: getSuitValues() for ALL cards (♠=4, ♥=3, ♦=2, ♣=1)
-
-BENEFITS:
-✅ 100% consistent - every hand type uses same tie-breaking system
-✅ No perfect ties possible - suits always provide final resolution
-✅ Predictable comparison - same algorithm works for all hand types
-✅ Easy debugging - clear pattern across all functions
-✅ Future-proof - new hand types follow same pattern
-
-COMPARISON ALGORITHM:
-function compareHands(handA, handB) {
-    const rankA = handA.hand_rank;
-    const rankB = handB.hand_rank;
-
-    for (let i = 0; i < Math.max(rankA.length, rankB.length); i++) {
-        const valueA = rankA[i] || 0;
-        const valueB = rankB[i] || 0;
-
-        if (valueA > valueB) return 1;  // Hand A wins
-        if (valueA < valueB) return -1; // Hand B wins
-    }
-
-    return 0; // Perfect tie (impossible with universal suits)
-}
-*/
 
 
 // Evaluate hand with wild cards
@@ -547,8 +479,8 @@ function evaluateHandWithWilds(normalCards, wildCount) {
             const fiveRank = parseInt(value);
             const handRankArray = [10, fiveRank];
             return {
-                rank: 10,
-                hand_rank: handRankArray,
+//                rank: 10,
+//                hand_rank: handRankArray,
                 name: 'Five of a Kind (Wild)',
                 handType: 10,
                 handStrength: handRankArray
@@ -559,8 +491,8 @@ function evaluateHandWithWilds(normalCards, wildCount) {
         const highCard = values[0] || 14;
         const handRankArray = [10, highCard];
         return {
-            rank: 10,
-            hand_rank: handRankArray,
+//            rank: 10,
+//            hand_rank: handRankArray,
             name: 'Five of a Kind (Wild)',
             handType: 10,
             handStrength: handRankArray
@@ -579,8 +511,8 @@ function evaluateHandWithWilds(normalCards, wildCount) {
             const kicker = remainingCards.length > 0 ? Math.max(...remainingCards.map(c => c.value)) : 13;
             const handRankArray = [8, quadRank, kicker];
             return {
-                rank: 8,
-                hand_rank: handRankArray,
+//                rank: 8,
+//                hand_rank: handRankArray,
                 name: 'Four of a Kind (Wild)',
                 handType: 8,
                 handStrength: handRankArray
@@ -592,8 +524,8 @@ function evaluateHandWithWilds(normalCards, wildCount) {
         const kicker = values[1] || 13;
         const handRankArray = [8, quadRank, kicker];
         return {
-            rank: 8,
-            hand_rank: handRankArray,
+//            rank: 8,
+//            hand_rank: handRankArray,
             name: 'Four of a Kind (Wild)',
             handType: 8,
             handStrength: handRankArray
@@ -610,8 +542,8 @@ function evaluateHandWithWilds(normalCards, wildCount) {
         const pairRank = parseInt(sortedPairs[1][0]);
         const handRankArray = [7, tripsRank, pairRank];
         return {
-            rank: 7,
-            hand_rank: handRankArray,
+//            rank: 7,
+//            hand_rank: handRankArray,
             name: 'Full House (Wild)',
             handType: 7,
             handStrength: handRankArray
@@ -624,8 +556,8 @@ function evaluateHandWithWilds(normalCards, wildCount) {
         const finalPairRank = Math.min(pairRank, singleRank);
         const handRankArray = [7, tripsRank, finalPairRank];
         return {
-            rank: 7,
-            hand_rank: handRankArray,
+//            rank: 7,
+//            hand_rank: handRankArray,
             name: 'Full House (Wild)',
             handType: 7,
             handStrength: handRankArray
@@ -637,8 +569,8 @@ function evaluateHandWithWilds(normalCards, wildCount) {
         const pairRank = parseInt(sortedSingles[1][0]);
         const handRankArray = [7, tripsRank, pairRank];
         return {
-            rank: 7,
-            hand_rank: handRankArray,
+//            rank: 7,
+//            hand_rank: handRankArray,
             name: 'Full House (Wild)',
             handType: 7,
             handStrength: handRankArray
@@ -662,8 +594,8 @@ function evaluateHandWithWilds(normalCards, wildCount) {
             while (kickers.length < 2) kickers.push(13 - kickers.length);
             const handRankArray = [4, tripsRank, ...kickers];
             return {
-                rank: 4,
-                hand_rank: handRankArray,
+//                rank: 4,
+//                hand_rank: handRankArray,
                 name: 'Three of a Kind (Wild)',
                 handType: 4,
                 handStrength: handRankArray
@@ -677,8 +609,8 @@ function evaluateHandWithWilds(normalCards, wildCount) {
         while (kickers.length < 2) kickers.push(13 - kickers.length);
         const handRankArray = [4, tripsRank, ...kickers];
         return {
-            rank: 4,
-            hand_rank: handRankArray,
+//            rank: 4,
+//            hand_rank: handRankArray,
             name: 'Three of a Kind (Wild)',
             handType: 4,
             handStrength: handRankArray
@@ -694,8 +626,8 @@ function evaluateHandWithWilds(normalCards, wildCount) {
         const kicker = singles.length > 1 ? parseInt(singles[1][0]) : 13;
         const handRankArray = [3, higherPair, lowerPair, kicker];
         return {
-            rank: 3,
-            hand_rank: handRankArray,
+//            rank: 3,
+//            hand_rank: handRankArray,
             name: 'Two Pair (Wild)',
             handType: 3,
             handStrength: handRankArray
@@ -710,8 +642,8 @@ function evaluateHandWithWilds(normalCards, wildCount) {
         while (kickers.length < 3) kickers.push(13 - kickers.length);
         const handRankArray = [2, pairRank, ...kickers];
         return {
-            rank: 2,
-            hand_rank: handRankArray,
+//            rank: 2,
+//            hand_rank: handRankArray,
             name: 'Pair (Wild)',
             handType: 2,
             handStrength: handRankArray
@@ -723,8 +655,8 @@ function evaluateHandWithWilds(normalCards, wildCount) {
     while (allValues.length < 5) allValues.push(14 - allValues.length);
     const handRankArray = [1, ...allValues.slice(0, 5)];
     return {
-        rank: 1,
-        hand_rank: handRankArray,
+//        rank: 1,
+//        hand_rank: handRankArray,
         name: 'High Card (Wild)',
         handType: 1,
         handStrength: handRankArray
@@ -767,8 +699,8 @@ function tryForStraightFlushWithWilds(normalCards, wildCount) {
                     const name = straight[0] === 14 && straight[1] === 13 ? 'Royal Flush (Wild)' : 'Straight Flush (Wild)';
                     const handRankArray = [9, straightInfo.high, straightInfo.secondHigh];
                     return {
-                        rank: 9,
-                        hand_rank: handRankArray,
+//                        rank: 9,
+//                        hand_rank: handRankArray,
                         name: name,
                         handType: 9,
                         handStrength: handRankArray
@@ -803,8 +735,8 @@ function tryForFlushWithWilds(normalCards, wildCount) {
 
             const handRankArray = [6, ...values.slice(0, 5)];
             return {
-                rank: 6,
-                hand_rank: handRankArray,
+//                rank: 6,
+//                hand_rank: handRankArray,
                 name: 'Flush (Wild)',
                 handType: 6,
                 handStrength: handRankArray
@@ -839,8 +771,8 @@ function tryForStraightWithWilds(normalCards, wildCount) {
             const straightInfo = getStraightInfo(straight);
             const handRankArray = [5, straightInfo.high, straightInfo.secondHigh];
             return {
-                rank: 5,
-                hand_rank: handRankArray,
+//                rank: 5,
+//                hand_rank: handRankArray,
                 name: 'Straight (Wild)',
                 handType: 5,
                 handStrength: handRankArray
@@ -924,22 +856,8 @@ function evaluateThreeCardHand(cards) {
         handType: 1,
         handStrength: handRankArray
     }
-
-
 }
 
-
-// CHANGES MADE:
-// 1. Added `const allSuitValues = getSuitValues(cards);` for normal 3-card hands
-// 2. Added `...allSuitValues` to Three of a Kind return: [4, tripsRank, ...suits]
-// 3. Added `...allSuitValues` to Pair return: [2, pairRank, kicker, ...suits]
-// 4. Added `...allSuitValues` to High Card return: [1, ...values, ...suits]
-// 5. Added `...allSuitValues` to edge cases (1-card, 2-card, invalid)
-
-// BEFORE vs AFTER:
-// Three of a Kind: [4, 14] → [4, 14, 4, 3, 2]           (added suits)
-// Pair:            [2, 8, 12] → [2, 8, 12, 4, 3, 2]     (added suits)
-// High Card:       [1, 14, 13, 12] → [1, 14, 13, 12, 4, 3, 2] (added suits)
 
 // Evaluate 3-card hand with wild cards
 function evaluateThreeCardHandWithWilds(normalCards, wildCount) {
@@ -951,8 +869,8 @@ function evaluateThreeCardHandWithWilds(normalCards, wildCount) {
     if (wildCount >= 2) {
         const handRankArray = [4, highCard, ...allSuitValues];
         return {
-            rank: 4,
-            hand_rank: handRankArray,
+//            rank: 4,
+//            hand_rank: handRankArray,
             name: 'Three of a Kind (Wild)',
             handType: 4,
             handStrength: handRankArray
@@ -964,8 +882,8 @@ function evaluateThreeCardHandWithWilds(normalCards, wildCount) {
         const kicker = values.find(v => v !== pairRank) || 13;
         const handRankArray = [2, pairRank, kicker, ...allSuitValues];
         return {
-            rank: 2,
-            hand_rank: handRankArray,
+//            rank: 2,
+//            hand_rank: handRankArray,
             name: 'Pair (Wild)',
             handType: 2,
             handStrength: handRankArray
@@ -976,8 +894,8 @@ function evaluateThreeCardHandWithWilds(normalCards, wildCount) {
     while (allValues.length < 3) allValues.push(13 - allValues.length);
     const handRankArray = [1, ...allValues.slice(0, 3), ...allSuitValues];
     return {
-        rank: 1,
-        hand_rank: handRankArray,
+//        rank: 1,
+//        hand_rank: handRankArray,
         name: 'High Card',
         handType: 1,
         handStrength: handRankArray
