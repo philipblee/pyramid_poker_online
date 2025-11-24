@@ -663,12 +663,9 @@ class HandDetector {
             cards: [...cards],
             handType,
             cardCount: cards.length,
-//            rank: handStrength.hand_rank[1] || cards[0].rank,
             rank: handStrength.handStrength[1] || cards[0].rank,
             handStrength: { ...handStrength },           // ✅ CREATE NEW OBJECT
-//            hand_rank: [...handStrength.hand_rank],      // ✅ CREATE NEW ARRAY
             hand_rank: [...handStrength.handStrength],      // ✅ CREATE NEW ARRAY
-//            strength: handStrength.rank,
             strength: handStrength.handType,
             validPositions: validPositions,
             isIncomplete: isIncomplete,
