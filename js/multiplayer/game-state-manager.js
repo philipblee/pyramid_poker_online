@@ -15,11 +15,11 @@ async function handleTableStateChange(tableState) {
             console.log('🎮 Handling NEW_TOURNAMENT state...');
             window.game.initializeTournament();
 
-            // since it's a new tournament, call transition from lobby to dealing
-            transitionFromLobbyToDealing();
+            // DON'T call transitionFromLobbyToDealing() yet!
+            // Just go to countdown
 
             // Then transition to DEALING
-            setTableState(TABLE_STATES.DEALING);
+            setTableState(TABLE_STATES.COUNTDOWN);
             break;
 
         // In game-state-manager.js
@@ -27,6 +27,10 @@ async function handleTableStateChange(tableState) {
             console.log('⏱️ Starting countdown phase...');
             if (window.isOwner) {
                 await transitionToCountdownPhase();
+            } else {
+                // Non-owner just displays countdown
+                await displayCountdownOnly();
+
             }
             break;
 
@@ -65,6 +69,9 @@ async function handleTableStateChange(tableState) {
                 closeScoringPopup();
                 const waitingEl = document.getElementById('waiting-for-table-owner');
                 if (waitingEl) waitingEl.remove();
+            } else {
+                    // Owner transitions to countdown for next round
+                    setTableState(TABLE_STATES.COUNTDOWN);  // ADD THIS
             }
             break;
 
@@ -80,20 +87,27 @@ async function handleTableStateChange(tableState) {
 
 async function transitionToCountdownPhase() {
     const config = window.gameConfig?.config;
-    const countdownTime = config.countDownTime || 0;
 
+    // show UI
+    transitionFromLobbyToDealing();
+
+
+    // Skip antes for now - just do countdown
+    const countdownTime = config.countdownTime || 0;
     if (countdownTime > 0) {
-        // Same countdown logic
+        console.log(`⏱️ Starting ${countdownTime} second countdown...`);
+
         for (let i = countdownTime; i > 0; i--) {
+            const statusElement = document.getElementById('status');
             if (statusElement) {
-                statusElement.textContent = `Get Ready: New Round starting in ${i}...`;
+                statusElement.textContent = `Get Ready -  Round starting in ${i}...`;
             }
             console.log(`⏱️ ${i}...`);
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
-
-
     }
+
+    // Move to dealing
     setTableState(TABLE_STATES.DEALING);
 }
 
@@ -212,23 +226,18 @@ async function setupLobbyStateListener(tableId) {
     });
 }
 
-//// In the Continue button click handler
-//function TransitionToRoundComplete() {
-//    if (window.isOwner) {
-//        console.log('Owner clicked Continue on Scoring Popup');
-//        transitionToRoundComplete();
-//    } else {
-//        console.log('Non-owner waiting for owner to click Continue');
-//        closeScoringPopup();
-//    }
-//}
-//
-//// In game-state-manager.js (or wherever state transitions are defined)
-//async function transitionToRoundComplete() {
-//    console.log('🔄 Transitioning to ROUND_COMPLETE state...');
-//
-//    // Only update Realtime Database (what listeners actually read)
-//    await firebase.database().ref(`tables/${this.currentTableId}/tableState`).set('round_complete');
-//
-//    console.log('✅ Successfully transitioned to ROUND_COMPLETE state');
-//}
+// Add this new function for non-owners
+async function displayCountdownOnly() {
+    const config = window.gameConfig?.config;
+    const countdownTime = config.countDownTime || 0;
+
+    if (countdownTime > 0) {
+        for (let i = countdownTime; i > 0; i--) {
+            const statusElement = document.getElementById('status');
+            if (statusElement) {
+                statusElement.textContent = `Game starting in ${i}...`;
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+}
