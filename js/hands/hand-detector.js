@@ -781,7 +781,7 @@ function calculateMethodScore(handStrength) {
 
     validPositions.forEach(position => {
         if (method === 'netEV') {
-            methodScore[position] = lookupNetEV(position, { hand_rank: handStrength.hand_rank });
+            methodScore[position] = lookupNetEV(position, { hand_rank: handStrength.handStrength });
         }
     });
 

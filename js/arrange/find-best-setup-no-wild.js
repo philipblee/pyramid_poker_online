@@ -313,9 +313,6 @@ class FindBestSetupNoWildBase {
 //            console.log(`   Middle: ${arrangement.middle.handType}(${arrangement.middle.rank}) - ${arrangement.middle.cards?.length || 0} cards`);
 //            console.log(`   Front: ${arrangement.front.handType}(${arrangement.front.rank}) - ${arrangement.front.cards?.length || 0} cards`);
 //
-//            console.log(`   Back hand_rank: ${arrangement.back.hand_rank}`);
-//            console.log(`   Middle hand_rank: ${arrangement.middle.hand_rank}`);
-//            console.log(`   Front hand_rank: ${arrangement.front.hand_rank}`);
 
             if (score > this.bestScore) {
                 this.bestScore = score;

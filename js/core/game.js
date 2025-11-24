@@ -748,13 +748,6 @@ class PyramidPoker {
             document.getElementById('middleStrength');
             document.getElementById('frontStrength');
 
-//            document.getElementById('backStrength').textContent = `${backStrength.name}   -   ${backPoints} Points`;
-//            document.getElementById('middleStrength').textContent = `${middleStrength.name}  -  ${middlePoints} Points`;
-//            document.getElementById('frontStrength').textContent = `${frontStrength.name}  -  ${frontPoints} Points`;
-
-//            document.getElementById('backStrength').textContent = `${backStrength.name}  (${backStrength.hand_rank.join(', ')})    ${backPoints} Points`;
-//            document.getElementById('middleStrength').textContent = `${middleStrength.name}  (${middleStrength.hand_rank.join(', ')})   ${middlePoints} Points`;
-//            document.getElementById('frontStrength').textContent = `${frontStrength.name}  (${frontStrength.hand_rank.join(', ')})   ${frontPoints} Points`;
             if (isValidOrder) {
                 // Valid setup
                 backHand.classList.add('valid');
