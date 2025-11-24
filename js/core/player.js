@@ -229,15 +229,14 @@ class PlayerManager {
             const snapshot = await firebase.database().ref(`tables/${currentTable.id}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`).once('value');
             const playerCount = snapshot.val() || 0;
 
-            if (playerCount < 2) {
-                throw new Error(`Need at least 2 players to start! Currently have ${playerCount} players.`);
-            }
+//            if (playerCount < 2) {
+//                throw new Error(`Need at least 2 players to start! Currently have ${playerCount} players.`);
+//            }
         } else {
             // Single-device validation
-            if (this.players.length < 2) {
-                throw new Error('Need at least 2 players to start in validateMinimumPlayers!');
+//            if (this.players.length < 2) {
+//                throw new Error('Need at least 2 players to start in validateMinimumPlayers!');
             }
-        }
     }
 
     ensurePlayersExist() {

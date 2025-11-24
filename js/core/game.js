@@ -283,13 +283,14 @@ class PyramidPoker {
             return;
         }
 
-        // In startNewRound(), after the maxRounds check:
         if (this.currentRound >= this.maxRounds) {
-            if (!this.multiDeviceMode) {  // ← Add this guard
-                this.showTournamentSummary();
-            }
-            if (window.isOwner) {
-                setTableState(TABLE_STATES.TOURNAMENT_COMPLETE);
+            // Single-player always shows summary directly
+            const isSingleHuman = window.gameConfig?.config?.gameMode === 'single-human';
+
+            if (isSingleHuman) {
+                this.showTournamentSummary();  // Direct call for all single-player
+            } else if (window.isOwner) {
+                setTableState(TABLE_STATES.TOURNAMENT_COMPLETE);  // Multi-player uses state machine
             }
             return;
         }

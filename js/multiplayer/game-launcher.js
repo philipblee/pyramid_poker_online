@@ -5,82 +5,32 @@
 function startGame() {
     if (!currentTable) return;
 
-//    console.log('🔥 STARTGAME FUNCTION CALLED!');
-//    console.log('🎮 Starting game with table settings:', tableSettings);
-
-    // STEP 1: Update the CORRECT gameConfig object
+    // Apply settings to gameConfig
     if (window.gameConfig) {
         Object.assign(window.gameConfig.config, tableSettings);
         window.gameConfig.saveToStorage();
-//        console.log('✅ Applied settings to window.gameConfig:', window.gameConfig.config);
-    } else {
-        console.error('❌ window.gameConfig not found!');
     }
 
-    // STEP 2: Enhanced branching based on game mode AND connect mode
-    // tables 1-5
-    if (window.gameConfig.config.gameMode === 'single-human' && window.gameConfig.config.gameConnectMode === 'offline') {
-//        console.log('🔥 CALLING startSingleHumanGame()!');
+    // Route to appropriate game mode
+    if (window.gameConfig.config.gameMode === 'single-human') {
         startSingleHumanGame();
-
-    // table 6 - FIXED: Now treated as single-player vs AI
-    } else if (window.gameConfig.config.gameMode === 'single-human' && window.gameConfig.config.gameConnectMode === 'online') {
-        console.log('🔥 CALLING startSingleHumanGame() - Table 6 single-player vs AI!');
-        startSingleHumanGame();
-
-    // tables 7-9
     } else if (window.gameConfig.config.gameMode === 'multiple-humans' && window.gameConfig.config.gameConnectMode === 'online') {
-        console.log('🔥 CALLING startMultiHumanCloudGame()!');
         startMultiHumanCloudGame();
-
-    // single-device multi-human - pass device around human users
     } else if (window.gameConfig.config.gameMode === 'multiple-humans' && window.gameConfig.config.gameConnectMode === 'offline') {
-        console.log('🔥 CALLING startMultiHumanOfflineGame()!');
         startMultiHumanOfflineGame();
-    } else {
-        console.log('❌ No matching game mode found');
     }
 }
 
 // FIXED: Table 6 now starts immediately without MultiDeviceIntegration
 async function startSingleHumanGame() {
+    window.isOwner = true;
 
-//    console.log('🔥 startSingleHumanGame() CALLED!');
-
-    if (tableSettings.gameConnectMode === 'online') {
-        // 🎯 FIX: Table 6 is single-player vs AI, NOT multi-player
-        // Don't use MultiDeviceIntegration - just start immediately like Tables 1-5
-        console.log('🎮 Table 6: Single-player vs AI - starting immediately');
-        console.log('📝 Note: MultiDeviceIntegration bypassed - no waiting for other players');
-
-        // 🏆 FIX: Set ownership for single-player (fixes "Waiting for table owner" issue)
-        window.isOwner = true;
-        console.log('✅ Set window.isOwner = true for single-player Table 6');
-
-        // ☁️ NEW: Create simple Firebase sync for Table 6 persistence
-        if (typeof window.createSimpleFirebaseSync === 'function') {
-            window.table6FirebaseSync = window.createSimpleFirebaseSync(currentTable.id);
-            console.log('✅ Created simple Firebase sync for Table 6');
-        } else {
-            console.log('⚠️ Simple Firebase sync not available - proceeding without cloud storage');
-        }
-
-        // Start game immediately without waiting for other players
-        launchGameInterface();
-
-        // TODO: Add simple Firebase storage for game persistence later (optional)
-        // But don't use MultiDeviceIntegration which expects multiple players
-
-    } else {
-        // Tables 1-5: offline single-player
-//        console.log('🎮 Tables 1-5: Offline single-player');
-
-        // 🏆 FIX: Set ownership for single-player (all single-player games need this)
-        window.isOwner = true;
-//        console.log('✅ Set window.isOwner = true for offline single-player');
-
-        launchGameInterface();
+    // Optional Firebase sync for online mode
+    if (tableSettings.gameConnectMode === 'online' && typeof window.createSimpleFirebaseSync === 'function') {
+        window.table6FirebaseSync = window.createSimpleFirebaseSync(currentTable.id);
     }
+
+    launchGameInterface();
 }
 
 function startMultiHumanCloudGame() {

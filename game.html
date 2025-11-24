@@ -812,64 +812,8 @@
                     console.log('Entire table 1-6 cleared');
                 });
 
-        <!--    firebase.database().ref(`tables/7`).remove()-->
-        <!--    .then(() => {-->
-        <!--        console.log('Entire table 7 cleared');-->
-        <!--    });-->
-
-        <!--    // Delete just the FireStore currentGame field from tables/7-->
-        <!--    firebase.firestore().collection('tables').doc('7').update({-->
-        <!--        currentGame: firebase.firestore.FieldValue.delete()-->
-        <!--    })-->
-        <!--    .then(() => console.log('currentGame from tables/7 deleted'));-->
-
-
-        <!--    // Delete just the FireStore currentGame field from tables/6-->
-        <!--    firebase.firestore().collection('tables').doc('6').update({-->
-        <!--        currentGame: firebase.firestore.FieldValue.delete()-->
-        <!--    })-->
-        <!--    .then(() => console.log('currentGame from tables/6 deleted'));-->
-
         });
 
-<!--        // Welcome screen functions-->
-<!--        function openLoginModal() {-->
-<!--            if (window.loginModal) {-->
-<!--                window.loginModal.show();-->
-<!--            }-->
-<!--        }-->
-
-<!--        function startGuestMode() {-->
-<!--            console.log('🎮 Guest mode not implemented yet');-->
-<!--            alert('Guest mode coming soon! Please use Login for now.');-->
-<!--        }-->
-
-<!--        // Update your login-modal.js updateLoginState method to control welcome screen-->
-<!--        function updateWelcomeScreenVisibility() {-->
-<!--            const welcomeScreen = document.getElementById('welcomeScreen');-->
-<!--            const lobbyScreen = document.getElementById('lobbyScreen');-->
-<!--            const currentUser = window.firebaseAuth?.currentUser;-->
-
-<!--            if (currentUser) {-->
-<!--                // User is logged in - hide welcome, show lobby-->
-<!--                if (welcomeScreen) welcomeScreen.style.display = 'none';-->
-<!--                if (lobbyScreen) lobbyScreen.style.display = 'block';-->
-<!--            } else {-->
-<!--                // User is logged out - show welcome, hide lobby-->
-<!--                if (welcomeScreen) welcomeScreen.style.display = 'block';-->
-<!--                if (lobbyScreen) lobbyScreen.style.display = 'none';-->
-<!--            }-->
-<!--        }-->
-
-<!--        // Call this on page load and auth state changes-->
-<!--        if (window.firebaseAuth) {-->
-<!--            window.firebaseAuth.onAuthStateChanged(() => {-->
-<!--                updateWelcomeScreenVisibility();-->
-<!--            });-->
-<!--        }-->
-
-<!--        // Call immediately on page load-->
-<!--        document.addEventListener('DOMContentLoaded', updateWelcomeScreenVisibility);-->
 
     </script>
 
