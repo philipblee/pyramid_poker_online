@@ -506,21 +506,12 @@ class MultiDeviceIntegration {
 
             const myUniquePlayerName = window.uniquePlayerName;
 
-//            console.log('🔍 Ownership check debug:', {
-//                tableOwner,
-//                myUniquePlayerName,
-//                tableId: this.currentTableId,
-//                match: tableOwner === myUniquePlayerName
-//            }
-//            )
-            ;
-
             return tableOwner === myUniquePlayerName;
         } catch (error) {
             console.error('❌ Error in isTableOwner:', error);
             return false;
         }
-        }
+    }
 
     // Sync all dealt hands to Firebase for cloud storage
     async storeAllHandsToFirebase() {
@@ -547,7 +538,6 @@ class MultiDeviceIntegration {
         console.log('🔍 currentTableId value:', this.currentTableId);
 
         // ✅ Correct - actual object
-        // Instead of .update()
         await this.tableManager.tablesRef.doc(this.currentTableId.toString()).set({
             'currentGame': {
                 'dealtHands': handsData,
@@ -677,7 +667,6 @@ class MultiDeviceIntegration {
             detailedResults: window.game.detailedResults || [], // Include detailed results
             timestamp: Date.now()
         };
-
 
         // Extract scores
         if (window.game.tournamentScores) {
@@ -1136,11 +1125,9 @@ class MultiDeviceIntegration {
             statusIndicator.remove();
         }
 
-
         console.log('✅ Cleanup complete');
     }
 }
-
 
 // Export for use in other modules
 window.MultiDeviceIntegration = MultiDeviceIntegration;

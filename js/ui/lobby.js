@@ -620,13 +620,7 @@ function onSettingsSaved(newSettings) {
     }
 }
 
-// Leave table v1
-//function leaveTable() {
-//    currentTable = null;
-//    showLobbyScreen();
-//}
-
-// Leave table v2
+// Leave table
 async function leaveTable() {
     console.log('🚪 Leave table clicked');
 
