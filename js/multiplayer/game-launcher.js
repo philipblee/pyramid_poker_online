@@ -158,7 +158,7 @@ async function setupMultiHumanPlayers() {
 // Launch your existing game interface
 function launchGameInterface() {
 //    console.log('🎮 Launching game interface with table settings:', tableSettings);
-
+    updateGameChipDisplay();  // ADD THIS LINE
     // Hide lobby, show your existing game interface
     document.getElementById('lobbyScreen').style.display = 'none';
     document.getElementById('tableScreen').style.display = 'none';

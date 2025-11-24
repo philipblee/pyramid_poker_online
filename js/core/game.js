@@ -1455,6 +1455,32 @@ class PyramidPoker {
     }
 }
 
+// Add near other utility functions in game.js
+function updateGameChipDisplay() {
+    const currentUser = firebase.auth().currentUser;
+    if (!currentUser) return;
+
+    const encodedEmail = currentUser.email.replace(/\./g, ',').replace('@', '_at_');
+    const playerRef = firebase.database().ref(`players/${encodedEmail}`);
+
+    // Real-time listener
+    playerRef.on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+
+        const chips = data.chips || 0;
+        const reloads = data.reloads || 0;
+
+        const userInfoDiv = document.querySelector('.game-user-info');
+        if (userInfoDiv) {
+            userInfoDiv.innerHTML = `
+                👤 ${currentUser.email} |
+                💰 ${chips.toLocaleString()} chips |
+                🔄 ${reloads} reloads
+            `;
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     game = new PyramidPoker();
 
