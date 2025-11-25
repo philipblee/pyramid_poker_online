@@ -217,7 +217,7 @@ function showLobbyScreen() {
 function showTableScreen() {
     document.getElementById('lobbyScreen').style.display = 'none';
     document.getElementById('tableScreen').style.display = 'block';
-    updateGameChipDisplay();
+    updateGameChipDisplays();
     document.getElementById('gameArea').style.display = 'none';
 }
 
@@ -338,6 +338,10 @@ async function claimOwnershipIfNeeded(tableId, playerName) {
 async function joinTable(table) {
     console.log('🔍 joinTable called for:', table.name);
 
+    // Initialize window.game if needed and set tableId for ALL modes
+    window.game = window.game || {};
+    window.game.currentTableId = table.id;
+
     // 🎯 FIX: Update gameConfig.config (not the whole gameConfig object)
     if (window.gameConfig) {
         Object.assign(window.gameConfig.config, {
@@ -363,12 +367,6 @@ async function joinTable(table) {
     firebase.database().ref(`tables/${table.id}/settings/humanPlayers`).once('value', (snapshot) => {
         const currentHumanPlayers = snapshot.val() || 0;
         const maxHumanPlayers = table.settings.maxHumanPlayers || 6;
-
-//        console.log('🔍 Current human players from Firebase:', currentHumanPlayers);
-        // Check if table is full (applies to ALL table types)
-//        console.log('🔍 Calculated - current:', currentHumanPlayers, 'max:', maxHumanPlayers);
-//        console.log('🔍 Is full?', currentHumanPlayers >= maxHumanPlayers);
-//        console.log('🔍 Max players:', maxHumanPlayers);
 
         if (currentHumanPlayers >= maxHumanPlayers) {
             alert(`Table "${table.name}" is full (${currentHumanPlayers}/${maxHumanPlayers} players)`);

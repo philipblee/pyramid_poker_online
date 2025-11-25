@@ -1491,30 +1491,34 @@ async handleCountdown() {
 }
 
 // this function is used to update GameChipDisplay for table screeb and game screen
-function updateGameChipDisplay() {
+function updateGameChipDisplays() {
     const currentUser = firebase.auth().currentUser;
     if (!currentUser) return;
 
+    // Player chips listener
     const encodedEmail = currentUser.email.replace(/\./g, ',').replace(/@/g, '_at_');
-    const playerRef = firebase.database().ref(`players/${encodedEmail}`);
-
-    playerRef.on('value', (snapshot) => {
+    firebase.database().ref(`players/${encodedEmail}`).on('value', (snapshot) => {
         const data = snapshot.val() || {};
-
         const chips = data.chips || 0;
         const reloads = data.reloads || 0;
 
-        // Update ALL matching divs (not just first one)
-        const userInfoDivs = document.querySelectorAll('.game-user-info');  // Changed to querySelectorAll
-        userInfoDivs.forEach(div => {
-            div.innerHTML = `
-                👤 ${currentUser.email} |
-                💰 ${chips.toLocaleString()} chips |
-                🔄 ${reloads} reloads
-            `;
+        document.querySelectorAll('.user-chips-display').forEach(span => {
+            span.innerHTML = `👤 ${currentUser.email} | 💰 ${chips.toLocaleString()} chips | 🔄 ${reloads} reloads`;
         });
     });
+
+    // Pot listener
+    const tableId = window.game?.currentTableId;
+    if (tableId) {
+        firebase.database().ref(`tables/${tableId}/pot`).on('value', (snapshot) => {
+            const pot = snapshot.val() || 0;
+            document.querySelectorAll('.pot-display').forEach(span => {
+                span.innerHTML = `🏆 Pot: ${pot.toLocaleString()} chips`;
+            });
+        });
+    }
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
     game = new PyramidPoker();
