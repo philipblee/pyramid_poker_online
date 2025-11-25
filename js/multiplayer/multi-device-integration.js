@@ -274,73 +274,48 @@ class MultiDeviceIntegration {
 
     // Enhanced submit button with submission coordination
     enhanceSubmitButton() {
-        const submitBtn = document.getElementById('submitHand');
-        if (!submitBtn) return;
+    const submitBtn = document.getElementById('submitHand');
+    if (!submitBtn) return;
 
-        // Add enhanced handler that runs FIRST and stops other handlers
-        submitBtn.addEventListener('click', async (e) => {
+    // Store handler as property so we can remove it later
+    this.enhancedSubmitHandler = async (e) => {
+        e.stopImmediatePropagation();
 
-            e.stopImmediatePropagation(); // Prevents original handler
+        const playerName = window.uniquePlayerName;
 
-            // Enhanced multi-device logic
-            const humanPlayer = window.game.players.find(p => !p.isAI);
-//            const playerName = humanPlayer ? humanPlayer.name : 'fallback@gmail.com';
+        const playerData = window.game.playerHands.get(window.game.players[0].name);
+        if (playerData) {
+            window.game.playerHands.set(playerName, {
+                back: [...playerData.back],
+                middle: [...playerData.middle],
+                front: [...playerData.front],
+                cards: [...playerData.cards],
+                originalCards: [...playerData.originalCards]
+            });
+        }
 
-            const playerName = window.uniquePlayerName;
+        try {
+            await this.storePlayerArrangementToFirebase(playerName);
 
-            // Read from where single instance actually stored the data (playerHands[0])
-            const playerData = window.game.playerHands.get(window.game.players[0].name);
-            if (playerData) {
-                // Store the actual arrangement data under the correct unique player key
-                window.game.playerHands.set(playerName, {
-                    back: [...playerData.back],
-                    middle: [...playerData.middle],
-                    front: [...playerData.front],
-                    cards: [...playerData.cards],
-                    originalCards: [...playerData.originalCards]
-                });
+            const submitBtn = document.getElementById('submitHand');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitted ✓';
             }
 
-//            console.log('🔍 PLAYER IDENTITY CHECK:');
-//            console.log('- playerName:', playerName);
-//            console.log('- Expected for this device:'), // what should it be?
-//            console.log('- playerHands before storage:', window.game.playerHands);
-//            console.log('- playerHands has this key?', window.game.playerHands.has(playerName));
-
-            try {
-//                console.log(`📝 Storing arrangement for human player: ${playerName}`);
-
-                // RIGHT BEFORE calling storePlayerArrangementToFirebase:
-//                console.log('🔍 PRE-STORAGE DEBUG for:', playerName);
-//                console.log('🔍 Current playerHands Map:', window.game.playerHands);
-//                console.log('🔍 PlayerHands has key?', window.game.playerHands.has(playerName));
-//                console.log('🔍 Direct playerHands.get():', window.game.playerHands.get(playerName));
-//
-//                // Also check what's visually arranged:
-//                console.log('🔍 DOM back hand:', document.querySelector('.back-hand')?.children.length);
-//                console.log('🔍 DOM middle hand:', document.querySelector('.middle-hand')?.children.length);
-//                console.log('🔍 DOM front hand:', document.querySelector('.front-hand')?.children.length);
-
-                await this.storePlayerArrangementToFirebase(playerName);
-
-                // Add after successful storage:
-                const submitBtn = document.getElementById('submitHand');
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'Submitted ✓';
-                }
-
-
-                if (await this.isTableOwner()) {
-                    await this.checkAllPlayersSubmitted();
-                } else {
-                    console.log('Not owner - skipping submission check');
-                }
-            } catch (error) {
-                console.error('❌ Error in enhanced submit:', error);
+            if (await this.isTableOwner()) {
+                await this.checkAllPlayersSubmitted();
+            } else {
+                console.log('Not owner - skipping submission check');
             }
-        }, true); // 'true' = capture phase, runs before original handler
-    }
+        } catch (error) {
+            console.error('❌ Error in enhanced submit:', error);
+        }
+    };
+
+    // Add the stored handler
+    submitBtn.addEventListener('click', this.enhancedSubmitHandler, true);
+}
 
     // enhanceContinueButton changes tableState to round_complete, then only owner can click continue to progress
     enhanceContinueButton() {
@@ -399,11 +374,6 @@ class MultiDeviceIntegration {
     // Set up listener for submission state changes (call this during initialization)
     async setupSubmissionListener() {
         if (!this.isMultiDevice) return;
-
-//        console.log('👂 Setting up submission state listener...');
-//        console.log('👂 Table ID:', this.currentTableId);
-//        console.log('👂 Is Owner:', this.isOwner);
-
         const tableRef = this.tableManager.tablesRef.doc(this.currentTableId.toString());
 
         this.submissionListener = tableRef.onSnapshot(async (doc) => {
@@ -1108,6 +1078,33 @@ class MultiDeviceIntegration {
             console.log('🔕 Players list listener removed');
         }
 
+        // Remove submit button handler
+        const submitBtn = document.getElementById('submitHand');
+        if (submitBtn && this.enhancedSubmitHandler) {
+            submitBtn.removeEventListener('click', this.enhancedSubmitHandler, true);
+            this.enhancedSubmitHandler = null;
+            console.log('🔕 Enhanced submit handler removed');
+        }
+
+        // Restore button handlers
+        if (this.originalButtonHandlers) {
+            this.originalButtonHandlers.forEach(({button, onclick}) => {
+                if (button) {
+                    button.onclick = onclick;
+                    button.disabled = false;
+                    button.style.opacity = '';
+                }
+            });
+            this.originalButtonHandlers = null;
+            console.log('🔕 Button handlers restored');
+        }
+
+        // Remove waiting message
+        const waitingMsg = document.getElementById('waiting-for-table-owner');
+        if (waitingMsg) {
+            waitingMsg.remove();
+        }
+
         // Clear references
         this.tableStateListener = null;
         this.currentTableStateRef = null;
@@ -1115,6 +1112,9 @@ class MultiDeviceIntegration {
         this.playerCountRef = null;
         this.playerListListener = null;
         this.playersRef = null;
+        // Clear global reference - THIS IS CRITICAL!
+        window.multiDeviceIntegration = null;  // ADD THIS LINE
+        window.isOwner = false;  // ADD THIS - reset ownership flag!
 
         // firestore listener
         this.submissionListener = null;

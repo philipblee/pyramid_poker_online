@@ -301,10 +301,7 @@ class PyramidPoker {
         }
 
         // Advance to next round
-//        console.log(`🔄 BEFORE increment: currentRound = ${this.currentRound}`);
         this.currentRound++;
-//        console.log(`🔄 AFTER increment: currentRound = ${this.currentRound}`);
-
         console.log(`🔄 Starting Round ${this.currentRound} of ${this.maxRounds}...`);
 
         // 🆕 ADD COUNTDOWN HERE (before dealing cards)
@@ -316,25 +313,18 @@ class PyramidPoker {
         }
 
         // Setup new round (same as before but with round tracking)
-        this.deckManager.createNewDeck();
         this.gameState = 'playing';
         this.playerManager.currentPlayerIndex = 0;
         this.submittedHands.clear();
-
-        /*
-        MODIFICATION 2: Add Firebase sync to startNewRound()
-        Location: After dealing new cards to all players, before this.loadCurrentPlayerHand()
-        */
 
         // IN startNewRound() method, ADD this block after the card dealing loop:
 
         // Deal cards to all players
         if (!this.multiDeviceMode || window.isOwner) {
-            // Existing dealing loop stays exactly the same
-            // Deal new cards to all existing players
+            this.deckManager.createNewDeck();
+            // Deal cards to all players
             for (let player of this.playerManager.players) {
                 const hand = this.deckManager.dealCards(17);
-
                 this.playerHands.set(player.name, {
                     cards: hand,
                     originalCards: [...hand],  // Save original dealt cards
