@@ -312,33 +312,7 @@ class PyramidPoker {
 
         // IN startNewRound() method, ADD this block after the card dealing loop:
 
-        // Deal cards to all players
-        if (!this.multiDeviceMode || window.isOwner) {
-            this.deckManager.createNewDeck();
-            // Deal cards to all players
-            for (let player of this.playerManager.players) {
-                const hand = this.deckManager.dealCards(17);
-                this.playerHands.set(player.name, {
-                    cards: hand,
-                    originalCards: [...hand],  // Save original dealt cards
-                    back: [],
-                    middle: [],
-                    front: []
-                });
-            }
-            
-            // Add Firebase sync only if multi-device owner
-            if (this.multiDeviceMode && window.multiDeviceIntegration) {
-                setTimeout(async () => {
-                    await window.multiDeviceIntegration.storeAllHandsToFirebase();
-                    console.log('✅ Owner synced all hands to Firebase');
-                }, 500);
-            }
-
-        } else {
-            setTimeout(() => this.handleNonOwnerCardRetrieval(), 1500);
-        }
-
+        this.dealCardsToAllPlayers();
 
         // ☁️ NEW: Add Firebase sync for Table 6 persistence
         if (window.table6FirebaseSync && gameConfig.config.gameConnectMode === 'online') {
@@ -373,6 +347,33 @@ class PyramidPoker {
 //        console.log('🔧 After ready reset:');
 //        this.players.forEach(p => console.log(`${p.name}: ready=${p.ready}`));
 
+    }
+
+    dealCardsToAllPlayers() {
+        if (!this.multiDeviceMode || window.isOwner) {
+            this.deckManager.createNewDeck();
+
+            for (let player of this.playerManager.players) {
+                const hand = this.deckManager.dealCards(17);
+                this.playerHands.set(player.name, {
+                    cards: hand,
+                    originalCards: [...hand],
+                    back: [],
+                    middle: [],
+                    front: []
+                });
+                player.ready = false;
+            }
+
+            if (this.multiDeviceMode && window.multiDeviceIntegration) {
+                setTimeout(async () => {
+                    await window.multiDeviceIntegration.storeAllHandsToFirebase();
+                    console.log('✅ Owner synced all hands to Firebase');
+                }, 500);
+            }
+        } else {
+            setTimeout(() => this.handleNonOwnerCardRetrieval(), 1500);
+        }
     }
 
     async startNewTournament() {
