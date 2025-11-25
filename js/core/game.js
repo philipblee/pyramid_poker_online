@@ -188,17 +188,6 @@ class PyramidPoker {
 
         await this.dealCardsToAllPlayers();
 
-        // ☁️ NEW: Add Firebase sync for Table 6 persistence
-        if (window.table6FirebaseSync && gameConfig.config.gameConnectMode === 'online') {
-            try {
-                await window.table6FirebaseSync.storeAllHandsToFirebase();
-                console.log('✅ [startNewGame] Hands synced to Firebase for persistence');
-            } catch (error) {
-                console.error('❌ [startNewGame] Firebase sync failed:', error);
-                // Continue without Firebase - game still works locally
-            }
-        }
-
         // Only load hand immediately for owner/single-player
         // Non-owners will load after Firebase retrieval completes
         if (!this.multiDeviceMode || window.isOwner) {
@@ -279,17 +268,6 @@ class PyramidPoker {
         // IN startNewRound() method, ADD this block after the card dealing loop:
 
         await this.dealCardsToAllPlayers();
-
-        // ☁️ NEW: Add Firebase sync for Table 6 persistence
-        if (window.table6FirebaseSync && gameConfig.config.gameConnectMode === 'online') {
-            try {
-                await window.table6FirebaseSync.storeAllHandsToFirebase();
-                console.log(`✅ [startNewRound] Round ${this.currentRound} hands synced to Firebase`);
-            } catch (error) {
-                console.error('❌ [startNewRound] Firebase sync failed:', error);
-                // Continue without Firebase - game still works locally
-            }
-        }
 
         this.loadCurrentPlayerHand();
 
