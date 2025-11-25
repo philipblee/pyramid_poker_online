@@ -186,7 +186,7 @@ class PyramidPoker {
         this.playerManager.currentPlayerIndex = 0;
         this.submittedHands.clear();
 
-        this.dealCardsToAllPlayers();
+        await this.dealCardsToAllPlayers();
 
         // ☁️ NEW: Add Firebase sync for Table 6 persistence
         if (window.table6FirebaseSync && gameConfig.config.gameConnectMode === 'online') {
@@ -278,7 +278,7 @@ class PyramidPoker {
 
         // IN startNewRound() method, ADD this block after the card dealing loop:
 
-        this.dealCardsToAllPlayers();
+        await this.dealCardsToAllPlayers();
 
         // ☁️ NEW: Add Firebase sync for Table 6 persistence
         if (window.table6FirebaseSync && gameConfig.config.gameConnectMode === 'online') {
@@ -306,7 +306,7 @@ class PyramidPoker {
 
     }
 
-    dealCardsToAllPlayers() {
+    async dealCardsToAllPlayers() {
         if (!this.multiDeviceMode || window.isOwner) {
             this.deckManager.createNewDeck();
 
@@ -331,7 +331,19 @@ class PyramidPoker {
         } else {
             setTimeout(() => this.handleNonOwnerCardRetrieval(), 1500);
         }
+
+        // Table 6 Firebase sync
+        if (window.table6FirebaseSync && gameConfig.config.gameConnectMode === 'online') {
+            try {
+                await window.table6FirebaseSync.storeAllHandsToFirebase();
+                console.log('✅ Hands synced to Firebase for persistence');
+            } catch (error) {
+                console.error('❌ Firebase sync failed:', error);
+            }
+        }
     }
+
+
 
     async startNewTournament() {
         console.log('🏆 Starting completely new tournament...');
