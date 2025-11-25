@@ -4,7 +4,13 @@
 
 function evaluateHand(cards) {
     if (cards.length !== 5 && cards.length !== 6 && cards.length !== 7 && cards.length !== 8)
-        return { rank: 1, hand_rank: [1, 7], name: 'High Card' };
+        return {
+            rank: 1,
+            hand_rank: [1, 7],
+            name: 'High Card',
+            handType: 1,              // ✅ ADD
+            handStrength: [1, 7]      // ✅ ADD
+        };
 
     const analysis = new Analysis(cards);
     const handEvaluation = getHandType(analysis);

@@ -653,11 +653,10 @@ class HandDetector {
         // In hand-detector.js addHand() method, right after:
         const preCalculatedScore = JSON.parse(JSON.stringify(calculateMethodScore(handStrength)));
 
-//         ADD THIS LOG:
-//        console.log(`✅ Created preCalculatedScore for addHands: ${handType}:`, preCalculatedScore);
+//        console.log('🔍 Before push - handStrength:', handStrength);
+//        console.log('🔍 handStrength.handStrength:', handStrength.handStrength);
+//        console.log('🔍 handStrength.hand_rank:', handStrength.hand_rank);
 
-//        console.log('🔍 handStrength object:', handStrength);
-//        console.log('🔍 handStrength keys:', Object.keys(handStrength));
 
         this.allHands.push({
             cards: [...cards],

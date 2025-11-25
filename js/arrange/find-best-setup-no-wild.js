@@ -300,7 +300,6 @@ class FindBestSetupNoWildBase {
             
             // Calculate full arrangement score
             const arrangement = { back: backHand, middle: middleHand, front: frontHand };
-            
             const backScore = this.getHandScore(arrangement.back, 'back');
             const middleScore = this.getHandScore(arrangement.middle, 'middle');
             const frontScore = this.getHandScore(arrangement.front, 'front');

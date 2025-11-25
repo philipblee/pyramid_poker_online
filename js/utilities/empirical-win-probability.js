@@ -433,7 +433,7 @@ function handleIncompleteFrontHand(handRank) {
  */
 function lookupEmpiricalWinProbability(position, hand) {
     // Extract hand_rank for compatibility
-    const handRank = hand.hand_rank || hand;
+    const handRank = hand.hand_rank || hand.handStrength.handStrength;
 
     // SPECIAL HANDLING: Incomplete front hands
     if (position.toLowerCase() === 'front' && hand.isIncomplete) {
