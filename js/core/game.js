@@ -304,15 +304,6 @@ class PyramidPoker {
 //            console.log(`- ${name}: ${hand.cards.length} cards`);
         });
 
-        // Reset all players' ready status to false
-        for (let player of this.playerManager.players) {
-            player.ready = false;
-        }
-
-        // 🔧 DEBUG - Verify the reset worked
-//        console.log('🔧 After ready reset:');
-//        this.players.forEach(p => console.log(`${p.name}: ready=${p.ready}`));
-
     }
 
     dealCardsToAllPlayers() {
