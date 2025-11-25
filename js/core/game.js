@@ -198,7 +198,6 @@ class PyramidPoker {
             // Existing dealing loop stays exactly the same
             for (let player of this.playerManager.players) {
                 const hand = this.deckManager.dealCards(17);
-                const analysis = new Analysis(hand);
 
                 this.playerHands.set(player.name, {
                     cards: hand,
@@ -210,15 +209,9 @@ class PyramidPoker {
                 player.ready = false;
             }
 
-            // Right before the Firebase sync setTimeout, add:
-            console.log('🔍 DEBUG before Firebase sync:');
-            console.log('  - playerHands size:', this.playerHands.size);
-
             // Add Firebase sync only if multi-device owner
             if (this.multiDeviceMode && window.multiDeviceIntegration) {
                 setTimeout(async () => {
-                    console.log('🔍 DEBUG inside Firebase sync timeout:');
-                    console.log('  - playerHands size:', this.playerHands.size);
                     await window.multiDeviceIntegration.storeAllHandsToFirebase();
                     console.log('✅ Owner synced all hands to Firebase');
                 }, 500);
