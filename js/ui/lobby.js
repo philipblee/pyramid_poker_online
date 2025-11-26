@@ -244,11 +244,7 @@ function createTableCard(table) {
 
     card.onclick = () => joinTable(table);
     const settings = table.settings;
-    // ADD THIS DEBUG BLOCK:
-//    console.log('🔍 Creating card for table:', table.name);
-//    console.log('🔍 Table settings:', settings);
-//    console.log('🔍 humanPlayers:', settings.humanPlayers);
-//    console.log('🔍 maxHumanPlayers:', settings.maxHumanPlayers);
+
 
     const currentPlayers = settings.humanPlayers || 0;
     const maxPlayers = settings.maxHumanPlayers || 1;

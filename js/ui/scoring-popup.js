@@ -42,9 +42,27 @@ async function distributeChips() {
 
         await firebase.database().ref(`players/${playerKey}/chips`)
             .transaction(current => (current || 0) + totalChange);
+
+        const result = await firebase.database().ref(`players/${playerKey}/chips`)
+            .transaction(current => (current || 0) + totalChange);
+
+        const newChips = result.snapshot.val();
+
+        // Reload if less than 0
+        if (newChips < 0) {
+            await firebase.database().ref(`players/${playerKey}/chips`).set(10000);
+            await firebase.database().ref(`players/${playerKey}/lastKnownChips`).set(10000);
+            await firebase.database().ref(`players/${playerKey}/reloads`)
+                .transaction(current => (current || 0) + 1);
+            console.log(`🔄 ${playerName} balance below 0, reload 10,000 chips`);
+        } else {
+            await firebase.database().ref(`players/${playerKey}/lastKnownChips`).set(newChips);
+        }
+
     }
 
     console.log(`✅ Chips distributed. Pot ${pot} to: ${winners.join(', ')}`);
+
 }
 
 // SIMPLIFIED: Just delegates to ScoringUtilities (maintains backward compatibility)
