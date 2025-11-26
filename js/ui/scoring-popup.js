@@ -93,6 +93,8 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
         });
     }
 
+
+
 //    console.log('🔍 Final captured scores:', window.lastGameScores);
     // In showScoringPopup, after line 80, add:
 //    console.log('🔍 Final captured scores DETAILS:', JSON.stringify(window.lastGameScores, null, 2));
@@ -102,16 +104,6 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
     const roundRobinResults = document.getElementById('roundRobinResults');
 
     roundRobinResults.innerHTML = '';  // ADD THIS LINE
-
-    // After roundRobinResults.innerHTML = '';
-//    console.log('After clearing roundRobinResults:', roundRobinResults.children.length);
-
-    // And later when you create the matrix:
-//    console.log('Adding matrix to:', roundRobinResults);
-//    console.log('roundRobinResults children before matrix:', roundRobinResults.children.length);
-
-    // After adding the matrix:
-//    console.log('roundRobinResults children after matrix:', roundRobinResults.children.length);
 
     // After the existing debug logs, add this:
     try {
@@ -386,6 +378,32 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
     });
 
     // The original code appended the matrix here. We've moved it up.
+
+    popup.style.display = 'block';
+
+    // Chip summary - add last so it positions correctly
+    const currentChips = window.lastKnownChips || 0;
+    const currentUser = firebase.auth().currentUser;
+    const userEmail = currentUser?.email || 'You';
+    const payoutMultiplier = window.gameConfig?.config?.stakesMultiplierAmount || 1;
+    const myTotal = playerTotals[userEmail] || 0;
+    const myPayout = myTotal * payoutMultiplier;
+    const myPotWin = winners.includes(userEmail) ? Math.floor(pot / winners.length) : 0;
+    const expectedChips = currentChips + myPayout + myPotWin;
+
+    let chipSummaryDiv = document.getElementById('popup-chip-summary');
+    if (!chipSummaryDiv) {
+        chipSummaryDiv = document.createElement('div');
+        chipSummaryDiv.id = 'popup-chip-summary';
+        chipSummaryDiv.style.cssText = 'padding: 10px; background: #2c3e50; color: white; border-radius: 8px; margin-bottom: 15px; text-align: right;';
+    }
+    // Insert right after h2, before the matrix
+    const titleH2 = popup.querySelector('h2');
+    titleH2.insertAdjacentElement('afterend', chipSummaryDiv);
+
+    const changeSign = (myPayout + myPotWin) >= 0 ? '+' : '';
+    const chipText = userEmail + ' | 💰 ' + currentChips.toLocaleString() + ' ' + changeSign + (myPayout + myPotWin) + ' = ' + expectedChips.toLocaleString() + ' chips';
+    chipSummaryDiv.innerHTML = '👤 ' + chipText;
 
     popup.style.display = 'block';
 

@@ -1471,18 +1471,38 @@ async handleCountdown() {
 
 // this function is used to update GameChipDisplay for table screeb and game screen
 function updateGameChipDisplays() {
+
+    console.log('🔍 updateGameChipDisplays CALLED');
+    console.log('🔍 previousPlayerChips:', window.previousPlayerChips);
+
     const currentUser = firebase.auth().currentUser;
     if (!currentUser) return;
 
     // Player chips listener
     const encodedEmail = currentUser.email.replace(/\./g, ',').replace(/@/g, '_at_');
+
     firebase.database().ref(`players/${encodedEmail}`).on('value', (snapshot) => {
         const data = snapshot.val() || {};
         const chips = data.chips || 0;
         const reloads = data.reloads || 0;
 
+        // Only update previous when chips actually change
+        if (window.lastKnownChips !== undefined && window.lastKnownChips !== chips) {
+            window.previousPlayerChips = window.lastKnownChips;
+            window.lastChipChange = chips - window.lastKnownChips;
+        }
+        window.lastKnownChips = chips;
+
+        let chipDisplay;
+        if (window.previousPlayerChips !== undefined && window.lastChipChange !== undefined) {
+            const sign = window.lastChipChange >= 0 ? '+' : '';
+            chipDisplay = window.previousPlayerChips.toLocaleString() + ' ' + sign + window.lastChipChange.toLocaleString() + ' = ' + chips.toLocaleString() + ' chips';
+        } else {
+            chipDisplay = chips.toLocaleString() + ' chips';
+        }
+
         document.querySelectorAll('.user-chips-display').forEach(span => {
-            span.innerHTML = `👤 ${currentUser.email} | 💰 ${chips.toLocaleString()} chips | 🔄 ${reloads} reloads`;
+            span.innerHTML = '👤 ' + currentUser.email + ' | 💰 ' + chipDisplay + ' | 🔄 ' + reloads + ' reloads';
         });
     });
 
