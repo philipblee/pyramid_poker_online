@@ -17,6 +17,14 @@ let tableSettings = {
     minPlayers: 2,                   // Minimum players to start game
     maxHumanPlayers: 6,              // Maximum number of human players, then join is disabled
     humanPlayers: 0,
+    // stakes:
+    stakes: 'yes',                   // 'yes', 'no'
+    stakesAnteAmount: 20,           // 0, 10, 20, etc.
+    stakesMultiplierAmount: 2,      // 0, 1, 2, 3, etc.
+    stakesSurrenderAmount: 10,      // 10, 20, etc.
+
+    // countdown:
+    countdownTime: 5,              // 10, 20, 30, etc.
     tableId: null,                   // For multiplayer table identification
     tableName: ''                   // Display name for table
 };
@@ -570,19 +578,17 @@ function updateTableDisplay() {
     const humanPlayers = tableSettings.humanPlayers + 1
     const settingsHtml = `
 
-        MODE:<br>
         Connect: ${tableSettings.gameConnectMode}<br>
         Device: ${tableSettings.gameDeviceMode}<br>
-        Humans: ${tableSettings.gameMode}<br><br>
-
-        PLAYERS:<br>
-        Human Players: ${humanPlayers}<br>
-        AI Players: ${tableSettings.computerPlayers}<br><br>
-
-        TOURNAMENT:<br>
-        Rounds: ${tableSettings.rounds}<br>
+        Humans: ${tableSettings.gameMode}<br>
+        AI Players: ${tableSettings.computerPlayers}<br>
+        Tournament Rounds: ${tableSettings.rounds}<br>
         Decks: ${tableSettings.deckCount}<br>
         Wild Cards: ${tableSettings.wildCardCount}<br>
+        Countdown Time: ${tableSettings.countdownTime}<br>
+        Stakes Ante: ${tableSettings.stakesAnteAmount}<br>
+        Stakes SurrenderAmount: ${tableSettings.stakesSurrenderAmount}<br>
+        Stakes Multiplier: ${tableSettings.stakesMultiplierAmount}<br>
         Game Variation: ${tableSettings.gameVariant}<br>
         AI Method: ${tableSettings.winProbabilityMethod}
     `;
@@ -750,27 +756,27 @@ function createTableSettingsModal() {
     document.body.appendChild(modal);
 }
 
-// Open table settings modal
-function openTableSettings() {
-    // Create modal if it doesn't exist
-    if (!document.getElementById('tableSettingsModal')) {
-        createTableSettingsModal();
-    }
-
-    // Populate current settings
-    document.getElementById('tableRounds').value = tableSettings.rounds || 3;
-    document.getElementById('winProbabilityMethod').value = tableSettings.winProbabilityMethod || 'tiered2';
-    document.getElementById('tableWildCardCounts').value = tableSettings.wildCardCount || 2;
-    document.getElementById('tableComputerPlayers').value = tableSettings.computerPlayers || 4;
-
-    // Update displays
-    updateRoundsDisplay(tableSettings.rounds || 3);
-    updateAiPlayersDisplay(tableSettings.computerPlayers || 4);
-    updateWildCardsDisplay(tableSettings.wildCardCount || 2);
-
-    // Show modal
-    document.getElementById('tableSettingsModal').style.display = 'block';
-}
+//// Open table settings modal
+//function openTableSettings() {
+//    // Create modal if it doesn't exist
+//    if (!document.getElementById('tableSettingsModal')) {
+//        createTableSettingsModal();
+//    }
+//
+//    // Populate current settings
+//    document.getElementById('tableRounds').value = tableSettings.rounds || 3;
+//    document.getElementById('winProbabilityMethod').value = tableSettings.winProbabilityMethod || 'tiered2';
+//    document.getElementById('tableWildCardCounts').value = tableSettings.wildCardCount || 2;
+//    document.getElementById('tableComputerPlayers').value = tableSettings.computerPlayers || 4;
+//
+//    // Update displays
+//    updateRoundsDisplay(tableSettings.rounds || 3);
+//    updateAiPlayersDisplay(tableSettings.computerPlayers || 4);
+//    updateWildCardsDisplay(tableSettings.wildCardCount || 2);
+//
+//    // Show modal
+//    document.getElementById('tableSettingsModal').style.display = 'block';
+//}
 
 // Close table settings modal
 function closeTableSettings() {
