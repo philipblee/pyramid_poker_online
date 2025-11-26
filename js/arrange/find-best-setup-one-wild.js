@@ -76,7 +76,7 @@ function FindBestSetupOneWild(cardObjects) {
             const detector = new HandDetector(cards);
             const handResults = detector.results;
 
-            // Updated calling program
+            // Updated calling pr ogram
             const flag = window.gameConfig?.config?.winProbabilityMethod || 'tiered';
             const finder = createFindBestSetupNoWild(flag);
             const result = finder.findBestSetupNoWild(cards);
