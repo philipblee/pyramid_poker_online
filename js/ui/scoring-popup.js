@@ -69,16 +69,6 @@ function getCardCountFromSubmittedHands(game, playerName, position) {
 // Enhanced showScoringPopup with proper large hand support
 function showScoringPopup(game, detailedResults, roundScores, specialPoints, roundNumber = null) {
 
-//    console.log(`🎯 showScoringPopup called - Round ${game.currentRound}, Call count:`, ++window.popupCallCount || (window.popupCallCount = 1));
-
-//    console.log('🔍 showScoringPopup called with:', {
-//        game,
-//        detailedResults,
-//        roundScores,
-//        specialPoints,
-//        roundNumber
-//    });
-
     // CAPTURE SCORES FOR STATS - Check all possible score sources
     window.lastGameDetailedResults = detailedResults;
     window.lastGameRoundScores = roundScores;
@@ -116,11 +106,6 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
             <div id="scoringMatrix"></div>
         `;
 //        console.log('Set matrixDiv innerHTML');
-
-//        commented out this block because roundRobinResults keep appending
-//        roundRobinResults.appendChild(matrixDiv);
-//        console.log('Appended matrixDiv to roundRobinResults');
-//        console.log('roundRobinResults children NOW:', roundRobinResults.children.length);
 
     } catch (error) {
         console.error('Error creating matrix:', error);
@@ -383,6 +368,7 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
 
     // Chip summary - add last so it positions correctly
     const currentChips = window.lastKnownChips || 0;
+
     const currentUser = firebase.auth().currentUser;
     const userEmail = currentUser?.email || 'You';
     const payoutMultiplier = window.gameConfig?.config?.stakesMultiplierAmount || 1;

@@ -1,7 +1,7 @@
 {
-  "version": "v5.5 - added chips",
+  "version": "v5.6 - added ante, pot, chip exchange",
   "commit": "819b42b",
   "branch": "main",
-  "buildDate": "2025-11-22",
-  "lastCommit": "2025-11-22"
+  "buildDate": "2025-11-25",
+  "lastCommit": "2025-11-25"
 }

@@ -48,7 +48,7 @@ function startMultiHumanCloudGame() {
 
 
 // Launch your existing game interface
-function launchGameInterface() {
+async function launchGameInterface() {
 //    console.log('🎮 Launching game interface with table settings:', tableSettings);
     updateGameChipDisplays();  // ADD THIS LINE
     // Hide lobby, show your existing game interface
@@ -69,7 +69,7 @@ function launchGameInterface() {
     // Use resetPlayers() to clear old players and create new ones with correct config
     // DON'T reset players for multi-human games - we already set them up manually
     if (window.game && window.game.playerManager && gameConfig.config.gameMode !== 'multiple-humans') {
-        window.game.playerManager.resetPlayers();
+        await window.game.playerManager.resetPlayers();
     }
 
 //    console.log('🎮 Settings used for launching game:', gameConfig.config);

@@ -86,6 +86,13 @@ class FirebaseAuth {
                 console.log('💰 Created reloads for existing user:', email);
             }
 
+            // Check lastKnownChips
+            const lastKnownChipsSnapshot = await playerRef.child('lastKnownChips').once('value');
+            if (!lastKnownChipsSnapshot.exists()) {
+                await playerRef.child('lastKnownChips').set(10000);
+                console.log('💰 Created lastKnownChips for existing user:', email);
+            }
+
             this.isLoggingIn = false;
             return { success: true, user: result.user };
         } catch (error) {

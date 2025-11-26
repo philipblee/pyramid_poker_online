@@ -1440,6 +1440,13 @@ class PyramidPoker {
 
             await firebase.database().ref(`players/${playerKey}/chips`)
                 .transaction(currentChips => (currentChips || 0) - anteAmount);
+
+            const result = await firebase.database().ref(`players/${playerKey}/chips`)
+                .transaction(currentChips => (currentChips || 0) - anteAmount);
+
+            // Also update lastKnownChips
+            await firebase.database().ref(`players/${playerKey}/lastKnownChips`).set(result.snapshot.val());
+
         }
 
         // Set pot (not transaction - owner controls it)

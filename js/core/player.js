@@ -45,10 +45,10 @@ class PlayerManager {
     }
 
     // Update addDefaultPlayers() method - Firebase auth section
-    addDefaultPlayers() {
+    async addDefaultPlayers() {
 
         const config = window.gameConfig.getConfig();
-//        console.log('gameConfig:', config);
+        console.log('gameConfig:', config);
 
         if (config.gameMode === 'single-human') {
             // Create 1 human player + configured number of AI players
@@ -56,22 +56,29 @@ class PlayerManager {
             const user = window.firebaseAuthManager.currentUser;
             let humanPlayerName = user?.email || 'Player 1'; // Use real email or fallback
 
+            // ✅ LOAD CHIPS (ADD THIS LINE!)
+            const humanPlayerData = await this.loadPlayerChips(humanPlayerName);
+            console.log('🔍 humanPlayerData:', humanPlayerData);
+
             // Create human player with actual email as the name
             this.players.push({
                 name: humanPlayerName,          // This will now be your actual email
                 originalEmail: user?.email,     // Keep original for reference
                 id: Date.now() + Math.random(),
                 ready: false,
-                type: 'human'
+                type: 'human',
+                chips: humanPlayerData.chips,    // ✅ ADD
+                lastKnownChips: humanPlayerData.lastKnownChips,    // ✅ ADD
+                reloads: humanPlayerData.reloads // ✅ ADD
             });
 
             this.scores.set(humanPlayerName, 0); // Uses the unique email as key
 
             // Add AI players
-            const aiNames = ['Peter AI', 'Tony AI', 'Johnny AI', 'Phil AI',
-                        'Tse Ming AI', 'Edmond AI', 'Ming AI', 'Jill AI',
-                        'Stephanie AI', 'Victoria AI', 'Clare AI', 'Linda AI',
-                        'Terry AI', 'Moonie AI'];
+            const aiNames = ['Peter_AI', 'Tony_AI', 'Johnny_AI', 'Phil_AI',
+                        'Tse_Ming_AI', 'Edmond_AI', 'Ming_AI', 'Jill_AI',
+                        'Stephanie_AI', 'Victoria_AI', 'Clare_AI', 'Linda_AI',
+                        'Terry_AI', 'Moonie_AI'];
 
             // Create new shuffled array each time
             for (let i = 0; i < config.computerPlayers; i++) {
@@ -79,16 +86,22 @@ class PlayerManager {
                 const randomIndex = Math.floor(Math.random() * aiNames.length);
                 const aiName = aiNames.splice(randomIndex, 1)[0] || `AI Player ${i + 1}`;
 
+                // ✅ Load chips for AI player
+                const aiPlayerData = await this.loadPlayerChips(aiName);
+
                 this.players.push({
                     name: aiName,
                     id: Date.now() + Math.random() + i,
                     ready: false,
-                    type: 'ai'
+                    type: 'ai',
+                    chips: aiPlayerData.chips,    // ✅ ADD
+                    lastKnownChips: aiPlayerData.lastKnownChips,    // ✅ ADD
+                    reloads: aiPlayerData.reloads // ✅ ADD
                 });
                 this.scores.set(aiName, 0);
             }
 
-//            console.log(`Auto-added single player mode: 1 human + ${config.computerPlayers} AI players (${this.players.length} total)`);
+            console.log(`Auto-added single player mode: 1 human + ${config.computerPlayers} AI players (${this.players.length} total)`);
         } else {
             // Multiplayer mode - create default human players
             if (config.gameDeviceMode === 'single-device'){
@@ -153,10 +166,10 @@ class PlayerManager {
         return null;
     }
 
-    resetPlayers() {
+    async resetPlayers() {
         this.players = [];
         this.scores.clear();
-        this.addDefaultPlayers();
+        await this.addDefaultPlayers();
 //        console.log('Players reset with current config');
     }
 
@@ -239,7 +252,7 @@ class PlayerManager {
             }
     }
 
-    ensurePlayersExist() {
+    async ensurePlayersExist() {
         if (this.players.length === 0) {
             // Check if we're in multi-device mode - don't add test players
             const isMultiDevice = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
@@ -249,7 +262,7 @@ class PlayerManager {
                 return false; // Don't auto-add players in multi-device
             } else {
                 console.log('No players found - adding default players for testing');
-                this.addDefaultPlayers();
+                await this.addDefaultPlayers();
                 return true; // Indicates players were auto-added
             }
         }
@@ -278,4 +291,47 @@ class PlayerManager {
         }
         return null;
     }
-}
+
+    async loadPlayerChips(playerName) {
+        // Encode for Firebase: replace special chars and spaces
+        const encodedName = playerName
+            .replace(/\./g, ',')
+            .replace('@', '_at_')
+            .replace(/ /g, '_');
+
+        try {
+            const snapshot = await firebase.database()
+                .ref(`players/${encodedName}/chips`)
+                .once('value');
+
+            if (snapshot.val() === null) {
+                // Auto-initialize new player
+                await firebase.database().ref(`players/${encodedName}/chips`).set(10000);
+                await firebase.database().ref(`players/${encodedName}/lastKnownChips`).set(10000);
+                await firebase.database().ref(`players/${encodedName}/reloads`).set(0);
+                console.log(`💰 Auto-initialized ${playerName} with 10,000 chips and 0 reloads`);
+                return { chips: 10000, lastKnownChips: 10000, reloads: 0 };
+            }
+
+            const reloadsSnapshot = await firebase.database()
+                .ref(`players/${encodedName}/reloads`)
+                .once('value');
+
+            console.log(`💰 Loaded ${playerName}: ${snapshot.val()} chips`);
+            const lastKnownChipsSnapshot = await firebase.database()
+                .ref(`players/${encodedName}/lastKnownChips`)
+                .once('value');
+
+            return {
+                chips: snapshot.val(),
+                lastKnownChips: lastKnownChipsSnapshot.val() || snapshot.val(),
+                reloads: reloadsSnapshot.val() || 0
+            };
+
+        } catch (error) {
+            console.error(`Error loading chips for ${playerName}:`, error);
+            return { chips: 10000, lastKnownChips: 10000, reloads: 0 };  //fall back
+        }
+    }
+
+    }

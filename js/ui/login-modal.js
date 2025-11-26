@@ -404,30 +404,6 @@ function startGuestMode() {
     alert('Guest mode is coming soon! For now, please create a free account to play.');
 }
 
-//function startGuestMode() {
-//    console.log('🎮 Starting guest mode...');
-//
-//    // Simply hide welcome and show lobby - no auth system integration
-//    const welcomeScreen = document.getElementById('welcomeScreen');
-//    const lobbyScreen = document.getElementById('lobbyScreen');
-//
-//    if (welcomeScreen) welcomeScreen.style.display = 'none';
-//    if (lobbyScreen) lobbyScreen.style.display = 'block';
-//
-//    // Update displays
-//    const currentUserElement = document.getElementById('currentUser');
-//    if (currentUserElement) {
-//        currentUserElement.textContent = 'Guest Player (Offline)';
-//    }
-//
-//    // Initialize lobby
-//    if (typeof populateLobby === 'function') {
-//        populateLobby();
-//    }
-//
-//console.log('✅ Guest mode activated - simple approach');
-//}
-
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
     window.loginModal = new LoginModal();
