@@ -17,6 +17,36 @@ function renderMiniCards(cards) {
     }).join('');
 }
 
+async function distributeChips() {
+    // Only owner distributes (prevents double in multiplayer)
+    if (window.game?.multiDeviceMode && !window.isOwner) return;
+
+    const playerTotals = window.game?.lastRoundTotals || {};
+    const pot = window.game?.currentPot || 0;
+    const multiplier = window.gameConfig?.config?.stakesMultiplierAmount || 1;
+
+    // Find pot winner(s)
+    const maxTotal = Math.max(...Object.values(playerTotals));
+    const winners = Object.keys(playerTotals).filter(p => playerTotals[p] === maxTotal);
+    const potShare = Math.floor(pot / winners.length);
+
+    // Update each player's chips
+    for (const [playerName, netPoints] of Object.entries(playerTotals)) {
+        const payout = netPoints * multiplier;
+        const potWin = winners.includes(playerName) ? potShare : 0;
+        const totalChange = payout + potWin;
+
+        // Get Firebase key
+        const isAI = playerName.endsWith('_AI') || playerName.includes(' AI');
+        const playerKey = isAI ? playerName : playerName.replace(/\./g, ',').replace(/@/g, '_at_');
+
+        await firebase.database().ref(`players/${playerKey}/chips`)
+            .transaction(current => (current || 0) + totalChange);
+    }
+
+    console.log(`✅ Chips distributed. Pot ${pot} to: ${winners.join(', ')}`);
+}
+
 // SIMPLIFIED: Just delegates to ScoringUtilities (maintains backward compatibility)
 function getPointsForHand(hand, position, cardCount = null) {
     return ScoringUtilities.getPointsForHand(hand, position, cardCount);
@@ -168,9 +198,13 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
     });
 
     // Add Total column header
+
     tableHTML += `<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #4ecdc4; font-weight: bold; min-width: 80px; background: rgba(78,205,196,0.2);">Total</th>`;
 
-    tableHTML += `</tr></thead><tbody>`;
+    // ADD THIS:
+    tableHTML += `<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; min-width: 80px; background: rgba(255,215,0,0.2);">Payout</th>`;
+
+    const playerTotals = {};
 
     // Data rows
     playerNames.forEach(player => {
@@ -194,17 +228,49 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
             }
 
             tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; color: ${cellColor}; font-weight: bold;">${score}</td>`;
+            playerTotals[player] = rowTotal
         });
+
+        window.game.lastRoundTotals = playerTotals
 
         // Add total cell with special styling
         const totalColor = rowTotal > 0 ? '#4ecdc4' : rowTotal < 0 ? '#ff6b6b' : '#ffd700';
         const totalSign = rowTotal > 0 ? '+' : '';
         tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; color: ${totalColor}; font-weight: bold; font-size: 16px; background: rgba(78,205,196,0.1);">${totalSign}${rowTotal}</td>`;
 
+
+        // ADD THIS:
+        const multiplier = window.gameConfig?.config?.stakesMultiplierAmount || 1;
+        const payout = rowTotal * multiplier;
+        const payoutColor = payout > 0 ? '#4ecdc4' : payout < 0 ? '#ff6b6b' : '#ffd700';
+        const payoutSign = payout > 0 ? '+' : '';
+        tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; color: ${payoutColor}; font-weight: bold; font-size: 16px; background: rgba(255,215,0,0.1);">${payoutSign}${payout}</td>`;
+
         tableHTML += `</tr>`;
     });
 
     tableHTML += `</tbody></table>`;
+
+    // Determine pot winner(s)
+    const tableId = window.game?.currentTableId;
+    const pot = window.game?.currentPot || 0;  // We'll need to get this from Firebase
+
+    // Find highest total
+    const maxTotal = Math.max(...Object.values(playerTotals));
+    const winners = Object.keys(playerTotals).filter(p => playerTotals[p] === maxTotal);
+
+    // Build pot winner display
+    let potWinnerHTML = '';
+    if (pot > 0) {
+        if (winners.length === 1) {
+            potWinnerHTML = `<div style="text-align: center; margin-top: 15px; padding: 10px; background: rgba(255,215,0,0.2); border-radius: 8px; color: #ffd700; font-size: 18px; font-weight: bold;">🏆 Pot Winner: ${winners[0]} +${pot} chips</div>`;
+        } else {
+            const splitAmount = Math.floor(pot / winners.length);
+            potWinnerHTML = `<div style="text-align: center; margin-top: 15px; padding: 10px; background: rgba(255,215,0,0.2); border-radius: 8px; color: #ffd700; font-size: 18px; font-weight: bold;">🏆 Pot Split: ${winners.join(', ')} +${splitAmount} chips each</div>`;
+        }
+    }
+
+    tableHTML += potWinnerHTML;
 
     // The HTML has a placeholder for a scoring matrix. Let's make sure it's at the top.
     const container = document.querySelector('.scoring-content');
@@ -322,11 +388,15 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
     // The original code appended the matrix here. We've moved it up.
 
     popup.style.display = 'block';
+
+    console.log('🔍 showScoringPopup END - button disabled:', document.querySelector('#scoringPopup .btn.btn-primary')?.disabled);
 }
 
 // Close scoring popup and clear all hands for next round (unchanged)function closeScoringPopup() {
 async function closeScoringPopup() {
     // Save game stats before closing popup
+    await distributeChips();
+
     saveGameStats();
 
     document.getElementById('scoringPopup').style.display = 'none';

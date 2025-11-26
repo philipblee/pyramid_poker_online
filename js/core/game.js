@@ -137,6 +137,9 @@ class PyramidPoker {
             return;
         }
 
+        // NEW: Collect antes
+        await this.collectAntes();
+
         // Add countdown
         const isSingleHuman = window.gameConfig?.config?.gameMode === 'single-human';
 
@@ -247,6 +250,9 @@ class PyramidPoker {
         // Advance to next round
         this.currentRound++;
         console.log(`🔄 Starting Round ${this.currentRound} of ${this.maxRounds}...`);
+
+        // NEW: Collect antes
+        await this.collectAntes();
 
         // 🆕 ADD COUNTDOWN HERE (before dealing cards)
         const config = window.gameConfig?.config;
@@ -1406,6 +1412,42 @@ class PyramidPoker {
         }
     }
 
+    async collectAntes() {
+        const anteAmount = window.gameConfig?.config?.stakesAnteAmount || 0;
+        if (anteAmount === 0) return;
+
+        const tableId = window.game?.currentTableId;
+        if (!tableId) {
+            console.warn('No tableId for ante collection');
+            return;
+        }
+
+        // Only owner collects all antes
+        if (this.multiDeviceMode && !window.isOwner) return;
+
+        const players = this.playerManager.players;
+        const totalPot = players.length * anteAmount;
+
+        // Deduct from each player
+        for (const player of players) {
+            let playerKey;
+            if (player.type === 'ai') {
+                playerKey = player.name;
+            } else {
+                // Human - encode email
+                playerKey = player.name.replace(/\./g, ',').replace(/@/g, '_at_');
+            }
+
+            await firebase.database().ref(`players/${playerKey}/chips`)
+                .transaction(currentChips => (currentChips || 0) - anteAmount);
+        }
+
+        // Set pot (not transaction - owner controls it)
+        await firebase.database().ref(`tables/${tableId}/pot`).set(totalPot);
+
+        console.log(`✅ Collected ${anteAmount} ante from ${players.length} players. Pot: ${totalPot}`);
+    }
+
 async handleCountdown() {
     console.log('🔍 handleCountdown CALLED');
     const config = window.gameConfig?.config;
@@ -1449,6 +1491,7 @@ function updateGameChipDisplays() {
     if (tableId) {
         firebase.database().ref(`tables/${tableId}/pot`).on('value', (snapshot) => {
             const pot = snapshot.val() || 0;
+            window.game.currentPot = pot;  // ADD THIS
             document.querySelectorAll('.pot-display').forEach(span => {
                 span.innerHTML = `🏆 Pot: ${pot.toLocaleString()} chips`;
             });

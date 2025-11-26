@@ -329,6 +329,9 @@ class MultiDeviceIntegration {
         const continueButton = document.querySelector('#scoringPopup .btn.btn-primary');
         const closeButton = document.querySelector('#scoringPopup .close-popup');
 
+        console.log('🔍 continueButton found:', !!continueButton);
+        console.log('🔍 continueButton.disabled before:', continueButton?.disabled);
+
         if (!continueButton && !closeButton) {
             console.warn('No continue/close buttons found in scoring popup');
             return;
@@ -337,6 +340,7 @@ class MultiDeviceIntegration {
         const buttons = [continueButton, closeButton].filter(Boolean);
 
         if (window.isOwner) {
+            console.log('🔍 Owner path - wrapping onclick');
             // Owner: Add Firebase update before existing logic
             buttons.forEach(button => {
                 const originalOnClick = button.onclick;
@@ -354,6 +358,7 @@ class MultiDeviceIntegration {
                 };
             });
         } else {
+            console.log('🔍 Non-owner path - disabling button')
             // Non-owner: Show waiting state
             buttons.forEach(button => {
                 button.disabled = true;
@@ -369,6 +374,8 @@ class MultiDeviceIntegration {
 
             // State change handling is done in handleTableStateChange()
         }
+
+        console.log('🔍 continueButton.disabled after:', continueButton?.disabled);
     }
 
     // Set up listener for submission state changes (call this during initialization)
