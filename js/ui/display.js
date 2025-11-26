@@ -369,7 +369,7 @@ function updateDisplay(game) {
 }
 
 // Show historical round results
-function showHistoricalRound(game, roundNumber) {
+async function showHistoricalRound(game, roundNumber) {
     console.log(`📋 Showing historical Round ${roundNumber} results...`);
 
     const roundData = game.roundHistory.find(round => round.roundNumber === roundNumber);
@@ -380,5 +380,5 @@ function showHistoricalRound(game, roundNumber) {
 
     // For now, just show the scoring popup with historical data
     // We'll enhance this in Phase 3B to have round selector tabs
-    showScoringPopup(game, roundData.detailedResults, roundData.roundScores, new Map(), roundNumber);
+    await showScoringPopup(game, roundData.detailedResults, roundData.roundScores, new Map(), roundNumber);
 }

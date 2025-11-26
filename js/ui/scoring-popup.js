@@ -67,7 +67,7 @@ function getCardCountFromSubmittedHands(game, playerName, position) {
 
 
 // Enhanced showScoringPopup with proper large hand support
-function showScoringPopup(game, detailedResults, roundScores, specialPoints, roundNumber = null) {
+async function showScoringPopup(game, detailedResults, roundScores, specialPoints, roundNumber = null) {
 
     // CAPTURE SCORES FOR STATS - Check all possible score sources
     window.lastGameDetailedResults = detailedResults;
@@ -377,19 +377,66 @@ function showScoringPopup(game, detailedResults, roundScores, specialPoints, rou
     const myPotWin = winners.includes(userEmail) ? Math.floor(pot / winners.length) : 0;
     const expectedChips = currentChips + myPayout + myPotWin;
 
+    // Chip summary for ALL players
     let chipSummaryDiv = document.getElementById('popup-chip-summary');
     if (!chipSummaryDiv) {
         chipSummaryDiv = document.createElement('div');
         chipSummaryDiv.id = 'popup-chip-summary';
-        chipSummaryDiv.style.cssText = 'padding: 10px; background: #2c3e50; color: white; border-radius: 8px; margin-bottom: 15px; text-align: right;';
+        chipSummaryDiv.style.cssText = 'padding: 10px; background: #2c3e50; color: white; border-radius: 8px; margin-bottom: 15px;';
     }
+
     // Insert right after h2, before the matrix
     const titleH2 = popup.querySelector('h2');
     titleH2.insertAdjacentElement('afterend', chipSummaryDiv);
 
-    const changeSign = (myPayout + myPotWin) >= 0 ? '+' : '';
-    const chipText = userEmail + ' | 💰 ' + currentChips.toLocaleString() + ' ' + changeSign + (myPayout + myPotWin) + ' = ' + expectedChips.toLocaleString() + ' chips';
-    chipSummaryDiv.innerHTML = '👤 ' + chipText;
+    // Build chip lines for all players
+//    const payoutMultiplier = window.gameConfig?.config?.stakesMultiplierAmount || 1;
+    let chipLinesHTML = '';
+
+    for (const player of game.players) {
+        // Get Firebase key
+        const isAI = player.type === 'ai' || player.name.endsWith('_AI');
+        const playerKey = isAI
+            ? player.name
+            : player.name.replace(/\./g, ',').replace('@', '_at_');
+
+        // Read lastKnownChips from Firebase
+        const snapshot = await firebase.database().ref(`players/${playerKey}/lastKnownChips`).once('value');
+        const lastKnownChips = snapshot.val() || 0;
+
+        // Calculate changes
+        const playerTotal = playerTotals[player.name] || 0;
+        const playerPayout = playerTotal * payoutMultiplier;
+        const playerPotWin = winners.includes(player.name) ? Math.floor(pot / winners.length) : 0;
+        const totalChange = playerPayout + playerPotWin;
+        const expectedChips = lastKnownChips + totalChange;
+
+        const changeSign = totalChange >= 0 ? '+' : '';
+        const changeColor = totalChange > 0 ? '#4ecdc4' : totalChange < 0 ? '#ff6b6b' : '#ffd700';
+
+        chipLinesHTML += `<div style="margin: 5px 0;">
+            👤 ${player.name} | 💰 ${lastKnownChips.toLocaleString()}
+            <span style="color: ${changeColor}">${changeSign}${totalChange}</span>
+            = ${expectedChips.toLocaleString()} chips
+        </div>`;
+    }
+
+    chipSummaryDiv.innerHTML = chipLinesHTML;
+
+
+//    let chipSummaryDiv = document.getElementById('popup-chip-summary');
+//    if (!chipSummaryDiv) {
+//        chipSummaryDiv = document.createElement('div');
+//        chipSummaryDiv.id = 'popup-chip-summary';
+//        chipSummaryDiv.style.cssText = 'padding: 10px; background: #2c3e50; color: white; border-radius: 8px; margin-bottom: 15px; text-align: right;';
+//    }
+//    // Insert right after h2, before the matrix
+//    const titleH2 = popup.querySelector('h2');
+//    titleH2.insertAdjacentElement('afterend', chipSummaryDiv);
+//
+//    const changeSign = (myPayout + myPotWin) >= 0 ? '+' : '';
+//    const chipText = userEmail + ' | 💰 ' + currentChips.toLocaleString() + ' ' + changeSign + (myPayout + myPotWin) + ' = ' + expectedChips.toLocaleString() + ' chips';
+//    chipSummaryDiv.innerHTML = '👤 ' + chipText;
 
     popup.style.display = 'block';
 

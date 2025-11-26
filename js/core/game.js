@@ -927,7 +927,7 @@ class PyramidPoker {
         updateDisplay(this);
     }
 
-    calculateScores() {
+    async calculateScores() {
 //        console.log('🚀 calculateScores() START - this.maxRounds:', this.maxRounds);
 
         const playerNames = this.playerManager.getPlayerNames();
@@ -1013,7 +1013,7 @@ class PyramidPoker {
         // In calculateScores(), after generating detailed results
         window.game.detailedResults = detailedResults; // Store for later extraction
 
-        showScoringPopup(this, detailedResults, roundScores, new Map());
+        await showScoringPopup(this, detailedResults, roundScores, new Map());
 
         updateDisplay(this);
 
