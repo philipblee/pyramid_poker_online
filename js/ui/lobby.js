@@ -338,7 +338,6 @@ async function claimOwnershipIfNeeded(tableId, playerName) {
     }
 }
 
-
 async function joinTable(table) {
     console.log('🔍 joinTable called for:', table.name);
 
@@ -755,28 +754,6 @@ function createTableSettingsModal() {
 
     document.body.appendChild(modal);
 }
-
-//// Open table settings modal
-//function openTableSettings() {
-//    // Create modal if it doesn't exist
-//    if (!document.getElementById('tableSettingsModal')) {
-//        createTableSettingsModal();
-//    }
-//
-//    // Populate current settings
-//    document.getElementById('tableRounds').value = tableSettings.rounds || 3;
-//    document.getElementById('winProbabilityMethod').value = tableSettings.winProbabilityMethod || 'tiered2';
-//    document.getElementById('tableWildCardCounts').value = tableSettings.wildCardCount || 2;
-//    document.getElementById('tableComputerPlayers').value = tableSettings.computerPlayers || 4;
-//
-//    // Update displays
-//    updateRoundsDisplay(tableSettings.rounds || 3);
-//    updateAiPlayersDisplay(tableSettings.computerPlayers || 4);
-//    updateWildCardsDisplay(tableSettings.wildCardCount || 2);
-//
-//    // Show modal
-//    document.getElementById('tableSettingsModal').style.display = 'block';
-//}
 
 // Close table settings modal
 function closeTableSettings() {
