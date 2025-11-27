@@ -1438,9 +1438,6 @@ class PyramidPoker {
                 playerKey = player.name.replace(/\./g, ',').replace(/@/g, '_at_');
             }
 
-            await firebase.database().ref(`players/${playerKey}/chips`)
-                .transaction(currentChips => (currentChips || 0) - anteAmount);
-
             const result = await firebase.database().ref(`players/${playerKey}/chips`)
                 .transaction(currentChips => (currentChips || 0) - anteAmount);
 

@@ -40,9 +40,6 @@ async function distributeChips() {
         const isAI = playerName.endsWith('_AI') || playerName.includes(' AI');
         const playerKey = isAI ? playerName : playerName.replace(/\./g, ',').replace(/@/g, '_at_');
 
-        await firebase.database().ref(`players/${playerKey}/chips`)
-            .transaction(current => (current || 0) + totalChange);
-
         const result = await firebase.database().ref(`players/${playerKey}/chips`)
             .transaction(current => (current || 0) + totalChange);
 
@@ -470,7 +467,6 @@ async function closeScoringPopup() {
 
     document.getElementById('scoringPopup').style.display = 'none';
 
-
     resetGameUI();
 
     // Clear previous round's game data from Firestore
@@ -483,6 +479,12 @@ async function closeScoringPopup() {
 
     // Clear all hand areas for next round
     clearAllHandAreas();
+
+        // Check if tournament is complete - don't start new round
+        if (window.game.currentRound >= window.game.totalRounds) {
+            console.log('🏆 Tournament complete - not starting new round');
+            return;
+        }
 
         if (window.gameConfig.config.gameDeviceMode === 'single-device') {
             // Single-player: use fallback logic
