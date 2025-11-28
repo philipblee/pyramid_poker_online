@@ -1,7 +1,7 @@
 {
-  "version": "v5.7 - added ante and pot",
-  "commit": "819b42b",
+  "version": "v5.8 - Display pot and chips",
+  "commit": "54e8a21",
   "branch": "main",
-  "buildDate": "2025-11-25",
-  "lastCommit": "2025-11-25"
+  "buildDate": "2025-11-28",
+  "lastCommit": "2025-11-28"
 }
