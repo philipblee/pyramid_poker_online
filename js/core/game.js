@@ -1414,6 +1414,7 @@ class PyramidPoker {
 
     async collectAntes() {
         const anteAmount = window.gameConfig?.config?.stakesAnteAmount || 0;
+        console.log(`Log from collectAntes - anteAmount , ${anteAmount}`)
         if (anteAmount === 0) return;
 
         const tableId = window.game?.currentTableId;

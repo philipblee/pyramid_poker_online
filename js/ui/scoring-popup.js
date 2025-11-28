@@ -453,15 +453,17 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
         // Read actual chips after distribution
         const chipsSnapshot = await firebase.database().ref(`players/${playerKey}/chips`).once('value');
         const actualChips = chipsSnapshot.val() || 0;
+        const beforeChips = actualChips - totalChange;  // Calculate what it was before
 
         const changeSign = totalChange >= 0 ? '+' : '';
         const changeColor = totalChange > 0 ? '#4ecdc4' : totalChange < 0 ? '#ff6b6b' : '#ffd700';
 
         chipLinesHTML += `<div style="margin: 5px 0;">
-            👤 ${player.name} | 💰 ${lastKnownChips.toLocaleString()}
+            👤 ${player.name} | 💰 ${beforeChips.toLocaleString()}
             <span style="color: ${changeColor}">${changeSign}${totalChange}</span>
             = ${actualChips.toLocaleString()} chips
         </div>`;
+
     }
 
     chipSummaryDiv.innerHTML = chipLinesHTML;
