@@ -18,17 +18,30 @@ function renderMiniCards(cards) {
 }
 
 async function distributeChips() {
+    console.log('🔍 distributeChips START');
+
     // Only owner distributes (prevents double in multiplayer)
-    if (window.game?.multiDeviceMode && !window.isOwner) return;
+    if (window.game?.multiDeviceMode && !window.isOwner) {
+        console.log('🔍 Non-owner, skipping distribution');
+        return;
+    }
 
     const playerTotals = window.game?.lastRoundTotals || {};
-    const pot = window.game?.currentPot || 0;
+    const pot = window.game?.currentRoundPot || 0;
     const multiplier = window.gameConfig?.config?.stakesMultiplierAmount || 1;
+
+    console.log('🔍 playerTotals:', playerTotals);
+    console.log('🔍 pot:', pot);
+    console.log('🔍 multiplier:', multiplier);
 
     // Find pot winner(s)
     const maxTotal = Math.max(...Object.values(playerTotals));
     const winners = Object.keys(playerTotals).filter(p => playerTotals[p] === maxTotal);
     const potShare = Math.floor(pot / winners.length);
+
+    console.log('🔍 maxTotal:', maxTotal);
+    console.log('🔍 winners:', winners);
+    console.log('🔍 potShare:', potShare);
 
     // Update each player's chips
     for (const [playerName, netPoints] of Object.entries(playerTotals)) {
@@ -40,10 +53,13 @@ async function distributeChips() {
         const isAI = playerName.endsWith('_AI') || playerName.includes(' AI');
         const playerKey = isAI ? playerName : playerName.replace(/\./g, ',').replace(/@/g, '_at_');
 
+        console.log(`🔍 ${playerName}: netPoints=${netPoints}, payout=${payout}, potWin=${potWin}, totalChange=${totalChange}`);
+
         const result = await firebase.database().ref(`players/${playerKey}/chips`)
             .transaction(current => (current || 0) + totalChange);
 
         const newChips = result.snapshot.val();
+        console.log(`🔍 ${playerName}: newChips=${newChips}`);
 
         // Reload if less than 0
         if (newChips < 0) {
@@ -55,11 +71,9 @@ async function distributeChips() {
         } else {
             await firebase.database().ref(`players/${playerKey}/lastKnownChips`).set(newChips);
         }
-
     }
 
     console.log(`✅ Chips distributed. Pot ${pot} to: ${winners.join(', ')}`);
-
 }
 
 // SIMPLIFIED: Just delegates to ScoringUtilities (maintains backward compatibility)
@@ -83,6 +97,9 @@ function getCardCountFromSubmittedHands(game, playerName, position) {
 
 // Enhanced showScoringPopup with proper large hand support
 async function showScoringPopup(game, detailedResults, roundScores, specialPoints, roundNumber = null) {
+
+    console.log ('DEBUG: showScoringPopup called')
+
 
     // CAPTURE SCORES FOR STATS - Check all possible score sources
     window.lastGameDetailedResults = detailedResults;
@@ -245,7 +262,10 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
 
     // Determine pot winner(s)
     const tableId = window.game?.currentTableId;
-    const pot = window.game?.currentPot || 0;  // We'll need to get this from Firebase
+    const potSnapshot = await firebase.database().ref(`tables/${tableId}/pot`).once('value');
+    const pot = potSnapshot.val() || 0;
+    console.log('🔍 Current Round Pot from Firebase:', pot);
+    window.game.currentRoundPot = pot;  // Save for distributeChips
 
     // Find highest total
     const maxTotal = Math.max(...Object.values(playerTotals));
@@ -263,6 +283,11 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
     }
 
     tableHTML += potWinnerHTML;
+
+    // Distribute chips NOW so display shows actual values
+    window.game.lastRoundTotals = playerTotals;
+    window.game.currentRoundPot = pot;
+    await distributeChips();
 
     // The HTML has a placeholder for a scoring matrix. Let's make sure it's at the top.
     const container = document.querySelector('.scoring-content');
@@ -424,7 +449,10 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
         const playerPayout = playerTotal * payoutMultiplier;
         const playerPotWin = winners.includes(player.name) ? Math.floor(pot / winners.length) : 0;
         const totalChange = playerPayout + playerPotWin;
-        const expectedChips = lastKnownChips + totalChange;
+
+        // Read actual chips after distribution
+        const chipsSnapshot = await firebase.database().ref(`players/${playerKey}/chips`).once('value');
+        const actualChips = chipsSnapshot.val() || 0;
 
         const changeSign = totalChange >= 0 ? '+' : '';
         const changeColor = totalChange > 0 ? '#4ecdc4' : totalChange < 0 ? '#ff6b6b' : '#ffd700';
@@ -432,26 +460,11 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
         chipLinesHTML += `<div style="margin: 5px 0;">
             👤 ${player.name} | 💰 ${lastKnownChips.toLocaleString()}
             <span style="color: ${changeColor}">${changeSign}${totalChange}</span>
-            = ${expectedChips.toLocaleString()} chips
+            = ${actualChips.toLocaleString()} chips
         </div>`;
     }
 
     chipSummaryDiv.innerHTML = chipLinesHTML;
-
-
-//    let chipSummaryDiv = document.getElementById('popup-chip-summary');
-//    if (!chipSummaryDiv) {
-//        chipSummaryDiv = document.createElement('div');
-//        chipSummaryDiv.id = 'popup-chip-summary';
-//        chipSummaryDiv.style.cssText = 'padding: 10px; background: #2c3e50; color: white; border-radius: 8px; margin-bottom: 15px; text-align: right;';
-//    }
-//    // Insert right after h2, before the matrix
-//    const titleH2 = popup.querySelector('h2');
-//    titleH2.insertAdjacentElement('afterend', chipSummaryDiv);
-//
-//    const changeSign = (myPayout + myPotWin) >= 0 ? '+' : '';
-//    const chipText = userEmail + ' | 💰 ' + currentChips.toLocaleString() + ' ' + changeSign + (myPayout + myPotWin) + ' = ' + expectedChips.toLocaleString() + ' chips';
-//    chipSummaryDiv.innerHTML = '👤 ' + chipText;
 
     popup.style.display = 'block';
 
@@ -461,7 +474,6 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
 // Close scoring popup and clear all hands for next round (unchanged)function closeScoringPopup() {
 async function closeScoringPopup() {
     // Save game stats before closing popup
-    await distributeChips();
 
     saveGameStats();
 
