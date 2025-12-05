@@ -1016,8 +1016,16 @@ class PyramidPoker {
     async calculateScores() {
 //        console.log('🚀 calculateScores() START - this.maxRounds:', this.maxRounds);
 
-        const playerNames = this.playerManager.getPlayerNames();
+        const allPlayerNames = this.playerManager.getPlayerNames();
 //        console.log('🔍 After getPlayerNames() - this.maxRounds:', this.maxRounds);
+
+       // Filter out surrendered players from scoring
+        const playerNames = allPlayerNames.filter(name => {
+            const decision = this.surrenderDecisions?.get(name);
+            return decision !== 'surrender';
+        });
+
+        console.log(`📊 Scoring ${playerNames.length} active players (${allPlayerNames.length - playerNames.length} surrendered)`);
 
         const roundScores = new Map();
         const detailedResults = [];

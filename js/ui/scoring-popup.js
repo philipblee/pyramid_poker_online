@@ -115,8 +115,6 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
         });
     }
 
-
-
 //    console.log('🔍 Final captured scores:', window.lastGameScores);
     // In showScoringPopup, after line 80, add:
 //    console.log('🔍 Final captured scores DETAILS:', JSON.stringify(window.lastGameScores, null, 2));
@@ -312,29 +310,47 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
             const playerDiv = document.createElement('div');
             playerDiv.className = 'player-hand-display';
 
-            // Get actual card counts for display
-            const backCardCount = hand.back ? hand.back.length : 5;
-            const middleCardCount = hand.middle ? hand.middle.length : 5;
-            const frontCardCount = hand.front ? hand.front.length : 3;
+            // Check if player surrendered
+            const surrendered = window.game.surrenderDecisions?.get(player.name) === 'surrender';
 
-            playerDiv.innerHTML = `
-                <div class="player-hand-title">${player.name}</div>
-                <div class="hand-row">
-                    <div class="hand-label-popup">Back (${backCardCount}):</div>
-                    <div class="hand-cards">${renderMiniCards(hand.back)}</div>
-                    <div class="hand-strength-popup">${getHandName(evaluateHand(hand.back))} (${evaluateHand(hand.back).handStrength.join(', ')})</div>
-                </div>
-                <div class="hand-row">
-                    <div class="hand-label-popup">Middle (${middleCardCount}):</div>
-                    <div class="hand-cards">${renderMiniCards(hand.middle)}</div>
-                    <div class="hand-strength-popup">${getHandName(evaluateHand(hand.middle))} (${evaluateHand(hand.middle).handStrength.join(', ')})</div>
-                </div>
-                <div class="hand-row">
-                    <div class="hand-label-popup">Front (${frontCardCount}):</div>
-                    <div class="hand-cards">${renderMiniCards(hand.front)}</div>
-                    <div class="hand-strength-popup">${getThreeCardHandName(evaluateThreeCardHand(hand.front))} (${evaluateThreeCardHand(hand.front).handStrength.join(', ')})</div>
-                </div>
-            `;
+            if (surrendered) {
+                // Display surrender message
+                playerDiv.innerHTML = `
+                    <div class="player-hand-title">${player.name}</div>
+                    <div class="hand-row" style="padding: 20px; text-align: center;">
+                        <div style="color: #ff6b6b; font-weight: bold; font-size: 1.1em;">
+                            Surrendered
+                        </div>
+                        <div style="color: #888; margin-top: 10px;">
+                            Paid 10 chip penalty
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Display normal hand (existing code)
+                const backCardCount = hand.back ? hand.back.length : 5;
+                const middleCardCount = hand.middle ? hand.middle.length : 5;
+                const frontCardCount = hand.front ? hand.front.length : 3;
+
+                playerDiv.innerHTML = `
+                    <div class="player-hand-title">${player.name}</div>
+                    <div class="hand-row">
+                        <div class="hand-label-popup">Back (${backCardCount}):</div>
+                        <div class="hand-cards">${renderMiniCards(hand.back)}</div>
+                        <div class="hand-strength-popup">${getHandName(evaluateHand(hand.back))} (${evaluateHand(hand.back).handStrength.join(', ')})</div>
+                    </div>
+                    <div class="hand-row">
+                        <div class="hand-label-popup">Middle (${middleCardCount}):</div>
+                        <div class="hand-cards">${renderMiniCards(hand.middle)}</div>
+                        <div class="hand-strength-popup">${getHandName(evaluateHand(hand.middle))} (${evaluateHand(hand.middle).handStrength.join(', ')})</div>
+                    </div>
+                    <div class="hand-row">
+                        <div class="hand-label-popup">Front (${frontCardCount}):</div>
+                        <div class="hand-cards">${renderMiniCards(hand.front)}</div>
+                        <div class="hand-strength-popup">${getThreeCardHandName(evaluateThreeCardHand(hand.front))} (${evaluateThreeCardHand(hand.front).handStrength.join(', ')})</div>
+                    </div>
+                `;
+            }
             allPlayerHands.appendChild(playerDiv);
         }
     });
