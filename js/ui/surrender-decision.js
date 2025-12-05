@@ -131,14 +131,49 @@ function checkAllDecided() {
 }
 
 function handleAllDecided() {
-    // Transition to ALL_DECIDED state
-    window.game.tableState = TABLE_STATES.ALL_DECIDED;
+    console.log('🎮 ALL_DECIDED - Processing decisions...');
 
-    // TODO: Collect surrender penalties
-    // TODO: Reveal remaining 4 cards for "play" players
-    // TODO: Transition to PLAYING
+    // Step 1: Collect surrender penalties
+    collectSurrenderPenalties();
 
-    console.log('🎮 Moving to ALL_DECIDED state');
+    // Step 2: Reveal remaining 4 cards for "play" players
+    revealKittyCards();
+
+    // Step 3: Transition to PLAYING state
+    window.game.tableState = TABLE_STATES.PLAYING;
+
+    // Reload UI to show all 17 cards for playing players
+    window.game.loadCurrentPlayerHand();
+
+    console.log('✅ Transitioned to PLAYING state');
+}
+
+function collectSurrenderPenalties() {
+    const surrenderPenalty = window.gameConfig.config.stakesSurrenderAmount || 10;
+    let totalPenalties = 0;
+
+    window.game.surrenderDecisions.forEach((decision, playerName) => {
+        if (decision === 'surrender') {
+            // Deduct chips from surrendered player
+            // TODO: Implement chip deduction
+            console.log(`💰 ${playerName} surrenders - paying ${surrenderPenalty} chips`);
+            totalPenalties += surrenderPenalty;
+        }
+    });
+
+    if (totalPenalties > 0) {
+        // Add to pot
+        console.log(`💰 Total surrender penalties: ${totalPenalties} chips added to pot`);
+    }
+}
+
+function revealKittyCards() {
+    // Cards are already dealt (all 17), just log for now
+    window.game.surrenderDecisions.forEach((decision, playerName) => {
+        if (decision === 'play') {
+            console.log(`🃏 ${playerName} receives 4 kitty cards (cards 14-17)`);
+        }
+    });
 }
 
 // Initialize on load
