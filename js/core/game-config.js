@@ -7,7 +7,7 @@ class GameConfig {
             gameConnectMode: 'offline',      //1 'offline', 'online' - how game connects/syncs
             gameDeviceMode: 'single-device', //2 'single-device', 'multi-device' - device setup
             gameMode: 'single-human',        //3 'single-human', 'multiple-humans' - how many humans
-            gameVariant: 'no surrender',     //4 'no surrender', 'standard'
+            gameVariant: 'no-surrender',     //4 'no surrender', 'kitty'
             computerPlayers: 5,              //5 Number of computer opponents (1-5)
             wildCardCount: 2,                //6 Number of wild cards (0-4)
             deckCount: 2,                    //7 Number of standard decks (1-3)

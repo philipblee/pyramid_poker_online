@@ -31,16 +31,11 @@ class PyramidPoker {
     get deck() { return this.deckManager.deck; }
 
     initializeEventListeners() {
-        // NEW: Make "newGame" button open config screen
-//        document.getElementById('newGame').addEventListener('click', () => this.startNewGame());
 
-        // NEW: Add "newRound" button to deal new hands to existing players
-//        document.getElementById('newRound').addEventListener('click', () => this.startNewRound());
         document.getElementById('autoArrange').addEventListener('click', () => this.handleAutoArrangeToggle());
         document.getElementById('sortByRank').addEventListener('click', () => this.resetAndSortByRank());
         document.getElementById('sortBySuit').addEventListener('click', () => this.resetAndSortBySuit());
         document.getElementById('submitHand').addEventListener('click', () => this.submitCurrentHand());
-//        document.getElementById('gameSettings').addEventListener('click', () => openGameSettings());
         document.getElementById('helpButton').addEventListener('click', () => openGameRules());
 
 
@@ -182,6 +177,7 @@ class PyramidPoker {
         // Setup first round
         this.deckManager.createNewDeck();
         this.gameState = 'playing';
+        this.tableState = TABLE_STATES.DEALING; // Add this - parallel tracking
         this.playerManager.currentPlayerIndex = 0;
         this.submittedHands.clear();
 
@@ -302,6 +298,16 @@ class PyramidPoker {
                 player.ready = false;
             }
 
+            // After dealing completes, set appropriate state
+            if (!this.multiDeviceMode) {
+                if (gameConfig.config.gameVariant === 'kitty') {
+                    this.tableState = TABLE_STATES.DECIDE_PLAYING;
+                } else {
+                    this.tableState = TABLE_STATES.PLAYING;
+                }
+            }
+            // Multi-device already handles tableState via Firebase
+
             if (this.multiDeviceMode && window.multiDeviceIntegration) {
                 setTimeout(async () => {
                     await window.multiDeviceIntegration.storeAllHandsToFirebase();
@@ -354,15 +360,27 @@ class PyramidPoker {
         this.startNewGame();
     }
 
-    // load all current playerHand
+    // load all current playerHand (added the gameVariant === 'kitty')
     loadCurrentPlayerHand() {
-        if (this.gameState !== 'playing') return;
+
+        // Allow loading during DECIDE_PLAYING for kitty variant
+        const isDecisionPhase = this.tableState === TABLE_STATES.DECIDE_PLAYING;
+
+        if (this.gameState !== 'playing' && !isDecisionPhase) return;
 
         const currentPlayer = this.playerManager.getCurrentPlayer();
         const playerData = this.playerHands.get(currentPlayer.name);
-//        console.log(`loadCurrentPlayerHand called for ${currentPlayer.name}`)
 
         if (!playerData) return;
+        console.log('🔍 loadCurrentPlayerHand DEBUG:', {
+           gameVariant: gameConfig.config.gameVariant,
+           tableState: this.tableState,
+           gameState: this.gameState,
+           isDecisionPhase: isDecisionPhase,
+           cardCount: playerData?.cards?.length
+       });
+
+
 
         // Clear display
         document.getElementById('playerHand').innerHTML = '';
@@ -370,8 +388,14 @@ class PyramidPoker {
         document.getElementById('middleHand').innerHTML = '';
         document.getElementById('frontHand').innerHTML = '';
 
+        // Determine how many cards to show
+        let cardsToDisplay = playerData.cards;
+        if (isDecisionPhase) {
+            cardsToDisplay = playerData.cards.slice(0, 13);
+        }
+
         // Display cards
-        displayCards(playerData.cards, 'playerHand');
+        displayCards(cardsToDisplay, 'playerHand');
         displayCards(playerData.back, 'backHand');
         displayCards(playerData.middle, 'middleHand');
         displayCards(playerData.front, 'frontHand');
@@ -383,7 +407,6 @@ class PyramidPoker {
             currentPlayer.aiTurnInProgress = true; // Set flag
             this.handleAITurn();
         }
-
     }
 
 

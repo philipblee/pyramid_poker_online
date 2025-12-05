@@ -35,11 +35,22 @@ async function handleTableStateChange(tableState) {
             console.log('🎮 Game started! Moving to dealing phase...');
             transitionToDealingPhase();
 
-            // After dealing setup, immediately advance to playing
             setTimeout(() => {
-//                console.log('🎮 Dealing complete, moving to playing phase...');
-                transitionToPlayingPhase();
+                // Check variant and branch state flow
+                if (gameConfig.config.gameVariant === 'kitty') {
+                    console.log('🎮 kitty variant - moving to decision phase');
+                    setTableState(TABLE_STATES.DECIDE_PLAYING);
+                } else {
+                    console.log('🎮 No-surrender - moving directly to playing phase');
+                    transitionToPlayingPhase();
+                }
             }, 1000);
+            break;
+
+        case TABLE_STATES.DECIDE_PLAYING:
+            console.log('🎮 Decision phase - players can see 13 cards and decide');
+            // Display surrender decision UI
+            // (We'll build this next)
             break;
 
         case TABLE_STATES.PLAYING:

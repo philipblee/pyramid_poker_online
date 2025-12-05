@@ -33,12 +33,13 @@ let tableSettings = {
 const defaultTables = [
     {
         id: 1,
-        name: '1. Offline vs. 1 AI Opponents - 2 Wilds',
+        name: '1. No-Surrender - Offline vs. 1 AI Opponents',
         settings: {
                     ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'single-human',
                     gameConnectMode: 'offline',
                     gameDeviceMode: 'single-device',
+                    gameVariant: 'no-surrender',
                     computerPlayers: 1,
                     rounds: 3,
                     wildCardCount: 2,
@@ -49,12 +50,13 @@ const defaultTables = [
 
     {
         id: 2,
-        name: '2. Offline vs. 2 AI Opponents - 1 Wild',
+        name: '2. kitty - Offline vs. 1 AI Opponents - 1 Wild',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'single-human',
                     gameConnectMode: 'offline',
                     gameDeviceMode: 'single-device',
+                    gameVariant: 'kitty',
                     computerPlayers: 2,
                     rounds: 3,
                     wildCardCount: 1,
