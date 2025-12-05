@@ -148,22 +148,53 @@ function handleAllDecided() {
     console.log('✅ Transitioned to PLAYING state');
 }
 
-function collectSurrenderPenalties() {
-    const surrenderPenalty = window.gameConfig.config.stakesSurrenderAmount || 10;
+async function collectSurrenderPenalties() {
+    const surrenderPenalty = window.gameConfig?.config?.stakesSurrenderAmount || 10;
+    const tableId = window.game?.currentTableId;
+
+    if (!tableId) {
+        console.warn('No tableId for penalty collection');
+        return;
+    }
+
+    // Only owner collects penalties
+    if (window.game.multiDeviceMode && !window.isOwner) return;
+
     let totalPenalties = 0;
 
-    window.game.surrenderDecisions.forEach((decision, playerName) => {
+    // Process each player's decision
+    for (const [playerName, decision] of window.game.surrenderDecisions.entries()) {
         if (decision === 'surrender') {
-            // Deduct chips from surrendered player
-            // TODO: Implement chip deduction
-            console.log(`💰 ${playerName} surrenders - paying ${surrenderPenalty} chips`);
+            // Find player to get type
+            const player = window.game.playerManager.players.find(p => p.name === playerName);
+            if (!player) continue;
+
+            // Get playerKey (same encoding as collectAntes)
+            let playerKey;
+            if (player.type === 'ai') {
+                playerKey = player.name;
+            } else {
+                playerKey = player.name.replace(/\./g, ',').replace(/@/g, '_at_');
+            }
+
+            // Deduct penalty
+            const result = await firebase.database().ref(`players/${playerKey}/chips`)
+                .transaction(currentChips => (currentChips || 0) - surrenderPenalty);
+
+            // Update lastKnownChips
+            await firebase.database().ref(`players/${playerKey}/lastKnownChips`).set(result.snapshot.val());
+
+            console.log(`💰 ${playerName} surrenders - paid ${surrenderPenalty} chips`);
             totalPenalties += surrenderPenalty;
         }
-    });
+    }
 
     if (totalPenalties > 0) {
-        // Add to pot
-        console.log(`💰 Total surrender penalties: ${totalPenalties} chips added to pot`);
+        // Add to existing pot
+        await firebase.database().ref(`tables/${tableId}/pot`)
+            .transaction(currentPot => (currentPot || 0) + totalPenalties);
+
+        console.log(`✅ Collected ${totalPenalties} in surrender penalties. Added to pot.`);
     }
 }
 
