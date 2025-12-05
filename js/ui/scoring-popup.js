@@ -34,9 +34,20 @@ async function distributeChips() {
     console.log('🔍 pot:', pot);
     console.log('🔍 multiplier:', multiplier);
 
-    // Find pot winner(s)
-    const maxTotal = Math.max(...Object.values(playerTotals));
-    const winners = Object.keys(playerTotals).filter(p => playerTotals[p] === maxTotal);
+    // Filter out surrendered players from pot eligibility
+    const activePlayers = Object.keys(playerTotals).filter(playerName => {
+        const decision = window.game.surrenderDecisions?.get(playerName);
+        console.log(`🔍 ${playerName}: decision=${decision}, surrenderDecisions exists=${!!window.game.surrenderDecisions}`);
+        return decision !== 'surrender';
+    });
+
+    console.log('🔍 activePlayers eligible for pot:', activePlayers);
+    console.log('🔍 All playerTotals:', Object.keys(playerTotals));
+    console.log('🔍 surrenderDecisions Map:', Array.from(window.game.surrenderDecisions?.entries() || []));
+
+    // Find pot winner(s) - only among active players
+    const maxTotal = Math.max(...activePlayers.map(name => playerTotals[name]));
+    const winners = activePlayers.filter(p => playerTotals[p] === maxTotal);
     const potShare = Math.floor(pot / winners.length);
 
     console.log('🔍 maxTotal:', maxTotal);

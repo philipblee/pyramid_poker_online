@@ -1,30 +1,28 @@
 // js/ui/surrender-decision.js - handles play/surrender decision UI
 
 function initializeSurrenderDecision() {
-    const toggleBtn = document.getElementById('toggleDecision');
+    const playBtn = document.getElementById('playButton');
+    const surrenderBtn = document.getElementById('surrenderButton');
     const submitBtn = document.getElementById('submitDecision');
 
-    let currentDecision = 'play'; // default
+    let currentDecision = 'play'; // Default to play
 
-    // Set initial state - Play is red to draw attention
-    toggleBtn.classList.add('btn-danger');
+    // Play button click
+    playBtn.addEventListener('click', () => {
+        currentDecision = 'play';
+        playBtn.classList.remove('btn-secondary');
+        playBtn.classList.add('btn-success'); // Green
+        surrenderBtn.classList.remove('btn-danger');
+        surrenderBtn.classList.add('btn-secondary'); // Gray
+    });
 
-    // Toggle between Play/Surrender
-    toggleBtn.addEventListener('click', () => {
-        if (currentDecision === 'play') {
-            currentDecision = 'surrender';
-            toggleBtn.textContent = 'Surrender';
-            toggleBtn.classList.remove('btn-danger');
-            toggleBtn.classList.add('btn-warning'); // Yellow/orange for surrender
-        } else {
-            currentDecision = 'play';
-            toggleBtn.textContent = 'Play';
-            toggleBtn.classList.remove('btn-warning');
-            toggleBtn.classList.add('btn-danger'); // Back to red
-        }
-
-        // Enable submit button once decision is made
-        submitBtn.disabled = false;
+    // Surrender button click
+    surrenderBtn.addEventListener('click', () => {
+        currentDecision = 'surrender';
+        surrenderBtn.classList.remove('btn-secondary');
+        surrenderBtn.classList.add('btn-danger'); // Red
+        playBtn.classList.remove('btn-success');
+        playBtn.classList.add('btn-secondary'); // Gray
     });
 
     // Submit decision
@@ -34,17 +32,37 @@ function initializeSurrenderDecision() {
 }
 
 function showDecisionButtons() {
-    document.getElementById('toggleDecision').style.display = 'inline-block';
-    document.getElementById('submitDecision').style.display = 'inline-block';
+    const playBtn = document.getElementById('playButton');
+    const surrenderBtn = document.getElementById('surrenderButton');
+    const submitBtn = document.getElementById('submitDecision');
+
+    playBtn.style.display = 'inline-block';
+    surrenderBtn.style.display = 'inline-block';
+    submitBtn.style.display = 'inline-block';
+
+    // RESET classes first (remove old state)
+    playBtn.className = 'btn btn-success decision-btn';  // Fresh green
+    surrenderBtn.className = 'btn btn-secondary decision-btn';  // Fresh gray
+
+    // Reset disabled state
+    playBtn.disabled = false;
+    surrenderBtn.disabled = false;
+    submitBtn.disabled = false;
+
+    // Hide only Auto and Submit Hand
     document.getElementById('submitHand').style.display = 'none';
-    document.getElementById('autoArrange').style.display = 'none'; // Hide instead of disable
+    document.getElementById('autoArrange').style.display = 'none';
 }
 
 function hideDecisionButtons() {
-    document.getElementById('toggleDecision').style.display = 'none';
+    document.getElementById('playButton').style.display = 'none';
+    document.getElementById('surrenderButton').style.display = 'none';
     document.getElementById('submitDecision').style.display = 'none';
+
+    // Show all game buttons
     document.getElementById('submitHand').style.display = 'inline-block';
-    document.getElementById('autoArrange').style.display = 'inline-block'; // Show again
+    document.getElementById('autoArrange').style.display = 'inline-block';
+    // Rank and Suit were never hidden, so they're already visible
 }
 
 function submitSurrenderDecision(decision) {
@@ -58,7 +76,8 @@ function submitSurrenderDecision(decision) {
     console.log(`✅ ${currentPlayer.name} chose: ${decision}`);
 
     // Disable buttons after submission
-    document.getElementById('toggleDecision').disabled = true;
+    document.getElementById('playButton').disabled = true;
+    document.getElementById('surrenderButton').disabled = true;
     document.getElementById('submitDecision').disabled = true;
 
     // Process AI decisions

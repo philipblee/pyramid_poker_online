@@ -108,12 +108,17 @@ class PyramidPoker {
         // Add this when a new game starts
         resetGameTimer();
 
-        // In startNewGame() or when entering DECIDE_PLAYING
-        this.surrenderDecisions.clear();
 
         // 🔧 FIX: Refresh ALL settings from current config (not stale constructor values)
         this.maxRounds = gameConfig.config.rounds;
         // Add any other cached settings here if we find them
+
+        // Clear surrender decisions from previous round
+        if (this.surrenderDecisions) {
+            this.surrenderDecisions.clear();
+        }
+
+        hideDecisionButtons();
 
         // Set multiDeviceMode based on gameConfig
         this.multiDeviceMode = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
@@ -219,6 +224,14 @@ class PyramidPoker {
     }
 
     async startNewRound() {
+
+        // Show appropriate buttons based on state
+        if (this.tableState === TABLE_STATES.DECIDE_PLAYING) {
+            showDecisionButtons();
+        } else {
+            hideDecisionButtons();
+        }
+
         console.log('🔍 startNewRound CALLED');
         console.log('🔍 isOwner:', window.isOwner);
         console.log('🔍 multiDeviceMode:', this.multiDeviceMode);
@@ -250,6 +263,17 @@ class PyramidPoker {
         // Advance to next round
         this.currentRound++;
         console.log(`🔄 Starting Round ${this.currentRound} of ${this.maxRounds}...`);
+
+
+        // Clear surrender decisions from previous round
+        if (this.surrenderDecisions) {
+            this.surrenderDecisions.clear();
+            console.log('🧹 Cleared surrender decisions for new round');
+        }
+
+        console.log('🔍 startNewRound - tableState before dealing:', this.tableState);
+
+        hideDecisionButtons();
 
         // NEW: Collect antes
         await this.collectAntes();
@@ -331,6 +355,9 @@ class PyramidPoker {
                 console.error('❌ Firebase sync failed:', error);
             }
         }
+        // At the very end of the function
+    console.log('🔍 dealCardsToAllPlayers - tableState after dealing:', this.tableState);
+    console.log('🔍 dealCardsToAllPlayers - gameVariant:', gameConfig.config.gameVariant);
     }
 
 
@@ -390,8 +417,13 @@ class PyramidPoker {
 
     // load all current playerHand (added the gameVariant === 'kitty')
     loadCurrentPlayerHand() {
+
+        console.log('🔍 loadCurrentPlayerHand - tableState:', this.tableState);
+        console.log('🔍 loadCurrentPlayerHand - gameVariant:', gameConfig.config.gameVariant);
+
         // Allow loading during DECIDE_PLAYING for kitty variant
         const isDecisionPhase = this.tableState === TABLE_STATES.DECIDE_PLAYING;
+        console.log('🔍 loadCurrentPlayerHand - isDecisionPhase:', isDecisionPhase);
 
         if (this.gameState !== 'playing' && !isDecisionPhase) return;
 
@@ -452,8 +484,10 @@ class PyramidPoker {
 
         // Show appropriate buttons based on state
         if (this.tableState === TABLE_STATES.DECIDE_PLAYING) {
+            console.log('🔍 Calling showDecisionButtons()');
             showDecisionButtons();
         } else {
+            console.log('🔍 Calling hideDecisionButtons()');
             hideDecisionButtons();
         }
 
