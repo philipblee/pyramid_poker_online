@@ -20,6 +20,7 @@ class PyramidPoker {
         this.roundHistory = [];         // Store completed round data
         this.tournamentScores = new Map(); // Running totals across rounds
         this.initializeEventListeners();
+        this.surrenderDecisions = new Map(); // playerName -> 'play' or 'surrender'
         updateDisplay(this);
         createParticles();
     }
@@ -106,6 +107,9 @@ class PyramidPoker {
     async startNewGame() {
         // Add this when a new game starts
         resetGameTimer();
+
+        // In startNewGame() or when entering DECIDE_PLAYING
+        this.surrenderDecisions.clear();
 
         // 🔧 FIX: Refresh ALL settings from current config (not stale constructor values)
         this.maxRounds = gameConfig.config.rounds;
