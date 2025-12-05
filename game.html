@@ -440,7 +440,13 @@
             <button id="sortBySuit" class="btn btn-secondary">Suit</button>
             <button id="submitHand" class="btn btn-primary" disabled>Submit</button>
 <!--            <button id="gameSettings" class="btn btn-secondary">Settings</button>-->
-            <button id="helpButton" class="btn btn-secondary">Rules</button>
+            <button id="toggleDecision" class="btn btn-danger decision-btn" style="display: none;">
+                Play
+            </button>
+            <button id="submitDecision" class="btn btn-primary decision-btn" style="display: none;" disabled>
+                Submit Decision
+            </button>
+<!--            <button id="helpButton" class="btn btn-secondary">Rules</button>-->
             <button class="btn btn-secondary" onclick="window.location.href='index.html'">Website</button>
         </div>
 
@@ -672,6 +678,7 @@
     <script src="js/multiplayer/game-launcher.js"></script>
     <script src="js/ui/lobby.js"></script>
     <script src="js/ui/login-modal.js"></script>
+    <script src="js/ui/surrender-decision.js"></script>
 
     <!-- Core dependencies first -->
     <script src="js/constants/hand-types.js"></script>

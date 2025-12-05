@@ -36,7 +36,7 @@ class PyramidPoker {
         document.getElementById('sortByRank').addEventListener('click', () => this.resetAndSortByRank());
         document.getElementById('sortBySuit').addEventListener('click', () => this.resetAndSortBySuit());
         document.getElementById('submitHand').addEventListener('click', () => this.submitCurrentHand());
-        document.getElementById('helpButton').addEventListener('click', () => openGameRules());
+//        document.getElementById('helpButton').addEventListener('click', () => openGameRules());
 
 
         const toggleButton = document.getElementById('sidebarToggle');
@@ -392,6 +392,13 @@ class PyramidPoker {
         let cardsToDisplay = playerData.cards;
         if (isDecisionPhase) {
             cardsToDisplay = playerData.cards.slice(0, 13);
+        }
+
+        // Show appropriate buttons based on state
+        if (this.tableState === TABLE_STATES.DECIDE_PLAYING) {
+            showDecisionButtons();
+        } else {
+            hideDecisionButtons();
         }
 
         // Display cards
