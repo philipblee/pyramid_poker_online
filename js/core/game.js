@@ -364,18 +364,70 @@ class PyramidPoker {
         this.startNewGame();
     }
 
+    // if player surrenders, skip his turn
+    skipSurrenderedPlayer() {
+        const currentPlayer = this.playerManager.getCurrentPlayer();
+
+        // Mark as submitted (with empty hands)
+        this.submittedHands.set(currentPlayer.name, {
+            name: currentPlayer.name,
+            surrendered: true,
+            front: [],
+            middle: [],
+            back: []
+        });
+
+        // Move to next player
+        this.playerManager.advanceToNextPlayer();
+
+        // Check if all active players submitted
+        if (this.checkAllActivePlayersSubmitted()) {
+            this.handleAllPlayersSubmitted();
+        } else {
+            this.loadCurrentPlayerHand(); // Load next player
+        }
+    }
+
     // load all current playerHand (added the gameVariant === 'kitty')
     loadCurrentPlayerHand() {
-
         // Allow loading during DECIDE_PLAYING for kitty variant
         const isDecisionPhase = this.tableState === TABLE_STATES.DECIDE_PLAYING;
 
         if (this.gameState !== 'playing' && !isDecisionPhase) return;
 
         const currentPlayer = this.playerManager.getCurrentPlayer();
+
+        // Check if player surrendered - skip their turn
+        if (this.surrenderDecisions && this.surrenderDecisions.get(currentPlayer.name) === 'surrender') {
+            console.log(`⏭️ ${currentPlayer.name} surrendered - auto-skipping`);
+
+            // Mark as submitted with empty hands
+            this.submittedHands.set(currentPlayer.name, {
+                back: [],
+                middle: [],
+                front: [],
+                surrendered: true
+            });
+
+            this.playerManager.setPlayerReady(currentPlayer.name, true);
+            this.playerManager.nextPlayer();
+
+            // Check if all done
+            if (this.playerManager.areAllPlayersReady()) {
+                this.calculateScores();
+                this.gameState = 'scoring';
+            } else {
+                this.loadCurrentPlayerHand(); // Recursive - load next player
+            }
+
+            updateDisplay(this);
+            return;
+        }
+
         const playerData = this.playerHands.get(currentPlayer.name);
 
         if (!playerData) return;
+
         console.log('🔍 loadCurrentPlayerHand DEBUG:', {
            gameVariant: gameConfig.config.gameVariant,
            tableState: this.tableState,
