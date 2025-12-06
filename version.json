@@ -1,7 +1,7 @@
 {
-  "version": "v5.9 - Added Kitty for single player",
-  "commit": "3a0aa44",
+  "version": "v6.0 - Added Kitty for multiplayer",
+  "commit": "b7b7323",
   "branch": "main",
-  "buildDate": "2025-12-05",
-  "lastCommit": "2025-12-05"
+  "buildDate": "2025-12-06",
+  "lastCommit": "2025-12-06"
 }
