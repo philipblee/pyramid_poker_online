@@ -186,11 +186,10 @@ function handleAllDecided() {
     // Step 2: Reveal remaining 4 cards for "play" players
     revealKittyCards();
 
-    // Step 3: Transition to PLAYING state
-    window.game.tableState = TABLE_STATES.PLAYING;
-
-    // Reload UI to show all 17 cards for playing players
-    window.game.loadCurrentPlayerHand();
+    // Step 3: Transition to PLAYING state - write to Firebase!
+    if (window.isOwner) {
+        setTableState(TABLE_STATES.PLAYING);  // ✅ Updates Firebase
+    }
 
     console.log('✅ Transitioned to PLAYING state');
 }
@@ -252,6 +251,32 @@ function revealKittyCards() {
             console.log(`🃏 ${playerName} receives 4 kitty cards (cards 14-17)`);
         }
     });
+}
+
+// NEW: Owner monitors Firebase for all decisions
+function setupOwnerDecisionListener() {
+    if (!window.game.multiDeviceMode || !window.isOwner) {
+        console.log('⏭️ Not owner or not multi-device, skipping listener setup');
+        return;
+    }
+
+    const tableId = window.game.currentTableId;
+    const playerCount = window.game.playerManager.players.length;
+
+    console.log(`👑 Owner setting up decision listener for ${playerCount} players`);
+
+    firebase.database().ref(`tables/${tableId}/surrenderDecisions`)
+        .on('value', (snapshot) => {
+            const decisions = snapshot.val() || {};
+            const decidedCount = Object.keys(decisions).length;
+
+            console.log(`📊 Decisions: ${decidedCount}/${playerCount}`);
+
+            if (decidedCount === playerCount) {
+                console.log('✅ All players decided! Transitioning...');
+                handleAllDecided();
+            }
+        });
 }
 
 // Initialize on load

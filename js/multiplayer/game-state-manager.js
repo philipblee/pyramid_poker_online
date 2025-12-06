@@ -51,15 +51,25 @@ async function handleTableStateChange(tableState) {
 
         case TABLE_STATES.DECIDE_PLAYING:
             console.log('🎮 Decision phase - players can see 13 cards and decide');
+
+            // Owner sets up listener to monitor decisions
+            if (window.isOwner && typeof setupOwnerDecisionListener === 'function') {
+                setupOwnerDecisionListener();
+            }
+
+            // Reload current player's hand to trigger 13-card slice
             if (window.game) {
                 window.game.loadCurrentPlayerHand();
             }
             break;
 
         case TABLE_STATES.PLAYING:
-//            console.log('🎮 Cards dealt! Players can now arrange hands...');
-            // transitionToPlayingPhase();
+            console.log('🎮 Moving to playing phase - showing all cards');
 
+            // Reload hand to show all 17 cards (slice logic won't apply outside DECIDE_PLAYING)
+            if (window.game) {
+                window.game.loadCurrentPlayerHand();
+            }
             break;
 
         case TABLE_STATES.ALL_SUBMITTED:
