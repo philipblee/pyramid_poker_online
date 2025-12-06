@@ -89,8 +89,11 @@ async function handleTableStateChange(tableState) {
             break;
 
         case TABLE_STATES.ROUND_COMPLETE:
-            console.log('🔍 ROUND_COMPLETE - currentRound:', window.game?.currentRound, 'maxRounds:', window.game?.maxRounds);
+            console.log('🔍 ROUND_COMPLETE handler called');
+            console.log('🔍 currentRound:', game.currentRound, 'maxRounds:', game.maxRounds);
             console.log('🔍 isOwner:', window.isOwner);
+            console.log('🔍 About to check if more rounds needed');
+
 
             if (!window.isOwner) {
                 closeScoringPopup();
@@ -98,6 +101,9 @@ async function handleTableStateChange(tableState) {
                 if (waitingEl) waitingEl.remove();
             } else {
                 // Check if tournament is complete
+                // Where owner decides COUNTDOWN or TOURNAMENT_COMPLETE
+                console.log('🔍 Owner deciding next state - currentRound:', game.currentRound);
+
                 if (window.game?.currentRound >= window.game?.maxRounds) {
                     console.log('🏆 Tournament complete! Transitioning to TOURNAMENT_COMPLETE');
                     setTableState(TABLE_STATES.TOURNAMENT_COMPLETE);

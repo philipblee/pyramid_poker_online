@@ -198,6 +198,7 @@ class PyramidPoker {
             this.loadCurrentPlayerHand();
             updateDisplay(this);
         }
+
     }
 
     async handleNonOwnerCardRetrieval() {
@@ -305,7 +306,13 @@ class PyramidPoker {
 
         await this.dealCardsToAllPlayers();
 
-        this.loadCurrentPlayerHand();
+        // Only load hand immediately for owner/single-player AND not kitty variant
+        // Multi-device kitty uses state machine, everything else loads immediately
+        const skipLoad = this.multiDeviceMode && gameConfig.config.gameVariant === 'kitty';
+
+        if (!skipLoad && (!this.multiDeviceMode || window.isOwner)) {
+            this.loadCurrentPlayerHand();
+        }
 
         updateDisplay(this);
 
@@ -321,6 +328,9 @@ class PyramidPoker {
     }
 
     async dealCardsToAllPlayers() {
+        console.log('🔍 dealCardsToAllPlayers START');
+        console.log('🔍 isOwner:', window.isOwner);
+        console.log('🔍 About to sync to Firebase?', this.multiDeviceMode && window.isOwner);
         if (!this.multiDeviceMode || window.isOwner) {
             this.deckManager.createNewDeck();
 
@@ -369,7 +379,6 @@ class PyramidPoker {
     console.log('🔍 dealCardsToAllPlayers - tableState after dealing:', this.tableState);
     console.log('🔍 dealCardsToAllPlayers - gameVariant:', gameConfig.config.gameVariant);
     }
-
 
 
     async startNewTournament() {
@@ -427,6 +436,8 @@ class PyramidPoker {
 
     // load all current playerHand (added the gameVariant === 'kitty')
     loadCurrentPlayerHand() {
+
+        console.log('🔍 loadCurrentPlayerHand called from:', new Error().stack);
 
         console.log('🔍 loadCurrentPlayerHand - tableState:', this.tableState);
         console.log('🔍 loadCurrentPlayerHand - gameVariant:', gameConfig.config.gameVariant);
@@ -1295,10 +1306,36 @@ class PyramidPoker {
     }
 
     returnToTable() {
-    if (window.isOwner) {
-        setTableState(TABLE_STATES.LOBBY);
+        console.log('🔙 Returning to table/lobby...');
+
+        // Close the tournament summary modal
+        const modals = document.querySelectorAll('div[style*="position: fixed"]');
+        modals.forEach(modal => {
+            if (modal.textContent.includes('TOURNAMENT COMPLETE')) {
+                modal.remove();
+            }
+        });
+
+        if (gameConfig.config.gameDeviceMode === 'multi-device') {
+            // MULTIPLAYER: Only owner sets state, non-owners just do cleanup
+            if (window.isOwner) {
+                setTableState(TABLE_STATES.LOBBY);
+                console.log('✅ Owner set tableState back to LOBBY');
+            } else {
+                // Non-owner just does local cleanup
+                console.log('✅ Non-owner cleaned up locally');
+            }
+        } else {
+            // SINGLE PLAYER: Reset to waiting state
+            this.gameState = 'waiting';
+            this.currentRound = 0;
+            updateDisplay(this);
+            console.log('✅ Single-player returned to waiting');
+        }
+
+        // Show table screen for everyone
+        showTableScreen();
     }
-}
 
     compareHands(hand1, hand2) {
         let player1Score = 0;

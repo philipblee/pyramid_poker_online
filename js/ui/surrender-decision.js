@@ -66,7 +66,8 @@ function hideDecisionButtons() {
 }
 
 function submitSurrenderDecision(decision) {
-    console.log(`Player decided to: ${decision}`);
+    console.log('🔍 DECISION - Human decided:', decision);
+    console.log('🔍 DECISION - gameDeviceMode:', gameConfig.config.gameDeviceMode);
 
     // Multi-device: Submit for THIS device's player, not current turn player
     const playerName = window.game.multiDeviceMode
@@ -166,10 +167,12 @@ function evaluateHandForSurrender(cards) {
 }
 
 function checkAllDecided() {
+
     const allPlayers = window.game.playerManager.players;
     const decidedCount = window.game.surrenderDecisions.size;
 
-    console.log(`Decisions: ${decidedCount}/${allPlayers.length}`);
+
+    console.log(`🔍 DECISION - Checking if all decided. Count:, ${decidedCount}, 'Total:', ${allPlayers}`);
 
     if (decidedCount === allPlayers.length) {
         console.log('✅ All players decided!');
@@ -178,8 +181,9 @@ function checkAllDecided() {
 }
 
 function handleAllDecided() {
-    console.log('🎮 ALL_DECIDED - Processing decisions...');
 
+    console.log('🔍 ALL_DECIDED - Starting transition');
+    console.log('🔍 ALL_DECIDED - gameDeviceMode:', gameConfig.config.gameDeviceMode);
     // Step 1: Collect surrender penalties
     collectSurrenderPenalties();
 
@@ -187,9 +191,15 @@ function handleAllDecided() {
     revealKittyCards();
 
     // Step 3: Transition to PLAYING state - write to Firebase!
-    if (window.isOwner) {
-        setTableState(TABLE_STATES.PLAYING);  // ✅ Updates Firebase
+    if (gameConfig.config.gameDeviceMode === 'multi-device') {
+        console.log('🔍 Taking MULTI-DEVICE path');
+        setTableState(TABLE_STATES.PLAYING);
+    } else {
+        console.log('🔍 Taking SINGLE-PLAYER path');
+        game.tableState = 'playing';  // ← ADD THIS
+        game.loadCurrentPlayerHand();
     }
+    console.log('🔍 Transition complete');
 
     console.log('✅ Transitioned to PLAYING state');
 }
