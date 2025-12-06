@@ -497,6 +497,19 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
 
     popup.style.display = 'block';
 
+    // Return Promise that waits for close button
+    return new Promise((resolve) => {
+        const closeButton = popup.querySelector('.btn.btn-primary');
+
+        // Remove old handler without cloning (preserves disabled state)
+        closeButton.onclick = null;
+
+        closeButton.onclick = () => {
+            closeScoringPopup();
+            resolve();
+        };
+    });
+
     console.log('🔍 showScoringPopup END - button disabled:', document.querySelector('#scoringPopup .btn.btn-primary')?.disabled);
 }
 
