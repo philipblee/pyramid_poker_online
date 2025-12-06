@@ -268,7 +268,17 @@ class PyramidPoker {
         // Clear surrender decisions from previous round
         if (this.surrenderDecisions) {
             this.surrenderDecisions.clear();
-            console.log('🧹 Cleared surrender decisions for new round');
+            console.log('🧹 Cleared local surrender decisions for new round');
+        }
+
+        // Clear Firebase decisions (for multi-player)
+        if (window.isOwner && window.multiDeviceIntegration) {
+            const tableId = window.multiDeviceIntegration.tableId;  // ← ADD THIS
+            await firebase.database()
+                .ref(`tables/${tableId}/surrenderDecisions`)
+                .remove();
+
+            console.log('🧹 Cleared Firebase surrender decisions for new round');
         }
 
         console.log('🔍 startNewRound - tableState before dealing:', this.tableState);

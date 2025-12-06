@@ -34,16 +34,12 @@ async function handleTableStateChange(tableState) {
             break;
 
         case TABLE_STATES.DEALING:
-            console.log('🎮 Game started! Moving to dealing phase...');
-            transitionToDealingPhase();
+            transitionToDealingPhase();  // Just UI prep, no state change
 
             setTimeout(() => {
-                // Check variant and branch state flow
                 if (gameConfig.config.gameVariant === 'kitty') {
-                    console.log('🎮 kitty variant - moving to decision phase');
-                    setTableState(TABLE_STATES.DECIDE_PLAYING);
+                    setTableState(TABLE_STATES.DECIDE_PLAYING);  // ✅ Correct
                 } else {
-                    console.log('🎮 No-surrender - moving directly to playing phase');
                     transitionToPlayingPhase();
                 }
             }, 1000);
@@ -197,11 +193,6 @@ function transitionFromLobbyToDealing() {
 
 function transitionToDealingPhase() {
 //    console.log('🎮 Transitioning to dealing phase...');
-
-    // ADD THIS - Set state to SCORING:
-    if (window.multiDeviceIntegration && window.multiDeviceIntegration.isOwner) {
-        setTableState(TABLE_STATES.PLAYING);
-    }
 }
 
 function transitionToPlayingPhase() {
