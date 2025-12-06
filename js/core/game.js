@@ -477,10 +477,14 @@ class PyramidPoker {
         document.getElementById('frontHand').innerHTML = '';
 
         // Determine how many cards to show
-        let cardsToDisplay = playerData.cards;
-        if (isDecisionPhase) {
+        let cardsToDisplay = playerData.cards;  // ← KEEP THIS LINE!
+
+        const isKittyVariant = gameConfig.config.gameVariant === 'kitty';
+        const shouldShowLimited = isDecisionPhase || (isKittyVariant && this.tableState === TABLE_STATES.DEALING);
+
+        if (shouldShowLimited) {
             cardsToDisplay = playerData.cards.slice(0, 13);
-        }
+}
 
         // Show appropriate buttons based on state
         if (this.tableState === TABLE_STATES.DECIDE_PLAYING) {

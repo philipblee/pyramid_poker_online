@@ -1,10 +1,12 @@
 //game-state-manager.js handles game transitions for multi-human, multi-device coordination
 
 async function handleTableStateChange(tableState) {
-//    console.log('🎮 Handling table state change:', tableState);
+    // ⭐ ADD THIS LINE:
+    window.game.tableState = tableState;
+
+    console.log('🎮 Handling table state change:', tableState);
 
     switch(tableState) {
-
 
         case TABLE_STATES.LOBBY:
             console.log('🎮 Returning to lobby/table screen...');
@@ -49,8 +51,9 @@ async function handleTableStateChange(tableState) {
 
         case TABLE_STATES.DECIDE_PLAYING:
             console.log('🎮 Decision phase - players can see 13 cards and decide');
-            // Display surrender decision UI
-            // (We'll build this next)
+            if (window.game) {
+                window.game.loadCurrentPlayerHand();
+            }
             break;
 
         case TABLE_STATES.PLAYING:
