@@ -1295,60 +1295,10 @@ class PyramidPoker {
     }
 
     returnToTable() {
-        console.log('🔙 Returning to table/lobby...');
-
-        // Close the tournament summary modal
-        const modals = document.querySelectorAll('div[style*="position: fixed"]');
-        modals.forEach(modal => {
-            if (modal.textContent.includes('TOURNAMENT COMPLETE')) {
-                modal.remove();
-            }
-        });
-
-        if (gameConfig.config.gameDeviceMode === 'multi-device') {
-            // MULTIPLAYER: Return to lobby state
-            setTableState(TABLE_STATES.LOBBY);
-            console.log('✅ Owner set tableState back to LOBBY');
-        } else {
-            // SINGLE PLAYER: Reset to lobby state
-            this.gameState = 'waiting'; // Already set in showTournamentSummary
-            this.currentRound = 0;
-            updateDisplay(this);
-            console.log('✅ Single-player returned to lobby');
-        }
-        }
-
-    returnToTable() {
-        console.log('🔙 Returning to table/lobby...');
-
-        // Close the tournament summary modal
-        const modals = document.querySelectorAll('div[style*="position: fixed"]');
-        modals.forEach(modal => {
-            if (modal.textContent.includes('TOURNAMENT COMPLETE')) {
-                modal.remove();
-            }
-        });
-
-        if (gameConfig.config.gameDeviceMode === 'multi-device') {
-            // MULTIPLAYER: Only owner sets state, non-owners just do cleanup
-            if (window.isOwner) {
-                setTableState(TABLE_STATES.LOBBY);
-                console.log('✅ Owner set tableState back to LOBBY');
-            } else {
-                // Non-owner just does local cleanup
-                console.log('✅ Non-owner cleaned up locally');
-            }
-        } else {
-            // SINGLE PLAYER: Reset to waiting state
-            this.gameState = 'waiting';
-            this.currentRound = 0;
-            updateDisplay(this);
-            console.log('✅ Single-player returned to waiting');
-        }
-
-        // Show table screen for everyone
-        showTableScreen();
+    if (window.isOwner) {
+        setTableState(TABLE_STATES.LOBBY);
     }
+}
 
     compareHands(hand1, hand2) {
         let player1Score = 0;

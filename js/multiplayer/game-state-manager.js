@@ -9,8 +9,16 @@ async function handleTableStateChange(tableState) {
     switch(tableState) {
 
         case TABLE_STATES.LOBBY:
-            console.log('🎮 Returning to lobby/table screen...');
-            window.game.returnToTable();
+            console.log('🎮 Tournament complete - staying at table...');
+            // Close tournament summary
+            const modals = document.querySelectorAll('div[style*="position: fixed"]');
+            modals.forEach(modal => {
+                if (modal.textContent.includes('TOURNAMENT COMPLETE')) {
+                    modal.remove();
+                }
+            });
+            // Show table screen (NOT lobby screen)
+            showTableScreen();
             break;
 
         case TABLE_STATES.NEW_TOURNAMENT:
