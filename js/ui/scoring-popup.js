@@ -90,6 +90,16 @@ async function distributeChips() {
     }
 
     console.log(`✅ Chips distributed. Pot ${pot} to: ${winners.join(', ')}`);
+
+    // At the end of distributeChips(), before the console.log, capture the data
+    window.lastRoundFinancial = {
+        surrenderDecisions: this.surrenderDecisions,
+        pot: pot,
+        winners: winners,
+        potShare: potShare,
+        playerTotals: playerTotals  // Add this
+    };
+
 }
 
 // SIMPLIFIED: Just delegates to ScoringUtilities (maintains backward compatibility)
@@ -436,6 +446,19 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
 
     // The original code appended the matrix here. We've moved it up.
 
+    // Add financial summary if data is available
+    if (window.lastRoundFinancial) {
+        const financialHtml = createRoundFinancialSummary(
+            game,
+            window.lastRoundFinancial.surrenderDecisions,
+            window.lastRoundFinancial.pot,
+            window.lastRoundFinancial.winners,
+            window.lastRoundFinancial.potShare,
+            window.lastRoundFinancial.playerTotals  // Add this
+        );
+        roundRobinResults.innerHTML += financialHtml;
+    }
+
     popup.style.display = 'block';
 
     // Chip summary - add last so it positions correctly
@@ -749,4 +772,65 @@ function resetGameTimer() {
 
 function getGameLength() {
     return Math.round((Date.now() - gameStartTime) / 1000); // seconds
+}
+
+// Create round financial summary table
+function createRoundFinancialSummary(game, surrenderDecisions, pot, winners, potShare, playerTotals) {
+    let html = `
+        <div style="margin: 20px 0;">
+            <h3 style="color: #ffd700; margin-bottom: 15px;">💰 Round Summary for Chips</h3>
+            <table style="width: 100%; border-collapse: collapse; background: rgba(0,0,0,0.3);">
+            <thead>
+                <tr style="background: rgba(255,215,0,0.2);">
+                    <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Player</th>
+                    <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Ante</th>
+                    <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Surr.</th>
+                    <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Payout</th>
+                    <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Pot</th>
+                    <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.2); background: rgba(78,205,196,0.1);">Total</th>
+                </tr>
+            </thead>
+                <tbody>
+    `;
+
+    game.playerManager.players.forEach(player => {
+    const playerName = getCompactName(player.name);
+    const ante = -(window.gameConfig?.config?.stakesAnteAmount || 10);
+
+    const decision = surrenderDecisions?.get(player.name);
+    const surrenderPenalty = (decision === 'surrender') ? -10 : 0;
+
+    // Get points and calculate payout
+    const points = playerTotals?.[player.name] || 0;
+    const multiplier = window.gameConfig?.config?.stakesChipsPerPoint || 2;
+    const payout = points * multiplier;
+
+    const potWin = winners.includes(player.name) ? potShare : 0;
+    const total = ante + surrenderPenalty + payout + potWin;
+
+    // Color coding
+    const totalColor = total > 0 ? '#4ecdc4' : total < 0 ? '#ff6b6b' : '#ffd700';
+    const payoutColor = payout > 0 ? '#4ecdc4' : payout < 0 ? '#ff6b6b' : '#666';
+    const totalSign = total > 0 ? '+' : '';
+    const payoutSign = payout > 0 ? '+' : '';
+
+    html += `
+        <tr>
+            <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">${playerName}</td>
+            <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2); color: #ff6b6b; text-align: center;">${ante}</td>
+            <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2); color: ${surrenderPenalty < 0 ? '#ff6b6b' : '#666'}; text-align: center;">${surrenderPenalty === 0 ? '-' : surrenderPenalty}</td>
+            <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2); color: ${payoutColor}; text-align: center;">${payout !== 0 ? payoutSign + payout : '-'}</td>
+            <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2); color: ${potWin > 0 ? '#4ecdc4' : '#666'}; text-align: center;">${potWin > 0 ? '+' + potWin : '-'}</td>
+            <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2); color: ${totalColor}; font-weight: bold; text-align: center; background: rgba(78,205,196,0.1);">${totalSign}${total}</td>
+        </tr>
+    `;
+});
+
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    return html;
 }
