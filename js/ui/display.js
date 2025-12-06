@@ -91,14 +91,28 @@ function setupDragAndDrop(game) {
 // Update game status display
 function updateStatus(game) {
     const status = document.getElementById('status');
+    const currentPlayer = game.playerManager.getCurrentPlayer();
+
+    if (game.gameState === 'playing' && currentPlayer) {
+        const roundNum = game.currentRound;
+        const maxRounds = game.maxRounds;
+
+        // Check if in decision phase (13 cards shown)
+        const tableState = game.tableState || 'playing';
+        const isDecisionPhase = (gameConfig.config.gameVariant === 'kitty' &&
+                                 tableState === 'decide_playing');
+
+        if (isDecisionPhase) {
+            // Decision phase message
+            status.innerHTML = `Round ${roundNum} of ${maxRounds}: ${getCompactName(currentPlayer.name)} - Choose PLAY or SURRENDER, then SUBMIT DECISION`;
+        } else {
+            // Normal playing message
+            status.innerHTML = `Round ${roundNum} of ${maxRounds}: ${getCompactName(currentPlayer.name)}'s turn to arrange the cards!`;
+        }
+    }
 
     if (game.gameState === 'waiting') {
         status.textContent = `Players: ${game.playerManager.players.length} - Add players and click "New Game" to start!`;
-    } else if (game.gameState === 'playing') {
-        const currentPlayer = game.playerManager.getCurrentPlayer();
-        const readyCount = game.playerManager.getReadyCount();
-        status.textContent = `Round ${game.currentRound} of ${game.maxRounds}: ${currentPlayer.name}'s turn to arrange the cards!`;
-//        status.textContent = `Round ${game.currentRound} of ${game.maxRounds}: ${currentPlayer.name}'s turn - Arrange your cards! (${readyCount}/${game.playerManager.players.length} players ready)`;
     } else if (game.gameState === 'scoring') {
         status.textContent = `Round ${game.currentRound} of ${game.maxRounds} complete! Check the scores below.`;
     }

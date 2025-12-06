@@ -73,6 +73,7 @@ async function handleTableStateChange(tableState) {
             // Reload hand to show all 17 cards (slice logic won't apply outside DECIDE_PLAYING)
             if (window.game) {
                 window.game.loadCurrentPlayerHand();
+                updateDisplay(window.game);  // ← Add this line
             }
             break;
 

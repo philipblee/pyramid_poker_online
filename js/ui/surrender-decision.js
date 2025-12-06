@@ -198,6 +198,7 @@ function handleAllDecided() {
         console.log('🔍 Taking SINGLE-PLAYER path');
         game.tableState = 'playing';  // ← ADD THIS
         game.loadCurrentPlayerHand();
+        updateDisplay(game);  // ← Add this line
     }
     console.log('🔍 Transition complete');
 
