@@ -71,7 +71,20 @@ function submitSurrenderDecision(decision) {
     const currentPlayer = window.game.playerManager.getCurrentPlayer();
 
     // Store human player's decision
+    // Store the decision locally
     window.game.surrenderDecisions.set(currentPlayer.name, decision);
+
+    // Store in Firebase for multi-device sync
+    if (window.game.multiDeviceMode) {
+        const tableId = window.game.currentTableId;
+        firebase.database()
+            .ref(`tables/${tableId}/surrenderDecisions/${currentPlayer.name}`)
+            .set(decision)
+            .then(() => {
+                console.log(`📤 Wrote ${decision} decision to Firebase for ${currentPlayer.name}`);
+            });
+
+    }
 
     console.log(`✅ ${currentPlayer.name} chose: ${decision}`);
 

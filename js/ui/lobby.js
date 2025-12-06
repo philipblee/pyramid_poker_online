@@ -43,7 +43,6 @@ const defaultTables = [
                     computerPlayers: 1,
                     rounds: 3,
                     wildCardCount: 2,
-                    stakes: 'no',
                     winProbabilityMethod: 'netEV' },
         icon: '🏓'
     },
@@ -60,7 +59,6 @@ const defaultTables = [
                     computerPlayers: 2,
                     rounds: 3,
                     wildCardCount: 1,
-                    stakes: 'no',
                     winProbabilityMethod: 'netEV' },
         icon: '🏓'
     },
@@ -128,12 +126,13 @@ const defaultTables = [
 
     {
         id: 7,
-        name: '7. Online - 2 Wild Card',
+        name: '7. Online - No-surrender',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'multiple-humans',
                     gameConnectMode: 'online',
                     gameDeviceMode: 'multi-device',
+                    gameVariant: 'no-surrender',
                     computerPlayers: 0,
                     rounds: 3,
                     wildCardCount: 2,
@@ -144,16 +143,17 @@ const defaultTables = [
 
     {
         id: 8,
-        name: '8. Online - 2 Wild Card',
+        name: '8. Online - Kitty',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'multiple-humans',
                     gameConnectMode: 'online',
                     gameDeviceMode: 'multi-device',
+                    gameVariant: 'kitty',
                     computerPlayers: 0,
                     rounds: 3,
                     wildCardCount: 2,
-                    maxPlayers: 2,
+                    maxPlayers: 6,
                     winProbabilityMethod: 'netEV' },
         icon: '☁️'
     },
@@ -476,9 +476,21 @@ async function joinTable(table) {
         // Clear previous round's game data from Firestore
         if (window.isOwner && window.multiDeviceIntegration) {
             const tableId = window.multiDeviceIntegration.tableId;
-            await firebase.firestore().collection('tables').doc(tableId.toString()).update({
-                'currentGame': firebase.firestore.FieldValue.delete()
-            });
+            const docRef = firebase.firestore().collection('tables').doc(tableId.toString());
+            const docSnapshot = await docRef.get();
+
+            if (docSnapshot.exists) {
+                await docRef.update({
+                    'currentGame': firebase.firestore.FieldValue.delete()
+                });
+            } else {
+                // Create the table document
+                await docRef.set({
+                    id: tableId,
+                    name: table.name,
+                    settings: table.settings
+                });
+            }
         }
 
         // Add player to Firebase table (using .then() instead of await)
