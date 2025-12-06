@@ -68,11 +68,38 @@ function hideDecisionButtons() {
 function submitSurrenderDecision(decision) {
     console.log(`Player decided to: ${decision}`);
 
-    const currentPlayer = window.game.playerManager.getCurrentPlayer();
+    // Multi-device: Submit for THIS device's player, not current turn player
+    const playerName = window.game.multiDeviceMode
+        ? window.uniquePlayerName
+        : window.game.playerManager.getCurrentPlayer().name;
 
-    // Store human player's decision
+    const currentPlayer = window.game.playerManager.players.find(p => p.name === playerName);
+
     // Store the decision locally
     window.game.surrenderDecisions.set(currentPlayer.name, decision);
+
+    // Store in Firebase for multi-device sync
+    if (window.game.multiDeviceMode) {
+        const tableId = window.game.currentTableId;
+        console.log('🔍 About to write to Firebase - tableId:', tableId);
+
+        const isAI = currentPlayer.name.endsWith('_AI') || currentPlayer.name.includes(' AI');
+        const playerKey = isAI ? currentPlayer.name : currentPlayer.name.replace(/\./g, ',').replace(/@/g, '_at_');
+        console.log('🔍 playerKey:', playerKey);
+
+        const path = `tables/${tableId}/surrenderDecisions/${playerKey}`;
+        console.log('🔍 Firebase path:', path);
+
+        firebase.database()
+            .ref(path)
+            .set(decision)
+            .then(() => {
+                console.log(`📤 Wrote ${decision} decision to Firebase for ${currentPlayer.name}`);
+            })
+            .catch((error) => {
+                console.error('❌ Failed to write decision to Firebase:', error);
+            });
+    }
 
     console.log(`✅ ${currentPlayer.name} chose: ${decision}`);
 
