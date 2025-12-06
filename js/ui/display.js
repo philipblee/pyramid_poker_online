@@ -138,7 +138,7 @@ function updatePlayerList(game) {
                 font-size: 14px; font-weight: bold;
             `;
             standingDiv.innerHTML = `
-                <span style="color: #ffd700;">${medal} ${playerName}</span>
+                <span style="color: #ffd700;">${medal} ${getCompactName(playerName)}</span>
                 <span style="color: ${scoreColor};">${totalScore > 0 ? '+' : ''}${totalScore}</span>
             `;
             standingsSection.appendChild(standingDiv);
@@ -236,7 +236,7 @@ function updatePlayerList(game) {
                 }
 
                 playerDiv.innerHTML = `
-                    <span>${readyIndicator}${player.name}</span>
+                    <span>${readyIndicator}${getCompactName(player.name)}</span>
                     <span style="color: ${scoreColor};">${scoreDisplay}</span>
                 `;
 

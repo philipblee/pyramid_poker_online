@@ -17,6 +17,11 @@ function renderMiniCards(cards) {
     }).join('');
 }
 
+// Strip @gmail.com for compact display
+function getCompactName(playerName) {
+    return playerName.replace(/@gmail\.com$/, '');
+}
+
 async function distributeChips() {
     console.log('🔍 distributeChips START');
 
@@ -212,7 +217,7 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
 
     // Header row
     playerNames.forEach(player => {
-        tableHTML += `<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; min-width: 80px;">${player}</th>`;
+        tableHTML += `<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; min-width: 80px;">${getCompactName(player)}</th>`;
     });
 
     // Add Total column header
@@ -227,7 +232,7 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
     // Data rows
     playerNames.forEach(player => {
         tableHTML += `<tr>`;
-        tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; background: rgba(255,215,0,0.1);">${player}</td>`;
+        tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; background: rgba(255,215,0,0.1);">${getCompactName(player)}</td>`;
 
         let rowTotal = 0;
 

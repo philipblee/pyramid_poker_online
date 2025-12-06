@@ -380,7 +380,6 @@ class PyramidPoker {
     console.log('🔍 dealCardsToAllPlayers - gameVariant:', gameConfig.config.gameVariant);
     }
 
-
     async startNewTournament() {
         console.log('🏆 Starting completely new tournament...');
 
@@ -530,7 +529,6 @@ class PyramidPoker {
             this.handleAITurn();
         }
     }
-
 
     // Load current player's hand from Firebase into local playerHands Map
     async loadCurrentPlayerHandFromFirebase() {
