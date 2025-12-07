@@ -1580,24 +1580,72 @@ class PyramidPoker {
         console.log(`✅ Collected ${anteAmount} ante from ${players.length} players. Pot: ${totalPot}`);
     }
 
-async handleCountdown() {
-    console.log('🔍 handleCountdown CALLED');
-    const config = window.gameConfig?.config;
-    console.log('🔍 countdownTime:', config?.countdownTime);
+    async handleCountdown() {
+        console.log('🔍 handleCountdown CALLED');
+        const config = window.gameConfig?.config;
+        console.log('🔍 countdownTime:', config?.countdownTime);
 
-    const countdownTime = config.countdownTime || 0;
+        const countdownTime = config.countdownTime || 0;
 
-    if (countdownTime > 0) {
-        showCountdownModal(countdownTime);
+        if (countdownTime > 0) {
+            showCountdownModal(countdownTime);
 
-        for (let i = countdownTime; i > 0; i--) {
-            updateCountdownNumber(i);
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            for (let i = countdownTime; i > 0; i--) {
+                updateCountdownNumber(i);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+
+            hideCountdownModal();
         }
-
-        hideCountdownModal();
     }
-}
+
+    reorderStagingByRank() {
+        const currentPlayer = this.playerManager.getCurrentPlayer();
+        const playerData = this.playerHands.get(currentPlayer.name);
+
+        if (!playerData || playerData.cards.length === 0) return;
+
+        // Split into visible (first 13) and kitty (last 4)
+        const visibleCards = playerData.cards.slice(0, 13);
+        const kittyCards = playerData.cards.slice(13);
+
+        // Sort ONLY the visible 13 cards
+        visibleCards.sort((a, b) => {
+            if (a.value !== b.value) return b.value - a.value;
+            const suitOrder = { '♠': 4, '♥': 3, '♦': 2, '♣': 1 };
+            return suitOrder[b.suit] - suitOrder[a.suit];
+        });
+
+        // Recombine: sorted visible + unchanged kitty
+        playerData.cards = [...visibleCards, ...kittyCards];
+
+        this.loadCurrentPlayerHand();
+        console.log('🔄 Reordered first 13 cards by rank');
+    }
+
+    reorderStagingBySuit() {
+        const currentPlayer = this.playerManager.getCurrentPlayer();
+        const playerData = this.playerHands.get(currentPlayer.name);
+
+        if (!playerData || playerData.cards.length === 0) return;
+
+        // Split into visible (first 13) and kitty (last 4)
+        const visibleCards = playerData.cards.slice(0, 13);
+        const kittyCards = playerData.cards.slice(13);
+
+        // Sort ONLY the visible 13 cards
+        visibleCards.sort((a, b) => {
+            const suitOrder = { '♠': 4, '♥': 3, '♦': 2, '♣': 1 };
+            if (a.suit !== b.suit) return suitOrder[b.suit] - suitOrder[a.suit];
+            return b.value - a.value;
+        });
+
+        // Recombine: sorted visible + unchanged kitty
+        playerData.cards = [...visibleCards, ...kittyCards];
+
+        this.loadCurrentPlayerHand();
+        console.log('🔄 Reordered first 13 cards by suit');
+    }
 
 }
 

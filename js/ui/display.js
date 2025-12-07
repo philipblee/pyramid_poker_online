@@ -396,3 +396,81 @@ async function showHistoricalRound(game, roundNumber) {
     // We'll enhance this in Phase 3B to have round selector tabs
     await showScoringPopup(game, roundData.detailedResults, roundData.roundScores, new Map(), roundNumber);
 }
+
+// Reorder staging container by rank (doesn't move cards from cardRow)
+function reorderStagingByRank() {
+    const stagingContainer = document.getElementById('playerHand');
+
+    if (!stagingContainer) {
+        console.error('❌ playerHand not found!');
+        return;
+    }
+
+    const cards = Array.from(stagingContainer.children);
+
+    if (cards.length === 0) {
+        console.log('⚠️ No cards to sort');
+        return;
+    }
+
+    console.log('🔍 Before sort:', cards.map(c => c.dataset.rank));
+
+    // Sort by rank order
+    cards.sort((a, b) => {
+        const rankA = a.dataset.rank;
+        const rankB = b.dataset.rank;
+        const rankOrder = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        return rankOrder.indexOf(rankA) - rankOrder.indexOf(rankB);
+    });
+
+    console.log('🔍 After sort:', cards.map(c => c.dataset.rank));
+
+    // Re-append in sorted order (removes from old position, adds to end)
+    cards.forEach(card => stagingContainer.appendChild(card));
+
+    console.log('✅ Reordered staging by rank');
+}
+
+// Reorder staging container by suit (doesn't move cards from cardRow)
+function reorderStagingBySuit() {
+    const stagingContainer = document.getElementById('playerHand');
+
+    if (!stagingContainer) {
+        console.error('❌ playerHand not found!');
+        return;
+    }
+
+    const cards = Array.from(stagingContainer.children);
+
+    if (cards.length === 0) {
+        console.log('⚠️ No cards to sort');
+        return;
+    }
+
+    console.log('🔍 Before sort:', cards.map(c => c.dataset.suit));
+
+    // Sort by suit order, then by rank within suit
+    cards.sort((a, b) => {
+        const suitA = a.dataset.suit;
+        const suitB = b.dataset.suit;
+        const suitOrder = ['♣', '♦', '♥', '♠'];
+        const suitDiff = suitOrder.indexOf(suitA) - suitOrder.indexOf(suitB);
+
+        // If same suit, sort by rank
+        if (suitDiff === 0) {
+            const rankA = a.dataset.rank;
+            const rankB = b.dataset.rank;
+            const rankOrder = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+            return rankOrder.indexOf(rankA) - rankOrder.indexOf(rankB);
+        }
+
+        return suitDiff;
+    });
+
+    console.log('🔍 After sort:', cards.map(c => c.dataset.suit));
+
+    // Re-append in sorted order
+    cards.forEach(card => stagingContainer.appendChild(card));
+
+    console.log('✅ Reordered staging by suit');
+}

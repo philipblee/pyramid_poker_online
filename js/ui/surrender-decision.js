@@ -32,41 +32,91 @@ function initializeSurrenderDecision() {
 }
 
 function showDecisionButtons() {
+    const rankBtn = document.getElementById('sortByRank');
+    const suitBtn = document.getElementById('sortBySuit');
+
+    console.log('🔍 showDecisionButtons - Rank button:', rankBtn);
+    console.log('🔍 showDecisionButtons - Suit button:', suitBtn);
+
+    // Hide traditional rank/suit buttons
+    if (rankBtn) {
+        rankBtn.style.display = 'none';
+        console.log('✅ Hid Rank button');
+    }
+    if (suitBtn) {
+        suitBtn.style.display = 'none';
+        console.log('✅ Hid Suit button');
+    }
+
     const playBtn = document.getElementById('playButton');
     const surrenderBtn = document.getElementById('surrenderButton');
     const submitBtn = document.getElementById('submitDecision');
+    const reorderRankBtn = document.getElementById('reorderRank');
+    const reorderSuitBtn = document.getElementById('reorderSuit');
+    const submitHandBtn = document.getElementById('submitHand');
+    const autoArrangeBtn = document.getElementById('autoArrange');
 
-    playBtn.style.display = 'inline-block';
-    surrenderBtn.style.display = 'inline-block';
-    submitBtn.style.display = 'inline-block';
+    // Hide traditional rank/suit buttons
+    if (rankBtn) rankBtn.style.display = 'none';
+    if (suitBtn) suitBtn.style.display = 'none';
 
-    // RESET classes first (remove old state)
-    playBtn.className = 'btn btn-success decision-btn';  // Fresh green
-    surrenderBtn.className = 'btn btn-secondary decision-btn';  // Fresh gray
+    // Show reorder and decision buttons
+    if (reorderRankBtn) {
+        reorderRankBtn.style.display = 'inline-block';
+        reorderRankBtn.disabled = false;
+    }
+    if (reorderSuitBtn) {
+        reorderSuitBtn.style.display = 'inline-block';
+        reorderSuitBtn.disabled = false;
+    }
+    if (playBtn) {
+        playBtn.style.display = 'inline-block';
+        playBtn.className = 'btn btn-success decision-btn';
+        playBtn.disabled = false;
+    }
+    if (surrenderBtn) {
+        surrenderBtn.style.display = 'inline-block';
+        surrenderBtn.className = 'btn btn-secondary decision-btn';
+        surrenderBtn.disabled = false;
+    }
+    if (submitBtn) {
+        submitBtn.style.display = 'inline-block';
+        submitBtn.disabled = false;
+    }
 
-    // Reset disabled state
-    playBtn.disabled = false;
-    surrenderBtn.disabled = false;
-    submitBtn.disabled = false;
+    // Reset decision to 'play' for new round
+    if (playBtn) playBtn.click();
 
-    // ✅ ADD THIS: Reset the decision to 'play' for new round
-    // Access the closure variable by re-clicking Play button programmatically
-    playBtn.click();
-
-    // Hide only Auto and Submit Hand
-    document.getElementById('submitHand').style.display = 'none';
-    document.getElementById('autoArrange').style.display = 'none';
+    // Hide Auto and Submit Hand
+    if (submitHandBtn) submitHandBtn.style.display = 'none';
+    if (autoArrangeBtn) autoArrangeBtn.style.display = 'none';
 }
 
 function hideDecisionButtons() {
-    document.getElementById('playButton').style.display = 'none';
-    document.getElementById('surrenderButton').style.display = 'none';
-    document.getElementById('submitDecision').style.display = 'none';
+    const rankBtn = document.getElementById('sortByRank');
+    const suitBtn = document.getElementById('sortBySuit');
+    const playBtn = document.getElementById('playButton');
+    const surrenderBtn = document.getElementById('surrenderButton');
+    const submitBtn = document.getElementById('submitDecision');
+    const reorderRankBtn = document.getElementById('reorderRank');
+    const reorderSuitBtn = document.getElementById('reorderSuit');
+    const submitHandBtn = document.getElementById('submitHand');
+    const autoArrangeBtn = document.getElementById('autoArrange');
+
+    // Hide decision buttons (with null checks)
+    if (playBtn) playBtn.style.display = 'none';
+    if (surrenderBtn) surrenderBtn.style.display = 'none';
+    if (submitBtn) submitBtn.style.display = 'none';
+    if (reorderRankBtn) reorderRankBtn.style.display = 'none';
+    if (reorderSuitBtn) reorderSuitBtn.style.display = 'none';
+
+    // Show traditional rank/suit buttons
+    if (rankBtn) rankBtn.style.display = 'inline-block';
+    if (suitBtn) suitBtn.style.display = 'inline-block';
 
     // Show all game buttons
-    document.getElementById('submitHand').style.display = 'inline-block';
-    document.getElementById('autoArrange').style.display = 'inline-block';
-    // Rank and Suit were never hidden, so they're already visible
+    if (submitHandBtn) submitHandBtn.style.display = 'inline-block';
+    if (autoArrangeBtn) autoArrangeBtn.style.display = 'inline-block';
 }
 
 function submitSurrenderDecision(decision) {
