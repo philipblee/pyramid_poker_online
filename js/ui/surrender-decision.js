@@ -49,6 +49,10 @@ function showDecisionButtons() {
     surrenderBtn.disabled = false;
     submitBtn.disabled = false;
 
+    // ✅ ADD THIS: Reset the decision to 'play' for new round
+    // Access the closure variable by re-clicking Play button programmatically
+    playBtn.click();
+
     // Hide only Auto and Submit Hand
     document.getElementById('submitHand').style.display = 'none';
     document.getElementById('autoArrange').style.display = 'none';
