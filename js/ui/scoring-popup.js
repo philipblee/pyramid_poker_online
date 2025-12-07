@@ -291,9 +291,14 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
     console.log('🔍 Current Round Pot from Firebase:', pot);
     window.game.currentRoundPot = pot;  // Save for distributeChips
 
-    // Find highest total
-    const maxTotal = Math.max(...Object.values(playerTotals));
-    const winners = Object.keys(playerTotals).filter(p => playerTotals[p] === maxTotal);
+    // ✅ FIX: Filter out surrendered players first
+    const activePlayers = Object.keys(playerTotals).filter(playerName => {
+        const decision = window.game.surrenderDecisions?.get(playerName);
+        return decision !== 'surrender';
+    });
+
+    const maxTotal = Math.max(...activePlayers.map(name => playerTotals[name]));
+    const winners = activePlayers.filter(p => playerTotals[p] === maxTotal);
 
     // Build pot winner display
     let potWinnerHTML = '';
