@@ -93,7 +93,7 @@ async function distributeChips() {
 
     // At the end of distributeChips(), before the console.log, capture the data
     window.lastRoundFinancial = {
-        surrenderDecisions: this.surrenderDecisions,
+        surrenderDecisions: window.game.surrenderDecisions,  // ✅ FIX
         pot: pot,
         winners: winners,
         potShare: potShare,
