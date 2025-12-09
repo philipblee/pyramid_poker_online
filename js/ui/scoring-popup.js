@@ -534,9 +534,7 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
     return new Promise((resolve) => {
         const closeButton = popup.querySelector('.btn.btn-primary');
 
-        // Remove old handler without cloning (preserves disabled state)
-        closeButton.onclick = null;
-
+        // ✅ KEEP THIS:
         closeButton.onclick = () => {
             closeScoringPopup();
             resolve();
