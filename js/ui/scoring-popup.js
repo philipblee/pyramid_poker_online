@@ -528,6 +528,14 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
 
     chipSummaryDiv.innerHTML = chipLinesHTML;
 
+    // ✅ ADD THIS: Enable continue button after chips distributed
+    const closeButton = popup.querySelector('.btn.btn-primary');
+    if (closeButton) {
+        closeButton.disabled = false;
+        console.log('✅ Continue button enabled after chip distribution');
+    }
+
+
     popup.style.display = 'block';
 
     // Return Promise that waits for close button
@@ -600,11 +608,11 @@ async function closeScoringPopup() {
             // comment this out because it's redundant as it's already set to dealing somewhere else
 //            setTableState('dealing');
 
-        } else {
-            // Multi-device non-owner: just advance currentRound
-            // Owner's setTableState should trigger retrieveHandFromFirebase
-             game.startNewRound();
-        }
+         } else {
+             // Multi-device non-owner: wait for owner's state changes
+             console.log('🔍 Non-owner waiting for owner to start next round...');
+             // Do nothing - state listener will handle everything
+         }
     }
 
 function resetGameUI() {
