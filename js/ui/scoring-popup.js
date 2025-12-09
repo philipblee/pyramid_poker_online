@@ -608,6 +608,41 @@ async function closeScoringPopup() {
             // comment this out because it's redundant as it's already set to dealing somewhere else
 //            setTableState('dealing');
 
+        // In js/ui/scoring-popup.js (around line 535 where we enable the button)
+
+        /**
+         * INTERMITTENT BUG DOCUMENTATION (Dec 9, 2024)
+         * ============================================
+         *
+         * SYMPTOMS:
+         * - Table 8 (multiplayer kitty) occasionally fails after Round 1
+         * - Non-owner's currentRound stays stuck at 1 for all rounds
+         * - Error: "Already processed scoring for round 1" in R2 and R3
+         * - Tournament summary only shows Round 1 data
+         * - Table 7 (no-surrender) works consistently
+         *
+         * ROOT CAUSE HYPOTHESIS:
+         * - Race condition between chip distribution and continue button enable
+         * - Decision phase in kitty variant adds async timing complexity
+         * - Firebase sync timing may cause non-owner state desync
+         *
+         * WHAT WE TRIED:
+         * 1. Removed game.startNewRound() from non-owners - Fixed T8, broke T7
+         * 2. Reverted change - Both tables mysteriously working
+         * 3. Same code that was failing now works - INTERMITTENT
+         *
+         * WHAT TO CHECK WHEN IT REAPPEARS:
+         * - Check if non-owner's currentRound increments in Firebase
+         * - Look for timing differences between T7 (no decision) vs T8 (has decision)
+         * - Check Firebase listeners for race conditions in surrender-decision.js
+         * - Verify roundHistory updates for non-owners
+         *
+         * RELATED FILES:
+         * - game-state-manager.js (ROUND_COMPLETE handler)
+         * - surrender-decision.js (decision phase listeners)
+         * - multi-device-integration.js (state sync)
+         */
+
         } else {
             // Multi-device non-owner: just advance currentRound
             // Owner's setTableState should trigger retrieveHandFromFirebase
