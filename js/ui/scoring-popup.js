@@ -528,14 +528,6 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
 
     chipSummaryDiv.innerHTML = chipLinesHTML;
 
-    // ✅ ADD THIS: Enable continue button after chips distributed
-    const closeButton = popup.querySelector('.btn.btn-primary');
-    if (closeButton) {
-        closeButton.disabled = false;
-        console.log('✅ Continue button enabled after chip distribution');
-    }
-
-
     popup.style.display = 'block';
 
     // ✅ Always enable button when showing popup
