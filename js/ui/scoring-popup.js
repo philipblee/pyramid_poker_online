@@ -538,13 +538,15 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
 
     popup.style.display = 'block';
 
+    // ✅ Always enable button when showing popup
+    const closeButton = popup.querySelector('.btn.btn-primary');
+    if (closeButton) {
+        closeButton.disabled = false;
+        console.log('✅ Continue button enabled after chip distribution');
+    }
+
     // Return Promise that waits for close button
     return new Promise((resolve) => {
-        const closeButton = popup.querySelector('.btn.btn-primary');
-
-        // Remove old handler without cloning (preserves disabled state)
-        closeButton.onclick = null;
-
         closeButton.onclick = () => {
             closeScoringPopup();
             resolve();
