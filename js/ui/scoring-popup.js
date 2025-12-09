@@ -608,11 +608,11 @@ async function closeScoringPopup() {
             // comment this out because it's redundant as it's already set to dealing somewhere else
 //            setTableState('dealing');
 
-         } else {
-             // Multi-device non-owner: wait for owner's state changes
-             console.log('🔍 Non-owner waiting for owner to start next round...');
-             // Do nothing - state listener will handle everything
-         }
+        } else {
+            // Multi-device non-owner: just advance currentRound
+            // Owner's setTableState should trigger retrieveHandFromFirebase
+             game.startNewRound();
+        }
     }
 
 function resetGameUI() {
