@@ -696,8 +696,6 @@
     <script src="js/core/player.js"></script>
     <script src="js/core/deck.js"></script>
     <script src="js/utils/version.js"></script>
-    <script src="js/utils/card-sorter.js"></script>
-    <script src="js/scoring/compare-hands.js"></script>
     <script src="js/core/game.js"></script>
     <script src="js/utilities/analysis.js"></script>
     <script src="js/utilities/card-parser.js"></script>

@@ -34,8 +34,8 @@ class PyramidPoker {
     initializeEventListeners() {
 
         document.getElementById('autoArrange').addEventListener('click', () => this.handleAutoArrangeToggle());
-        document.getElementById('sortByRank').addEventListener('click', () => resetAndSortByRank(this));
-        document.getElementById('sortBySuit').addEventListener('click', () => resetAndSortBySuit(this));
+        document.getElementById('sortByRank').addEventListener('click', () => this.resetAndSortByRank());
+        document.getElementById('sortBySuit').addEventListener('click', () => this.resetAndSortBySuit());
         document.getElementById('submitHand').addEventListener('click', () => this.submitCurrentHand());
 //        document.getElementById('helpButton').addEventListener('click', () => openGameRules());
 
@@ -987,6 +987,54 @@ class PyramidPoker {
         this.loadCurrentPlayerHand();
     }
 
+    resetAndSortByRank() {
+        const currentPlayer = this.playerManager.getCurrentPlayer();
+        const playerData = this.playerHands.get(currentPlayer.name);
+
+        if (!playerData) return;
+
+        const allCards = [...playerData.cards, ...playerData.back, ...playerData.middle, ...playerData.front];
+
+        allCards.sort((a, b) => {
+            if (a.value !== b.value) return b.value - a.value;
+            const suitOrder = { '♠': 4, '♥': 3, '♦': 2, '♣': 1 };
+            return suitOrder[b.suit] - suitOrder[a.suit];
+        });
+
+        playerData.cards = allCards;
+//        playerData.cards = this.restoreWildsInStaging(playerData.cards);
+        playerData.back = [];
+        playerData.middle = [];
+        playerData.front = [];
+
+        this.loadCurrentPlayerHand();
+    }
+
+    resetAndSortBySuit() {
+        const currentPlayer = this.playerManager.getCurrentPlayer();
+        const playerData = this.playerHands.get(currentPlayer.name);
+
+        if (!playerData) return;
+
+        const allCards = [...playerData.cards, ...playerData.back, ...playerData.middle, ...playerData.front];
+
+        allCards.sort((a, b) => {
+            const suitOrder = { '♠': 4, '♥': 3, '♦': 2, '♣': 1 };
+            if (a.suit !== b.suit) return suitOrder[b.suit] - suitOrder[a.suit];
+            return b.value - a.value;
+        });
+
+        playerData.cards = allCards;
+        playerData.back = [];
+        playerData.middle = [];
+        playerData.front = [];
+
+        this.loadCurrentPlayerHand();
+    }
+
+    // Add these methods to your js/core/game.js file
+    // Insert after the resetAndSortBySuit() method
+
     submitCurrentHand() {
 
         // Replace validation with the good function
@@ -1061,7 +1109,7 @@ class PyramidPoker {
 //                console.log(`🔍 Player in calculateScores ${player1} hand:`, hand1);
 //                console.log(`🔍 Player in calculateScores ${player2} hand:`, hand2);
 
-                const result = compareHands(hand1, hand2);
+                const result = this.compareHands(hand1, hand2);
 
                 roundScores.set(player1, roundScores.get(player1) + result.player1Score);
                 roundScores.set(player2, roundScores.get(player2) + result.player2Score);
@@ -1288,8 +1336,111 @@ class PyramidPoker {
         showTableScreen();
     }
 
+    compareHands(hand1, hand2) {
+        let player1Score = 0;
+        let player2Score = 0;
+        const details = [];
+
+        // Back hand comparison
+        const back1 = evaluateHand(hand1.back);
+        const back2 = evaluateHand(hand2.back);
+        const backComparison = compareTuples(back1.handStrength, back2.handStrength);
+        let backResult = 'tie';
+
+        if (backComparison > 0) {
+            const points = this.getHandPoints(back1, hand1.back.length, 'back');
+            player1Score += points;
+            player2Score -= points;
+            backResult = 'player1';
+        } else if (backComparison < 0) {
+            const points = this.getHandPoints(back2, hand2.back.length, 'back');
+            player2Score += points;
+            player1Score -= points;
+            backResult = 'player2';
+        }
+
+        details.push({
+            hand: 'Back',
+            player1Hand: back1,
+            player2Hand: back2,
+            winner: backResult
+        });
+
+        // Middle hand comparison
+        const middle1 = evaluateHand(hand1.middle);
+        const middle2 = evaluateHand(hand2.middle);
+        const middleComparison = compareTuples(middle1.handStrength, middle2.handStrength);
+        let middleResult = 'tie';
+
+        if (middleComparison > 0) {
+            const points = this.getHandPoints(middle1, hand1.middle.length, 'middle');
+            player1Score += points;
+            player2Score -= points;
+            middleResult = 'player1';
+        } else if (middleComparison < 0) {
+            const points = this.getHandPoints(middle2, hand2.middle.length, 'middle');
+            player2Score += points;
+            player1Score -= points;
+            middleResult = 'player2';
+        }
+
+        details.push({
+            hand: 'Middle',
+            player1Hand: middle1,
+            player2Hand: middle2,
+            winner: middleResult
+        });
+
+        // Front hand comparison
+        const front1 = evaluateThreeCardHand(hand1.front);
+        const front2 = evaluateThreeCardHand(hand2.front);
+        const frontComparison = compareTuples(front1.handStrength, front2.handStrength);
+        let frontResult = 'tie';
+
+        if (frontComparison > 0) {
+            const points = this.getHandPoints(front1, hand1.front.length, 'front');
+            player1Score += points;
+            player2Score -= points;
+            frontResult = 'player1';
+        } else if (frontComparison < 0) {
+            const points = this.getHandPoints(front2, hand2.front.length, 'front');
+            player2Score += points;
+            player1Score -= points;
+            frontResult = 'player2';
+        }
+
+        details.push({
+            hand: 'Front',
+            player1Hand: front1,
+            player2Hand: front2,
+            winner: frontResult
+        });
+
+        return { player1Score, player2Score, details };
+    }
+
+    getHandPoints(handEval, cardCount, position) {
+        return ScoringUtilities.getPointsForHand(handEval, position, cardCount);
+    }
+
     closeScoringPopup() {
         closeScoringPopup();
+    }
+
+    // ADD THIS AS A NEW METHOD - doesn't touch existing code
+    compareScoringMethods(handEval, cardCount, position) {
+        // Call your existing method (unchanged)
+        const currentPoints = this.getHandPoints(handEval, cardCount, position);
+
+        // Call standard method
+        const standardPoints = ScoringUtilities.getPointsForHand(handEval, position, cardCount);
+
+        // Just log the comparison
+        console.log(`🎯 Scoring comparison - ${position} (${cardCount} cards):`,
+                    `current=${currentPoints}, standard=${standardPoints}`,
+                    currentPoints === standardPoints ? '✅ MATCH' : '❌ DIFFERENT');
+
+        // Don't return anything - this is just for comparison
     }
 
     // Enhance existing game completion
@@ -1448,6 +1599,55 @@ class PyramidPoker {
             hideCountdownModal();
         }
     }
+
+    reorderStagingByRank() {
+        const currentPlayer = this.playerManager.getCurrentPlayer();
+        const playerData = this.playerHands.get(currentPlayer.name);
+
+        if (!playerData || playerData.cards.length === 0) return;
+
+        // Split into visible (first 13) and kitty (last 4)
+        const visibleCards = playerData.cards.slice(0, 13);
+        const kittyCards = playerData.cards.slice(13);
+
+        // Sort ONLY the visible 13 cards
+        visibleCards.sort((a, b) => {
+            if (a.value !== b.value) return b.value - a.value;
+            const suitOrder = { '♠': 4, '♥': 3, '♦': 2, '♣': 1 };
+            return suitOrder[b.suit] - suitOrder[a.suit];
+        });
+
+        // Recombine: sorted visible + unchanged kitty
+        playerData.cards = [...visibleCards, ...kittyCards];
+
+        this.loadCurrentPlayerHand();
+        console.log('🔄 Reordered first 13 cards by rank');
+    }
+
+    reorderStagingBySuit() {
+        const currentPlayer = this.playerManager.getCurrentPlayer();
+        const playerData = this.playerHands.get(currentPlayer.name);
+
+        if (!playerData || playerData.cards.length === 0) return;
+
+        // Split into visible (first 13) and kitty (last 4)
+        const visibleCards = playerData.cards.slice(0, 13);
+        const kittyCards = playerData.cards.slice(13);
+
+        // Sort ONLY the visible 13 cards
+        visibleCards.sort((a, b) => {
+            const suitOrder = { '♠': 4, '♥': 3, '♦': 2, '♣': 1 };
+            if (a.suit !== b.suit) return suitOrder[b.suit] - suitOrder[a.suit];
+            return b.value - a.value;
+        });
+
+        // Recombine: sorted visible + unchanged kitty
+        playerData.cards = [...visibleCards, ...kittyCards];
+
+        this.loadCurrentPlayerHand();
+        console.log('🔄 Reordered first 13 cards by suit');
+    }
+
 }
 
 // this function is used to update GameChipDisplay for table screeb and game screen
