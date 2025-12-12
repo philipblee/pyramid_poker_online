@@ -539,7 +539,13 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
 
     // Return Promise that waits for close button
     return new Promise((resolve) => {
-        closeButton.onclick = () => {
+        const existingOnClick = closeButton.onclick;  // Save wrapper if present
+
+        closeButton.onclick = async () => {
+            // If wrapper exists, let it run first (sets round_complete state)
+            if (existingOnClick) {
+                await existingOnClick.call(closeButton);
+            }
             closeScoringPopup();
             resolve();
         };
