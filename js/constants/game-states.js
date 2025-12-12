@@ -13,6 +13,7 @@ const TABLE_STATES = {
     NEW_TOURNAMENT: 'new_tournament',
     COUNTDOWN: 'countdown',
     DEALING: 'dealing',
+    HANDS_DEALT: 'hands_dealt',  // ✅ NEW
     DECIDE_PLAYING: 'decide_playing',  // NEW: play/surrender decision phase
     ALL_DECIDED: 'all_decided',        // NEW: all players submitted decisions
     PLAYING: 'playing',

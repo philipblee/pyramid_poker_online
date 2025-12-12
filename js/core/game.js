@@ -356,14 +356,14 @@ class PyramidPoker {
             }
             // Multi-device already handles tableState via Firebase
 
-            if (this.multiDeviceMode && window.multiDeviceIntegration) {
-                setTimeout(async () => {
-                    await window.multiDeviceIntegration.storeAllHandsToFirebase();
-                    console.log('✅ Owner synced all hands to Firebase');
-                }, 500);
+        if (this.multiDeviceMode && window.multiDeviceIntegration) {
+            if (window.isOwner) {
+                // Owner: Sync hands immediately, then signal ready
+                await window.multiDeviceIntegration.storeAllHandsToFirebase();
+                console.log('✅ Owner synced all hands to Firebase');
+                await setTableState(TABLE_STATES.HANDS_DEALT);
             }
-        } else {
-            setTimeout(() => this.handleNonOwnerCardRetrieval(), 1500);
+            // Non-owner: Do nothing - will wait for HANDS_DEALT state
         }
 
         // Table 6 Firebase sync
@@ -376,8 +376,9 @@ class PyramidPoker {
             }
         }
         // At the very end of the function
-    console.log('🔍 dealCardsToAllPlayers - tableState after dealing:', this.tableState);
-    console.log('🔍 dealCardsToAllPlayers - gameVariant:', gameConfig.config.gameVariant);
+        console.log('🔍 dealCardsToAllPlayers - tableState after dealing:', this.tableState);
+        console.log('🔍 dealCardsToAllPlayers - gameVariant:', gameConfig.config.gameVariant);
+        }
     }
 
     async startNewTournament() {

@@ -53,6 +53,14 @@ async function handleTableStateChange(tableState) {
             }, 1000);
             break;
 
+        case TABLE_STATES.HANDS_DEALT:
+            console.log('✅ Cards dealt and synced - ready for retrieval');
+            if (!window.isOwner) {
+                await game.handleNonOwnerCardRetrieval();
+            }
+            // Owner continues to countdown automatically
+            break;
+
         case TABLE_STATES.DECIDE_PLAYING:
             console.log('🎮 Decision phase - players can see 13 cards and decide');
 
