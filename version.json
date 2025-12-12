@@ -1,7 +1,7 @@
 {
-  "version": "v6.2 - Tables 1, 2, 7, 8 work",
-  "commit": "582be67",
+  "version": "v6.3 - Table 7 and 8 work",
+  "commit": "a2b9e45",
   "branch": "main",
-  "buildDate": "2025-12-09",
-  "lastCommit": "2025-12-09"
+  "buildDate": "2025-12-11",
+  "lastCommit": "2025-12-11"
 }
