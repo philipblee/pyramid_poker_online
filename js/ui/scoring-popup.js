@@ -89,6 +89,16 @@ async function distributeChips() {
         }
     }
 
+    // Build chip changes map (AFTER the update loop)
+    const chipChanges = new Map();
+    const anteAmount = window.gameConfig?.config?.anteAmount || 10;
+    for (const [playerName, netPoints] of Object.entries(playerTotals)) {
+        const payout = netPoints * multiplier;
+        const potWin = winners.includes(playerName) ? potShare : 0;
+        const totalChange = payout + potWin - anteAmount;  // ADD ANTE HERE
+        chipChanges.set(playerName, totalChange);
+    }
+
     console.log(`✅ Chips distributed. Pot ${pot} to: ${winners.join(', ')}`);
 
     // At the end of distributeChips(), before the console.log, capture the data
@@ -97,8 +107,10 @@ async function distributeChips() {
         pot: pot,
         winners: winners,
         potShare: potShare,
-        playerTotals: playerTotals  // Add this
+        playerTotals: playerTotals
     };
+
+    return chipChanges;
 
 }
 
@@ -316,7 +328,10 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
     // Distribute chips NOW so display shows actual values
     window.game.lastRoundTotals = playerTotals;
     window.game.currentRoundPot = pot;
-    await distributeChips();
+    const chipChanges = await distributeChips();
+    console.log('🔍 chipChanges returned from distributeChips:', chipChanges);
+    console.log('🔍 chipChanges size:', chipChanges?.size);
+    window.game.lastRoundChipChanges = chipChanges;
 
     // The HTML has a placeholder for a scoring matrix. Let's make sure it's at the top.
     const container = document.querySelector('.scoring-content');
@@ -575,37 +590,49 @@ async function closeScoringPopup() {
     // Clear all hand areas for next round
     clearAllHandAreas();
 
-        // Check if tournament is complete - don't start new round
-        if (window.game.currentRound >= window.game.totalRounds) {
-            console.log('🏆 Tournament complete - not starting new round');
-            return;
+    // Check if tournament is complete - don't start new round
+    if (window.game.currentRound >= window.game.totalRounds) {
+        console.log('🏆 Tournament complete - not starting new round');
+        return;
+    }
+
+    // UPDATE CHIP CHANGES IN ROUND HISTORY - ADD THIS HERE
+    if (window.game.lastRoundChipChanges) {
+        const currentRoundData = window.game.roundHistory.find(r => r.roundNumber === window.game.currentRound);
+        if (currentRoundData) {
+            currentRoundData.chipChanges = new Map(window.game.lastRoundChipChanges);
+            console.log('🔍 Updated roundData with chipChanges:', Array.from(currentRoundData.chipChanges.entries()));
+        } else {
+            console.log('🔍 Could not find roundData for round:', window.game.currentRound);
         }
+    }
 
-        if (window.gameConfig.config.gameDeviceMode === 'single-device') {
-            // Single-player: use fallback logic
-            setTimeout(() => {
-            const newRoundButton = document.querySelector('button[onclick*="newRound"]') ||
-                                  document.getElementById('newRoundButton') ||
-                                  document.querySelector('.new-round-btn');
+    // NOW proceed with device-specific logic
+    if (window.gameConfig.config.gameDeviceMode === 'single-device') {
+        // Single-player: use fallback logic
+        setTimeout(() => {
+        const newRoundButton = document.querySelector('button[onclick*="newRound"]') ||
+                              document.getElementById('newRoundButton') ||
+                              document.querySelector('.new-round-btn');
 
-            if (newRoundButton) {
-                console.log('🎮 Auto-starting new round...');
-                newRoundButton.click();
-            } else {
+        if (newRoundButton) {
+            console.log('🎮 Auto-starting new round...');
+            newRoundButton.click();
+        } else {
 //                console.log('🎮 New round button not found, trying direct function call...');
-                // Try calling the function directly if button not found
-                if (typeof newRound === 'function') {
-                    newRound();
-                } else if (typeof game !== 'undefined' && game.startNewRound) {
-                    game.startNewRound();
-                }
+            // Try calling the function directly if button not found
+            if (typeof newRound === 'function') {
+                newRound();
+            } else if (typeof game !== 'undefined' && game.startNewRound) {
+                game.startNewRound();
             }
-            }, 200); // Small delay to let popup close and hands clear
+        }
+        }, 200); // Small delay to let popup close and hands clear
 
-         } else if (window.isOwner) {
-            // Multi-device owner: controls round progression
-            game.startNewRound();
-            // comment this out because it's redundant as it's already set to dealing somewhere else
+     } else if (window.isOwner) {
+        // Multi-device owner: controls round progression
+        game.startNewRound();
+        // comment this out because it's redundant as it's already set to dealing somewhere else
 //            setTableState('dealing');
 
         // In js/ui/scoring-popup.js (around line 535 where we enable the button)
@@ -648,7 +675,12 @@ async function closeScoringPopup() {
             // Owner's setTableState should trigger retrieveHandFromFirebase
              game.startNewRound();
         }
+
+
+
     }
+
+
 
 function resetGameUI() {
     // Reset auto arrange state

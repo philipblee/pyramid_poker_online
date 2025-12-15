@@ -1089,10 +1089,12 @@ class PyramidPoker {
             const roundData = {
                 roundNumber: this.currentRound,
                 roundScores: new Map(roundScores),
+                chipChanges: new Map(this.lastRoundChipChanges || new Map()),  // ADD THIS
                 detailedResults: [...detailedResults],
                 submittedHands: new Map(this.submittedHands),
                 timestamp: new Date()
             };
+            console.log('🔍 Storing roundData with chipChanges:', Array.from(roundData.chipChanges.entries()));
             this.roundHistory.push(roundData);
 
             // Update tournament totals only once per round

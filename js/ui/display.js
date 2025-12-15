@@ -129,19 +129,35 @@ function updatePlayerList(game) {
         const standingsSection = document.createElement('div');
         standingsSection.className = 'tournament-standings';
         standingsSection.innerHTML = `
-            <h4 style="color: #ffd700; margin: 0 0 10px 0; font-size: 14px;">🏆 Tournament Standings</h4>
+            <h4 style="color: #ffd700; margin: 0 0 10px 0; font-size: 14px;">🏆 Chips Summary</h4>
         `;
 
+        // Calculate cumulative chip changes from all completed rounds
+        const chipTotals = new Map();
+        game.playerManager.players.forEach(player => {
+            chipTotals.set(player.name, 0);
+        });
+
+        // Sum chip changes from all completed rounds
+        game.roundHistory.forEach(roundData => {
+            if (roundData.chipChanges) {
+                roundData.chipChanges.forEach((chipChange, playerName) => {
+                    const current = chipTotals.get(playerName) || 0;
+                    chipTotals.set(playerName, current + chipChange);
+                });
+            }
+        });
+
         // Sort players by tournament total scores
-        const standings = [...game.tournamentScores.entries()]
+        const standings = [...chipTotals.entries()]
             .sort((a, b) => b[1] - a[1]);
 
-        standings.forEach(([playerName, totalScore], index) => {
+        standings.forEach(([playerName, totalChipChange], index) => {
             const position = index + 1;
             const medal = position === 1 ? '🥇' : position === 2 ? '🥈' : position === 3 ? '🥉' : `${position}.`;
 
             // Color logic for tournament scores
-            const scoreColor = totalScore < 0 ? '#ff6b6b' : '#4ecdc4';
+            const scoreColor = totalChipChange < 0 ? '#ff6b6b' : '#4ecdc4';
 
             const standingDiv = document.createElement('div');
             standingDiv.style.cssText = `
@@ -153,7 +169,7 @@ function updatePlayerList(game) {
             `;
             standingDiv.innerHTML = `
                 <span style="color: #ffd700;">${medal} ${getCompactName(playerName)}</span>
-                <span style="color: ${scoreColor};">${totalScore > 0 ? '+' : ''}${totalScore}</span>
+                <span style="color: ${scoreColor};">${totalChipChange > 0 ? '+' : ''}${totalChipChange}</span>
             `;
             standingsSection.appendChild(standingDiv);
         });
@@ -239,10 +255,10 @@ function updatePlayerList(game) {
                 let scoreDisplay, scoreColor;
 
                 if (roundCompleted) {
-                    // Round completed - show actual round score
-                    const score = roundScores.get(player.name) || 0;
-                    scoreColor = score < 0 ? '#ff6b6b' : '#4ecdc4';
-                    scoreDisplay = `${score > 0 ? '+' : ''}${score} pts`;
+                    // Round completed - show chip change instead of points
+                    const chipChange = roundCompleted.chipChanges?.get(player.name) || 0;
+                    scoreColor = chipChange < 0 ? '#ff6b6b' : '#4ecdc4';
+                    scoreDisplay = `${chipChange > 0 ? '+' : ''}${chipChange}`;  // Remove "pts"
                 } else {
                 // Round not played yet - show dash
                 scoreColor = '#ffffff'; // White for maximum visibility
