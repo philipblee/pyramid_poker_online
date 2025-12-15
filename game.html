@@ -436,8 +436,8 @@
             <button id="autoArrange" class="btn btn-secondary">Auto</button>
             <button id="sortByRank" class="btn btn-secondary">Rank</button>
             <button id="sortBySuit" class="btn btn-secondary">Suit</button>
-            <button id="reorderRank" class="btn btn-secondary" onclick="game.reorderStagingByRank()">Rank</button>
-            <button id="reorderSuit" class="btn btn-secondary" onclick="game.reorderStagingBySuit()">Suit</button>
+            <button id="reorderRank" class="btn btn-secondary" onclick="reorderStagingByRank(game)">Rank</button>
+            <button id="reorderSuit" class="btn btn-secondary" onclick="reorderStagingBySuit(game)">Suit</button>
             <button id="submitHand" class="btn btn-primary" disabled>Submit</button>
             <button id="playButton" class="btn btn-success decision-btn" style="display: none;">
                 Play
@@ -667,7 +667,7 @@
     <!-- Your Firebase files -->
     <script src="js/firebase/firebase-config.js"></script>
     <script src="js/firebase/firebase-auth.js"></script>
-    <script src="js/firebase/user-stats.js"></script>
+    <!-- <script src="js/firebase/user-stats.js"></script> -->
 
     <!-- Add game states before other multiplayer scripts -->
     <script src="js/constants/game-states.js"></script>
@@ -724,8 +724,8 @@
     <script src="js/ui/rules.js"></script>
 
     <!-- Add these lines -->
-    <link rel="stylesheet" href="css/user-stats.css">
-    <script src="js/ui/user-stats-display.js"></script>
+    <!-- <link rel="stylesheet" href="css/user-stats.css"> -->
+    <!-- <script src="js/ui/user-stats-display.js"></script> -->
 
 
     <!-- Only load tests in development -->

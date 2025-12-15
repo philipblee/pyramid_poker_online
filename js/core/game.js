@@ -1500,7 +1500,6 @@ function updateGameChipDisplays() {
     }
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
     game = new PyramidPoker();
 
