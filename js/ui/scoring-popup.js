@@ -208,7 +208,7 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
     const maxTotal = Math.max(...activePlayers.map(name => playerTotals[name]));
     const winners = activePlayers.filter(p => playerTotals[p] === maxTotal);
 
-    // === Show Head-to-Head Matrix ===
+//    // === Show Head-to-Head Matrix ===
     showHeadToHeadMatrix(game, detailedResults, playerTotals, pot, winners);
 
     // Show All Players Hands
@@ -830,7 +830,7 @@ async function showRoundSummaryForChips(game, surrenderDecisions, pot, winners, 
     // === Show Round Chip Summary (matching original design) ===
     if (chipChanges && chipChanges.size > 0) {
         const multiplier = window.gameConfig?.config?.stakesMultiplierAmount || 1;
-        const ante = window.gameConfig?.config?.stakesAnteAmount || -10;
+        const ante = -1 * window.gameConfig?.config?.stakesAnteAmount || 10;
 
         let summaryHTML = `
             <div style="margin: 0px 0 20px 0;">
