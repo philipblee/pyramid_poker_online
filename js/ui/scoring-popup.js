@@ -1,8 +1,8 @@
 // js/ui/scoring-popup.js
 // COMPLETE VERSION: Uses ScoringUtilities for all scoring calculations
 
-// Render mini cards for scoring popup
-function renderMiniCards(cards) {
+// Show mini cards for scoring popup
+function showMiniCards(cards) {
     return cards.map(card => {
         if (card.isWild) {
             return `<div class="card-mini wild">🃏</div>`;
@@ -138,7 +138,6 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
 
     console.log ('DEBUG: showScoringPopup called')
 
-
     // CAPTURE SCORES FOR STATS - Check all possible score sources
     window.lastGameDetailedResults = detailedResults;
     window.lastGameRoundScores = roundScores;
@@ -153,6 +152,8 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
         });
     }
 
+
+
 //    console.log('🔍 Final captured scores:', window.lastGameScores);
     // In showScoringPopup, after line 80, add:
 //    console.log('🔍 Final captured scores DETAILS:', JSON.stringify(window.lastGameScores, null, 2));
@@ -161,149 +162,44 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
     const allPlayerHands = document.getElementById('allPlayerHands');
     const roundRobinResults = document.getElementById('roundRobinResults');
 
-    roundRobinResults.innerHTML = '';  // ADD THIS LINE
+     // Clear previous round robin results content
+    roundRobinResults.innerHTML = '';  // Good — keep this
 
-    // After the existing debug logs, add this:
-    try {
-        // Your matrix creation code
-        const matrixDiv = document.createElement('div');
-//        console.log('Created matrixDiv:', matrixDiv);
-
-        matrixDiv.innerHTML = `
-//            <h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">Head-to-Head Matrix</h3>
-            <div id="scoringMatrix"></div>
-        `;
-//        console.log('Set matrixDiv innerHTML');
-
-    } catch (error) {
-        console.error('Error creating matrix:', error);
-    }
-
-    // Update the popup title to show which round
+    // Update the popup title
     const title = roundNumber ? `Round ${roundNumber} Results` : `Round ${game.currentRound} Results`;
     popup.querySelector('h2').textContent = `🏆 ${title}`;
 
-    // For historical rounds, get hands from round history
-    let handsToDisplay;
+    // Determine hands to display
+    let handsToDisplay = game.submittedHands;
     if (roundNumber && game.roundHistory) {
-        const historicalRound = game.roundHistory.find(round => round.roundNumber === roundNumber);
-        handsToDisplay = historicalRound ? historicalRound.submittedHands : game.submittedHands;
-    } else {
-        handsToDisplay = game.submittedHands;
+        const historicalRound = game.roundHistory.find(r => r.roundNumber === roundNumber);
+        if (historicalRound) handsToDisplay = historicalRound.submittedHands;
     }
 
-
-    // MOVE THIS SECTION TO THE TOP to show it first
-    // Create scoring matrix
-    const matrixContainer = document.getElementById('scoringMatrix');
-    // Check if the HTML element exists, if not, create it
-    if (!matrixContainer) {
-        // Find a place to insert it. Let's assume you want it at the start of the popup content.
-        const firstSection = document.querySelector('.player-hands-section');
-        if (firstSection) {
-            const matrixDiv = document.createElement('div');
-            matrixDiv.id = 'scoringMatrix';
-            matrixDiv.innerHTML = `<h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">  </h3>`;
-            firstSection.parentNode.insertBefore(matrixDiv, firstSection);
-        }
-    }
-
-    // Build the matrix
-    const playerNames = game.players.map(p => p.name);
-    // Create matrix data
-    const matrix = {};
-    playerNames.forEach(player => {
-        matrix[player] = {};
-        playerNames.forEach(opponent => {
-            matrix[player][opponent] = player === opponent ? '-' : 0;
-        });
-    });
-
-
-//console.log(`🎯 Matrix created for round ${game.currentRound}. Total children in roundRobinResults:`, roundRobinResults.children.length);
-
-    // Fill matrix with results
-    detailedResults.forEach(result => {
-        matrix[result.player1][result.player2] = result.player1Score > 0 ? `+${result.player1Score}` : result.player1Score;
-        matrix[result.player2][result.player1] = result.player2Score > 0 ? `+${result.player2Score}` : result.player2Score;
-    });
-
-    // Create HTML table
-    let tableHTML = `
-        <h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">Head-to-Head Matrix</h3>
-        <table style="border-collapse: collapse; margin: 0 auto; background: rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden;">
-            <thead>
-                <tr style="background: rgba(255,215,0,0.2);">
-                    <th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold;">vs</th>
-    `;
-
-    // Header row
-    playerNames.forEach(player => {
-        tableHTML += `<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; min-width: 80px;">${getCompactName(player)}</th>`;
-    });
-
-    // Add Total column header
-
-    tableHTML += `<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #4ecdc4; font-weight: bold; min-width: 80px; background: rgba(78,205,196,0.2);">Total</th>`;
-
-    // ADD THIS:
-    tableHTML += `<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; min-width: 80px; background: rgba(255,215,0,0.2);">Payout</th>`;
-
+    // === Calculate playerTotals ONCE (net points this round) ===
     const playerTotals = {};
 
-    // Data rows
-    playerNames.forEach(player => {
-        tableHTML += `<tr>`;
-        tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; background: rgba(255,215,0,0.1);">${getCompactName(player)}</td>`;
-
-        let rowTotal = 0;
-
-        playerNames.forEach(opponent => {
-            const score = matrix[player][opponent];
-            let cellColor = '#ccc';
-
-            if (score === '-') {
-                cellColor = '#666';
-            } else if (score > 0) {
-                cellColor = '#4ecdc4';
-                rowTotal += parseInt(score);
-            } else if (score < 0) {
-                cellColor = '#ff6b6b';
-                rowTotal += parseInt(score);
-            }
-
-            tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; color: ${cellColor}; font-weight: bold;">${score}</td>`;
-            playerTotals[player] = rowTotal
-        });
-
-        window.game.lastRoundTotals = playerTotals
-
-        // Add total cell with special styling
-        const totalColor = rowTotal > 0 ? '#4ecdc4' : rowTotal < 0 ? '#ff6b6b' : '#ffd700';
-        const totalSign = rowTotal > 0 ? '+' : '';
-        tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; color: ${totalColor}; font-weight: bold; font-size: 16px; background: rgba(78,205,196,0.1);">${totalSign}${rowTotal}</td>`;
-
-
-        // ADD THIS:
-        const multiplier = window.gameConfig?.config?.stakesMultiplierAmount || 1;
-        const payout = rowTotal * multiplier;
-        const payoutColor = payout > 0 ? '#4ecdc4' : payout < 0 ? '#ff6b6b' : '#ffd700';
-        const payoutSign = payout > 0 ? '+' : '';
-        tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; color: ${payoutColor}; font-weight: bold; font-size: 16px; background: rgba(255,215,0,0.1);">${payoutSign}${payout}</td>`;
-
-        tableHTML += `</tr>`;
+    game.players.forEach(player => {
+        playerTotals[player.name] = 0;
     });
 
-    tableHTML += `</tbody></table>`;
+    detailedResults.forEach(result => {
+        playerTotals[result.player1] += result.player1Score;
+        playerTotals[result.player2] += result.player2Score;
+    });
 
-    // Determine pot winner(s)
+
+    window.game.lastRoundTotals = playerTotals;
+    window.game.lastGameScores = playerTotals;  // if sidebar uses this too
+
+    // === Fetch pot from Firebase ===
     const tableId = window.game?.currentTableId;
     const potSnapshot = await firebase.database().ref(`tables/${tableId}/pot`).once('value');
     const pot = potSnapshot.val() || 0;
     console.log('🔍 Current Round Pot from Firebase:', pot);
-    window.game.currentRoundPot = pot;  // Save for distributeChips
+    window.game.currentRoundPot = pot;
 
-    // ✅ FIX: Filter out surrendered players first
+    // === Determine pot winners (excluding surrendered players) ===
     const activePlayers = Object.keys(playerTotals).filter(playerName => {
         const decision = window.game.surrenderDecisions?.get(playerName);
         return decision !== 'surrender';
@@ -312,176 +208,36 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
     const maxTotal = Math.max(...activePlayers.map(name => playerTotals[name]));
     const winners = activePlayers.filter(p => playerTotals[p] === maxTotal);
 
-    // Build pot winner display
-    let potWinnerHTML = '';
-    if (pot > 0) {
-        if (winners.length === 1) {
-            potWinnerHTML = `<div style="text-align: center; margin-top: 15px; padding: 10px; background: rgba(255,215,0,0.2); border-radius: 8px; color: #ffd700; font-size: 18px; font-weight: bold;">🏆 Pot Winner: ${winners[0]} +${pot} chips</div>`;
-        } else {
-            const splitAmount = Math.floor(pot / winners.length);
-            potWinnerHTML = `<div style="text-align: center; margin-top: 15px; padding: 10px; background: rgba(255,215,0,0.2); border-radius: 8px; color: #ffd700; font-size: 18px; font-weight: bold;">🏆 Pot Split: ${winners.join(', ')} +${splitAmount} chips each</div>`;
-        }
-    }
+    // === Show Head-to-Head Matrix ===
+    showHeadToHeadMatrix(game, detailedResults, playerTotals, pot, winners);
 
-    tableHTML += potWinnerHTML;
-
-    // Distribute chips NOW so display shows actual values
-    window.game.lastRoundTotals = playerTotals;
-    window.game.currentRoundPot = pot;
-    const chipChanges = await distributeChips();
-    console.log('🔍 chipChanges returned from distributeChips:', chipChanges);
-    console.log('🔍 chipChanges size:', chipChanges?.size);
-    window.game.lastRoundChipChanges = chipChanges;
-
-    // The HTML has a placeholder for a scoring matrix. Let's make sure it's at the top.
-    const container = document.querySelector('.scoring-content');
-    if (container) {
-        // Remove any existing tournament matrix (safest - only removes our specific element)
-        const oldMatrix = container.querySelector('#tournament-head-to-head-matrix');
-        if (oldMatrix) oldMatrix.remove();
-
-        const matrixDiv = document.createElement('div');
-        matrixDiv.id = 'tournament-head-to-head-matrix'; // Give it a unique ID
-        matrixDiv.innerHTML = tableHTML;
-        // Insert the matrix right after the title and close button
-        container.insertBefore(matrixDiv, container.children[2]);
-    }
-
-    // Display all player hands with card counts
+    // Show All Players Hands
     allPlayerHands.innerHTML = '';
-    game.players.forEach(player => {
-        const hand = game.submittedHands.get(player.name);
+    showPlayerHands(game, handsToDisplay, allPlayerHands);
 
-        if (hand) {
-            const playerDiv = document.createElement('div');
-            playerDiv.className = 'player-hand-display';
-
-            // Check if player surrendered
-            const surrendered = window.game.surrenderDecisions?.get(player.name) === 'surrender';
-
-            if (surrendered) {
-                // Display surrender message
-                playerDiv.innerHTML = `
-                    <div class="player-hand-title">${player.name}</div>
-                    <div class="hand-row" style="padding: 20px; text-align: center;">
-                        <div style="color: #ff6b6b; font-weight: bold; font-size: 1.1em;">
-                            Surrendered
-                        </div>
-                        <div style="color: #888; margin-top: 10px;">
-                            Paid 10 chip penalty
-                        </div>
-                    </div>
-                `;
-            } else {
-                // Display normal hand (existing code)
-                const backCardCount = hand.back ? hand.back.length : 5;
-                const middleCardCount = hand.middle ? hand.middle.length : 5;
-                const frontCardCount = hand.front ? hand.front.length : 3;
-
-                playerDiv.innerHTML = `
-                    <div class="player-hand-title">${player.name}</div>
-                    <div class="hand-row">
-                        <div class="hand-label-popup">Back (${backCardCount}):</div>
-                        <div class="hand-cards">${renderMiniCards(hand.back)}</div>
-                        <div class="hand-strength-popup">${getHandName(evaluateHand(hand.back))} (${evaluateHand(hand.back).handStrength.join(', ')})</div>
-                    </div>
-                    <div class="hand-row">
-                        <div class="hand-label-popup">Middle (${middleCardCount}):</div>
-                        <div class="hand-cards">${renderMiniCards(hand.middle)}</div>
-                        <div class="hand-strength-popup">${getHandName(evaluateHand(hand.middle))} (${evaluateHand(hand.middle).handStrength.join(', ')})</div>
-                    </div>
-                    <div class="hand-row">
-                        <div class="hand-label-popup">Front (${frontCardCount}):</div>
-                        <div class="hand-cards">${renderMiniCards(hand.front)}</div>
-                        <div class="hand-strength-popup">${getThreeCardHandName(evaluateThreeCardHand(hand.front))} (${evaluateThreeCardHand(hand.front).handStrength.join(', ')})</div>
-                    </div>
-                `;
-            }
-            allPlayerHands.appendChild(playerDiv);
-        }
-    });
-
-    // Display round robin results with correct scoring
+    // Show Round Robin Scoring (detailed matchups)
     roundRobinResults.innerHTML = '';
-    detailedResults.forEach(result => {
-        const matchupDiv = document.createElement('div');
-        matchupDiv.className = 'matchup';
+    showRoundRobinScoring(detailedResults, game, roundRobinResults);
 
-        let matchupHTML = `
-            <div class="matchup-title">${result.player1} vs ${result.player2}</div>
-        `;
+    // Show Round Summary for Chips
+    // This chart includes initial ante, pot winnings and net payouts
+    const financialHtml = showRoundSummaryForChips(
+        game,
+        window.game.surrenderDecisions,           // current surrenders
+        pot,                                      // current pot (just fetched)
+        winners,                                  // current winners
+        null,                                     // potShare — calculate inside if needed, or pass pot/winners.length
+        playerTotals                              // current round points → payouts
+    );
 
-        result.details.forEach(detail => {
-            const p1Class = detail.winner === 'player1' ? 'winner' : detail.winner === 'tie' ? 'tie' : 'loser';
-            const p2Class = detail.winner === 'player2' ? 'winner' : detail.winner === 'tie' ? 'tie' : 'loser';
-
-            // Calculate points using ScoringUtilities with correct card counts
-            const getPointsDisplay = (playerHand, position, playerName, isPlayer1) => {
-                if (detail.winner === 'tie') return '(0)';
-
-                // Get actual card count from submitted hands
-                const cardCount = getCardCountFromSubmittedHands(game, playerName, position);
-
-                // Only calculate points for the WINNER's hand
-                let points = 0;
-                if (detail.winner === 'player1') {
-                    points = ScoringUtilities.getPointsForHand(detail.player1Hand, position, cardCount);
-                    return isPlayer1 ? `(+${points})` : `(-${points})`;
-                } else if (detail.winner === 'player2') {
-                    points = ScoringUtilities.getPointsForHand(detail.player2Hand, position, cardCount);
-                    return isPlayer1 ? `(-${points})` : `(+${points})`;
-                }
-
-                return '(0)';
-            };
-
-            matchupHTML += `
-                <div class="comparison-row">
-                    <div class="player-result ${p1Class}">
-                        ${detail.player1Hand.name} (${detail.player1Hand.handStrength.join(', ')}) ${getPointsDisplay(detail.player1Hand, detail.hand, result.player1, true)}
-                    </div>
-                    <div style="color: #ffd700; font-weight: bold;">${detail.hand}</div>
-                    <div class="player-result ${p2Class}">
-                        ${detail.player2Hand.name} (${detail.player2Hand.handStrength.join(', ')}) ${getPointsDisplay(detail.player2Hand, detail.hand, result.player2, false)}
-                    </div>
-                </div>
-            `;
-        });
-
-        matchupHTML += `
-            <div class="comparison-row">
-                <div class="player-result ${result.player1Score > result.player2Score ? 'winner' : result.player1Score < result.player2Score ? 'loser' : 'tie'}">
-                    ${result.player1}: ${result.player1Score} points
-                </div>
-                <div style="color: #ffd700; font-weight: bold;">HEAD-TO-HEAD</div>
-                <div class="player-result ${result.player2Score > result.player1Score ? 'winner' : result.player2Score < result.player1Score ? 'loser' : 'tie'}">
-                    ${result.player2}: ${result.player2Score} points
-                </div>
-            </div>
-        `;
-
-        matchupDiv.innerHTML = matchupHTML;
-        roundRobinResults.appendChild(matchupDiv);
-    });
-
-    // The original code appended the matrix here. We've moved it up.
-
-    // Add financial summary if data is available
-    if (window.lastRoundFinancial) {
-        const financialHtml = createRoundFinancialSummary(
-            game,
-            window.lastRoundFinancial.surrenderDecisions,
-            window.lastRoundFinancial.pot,
-            window.lastRoundFinancial.winners,
-            window.lastRoundFinancial.potShare,
-            window.lastRoundFinancial.playerTotals  // Add this
-        );
+    if (financialHtml) {
         roundRobinResults.innerHTML += financialHtml;
     }
 
     popup.style.display = 'block';
 
     // Chip summary - add last so it positions correctly
+    // This includes all players and includes pot and payouts (excludes ante because that was collected earlier)
     const currentChips = window.lastKnownChips || 0;
 
     const currentUser = firebase.auth().currentUser;
@@ -632,43 +388,6 @@ async function closeScoringPopup() {
      } else if (window.isOwner) {
         // Multi-device owner: controls round progression
         game.startNewRound();
-        // comment this out because it's redundant as it's already set to dealing somewhere else
-//            setTableState('dealing');
-
-        // In js/ui/scoring-popup.js (around line 535 where we enable the button)
-
-        /**
-         * INTERMITTENT BUG DOCUMENTATION (Dec 9, 2024)
-         * ============================================
-         *
-         * SYMPTOMS:
-         * - Table 8 (multiplayer kitty) occasionally fails after Round 1
-         * - Non-owner's currentRound stays stuck at 1 for all rounds
-         * - Error: "Already processed scoring for round 1" in R2 and R3
-         * - Tournament summary only shows Round 1 data
-         * - Table 7 (no-surrender) works consistently
-         *
-         * ROOT CAUSE HYPOTHESIS:
-         * - Race condition between chip distribution and continue button enable
-         * - Decision phase in kitty variant adds async timing complexity
-         * - Firebase sync timing may cause non-owner state desync
-         *
-         * WHAT WE TRIED:
-         * 1. Removed game.startNewRound() from non-owners - Fixed T8, broke T7
-         * 2. Reverted change - Both tables mysteriously working
-         * 3. Same code that was failing now works - INTERMITTENT
-         *
-         * WHAT TO CHECK WHEN IT REAPPEARS:
-         * - Check if non-owner's currentRound increments in Firebase
-         * - Look for timing differences between T7 (no decision) vs T8 (has decision)
-         * - Check Firebase listeners for race conditions in surrender-decision.js
-         * - Verify roundHistory updates for non-owners
-         *
-         * RELATED FILES:
-         * - game-state-manager.js (ROUND_COMPLETE handler)
-         * - surrender-decision.js (decision phase listeners)
-         * - multi-device-integration.js (state sync)
-         */
 
         } else {
             // Multi-device non-owner: just advance currentRound
@@ -679,8 +398,6 @@ async function closeScoringPopup() {
 
 
     }
-
-
 
 function resetGameUI() {
     // Reset auto arrange state
@@ -854,63 +571,323 @@ function getGameLength() {
     return Math.round((Date.now() - gameStartTime) / 1000); // seconds
 }
 
-// Create round financial summary table
-function createRoundFinancialSummary(game, surrenderDecisions, pot, winners, potShare, playerTotals) {
-    let html = `
-        <div style="margin: 20px 0;">
-            <h3 style="color: #ffd700; margin-bottom: 15px;">💰 Round Summary for Chips</h3>
-            <table style="width: 100%; border-collapse: collapse; background: rgba(0,0,0,0.3);">
+async function showHeadToHeadMatrix(game, detailedResults, playerTotals, pot, winners, containerSelector = '.scoring-content') {
+
+
+
+
+
+    // Build the player names list
+    const playerNames = game.players.map(p => p.name);
+
+    // Create matrix data structure
+    const matrix = {};
+    playerNames.forEach(player => {
+        matrix[player] = {};
+        playerNames.forEach(opponent => {
+            matrix[player][opponent] = player === opponent ? '-' : 0;
+        });
+    });
+
+    // Fill matrix with scores — always as strings with consistent formatting
+    detailedResults.forEach(result => {
+        const format = (s) => s > 0 ? `+${s}` : s === 0 ? '0' : `${s}`;
+
+        matrix[result.player1][result.player2] = format(result.player1Score);
+        matrix[result.player2][result.player1] = format(result.player2Score);
+    });
+
+    // Re-calculate row totals (in case we're reusing playerTotals from elsewhere)
+    const rowTotals = {};
+    playerNames.forEach(player => {
+        let total = 0;
+        playerNames.forEach(opponent => {
+            const score = matrix[player][opponent];
+            if (score !== '-' && score !== 0) {
+                total += parseInt(score);
+            }
+        });
+        rowTotals[player] = total;
+    });
+
+    // Use provided playerTotals if available, otherwise use calculated
+    const finalTotals = playerTotals || rowTotals;
+
+    // Get stakes multiplier
+    const multiplier = window.gameConfig?.config?.stakesMultiplierAmount || 1;
+
+    // Build the table HTML
+    let tableHTML = `
+        <h3 style="color: #ffd700; margin-top: 30px; margin-bottom: 15px;">Head-to-Head Matrix</h3>
+        <table style="border-collapse: collapse; margin: 0 auto; background: rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden;">
             <thead>
                 <tr style="background: rgba(255,215,0,0.2);">
-                    <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Player</th>
-                    <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Ante</th>
-                    <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Surr.</th>
-                    <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Payout</th>
-                    <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">Pot</th>
-                    <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.2); background: rgba(78,205,196,0.1);">Total</th>
+                    <th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold;">vs</th>
+    `;
+
+    // Header row: player names
+    playerNames.forEach(player => {
+        tableHTML += `<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; min-width: 80px;">${getCompactName(player)}</th>`;
+    });
+
+    // Total and Payout columns
+    tableHTML += `
+        <th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #4ecdc4; font-weight: bold; min-width: 80px; background: rgba(78,205,196,0.2);">Total</th>
+        <th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; min-width: 80px; background: rgba(255,215,0,0.2);">Payout</th>
+    `;
+
+    tableHTML += `</tr></thead><tbody>`;
+
+    // Data rows
+    playerNames.forEach(player => {
+        tableHTML += `<tr>`;
+        tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); color: #ffd700; font-weight: bold; background: rgba(255,215,0,0.1);">${getCompactName(player)}</td>`;
+
+        let rowTotal = 0;
+        playerNames.forEach(opponent => {
+            const score = matrix[player][opponent];
+            let cellColor = '#ccc';
+
+            const numericScore = parseInt(score);
+
+            if (score === '-' || score === '0') {
+                cellColor = '#666';
+            } else if (numericScore > 0) {
+                cellColor = '#4ecdc4';
+                rowTotal += numericScore;
+            } else if (numericScore < 0) {
+                cellColor = '#ff6b6b';
+                rowTotal += numericScore;
+            }
+
+            tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; color: ${cellColor}; font-weight: bold;">${score}</td>`;
+        });
+
+        // Total cell
+        const total = finalTotals[player] || rowTotal;
+        const totalColor = total > 0 ? '#4ecdc4' : total < 0 ? '#ff6b6b' : '#ffd700';
+        const totalSign = total > 0 ? '+' : '';
+        tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; color: ${totalColor}; font-weight: bold; font-size: 16px; background: rgba(78,205,196,0.1);">${totalSign}${total}</td>`;
+
+        // Payout cell
+        const payout = total * multiplier;
+        const payoutColor = payout > 0 ? '#4ecdc4' : payout < 0 ? '#ff6b6b' : '#ffd700';
+        const payoutSign = payout > 0 ? '+' : '';
+        tableHTML += `<td style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; color: ${payoutColor}; font-weight: bold; font-size: 16px; background: rgba(255,215,0,0.1);">${payoutSign}${payout}</td>`;
+
+        tableHTML += `</tr>`;
+    });
+
+    tableHTML += `</tbody></table>`;
+
+    // Pot winner banner (if pot > 0)
+    let potWinnerHTML = '';
+    if (pot > 0 && winners && winners.length > 0) {
+        if (winners.length === 1) {
+            potWinnerHTML = `<div style="text-align: center; margin-top: 15px; padding: 10px; background: rgba(255,215,0,0.2); border-radius: 8px; color: #ffd700; font-size: 18px; font-weight: bold;">🏆 Pot Winner: ${winners[0]} +${pot} chips</div>`;
+        } else {
+            const splitAmount = Math.floor(pot / winners.length);
+            potWinnerHTML = `<div style="text-align: center; margin-top: 15px; padding: 10px; background: rgba(255,215,0,0.2); border-radius: 8px; color: #ffd700; font-size: 18px; font-weight: bold;">🏆 Pot Split: ${winners.join(', ')} +${splitAmount} chips each</div>`;
+        }
+    }
+
+    tableHTML += potWinnerHTML;
+
+}
+
+async function showPlayerHands(game, handsToDisplay, containerElement) {
+    // Clear previous content
+    containerElement.innerHTML = '';
+
+    game.players.forEach(player => {
+        const hand = handsToDisplay.get(player.name);
+
+        if (!hand) {
+            // Optional: show missing hand (shouldn't happen in normal flow)
+            return;
+        }
+
+        const playerDiv = document.createElement('div');
+        playerDiv.className = 'player-hand-display';
+
+        // Check if player surrendered
+        const surrendered = window.game.surrenderDecisions?.get(player.name) === 'surrender';
+
+        if (surrendered) {
+            playerDiv.innerHTML = `
+                <div class="player-hand-title">${player.name}</div>
+                <div class="hand-row" style="padding: 20px; text-align: center;">
+                    <div style="color: #ff6b6b; font-weight: bold; font-size: 1.1em;">
+                        Surrendered
+                    </div>
+                    <div style="color: #888; margin-top: 10px;">
+                        Paid 10 chip penalty
+                    </div>
+                </div>
+            `;
+        } else {
+            // Display normal hand
+            const backCardCount = hand.back ? hand.back.length : 5;
+            const middleCardCount = hand.middle ? hand.middle.length : 5;
+            const frontCardCount = hand.front ? hand.front.length : 3;
+
+            playerDiv.innerHTML = `
+                <div class="player-hand-title">${player.name}</div>
+                <div class="hand-row">
+                    <div class="hand-label-popup">Back (${backCardCount}):</div>
+                    <div class="hand-cards">${showMiniCards(hand.back)}</div>
+                    <div class="hand-strength-popup">${getHandName(evaluateHand(hand.back))} (${evaluateHand(hand.back).handStrength.join(', ')})</div>
+                </div>
+                <div class="hand-row">
+                    <div class="hand-label-popup">Middle (${middleCardCount}):</div>
+                    <div class="hand-cards">${showMiniCards(hand.middle)}</div>
+                    <div class="hand-strength-popup">${getHandName(evaluateHand(hand.middle))} (${evaluateHand(hand.middle).handStrength.join(', ')})</div>
+                </div>
+                <div class="hand-row">
+                    <div class="hand-label-popup">Front (${frontCardCount}):</div>
+                    <div class="hand-cards">${showMiniCards(hand.front)}</div>
+                    <div class="hand-strength-popup">${getThreeCardHandName(evaluateThreeCardHand(hand.front))} (${evaluateThreeCardHand(hand.front).handStrength.join(', ')})</div>
+                </div>
+            `;
+        }
+
+        containerElement.appendChild(playerDiv);
+    });
+}
+
+function showRoundRobinScoring(detailedResults, game, containerElement) {
+    // Clear previous content
+    containerElement.innerHTML = '';
+
+    detailedResults.forEach(result => {
+        const matchupDiv = document.createElement('div');
+        matchupDiv.className = 'matchup';
+
+        let matchupHTML = `
+            <div class="matchup-title">${result.player1} vs ${result.player2}</div>
+        `;
+
+        result.details.forEach(detail => {
+            const p1Class = detail.winner === 'player1' ? 'winner' : detail.winner === 'tie' ? 'tie' : 'loser';
+            const p2Class = detail.winner === 'player2' ? 'winner' : detail.winner === 'tie' ? 'tie' : 'loser';
+
+            // Helper to show points correctly for winner only
+            const getPointsDisplay = (playerHand, position, playerName, isPlayer1) => {
+                if (detail.winner === 'tie') return '(0)';
+
+                // Get actual card count from submitted hands (for royalty calculation)
+                const cardCount = getCardCountFromSubmittedHands(game, playerName, position);
+
+                let points = 0;
+                if (detail.winner === 'player1') {
+                    points = ScoringUtilities.getPointsForHand(detail.player1Hand, position, cardCount);
+                    return isPlayer1 ? `(+${points})` : `(-${points})`;
+                } else if (detail.winner === 'player2') {
+                    points = ScoringUtilities.getPointsForHand(detail.player2Hand, position, cardCount);
+                    return isPlayer1 ? `(-${points})` : `(+${points})`;
+                }
+
+                return '(0)';
+            };
+
+            matchupHTML += `
+                <div class="comparison-row">
+                    <div class="player-result ${p1Class}">
+                        ${detail.player1Hand.name} (${detail.player1Hand.handStrength.join(', ')})
+                        ${getPointsDisplay(detail.player1Hand, detail.hand, result.player1, true)}
+                    </div>
+                    <div style="color: #ffd700; font-weight: bold;">${detail.hand}</div>
+                    <div class="player-result ${p2Class}">
+                        ${detail.player2Hand.name} (${detail.player2Hand.handStrength.join(', ')})
+                        ${getPointsDisplay(detail.player2Hand, detail.hand, result.player2, false)}
+                    </div>
+                </div>
+            `;
+        });
+
+        // Final head-to-head score
+        matchupHTML += `
+            <div class="comparison-row">
+                <div class="player-result ${result.player1Score > result.player2Score ? 'winner' : result.player1Score < result.player2Score ? 'loser' : 'tie'}">
+                    ${result.player1}: ${result.player1Score > 0 ? '+' : ''}${result.player1Score} points
+                </div>
+                <div style="color: #ffd700; font-weight: bold;">HEAD-TO-HEAD</div>
+                <div class="player-result ${result.player2Score > result.player1Score ? 'winner' : result.player2Score < result.player1Score ? 'loser' : 'tie'}">
+                    ${result.player2}: ${result.player2Score > 0 ? '+' : ''}${result.player2Score} points
+                </div>
+            </div>
+        `;
+
+        matchupDiv.innerHTML = matchupHTML;
+        containerElement.appendChild(matchupDiv);
+    });
+}
+
+// Create round financial summary table
+async function showRoundSummaryForChips(game, surrenderDecisions, pot, winners, potShare, playerTotals) {
+
+    const chipChanges = await distributeChips()
+    // === Show Round Chip Summary (matching original design) ===
+    if (chipChanges && chipChanges.size > 0) {
+        const multiplier = window.gameConfig?.config?.stakesMultiplierAmount || 1;
+        const ante = window.gameConfig?.config?.stakesAnteAmount || -10;
+
+        let summaryHTML = `
+            <div style="margin: 0px 0 20px 0;">
+                <h3 style="color: #ffd700; text-align: left; margin: 0 0 10px 0; font-size: 18px; font-weight: bold;">
+                    Round Summary for Chips
+                </h3>
+                <table style="width: 100%; border-collapse: separate; border-spacing: 0; background: rgba(0,0,0,0.4); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                    <thead>
+                        <tr style="background: linear-gradient(to bottom, #b8860b, #8b6914); height: 50px;">
+                            <th style="padding: 12px; color: #ffd700; font-weight: bold; text-align: left; width: 30%;">Player</th>
+                            <th style="padding: 12px; color: #ffd700; font-weight: bold;">Ante</th>
+                            <th style="padding: 12px; color: #ffd700; font-weight: bold;">Surr.</th>
+                            <th style="padding: 12px; color: #ffd700; font-weight: bold;">Payout</th>
+                            <th style="padding: 12px; color: #ffd700; font-weight: bold;">Pot</th>
+                            <th style="padding: 12px; color: #4ecdc4; font-weight: bold; font-size: 18px;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        game.players.forEach(player => {
+            const name = player.name;
+            const totalChange = chipChanges.get(name) || 0;
+
+            const payout = (playerTotals[name] || 0) * multiplier;
+            const potWin = winners.includes(name) ? Math.floor(pot / winners.length) : 0;
+            const surrenderPenalty = window.game.surrenderDecisions?.get(name) === 'surrender' ? -10 : 0;
+
+            const payoutDisplay = payout !== 0 ? (payout > 0 ? `+${payout}` : payout) : '-';
+            const potDisplay = potWin > 0 ? `+${potWin}` : '-';
+            const surrenderDisplay = surrenderPenalty < 0 ? surrenderPenalty : '-';
+
+            const totalColor = totalChange > 0 ? '#4ecdc4' : totalChange < 0 ? '#ff6b6b' : '#ffd700';
+            const totalSign = totalChange > 0 ? '+' : '';
+
+            summaryHTML += `
+                <tr style="height: 50px;">
+                    <td style="padding: 12px; color: #ecf0f1; text-align: left; font-weight: bold;">
+                        ${getCompactName(name)}
+                    </td>
+                    <td style="padding: 12px; text-align: center; color: #ffd700;">${ante}</td>
+                    <td style="padding: 12px; text-align: center; color: #ff6b6b;">${surrenderDisplay}</td>
+                    <td style="padding: 12px; text-align: center; color: #ffd700;">${payoutDisplay}</td>
+                    <td style="padding: 12px; text-align: center; color: #ffd700;">${potDisplay}</td>
+                    <td style="padding: 12px; text-align: center; color: ${totalColor}; font-weight: bold; font-size: 18px;">
+                        ${totalSign}${totalChange}
+                    </td>
                 </tr>
-            </thead>
-                <tbody>
-    `;
+            `;
+        });
 
-    game.playerManager.players.forEach(player => {
-    const playerName = getCompactName(player.name);
-    const ante = -(window.gameConfig?.config?.stakesAnteAmount || 10);
+        summaryHTML += `
+                    </tbody>
+                </table>
+            </div>
+        `;
 
-    const decision = surrenderDecisions?.get(player.name);
-    const surrenderPenalty = (decision === 'surrender') ? -10 : 0;
-
-    // Get points and calculate payout
-    const points = playerTotals?.[player.name] || 0;
-    const multiplier = window.gameConfig?.config?.stakesChipsPerPoint || 2;
-    const payout = points * multiplier;
-
-    const potWin = winners.includes(player.name) ? potShare : 0;
-    const total = ante + surrenderPenalty + payout + potWin;
-
-    // Color coding
-    const totalColor = total > 0 ? '#4ecdc4' : total < 0 ? '#ff6b6b' : '#ffd700';
-    const payoutColor = payout > 0 ? '#4ecdc4' : payout < 0 ? '#ff6b6b' : '#666';
-    const totalSign = total > 0 ? '+' : '';
-    const payoutSign = payout > 0 ? '+' : '';
-
-    html += `
-        <tr>
-            <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2);">${playerName}</td>
-            <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2); color: #ff6b6b; text-align: center;">${ante}</td>
-            <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2); color: ${surrenderPenalty < 0 ? '#ff6b6b' : '#666'}; text-align: center;">${surrenderPenalty === 0 ? '-' : surrenderPenalty}</td>
-            <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2); color: ${payoutColor}; text-align: center;">${payout !== 0 ? payoutSign + payout : '-'}</td>
-            <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2); color: ${potWin > 0 ? '#4ecdc4' : '#666'}; text-align: center;">${potWin > 0 ? '+' + potWin : '-'}</td>
-            <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.2); color: ${totalColor}; font-weight: bold; text-align: center; background: rgba(78,205,196,0.1);">${totalSign}${total}</td>
-        </tr>
-    `;
-});
-
-    html += `
-                </tbody>
-            </table>
-        </div>
-    `;
-
-    return html;
+        roundRobinResults.innerHTML += summaryHTML;
+    }
 }

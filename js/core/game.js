@@ -1035,7 +1035,8 @@ class PyramidPoker {
             return decision !== 'surrender';
         });
 
-        console.log(`📊 Scoring ${playerNames.length} active players (${allPlayerNames.length - playerNames.length} surrendered)`);
+        console.log(`📊 Scoring ${playerNames.length} active players
+            (${allPlayerNames.length - playerNames.length} surrendered)`);
 
         const roundScores = new Map();
         const detailedResults = [];
@@ -1161,18 +1162,28 @@ class PyramidPoker {
     showTournamentSummary() {
         console.log('🏆 Showing tournament summary...');
 
-        // DEBUG: Check what's actually in round history
-        this.roundHistory.forEach((round, index) => {
-            // console.log(`Round ${index + 1}:`, round.roundNumber, 'Scores:', [...round.roundScores.entries()]);
+        // Calculate cumulative chip changes from all completed rounds
+        const chipTotals = new Map();
+        this.playerManager.players.forEach(player => {
+            chipTotals.set(player.name, 0);
         });
 
-        // Create sorted tournament standings
-        const standings = [...this.tournamentScores.entries()]
+        this.roundHistory.forEach(roundData => {
+            if (roundData.chipChanges) {
+                roundData.chipChanges.forEach((chipChange, playerName) => {
+                    const current = chipTotals.get(playerName) || 0;
+                    chipTotals.set(playerName, current + chipChange);
+                });
+            }
+        });
+
+        // Create sorted tournament standings by chip changes
+        const standings = [...chipTotals.entries()]
             .sort((a, b) => b[1] - a[1])
             .map((entry, index) => ({
                 position: index + 1,
                 playerName: entry[0],
-                totalScore: entry[1]
+                totalChipChange: entry[1]
             }));
 
         // Create tournament summary modal
@@ -1206,10 +1217,11 @@ class PyramidPoker {
                          standing.position === 2 ? '🥈' :
                          standing.position === 3 ? '🥉' : '🏅';
             const bgColor = standing.position === 1 ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255, 255, 255, 0.1)';
+            const color = standing.totalChipChange >= 0 ? '#4ecdc4' : '#ff6b6b';
             html += `
                 <div style="background: ${bgColor}; padding: 15px; margin: 10px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-size: 16px;">${medal} ${standing.position}. ${standing.playerName}</span>
-                    <span style="font-size: 14px; font-weight: bold; color: #4ecdc4;">${standing.totalScore} points</span>
+                    <span style="font-size: 14px; font-weight: bold; color: ${color};">${standing.totalChipChange > 0 ? '+' : ''}${standing.totalChipChange}</span>
                 </div>
             `;
         });
@@ -1221,21 +1233,22 @@ class PyramidPoker {
         for (let round = 1; round <= this.roundHistory.length; round++) {
             const roundData = this.roundHistory[round - 1];
             html += `<div style="margin-bottom: 15px;"><h4 style="color: #ffd700;">Round ${round}</h4>`;
-            roundData.roundScores.forEach((score, playerName) => {
-                const sign = score > 0 ? '+' : '';
-                const color = score > 0 ? '#4ecdc4' : score < 0 ? '#ff6b6b' : '#95a5a6';
-                html += `<div style="color: ${color};">${playerName}: ${sign}${score}</div>`;
-            });
+
+            if (roundData.chipChanges) {
+                roundData.chipChanges.forEach((chipChange, playerName) => {
+                    const sign = chipChange > 0 ? '+' : '';
+                    const color = chipChange > 0 ? '#4ecdc4' : chipChange < 0 ? '#ff6b6b' : '#95a5a6';
+                    html += `<div style="color: ${color};">${playerName}: ${sign}${chipChange}</div>`;
+                });
+            }
             html += `</div>`;
         }
 
         html += `</div>`;
 
-        // ✨ NEW: Add "Return to Table" button or waiting message
         const canReturn = gameConfig.config.gameDeviceMode !== 'multi-device' || window.isOwner;
 
         if (canReturn) {
-            // Owner (or single-player) can return to table
             html += `
                 <button onclick="game.returnToTable();"
                         style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px;">
@@ -1243,7 +1256,6 @@ class PyramidPoker {
                 </button>
             `;
         } else {
-            // Non-owner waits
             html += `
                 <p style="color: #ffd700; margin-top: 20px; font-size: 16px;">
                     Waiting for table owner to continue...
@@ -1254,8 +1266,6 @@ class PyramidPoker {
         content.innerHTML = html;
         modal.appendChild(content);
         document.body.appendChild(modal);
-
-        // ✨ REMOVED: Don't reset state here anymore - only when Return to Table is clicked
     }
 
     returnToTable() {
