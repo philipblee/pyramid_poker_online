@@ -95,7 +95,12 @@ async function distributeChips() {
     for (const [playerName, netPoints] of Object.entries(playerTotals)) {
         const payout = netPoints * multiplier;
         const potWin = winners.includes(playerName) ? potShare : 0;
-        const totalChange = payout + potWin - anteAmount;  // ADD ANTE HERE
+
+        // Include surrender penalty in chip delta so sidebar / history totals match
+        const surrendered = window.game.surrenderDecisions?.get(playerName) === 'surrender';
+        const surrenderPenalty = surrendered ? -10 : 0;
+
+        const totalChange = payout + potWin - anteAmount + surrenderPenalty;
         chipChanges.set(playerName, totalChange);
     }
 
