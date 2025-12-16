@@ -310,16 +310,23 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
 
     // Return Promise that waits for close button
     return new Promise((resolve) => {
-        const existingOnClick = closeButton.onclick;  // Save wrapper if present
-
-        closeButton.onclick = async () => {
-            // If wrapper exists, let it run first (sets round_complete state)
-            if (existingOnClick) {
-                await existingOnClick.call(closeButton);
-            }
-            closeScoringPopup();
-            resolve();
-        };
+        if (window.gameConfig?.config?.gameDeviceMode === 'multi-device') {
+            // Multi-device: preserve enhanceContinueButton wrapper
+            const existingOnClick = closeButton.onclick;
+            closeButton.onclick = async () => {
+                if (existingOnClick) {
+                    await existingOnClick.call(closeButton);
+                }
+                closeScoringPopup();
+                resolve();
+            };
+        } else {
+            // Single-player: replace handler (no nesting)
+            closeButton.onclick = () => {
+                closeScoringPopup();
+                resolve();
+            };
+        }
     });
 
     console.log('🔍 showScoringPopup END - button disabled:', document.querySelector('#scoringPopup .btn.btn-primary')?.disabled);
