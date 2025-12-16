@@ -22,14 +22,9 @@ function getCompactName(playerName) {
     return playerName.replace(/@gmail\.com$/, '');
 }
 
+
 async function distributeChips() {
     console.log('🔍 distributeChips START');
-
-    // Only owner distributes (prevents double in multiplayer)
-    if (window.game?.multiDeviceMode && !window.isOwner) {
-        console.log('🔍 Non-owner, skipping distribution');
-        return;
-    }
 
     const playerTotals = window.game?.lastRoundTotals || {};
     const pot = window.game?.currentRoundPot || 0;
@@ -59,36 +54,38 @@ async function distributeChips() {
     console.log('🔍 winners:', winners);
     console.log('🔍 potShare:', potShare);
 
-    // Update each player's chips
-    for (const [playerName, netPoints] of Object.entries(playerTotals)) {
-        const payout = netPoints * multiplier;
-        const potWin = winners.includes(playerName) ? potShare : 0;
-        const totalChange = payout + potWin;
+    // ONLY OWNER updates Firebase
+    if (window.isOwner) {
+        // Update each player's chips
+        for (const [playerName, netPoints] of Object.entries(playerTotals)) {
+            const payout = netPoints * multiplier;
+            const potWin = winners.includes(playerName) ? potShare : 0;
+            const totalChange = payout + potWin;
 
-        // Get Firebase key
-        const isAI = playerName.endsWith('_AI') || playerName.includes(' AI');
-        const playerKey = isAI ? playerName : playerName.replace(/\./g, ',').replace(/@/g, '_at_');
+            // Get Firebase key
+            const isAI = playerName.endsWith('_AI') || playerName.includes(' AI');
+            const playerKey = isAI ? playerName : playerName.replace(/\./g, ',').replace(/@/g, '_at_');
 
-        console.log(`🔍 ${playerName}: netPoints=${netPoints}, payout=${payout}, potWin=${potWin}, totalChange=${totalChange}`);
+            console.log(`🔍 ${playerName}: netPoints=${netPoints}, payout=${payout}, potWin=${potWin}, totalChange=${totalChange}`);
 
-        const result = await firebase.database().ref(`players/${playerKey}/chips`)
-            .transaction(current => (current || 0) + totalChange);
+            const result = await firebase.database().ref(`players/${playerKey}/chips`)
+                .transaction(current => (current || 0) + totalChange);
 
-        const newChips = result.snapshot.val();
-        console.log(`🔍 ${playerName}: newChips=${newChips}`);
+            const newChips = result.snapshot.val();
+            console.log(`🔍 ${playerName}: newChips=${newChips}`);
 
-        // Reload if less than 0
-        if (newChips < 0) {
-            await firebase.database().ref(`players/${playerKey}/chips`).set(10000);
-            await firebase.database().ref(`players/${playerKey}/lastKnownChips`).set(10000);
-            await firebase.database().ref(`players/${playerKey}/reloads`)
-                .transaction(current => (current || 0) + 1);
-            console.log(`🔄 ${playerName} balance below 0, reload 10,000 chips`);
-        } else {
-            await firebase.database().ref(`players/${playerKey}/lastKnownChips`).set(newChips);
+            // Reload if less than 0
+            if (newChips < 0) {
+                await firebase.database().ref(`players/${playerKey}/chips`).set(10000);
+                await firebase.database().ref(`players/${playerKey}/lastKnownChips`).set(10000);
+                await firebase.database().ref(`players/${playerKey}/reloads`)
+                    .transaction(current => (current || 0) + 1);
+                console.log(`🔄 ${playerName} balance below 0, reload 10,000 chips`);
+            } else {
+                await firebase.database().ref(`players/${playerKey}/lastKnownChips`).set(newChips);
+            }
         }
     }
-
     // Build chip changes map (AFTER the update loop)
     const chipChanges = new Map();
     const anteAmount = window.gameConfig?.config?.anteAmount || 10;
@@ -123,7 +120,6 @@ async function distributeChips() {
     return chipChanges;
 
 }
-
 // SIMPLIFIED: Just delegates to ScoringUtilities (maintains backward compatibility)
 function getPointsForHand(hand, position, cardCount = null) {
     return ScoringUtilities.getPointsForHand(hand, position, cardCount);
@@ -345,15 +341,30 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
     console.log('🔍 showScoringPopup END - button disabled:', document.querySelector('#scoringPopup .btn.btn-primary')?.disabled);
 }
 
-// Close scoring popup and clear all hands for next round (unchanged)function closeScoringPopup() {
+// Close scoring popup and clear all hands for next round
+let isClosingPopup = false; // Guard against double calls
 async function closeScoringPopup() {
-    // Save game stats before closing popup
+    // Prevent double calls - if already closing, return early
+    if (isClosingPopup) {
+        console.log('🔍 closeScoringPopup: Already closing, skipping duplicate call');
+        return;
+    }
+    
+    const popup = document.getElementById('scoringPopup');
+    if (!popup || popup.style.display === 'none') {
+        console.log('🔍 closeScoringPopup: Popup already closed, skipping');
+        return;
+    }
+    
+    isClosingPopup = true;
+    
+    try {
+        // Save game stats before closing popup
+        saveGameStats();
 
-    saveGameStats();
+        popup.style.display = 'none';
 
-    document.getElementById('scoringPopup').style.display = 'none';
-
-    resetGameUI();
+        resetGameUI();
 
     // Clear previous round's game data from Firestore
     if (window.isOwner && window.multiDeviceIntegration) {
@@ -408,16 +419,16 @@ async function closeScoringPopup() {
      } else if (window.isOwner) {
         // Multi-device owner: controls round progression
         game.startNewRound();
-
-        } else {
-            // Multi-device non-owner: just advance currentRound
-            // Owner's setTableState should trigger retrieveHandFromFirebase
-             game.startNewRound();
-        }
-
-
-
+    } else {
+        // Multi-device non-owner: just advance currentRound
+        // Owner's setTableState should trigger retrieveHandFromFirebase
+        game.startNewRound();
     }
+    } finally {
+        // Reset guard after completion (even if error occurred)
+        isClosingPopup = false;
+    }
+}
 
 function resetGameUI() {
     // Reset auto arrange state
