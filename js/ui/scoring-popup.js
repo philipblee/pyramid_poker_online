@@ -99,9 +99,14 @@ async function distributeChips() {
         chipChanges.set(playerName, totalChange);
     }
 
+    // Persist chip changes so sidebar / history can access them
+    if (window.game) {
+        window.game.lastRoundChipChanges = chipChanges;
+    }
+
     console.log(`✅ Chips distributed. Pot ${pot} to: ${winners.join(', ')}`);
 
-    // At the end of distributeChips(), before the console.log, capture the data
+    // Capture financial snapshot for debugging / stats
     window.lastRoundFinancial = {
         surrenderDecisions: window.game.surrenderDecisions,  // ✅ FIX
         pot: pot,
@@ -219,15 +224,18 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
     roundRobinResults.innerHTML = '';
     showRoundRobinScoring(detailedResults, game, roundRobinResults);
 
-    // Show Round Summary for Chips
+    // Distribute chips and then show Round Summary for Chips
     // This chart includes initial ante, pot winnings and net payouts
+    const chipChanges = await distributeChips();
+
     const financialHtml = showRoundSummaryForChips(
         game,
         window.game.surrenderDecisions,           // current surrenders
         pot,                                      // current pot (just fetched)
         winners,                                  // current winners
         null,                                     // potShare — calculate inside if needed, or pass pot/winners.length
-        playerTotals                              // current round points → payouts
+        playerTotals,                             // current round points → payouts
+        chipChanges                               // per-player chip deltas
     );
 
     if (financialHtml) {
@@ -831,9 +839,7 @@ function showRoundRobinScoring(detailedResults, game, containerElement) {
 }
 
 // Create round financial summary table
-async function showRoundSummaryForChips(game, surrenderDecisions, pot, winners, potShare, playerTotals) {
-
-    const chipChanges = await distributeChips()
+function showRoundSummaryForChips(game, surrenderDecisions, pot, winners, potShare, playerTotals, chipChanges) {
     // === Show Round Chip Summary (matching original design) ===
     if (chipChanges && chipChanges.size > 0) {
         const multiplier = window.gameConfig?.config?.stakesMultiplierAmount || 1;
@@ -895,6 +901,8 @@ async function showRoundSummaryForChips(game, surrenderDecisions, pot, winners, 
             </div>
         `;
 
-        roundRobinResults.innerHTML += summaryHTML;
+        return summaryHTML;
     }
+
+    return '';
 }
