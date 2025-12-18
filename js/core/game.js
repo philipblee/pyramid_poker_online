@@ -236,7 +236,7 @@ class PyramidPoker {
         console.log('🔍 startNewRound CALLED');
         console.log('🔍 isOwner:', window.isOwner);
         console.log('🔍 multiDeviceMode:', this.multiDeviceMode);
-        console.trace('Call stack:');  // This shows where it was called from
+//        console.trace('Call stack:');  // This shows where it was called from
 
         // Must have existing players to start a new round
         if (this.playerManager.players.length < 2) {
@@ -317,10 +317,6 @@ class PyramidPoker {
         updateDisplay(this);
 
         // Add at end of startNewRound()
-        console.log('🔍 Round', this.currentRound, 'setup complete:');
-        console.log('- Players:', this.players.map(p => `${p.name}(ready:${p.ready})`));
-        console.log('- PlayerHands size:', this.playerHands.size);
-        console.log('- SubmittedHands size:', this.submittedHands.size);
         this.playerHands.forEach((hand, name) => {
 //            console.log(`- ${name}: ${hand.cards.length} cards`);
         });
@@ -328,9 +324,7 @@ class PyramidPoker {
     }
 
     async dealCardsToAllPlayers() {
-        console.log('🔍 dealCardsToAllPlayers START');
-        console.log('🔍 isOwner:', window.isOwner);
-        console.log('🔍 About to sync to Firebase?', this.multiDeviceMode && window.isOwner);
+
         if (!this.multiDeviceMode || window.isOwner) {
             this.deckManager.createNewDeck();
 
@@ -376,7 +370,6 @@ class PyramidPoker {
             }
         }
         // At the very end of the function
-        console.log('🔍 dealCardsToAllPlayers - tableState after dealing:', this.tableState);
         console.log('🔍 dealCardsToAllPlayers - gameVariant:', gameConfig.config.gameVariant);
         }
     }
@@ -437,14 +430,8 @@ class PyramidPoker {
     // load all current playerHand (added the gameVariant === 'kitty')
     loadCurrentPlayerHand() {
 
-        console.log('🔍 loadCurrentPlayerHand called from:', new Error().stack);
-
-        console.log('🔍 loadCurrentPlayerHand - tableState:', this.tableState);
-        console.log('🔍 loadCurrentPlayerHand - gameVariant:', gameConfig.config.gameVariant);
-
         // Allow loading during DECIDE_PLAYING for kitty variant
         const isDecisionPhase = this.tableState === TABLE_STATES.DECIDE_PLAYING;
-        console.log('🔍 loadCurrentPlayerHand - isDecisionPhase:', isDecisionPhase);
 
         if (this.gameState !== 'playing' && !isDecisionPhase) return;
 
@@ -452,7 +439,6 @@ class PyramidPoker {
 
         // Check if player surrendered - skip their turn
         if (this.surrenderDecisions && this.surrenderDecisions.get(currentPlayer.name) === 'surrender') {
-            console.log(`⏭️ ${currentPlayer.name} surrendered - auto-skipping`);
 
             // Mark as submitted with empty hands
             this.submittedHands.set(currentPlayer.name, {
@@ -481,16 +467,6 @@ class PyramidPoker {
 
         if (!playerData) return;
 
-        console.log('🔍 loadCurrentPlayerHand DEBUG:', {
-           gameVariant: gameConfig.config.gameVariant,
-           tableState: this.tableState,
-           gameState: this.gameState,
-           isDecisionPhase: isDecisionPhase,
-           cardCount: playerData?.cards?.length
-       });
-
-
-
         // Clear display
         document.getElementById('playerHand').innerHTML = '';
         document.getElementById('backHand').innerHTML = '';
@@ -505,14 +481,12 @@ class PyramidPoker {
 
         if (shouldShowLimited) {
             cardsToDisplay = playerData.cards.slice(0, 13);
-}
+        }
 
         // Show appropriate buttons based on state
         if (this.tableState === TABLE_STATES.DECIDE_PLAYING) {
-            console.log('🔍 Calling showDecisionButtons()');
             showDecisionButtons();
         } else {
-            console.log('🔍 Calling hideDecisionButtons()');
             hideDecisionButtons();
         }
 
@@ -626,8 +600,6 @@ class PyramidPoker {
 
         await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
 
-        console.log(`🤖 ${currentPlayer.name} is playing...`);
-
         // Step 1: Show AI is thinking (1 second)
         setTimeout(() => {
             this.autoArrangeManager.autoArrangeHand();
@@ -673,10 +645,8 @@ class PyramidPoker {
                 console.log('🔄 Restored buttons - human player turn');
             } else if (allPlayersReady) {
                 // All players ready - going to scoring, keep buttons disabled
-                console.log('🏁 All players ready - keeping buttons disabled for scoring');
             } else {
                 // Another AI turn - keep buttons disabled
-                console.log('🤖 Next AI player - keeping buttons disabled');
             }
 
 }, 1200);
@@ -1471,9 +1441,6 @@ class PyramidPoker {
 
 // this function is used to update GameChipDisplay for table screeb and game screen
 function updateGameChipDisplays() {
-
-    console.log('🔍 updateGameChipDisplays CALLED');
-    console.log('🔍 previousPlayerChips:', window.previousPlayerChips);
 
     const currentUser = firebase.auth().currentUser;
     if (!currentUser) return;

@@ -35,17 +35,12 @@ function showDecisionButtons() {
     const rankBtn = document.getElementById('sortByRank');
     const suitBtn = document.getElementById('sortBySuit');
 
-    console.log('🔍 showDecisionButtons - Rank button:', rankBtn);
-    console.log('🔍 showDecisionButtons - Suit button:', suitBtn);
-
     // Hide traditional rank/suit buttons
     if (rankBtn) {
         rankBtn.style.display = 'none';
-        console.log('✅ Hid Rank button');
     }
     if (suitBtn) {
         suitBtn.style.display = 'none';
-        console.log('✅ Hid Suit button');
     }
 
     const playBtn = document.getElementById('playButton');
@@ -120,8 +115,6 @@ function hideDecisionButtons() {
 }
 
 function submitSurrenderDecision(decision) {
-    console.log('🔍 DECISION - Human decided:', decision);
-    console.log('🔍 DECISION - gameDeviceMode:', gameConfig.config.gameDeviceMode);
 
     // Multi-device: Submit for THIS device's player, not current turn player
     const playerName = window.game.multiDeviceMode
@@ -177,7 +170,6 @@ function processAIDecisions() {
         if (player.type === 'ai' && !window.game.surrenderDecisions.has(player.name)) {
             const decision = decideAISurrender(player);
             window.game.surrenderDecisions.set(player.name, decision);
-            console.log(`🤖 ${player.name} decided: ${decision}`);
         }
     });
 }
@@ -191,8 +183,6 @@ function decideAISurrender(player) {
 
     // Count wild cards
     const wildCount = cards.filter(card => card.isWild).length;
-
-    console.log(`🤖 ${player.name} has ${wildCount} wild cards in first 13`);
 
     // Decision logic
     if (wildCount >= 2) {
@@ -229,15 +219,12 @@ function checkAllDecided() {
     console.log(`🔍 DECISION - Checking if all decided. Count:, ${decidedCount}, 'Total:', ${allPlayers}`);
 
     if (decidedCount === allPlayers.length) {
-        console.log('✅ All players decided!');
         handleAllDecided();
     }
 }
 
 function handleAllDecided() {
 
-    console.log('🔍 ALL_DECIDED - Starting transition');
-    console.log('🔍 ALL_DECIDED - gameDeviceMode:', gameConfig.config.gameDeviceMode);
     // Step 1: Collect surrender penalties
     collectSurrenderPenalties();
 
@@ -246,7 +233,6 @@ function handleAllDecided() {
 
     // Step 3: Transition to PLAYING state - write to Firebase!
     if (gameConfig.config.gameDeviceMode === 'multi-device') {
-        console.log('🔍 Taking MULTI-DEVICE path');
         setTableState(TABLE_STATES.PLAYING);
     } else {
         console.log('🔍 Taking SINGLE-PLAYER path');
@@ -254,9 +240,6 @@ function handleAllDecided() {
         game.loadCurrentPlayerHand();
         updateDisplay(game);  // ← Add this line
     }
-    console.log('🔍 Transition complete');
-
-    console.log('✅ Transitioned to PLAYING state');
 }
 
 async function collectSurrenderPenalties() {
