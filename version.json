@@ -1,7 +1,7 @@
 {
-  "version": "v6.3 - Table 7 and 8 work",
-  "commit": "a2b9e45",
+  "version": "v6.5 Scoring Uses Chips",
+  "commit": "b11538f",
   "branch": "main",
-  "buildDate": "2025-12-11",
-  "lastCommit": "2025-12-11"
+  "buildDate": "2025-12-18",
+  "lastCommit": "2025-12-18"
 }
