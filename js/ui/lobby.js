@@ -993,6 +993,33 @@ function updatePlayerListUI(players, tableId) {
 
 }
 
+// DEBUG: Clear stuck tables
+async function clearTable(tableId) {
+    if (!confirm(`Clear ALL data from Table ${tableId}?`)) return;
+
+    console.log(`🗑️ Clearing table ${tableId}...`);
+
+    try {
+        // Remove from Realtime Database
+        await firebase.database().ref(`tables/${tableId}`).remove();
+        console.log(`✅ Realtime DB table ${tableId} cleared`);
+
+        // Remove from Firestore (if exists)
+        try {
+            await firebase.firestore().collection('tables').doc(String(tableId)).delete();
+            console.log(`✅ Firestore table ${tableId} cleared`);
+        } catch (firestoreError) {
+            // Table might not exist in Firestore, that's okay
+            console.log(`ℹ️ Firestore table ${tableId} not found (okay)`);
+        }
+
+        alert(`✅ Table ${tableId} cleared successfully`);
+
+    } catch (error) {
+        console.error(`❌ Error clearing table ${tableId}:`, error);
+        alert(`❌ Error clearing table: ${error.message}`);
+    }
+}
 
 // Export functions for integration
 window.PyramidPokerLobby = {

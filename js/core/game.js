@@ -280,6 +280,11 @@ class PyramidPoker {
                 .remove();
 
             console.log('🧹 Cleared Firebase surrender decisions for new round');
+
+            // After clearing Firebase surrender decisions
+            if (typeof window.cleanupDecisionListener === 'function') {
+                window.cleanupDecisionListener();
+            }
         }
 
         console.log('🔍 startNewRound - tableState before dealing:', this.tableState);

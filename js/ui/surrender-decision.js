@@ -302,30 +302,49 @@ function revealKittyCards() {
 }
 
 // NEW: Owner monitors Firebase for all decisions
+// At top of file, add:
+let decisionListenerRef = null;
+
+// Modify setupOwnerDecisionListener (line 306):
 function setupOwnerDecisionListener() {
     if (!window.game.multiDeviceMode || !window.isOwner) {
-        console.log('⏭️ Not owner or not multi-device, skipping listener setup');
+        console.log('⭐️ Not owner or not multi-device, skipping listener setup');
         return;
     }
+
+    // Clean up any existing listener first
+    cleanupDecisionListener();
 
     const tableId = window.game.currentTableId;
     const playerCount = window.game.playerManager.players.length;
 
     console.log(`👑 Owner setting up decision listener for ${playerCount} players`);
 
-    firebase.database().ref(`tables/${tableId}/surrenderDecisions`)
-        .on('value', (snapshot) => {
-            const decisions = snapshot.val() || {};
-            const decidedCount = Object.keys(decisions).length;
+    decisionListenerRef = firebase.database().ref(`tables/${tableId}/surrenderDecisions`);
+    decisionListenerRef.on('value', (snapshot) => {
+        const decisions = snapshot.val() || {};
+        const decidedCount = Object.keys(decisions).length;
 
-            console.log(`📊 Decisions: ${decidedCount}/${playerCount}`);
+        console.log(`📊 Decisions: ${decidedCount}/${playerCount}`);
 
-            if (decidedCount === playerCount) {
-                console.log('✅ All players decided! Transitioning...');
-                handleAllDecided();
-            }
-        });
+        if (decidedCount === playerCount) {
+            console.log('✅ All players decided! Transitioning...');
+            handleAllDecided();
+        }
+    });
 }
+
+// Add new cleanup function:
+function cleanupDecisionListener() {
+    if (decisionListenerRef) {
+        decisionListenerRef.off('value');
+        decisionListenerRef = null;
+        console.log('🔕 Removed surrender decision listener');
+    }
+}
+
+// Export for use in game.js
+window.cleanupDecisionListener = cleanupDecisionListener;
 
 // Initialize on load
 if (document.readyState === 'loading') {
