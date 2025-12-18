@@ -200,9 +200,15 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
 
     // === Fetch pot from Firebase ===
     const tableId = window.game?.currentTableId;
+
+    console.log('🔍 DISTRIBUTE - tableId:', tableId);
+    console.log('🔍 DISTRIBUTE - Reading from path: tables/' + tableId + '/pot');
+
     const potSnapshot = await firebase.database().ref(`tables/${tableId}/pot`).once('value');
     const pot = potSnapshot.val() || 0;
     console.log('🔍 Current Round Pot from Firebase:', pot);
+    console.log(`🔍 distributeChips - tableId: ${tableId}, reading from: tables/${tableId}/pot`);
+
     window.game.currentRoundPot = pot;
 
     // === Determine pot winners (excluding surrendered players) ===

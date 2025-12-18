@@ -1407,6 +1407,10 @@ class PyramidPoker {
         if (anteAmount === 0) return;
 
         const tableId = window.game?.currentTableId;
+
+        console.log('🔍 ANTE - tableId:', tableId);
+        console.log('🔍 ANTE - Writing to path: tables/' + tableId + '/pot');
+
         if (!tableId) {
             console.warn('No tableId for ante collection');
             return;
@@ -1435,6 +1439,9 @@ class PyramidPoker {
             await firebase.database().ref(`players/${playerKey}/lastKnownChips`).set(result.snapshot.val());
 
         }
+
+//        const tableId = window.game?.currentTableId;
+        console.log(`🔍 collectAntes - tableId: ${tableId}, path: tables/${tableId}/pot`);
 
         // Set pot (not transaction - owner controls it)
         await firebase.database().ref(`tables/${tableId}/pot`).set(totalPot);
