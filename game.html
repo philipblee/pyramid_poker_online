@@ -450,7 +450,7 @@
             <button id="reorderRank" class="btn btn-secondary" onclick="reorderStagingByRank(game)">Rank</button>
             <button id="reorderSuit" class="btn btn-secondary" onclick="reorderStagingBySuit(game)">Suit</button>
             <button id="submitHand" class="btn btn-primary" disabled>Submit</button>
-            <button id="submitAutomatic" class="btn btn-primary" disabled>Automatic</button>
+            <button id="findAutomatics" class="btn btn-primary">Find Automatics</button>
             <button id="playButton" class="btn btn-success decision-btn" style="display: none;">
                 Play
             </button>
@@ -461,6 +461,10 @@
                 Submit Decision
             </button>
             <button class="btn btn-secondary" onclick="window.location.href='index.html'">Website</button>
+        </div>
+
+        <!-- Add near the Find Automatics button -->
+        <div id="automaticMessage" style="display: none; padding: 10px; background: #4CAF50; color: white; border-radius: 5px; margin: 10px 0;">
         </div>
 
         <div class="status" id="status">
@@ -552,6 +556,47 @@
 
     <!-- Near the bottom of game.html, before closing </body> -->
     <script>
+
+    // In your game.js or UI handler
+    function handleFindAutomatics() {
+        const currentPlayer = game.getCurrentPlayer();
+        const allCards = currentPlayer.hand; // All 17 cards
+
+        console.log('🔍 Searching for automatics...');
+        const result = findAndArrangeBestAutomatic(allCards);
+
+        if (result) {
+            // Found an automatic!
+            const automaticName = result.type.replace(/-/g, ' ').toUpperCase();
+            showAutomaticMessage(`✨ Automatic Found: ${automaticName}`);
+
+            // Place cards in positions
+            game.placeCardsInBack(result.arrangement.back);
+            game.placeCardsInMiddle(result.arrangement.middle);
+            game.placeCardsInFront(result.arrangement.front);
+
+            // Enable submit button
+            document.getElementById('submitHandBtn').disabled = false;
+
+            console.log(`✅ Arranged ${result.type}`);
+        } else {
+            // No automatic found
+            showAutomaticMessage('❌ No automatic possible with these cards');
+        }
+    }
+
+    // Display message on UI
+    function showAutomaticMessage(message) {
+        const messageDiv = document.getElementById('automaticMessage');
+        messageDiv.textContent = message;
+        messageDiv.style.display = 'block';
+
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 3000);
+    }
+
     function updateStartGameButton(playerCount) {
 <!--        console.log("Log - updateStartGameButton called")-->
         const startBtn = document.getElementById('startGameBtn');

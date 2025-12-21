@@ -38,8 +38,12 @@ class PyramidPoker {
         document.getElementById('sortByRank').addEventListener('click', () => resetAndSortByRank(this));
         document.getElementById('sortBySuit').addEventListener('click', () => resetAndSortBySuit(this));
         document.getElementById('submitHand').addEventListener('click', () => this.submitCurrentHand());
-        document.getElementById('submitAutomatic').addEventListener('click', () => this.submitAutomatic());
-//        document.getElementById('helpButton').addEventListener('click', () => openGameRules());
+
+        // Find Automatics button (may not exist on all pages)
+        const findAutomaticsBtn = document.getElementById('findAutomatics');
+        if (findAutomaticsBtn) {
+            findAutomaticsBtn.addEventListener('click', () => handleFindAutomatics());
+        }
 
 
         const toggleButton = document.getElementById('sidebarToggle');
@@ -843,8 +847,8 @@ class PyramidPoker {
                 submitBtn.disabled = false;
 
                 // Check for automatic if automatics are allowed
-                const automaticBtn = document.getElementById('submitAutomatic');
-                if (gameConfig.config.automaticsAllowed === 'yes') {
+                const automaticBtn = document.getElementById('findAutomatics'); // CHANGED
+                if (automaticBtn && gameConfig.config.automaticsAllowed === 'yes') { // ADDED null check
                     const arrangement = {
                         back: playerData.back,
                         middle: playerData.middle,
@@ -858,7 +862,7 @@ class PyramidPoker {
                         automaticBtn.disabled = true;
                         automaticBtn.title = '';
                     }
-                } else {
+                } else if (automaticBtn) { // ADDED null check
                     automaticBtn.disabled = true;
                     automaticBtn.title = '';
                 }
@@ -871,8 +875,8 @@ class PyramidPoker {
                 middleHand.classList.add('invalid');
                 frontHand.classList.add('invalid');
                 submitBtn.disabled = true;
-                const automaticBtn = document.getElementById('submitAutomatic');
-                if (automaticBtn) automaticBtn.disabled = true;
+                const automaticBtn = document.getElementById('findAutomatics'); // CHANGED
+                if (automaticBtn) automaticBtn.disabled = true; // null check already there
 
                 let reason = '';
                 if (!frontIsValid) reason = '5-card front hand must be at least a Straight';
@@ -1077,10 +1081,14 @@ class PyramidPoker {
         this.playerManager.nextPlayer();
 
 
-         // Reset auto button for next turn (always happens after submit)
+        // Reset auto button for next turn (always happens after submit)
         this.autoArrangeUsed = false;
         document.getElementById('autoArrange').textContent = 'Auto';
-        document.getElementById('submitAutomatic').disabled = true;
+
+        const findAutomaticsBtn = document.getElementById('findAutomatics'); // CHANGED - added 's'
+        if (findAutomaticsBtn) {
+            findAutomaticsBtn.disabled = false;
+        }
 
         if (this.playerManager.areAllPlayersReady()) {
             this.calculateScores();
@@ -1092,248 +1100,6 @@ class PyramidPoker {
         updateDisplay(this);
     }
 
-    handleMultiAutomatics(automaticPlayers, roundScores, detailedResults) {
-        // Group players by automatic type
-        const playersByType = new Map();
-        automaticPlayers.forEach(playerName => {
-            const automatic = this.automaticHands.get(playerName);
-            const type = automatic.type;
-            if (!playersByType.has(type)) {
-                playersByType.set(type, []);
-            }
-            playersByType.get(type).push(playerName);
-        });
-
-        // Find the highest precedence automatic type
-        let highestPrecedence = -1;
-        let highestType = null;
-        playersByType.forEach((players, type) => {
-            const automatic = this.automaticHands.get(players[0]);
-            if (automatic.precedence > highestPrecedence) {
-                highestPrecedence = automatic.precedence;
-                highestType = type;
-            }
-        });
-
-        // Only players with the highest precedence automatic compete
-        const competingPlayers = playersByType.get(highestType);
-
-        if (competingPlayers.length === 1) {
-            // Only one player has the highest automatic - they win 3 points per regular player
-            const winner = competingPlayers[0];
-            const regularPlayers = Array.from(roundScores.keys()).filter(name => !automaticPlayers.includes(name));
-            
-            // Automatic player gets 3 points per regular player
-            const automaticPoints = 3 * regularPlayers.length;
-            roundScores.set(winner, roundScores.get(winner) + automaticPoints);
-            
-            // Each regular player gets -3 points
-            if (regularPlayers.length > 0) {
-                regularPlayers.forEach(regularPlayer => {
-                    roundScores.set(regularPlayer, roundScores.get(regularPlayer) - 3);
-                });
-                console.log(`🎯 ${winner} wins ${automaticPoints} points for highest automatic: ${highestType} (3 per player)`);
-                console.log(`🎯 Each regular player gets -3 points (zero-sum)`);
-            }
-        } else {
-            // Multiple players with same automatic - play out all three hands
-            // Track total automatic points awarded for zero-sum calculation
-            let totalAutomaticPointsAwarded = 0;
-            
-            for (let i = 0; i < competingPlayers.length; i++) {
-                for (let j = i + 1; j < competingPlayers.length; j++) {
-                    const player1 = competingPlayers[i];
-                    const player2 = competingPlayers[j];
-
-                    const hand1 = this.submittedHands.get(player1);
-                    const hand2 = this.submittedHands.get(player2);
-                    const auto1 = this.automaticHands.get(player1);
-
-                    // ✅ DRAGON vs DRAGON
-                    if (auto1.type === 'dragon') {
-                        console.log(`🐉 Comparing two dragons: ${player1} vs ${player2}`);
-                        const dragonWinner = compareDragons(hand1, hand2);
-
-                        const points = dragonWinner === 'tie' ? 0 : 3;
-                        if (dragonWinner === 'player1') {
-                            roundScores.set(player1, roundScores.get(player1) + points);
-                            roundScores.set(player2, roundScores.get(player2) - points);
-                            totalAutomaticPointsAwarded += points;
-                        } else if (dragonWinner === 'player2') {
-                            roundScores.set(player2, roundScores.get(player2) + points);
-                            roundScores.set(player1, roundScores.get(player1) - points);
-                            totalAutomaticPointsAwarded += points;
-                        }
-                        // Skip to next pair
-                        continue;
-                    }
-
-                    // Compare all three hands
-                    const back1 = evaluateHand(hand1.back);
-                    const back2 = evaluateHand(hand2.back);
-                    const middle1 = evaluateHand(hand1.middle);
-                    const middle2 = evaluateHand(hand2.middle);
-                    const front1 = evaluateThreeCardHand(hand1.front);
-                    const front2 = evaluateThreeCardHand(hand2.front);
-
-                    let player1Wins = 0;
-                    let player2Wins = 0;
-                    let pushes = 0;
-
-                    // Back hand
-                    const backComparison = compareTuples(back1.handStrength, back2.handStrength);
-                    if (backComparison > 0) player1Wins++;
-                    else if (backComparison < 0) player2Wins++;
-                    else pushes++;
-
-                    // Middle hand
-                    const middleComparison = compareTuples(middle1.handStrength, middle2.handStrength);
-                    if (middleComparison > 0) player1Wins++;
-                    else if (middleComparison < 0) player2Wins++;
-                    else pushes++;
-
-                    // Front hand
-                    const frontComparison = compareTuples(front1.handStrength, front2.handStrength);
-                    if (frontComparison > 0) player1Wins++;
-                    else if (frontComparison < 0) player2Wins++;
-                    else pushes++;
-
-                    // Calculate points based on results
-                    let player1Points = 0;
-                    let player2Points = 0;
-
-                    if (player1Wins === 3) {
-                        // Player 1 sweeps - 3 points
-                        player1Points = 3;
-                    } else if (player2Wins === 3) {
-                        // Player 2 sweeps - 3 points
-                        player2Points = 3;
-                    } else if (player1Wins === 2 && player2Wins === 1) {
-                        // Player 1 wins 2, player 2 wins 1 - 1 point each
-                        player1Points = 1;
-                        player2Points = 1;
-                    } else if (player2Wins === 2 && player1Wins === 1) {
-                        // Player 2 wins 2, player 1 wins 1 - 1 point each
-                        player1Points = 1;
-                        player2Points = 1;
-                    } else if (player1Wins === 2 && pushes === 1) {
-                        // Player 1 wins 2, one push - 2 points
-                        player1Points = 2;
-                    } else if (player2Wins === 2 && pushes === 1) {
-                        // Player 2 wins 2, one push - 2 points
-                        player2Points = 2;
-                    } else if (player1Wins === 1 && player2Wins === 1 && pushes === 1) {
-                        // Each wins 1, one push - 0 points each
-                        player1Points = 0;
-                        player2Points = 0;
-                    }
-
-                    roundScores.set(player1, roundScores.get(player1) + player1Points);
-                    roundScores.set(player2, roundScores.get(player2) + player2Points);
-                    
-                    // Track total automatic points awarded
-                    totalAutomaticPointsAwarded += (player1Points + player2Points);
-
-                    console.log(`🎯 Automatic tie-breaker: ${player1} vs ${player2} - ${player1Wins}-${player2Wins}-${pushes} (${player1Points}-${player2Points} points)`);
-                }
-            }
-            
-            // Zero-sum: distribute negative total among regular players
-            const regularPlayers = Array.from(roundScores.keys()).filter(name => !automaticPlayers.includes(name));
-            if (regularPlayers.length > 0 && totalAutomaticPointsAwarded > 0) {
-                const pointsPerPlayer = -totalAutomaticPointsAwarded / regularPlayers.length;
-                regularPlayers.forEach(regularPlayer => {
-                    roundScores.set(regularPlayer, roundScores.get(regularPlayer) + pointsPerPlayer);
-                });
-                console.log(`🎯 Automatic players awarded ${totalAutomaticPointsAwarded} total points`);
-                console.log(`🎯 Regular players each get ${pointsPerPlayer.toFixed(2)} points (zero-sum)`);
-            }
-        }
-
-                    const hand1 = this.submittedHands.get(player1);
-                    const hand2 = this.submittedHands.get(player2);
-
-                    // Compare all three hands
-                    const back1 = evaluateHand(hand1.back);
-                    const back2 = evaluateHand(hand2.back);
-                    const middle1 = evaluateHand(hand1.middle);
-                    const middle2 = evaluateHand(hand2.middle);
-                    const front1 = evaluateThreeCardHand(hand1.front);
-                    const front2 = evaluateThreeCardHand(hand2.front);
-
-                    let player1Wins = 0;
-                    let player2Wins = 0;
-                    let pushes = 0;
-
-                    // Back hand
-                    const backComparison = compareTuples(back1.handStrength, back2.handStrength);
-                    if (backComparison > 0) player1Wins++;
-                    else if (backComparison < 0) player2Wins++;
-                    else pushes++;
-
-                    // Middle hand
-                    const middleComparison = compareTuples(middle1.handStrength, middle2.handStrength);
-                    if (middleComparison > 0) player1Wins++;
-                    else if (middleComparison < 0) player2Wins++;
-                    else pushes++;
-
-                    // Front hand
-                    const frontComparison = compareTuples(front1.handStrength, front2.handStrength);
-                    if (frontComparison > 0) player1Wins++;
-                    else if (frontComparison < 0) player2Wins++;
-                    else pushes++;
-
-                    // Calculate points based on results
-                    let player1Points = 0;
-                    let player2Points = 0;
-
-                    if (player1Wins === 3) {
-                        // Player 1 sweeps - 3 points
-                        player1Points = 3;
-                    } else if (player2Wins === 3) {
-                        // Player 2 sweeps - 3 points
-                        player2Points = 3;
-                    } else if (player1Wins === 2 && player2Wins === 1) {
-                        // Player 1 wins 2, player 2 wins 1 - 1 point each
-                        player1Points = 1;
-                        player2Points = 1;
-                    } else if (player2Wins === 2 && player1Wins === 1) {
-                        // Player 2 wins 2, player 1 wins 1 - 1 point each
-                        player1Points = 1;
-                        player2Points = 1;
-                    } else if (player1Wins === 2 && pushes === 1) {
-                        // Player 1 wins 2, one push - 2 points
-                        player1Points = 2;
-                    } else if (player2Wins === 2 && pushes === 1) {
-                        // Player 2 wins 2, one push - 2 points
-                        player2Points = 2;
-                    } else if (player1Wins === 1 && player2Wins === 1 && pushes === 1) {
-                        // Each wins 1, one push - 0 points each
-                        player1Points = 0;
-                        player2Points = 0;
-                    }
-
-                    roundScores.set(player1, roundScores.get(player1) + player1Points);
-                    roundScores.set(player2, roundScores.get(player2) + player2Points);
-                    
-                    // Track total automatic points awarded
-                    totalAutomaticPointsAwarded += (player1Points + player2Points);
-
-                    console.log(`🎯 Automatic tie-breaker: ${player1} vs ${player2} - ${player1Wins}-${player2Wins}-${pushes} (${player1Points}-${player2Points} points)`);
-
-
-            
-            // Zero-sum: distribute negative total among regular players
-            const regularPlayers = Array.from(roundScores.keys()).filter(name => !automaticPlayers.includes(name));
-            if (regularPlayers.length > 0 && totalAutomaticPointsAwarded > 0) {
-                const pointsPerPlayer = -totalAutomaticPointsAwarded / regularPlayers.length;
-                regularPlayers.forEach(regularPlayer => {
-                    roundScores.set(regularPlayer, roundScores.get(regularPlayer) + pointsPerPlayer);
-                });
-                console.log(`🎯 Automatic players awarded ${totalAutomaticPointsAwarded} total points`);
-                console.log(`🎯 Regular players each get ${pointsPerPlayer.toFixed(2)} points (zero-sum)`);
-            }
-        }
 
     async calculateScores() {
 //        console.log('🚀 calculateScores() START - this.maxRounds:', this.maxRounds);
@@ -1894,6 +1660,76 @@ class PyramidPoker {
 
             hideCountdownModal();
         }
+    }
+}
+
+
+function handleFindAutomatics() {
+    // Get all 17 cards from staging area (playerHand)
+    const stagingArea = document.getElementById('playerHand');
+
+    if (!stagingArea) {
+        console.error('❌ playerHand element not found');
+        showAutomaticMessage('❌ Error: Staging area not found');
+        return;
+    }
+
+    const cardElements = stagingArea.querySelectorAll('.card');
+
+    if (cardElements.length === 0) {
+        showAutomaticMessage('❌ No cards in staging area');
+        return;
+    }
+
+    // Convert DOM elements to card objects
+    const allCards = Array.from(cardElements).map(cardEl => {
+        return {
+            rank: cardEl.dataset.rank,
+            suit: cardEl.dataset.suit,
+            value: parseInt(cardEl.dataset.value),
+            isWild: cardEl.classList.contains('wild-card'),
+            element: cardEl  // Keep reference for moving
+        };
+    });
+
+    console.log('🔍 Searching for automatics with', allCards.length, 'cards...');
+    const result = findAndArrangeBestAutomatic(allCards);
+
+    if (result) {
+        const automaticName = result.type.replace(/-/g, ' ').toUpperCase();
+        showAutomaticMessage(`✨ Automatic Found: ${automaticName}`);
+
+        // Move actual card elements to positions
+        result.arrangement.back.forEach(card => {
+            document.getElementById('backHand').appendChild(card.element);
+        });
+        result.arrangement.middle.forEach(card => {
+            document.getElementById('middleHand').appendChild(card.element);
+        });
+        result.arrangement.front.forEach(card => {
+            document.getElementById('frontHand').appendChild(card.element);
+        });
+
+        // Enable submit button
+        document.getElementById('submitHand').disabled = false;
+
+        console.log(`✅ Arranged ${result.type}`);
+    } else {
+        showAutomaticMessage('❌ No automatic possible with these cards');
+    }
+}
+
+function showAutomaticMessage(message) {
+    const messageDiv = document.getElementById('automaticMessage');
+    if (messageDiv) {
+        messageDiv.textContent = message;
+        messageDiv.style.display = 'block';
+
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 3000);
+    } else {
+        console.log(message); // Fallback
     }
 }
 
