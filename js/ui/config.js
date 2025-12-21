@@ -182,6 +182,14 @@ class ConfigUI {
                             </select>
                             <div class="config-description">More decks allow for larger games and more duplicate cards.</div>
                         </div>
+                        <div class="config-option">
+                            <label for="automaticsAllowed">Allow Automatics:</label>
+                            <select id="automaticsAllowed">
+                                <option value="no">No - Standard Play</option>
+                                <option value="yes">Yes - Allow Automatic Hands</option>
+                            </select>
+                            <div class="config-description">If enabled, players can submit automatic hands (three full houses, dragon, three flush, or three straight) for bonus points.</div>
+                        </div>
                     </div>
 
                     // Player Settings Section
@@ -510,6 +518,7 @@ class ConfigUI {
         document.getElementById('computerPlayers').value = config.computerPlayers;
         document.getElementById('wildCardCount').value = config.wildCardCount;
         document.getElementById('deckCount').value = config.deckCount;
+        document.getElementById('automaticsAllowed').value = config.automaticsAllowed || 'no';
 
         // Show/hide computer players option
         this.toggleComputerPlayersOption();
@@ -562,6 +571,7 @@ class ConfigUI {
             window.gameConfig.setComputerPlayers(computerPlayers);
             window.gameConfig.setWildCardCount(wildCardCount);
             window.gameConfig.setDeckCount(deckCount);
+            window.gameConfig.setAutomaticsAllowed(automaticsAllowed);
 
             this.updateButtonText();
             this.close();

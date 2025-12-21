@@ -315,6 +315,7 @@ function updateButtonStates(game) {
     const rankBtn = document.getElementById('sortByRank');
     const suitBtn = document.getElementById('sortBySuit');
     const submitBtn = document.getElementById('submitHand');
+    const automaticBtn = document.getElementById('submitAutomatic');
 
     if (game.gameState === 'waiting') {
 //        addPlayerBtn.disabled = false;
@@ -324,6 +325,7 @@ function updateButtonStates(game) {
         rankBtn.disabled = true;
         suitBtn.disabled = true;
         submitBtn.disabled = true;
+        if (automaticBtn) automaticBtn.disabled = true;
     } else if (game.gameState === 'playing') {
 
         // NEW LOGIC: Check if any players have started playing (moved cards around)
@@ -344,6 +346,7 @@ function updateButtonStates(game) {
         rankBtn.disabled = true;
         suitBtn.disabled = true;
         submitBtn.disabled = true;
+        if (automaticBtn) automaticBtn.disabled = true;
 
     // Log what decisions are being made:
     if (game.gameState === 'playing') {

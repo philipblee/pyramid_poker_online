@@ -38,6 +38,9 @@ class GameConfig {
 
             // countdown:
             countdownTime: 5,              // 10, 20, 30, etc.
+
+            // automatics:
+            automaticsAllowed: 'yes',       // 'yes' or 'no' - allow automatic hands
         };
 
 //        this.loadFromStorage();
@@ -124,6 +127,20 @@ class GameConfig {
 
     getDeckCount() {
         return this.config.deckCount;
+    }
+
+    // Automatics settings
+    setAutomaticsAllowed(allowed) {
+        if (allowed !== 'yes' && allowed !== 'no') {
+            throw new Error('Automatics allowed must be "yes" or "no"');
+        }
+        this.config.automaticsAllowed = allowed;
+        this.saveToStorage();
+        console.log(`🎯 Automatics allowed set to: ${allowed}`);
+    }
+
+    getAutomaticsAllowed() {
+        return this.config.automaticsAllowed;
     }
 
     // Reset to default settings

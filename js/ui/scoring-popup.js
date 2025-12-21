@@ -183,16 +183,28 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
     }
 
     // === Calculate playerTotals ONCE (net points this round) ===
+    // Use roundScores directly if available (it includes automatic points)
+    // Otherwise calculate from detailedResults
     const playerTotals = {};
 
     game.players.forEach(player => {
         playerTotals[player.name] = 0;
     });
 
-    detailedResults.forEach(result => {
-        playerTotals[result.player1] += result.player1Score;
-        playerTotals[result.player2] += result.player2Score;
-    });
+    if (roundScores && roundScores instanceof Map && roundScores.size > 0) {
+        // Use roundScores directly - it already includes automatic points
+        roundScores.forEach((score, playerName) => {
+            if (playerTotals.hasOwnProperty(playerName)) {
+                playerTotals[playerName] = score;
+            }
+        });
+    } else {
+        // Fallback: calculate from detailedResults (for backwards compatibility)
+        detailedResults.forEach(result => {
+            playerTotals[result.player1] += result.player1Score;
+            playerTotals[result.player2] += result.player2Score;
+        });
+    }
 
 
     window.game.lastRoundTotals = playerTotals;

@@ -12,6 +12,7 @@ class PyramidPoker {
         this.gameState = 'waiting';
         this.playerHands = new Map();
         this.submittedHands = new Map();
+        this.automaticHands = new Map(); // Track which players submitted automatics
         this.sidebarVisible = false;
 
         // NEW: Round tracking
@@ -37,6 +38,7 @@ class PyramidPoker {
         document.getElementById('sortByRank').addEventListener('click', () => resetAndSortByRank(this));
         document.getElementById('sortBySuit').addEventListener('click', () => resetAndSortBySuit(this));
         document.getElementById('submitHand').addEventListener('click', () => this.submitCurrentHand());
+        document.getElementById('submitAutomatic').addEventListener('click', () => this.submitAutomatic());
 //        document.getElementById('helpButton').addEventListener('click', () => openGameRules());
 
 
@@ -116,6 +118,11 @@ class PyramidPoker {
         // Clear surrender decisions from previous round
         if (this.surrenderDecisions) {
             this.surrenderDecisions.clear();
+        }
+
+        // Clear automatic hands from previous game
+        if (this.automaticHands) {
+            this.automaticHands.clear();
         }
 
         hideDecisionButtons();
@@ -306,6 +313,9 @@ class PyramidPoker {
         this.gameState = 'playing';
         this.playerManager.currentPlayerIndex = 0;
         this.submittedHands.clear();
+        if (this.automaticHands) {
+            this.automaticHands.clear();
+        }
 
         // IN startNewRound() method, ADD this block after the card dealing loop:
 
@@ -832,6 +842,27 @@ class PyramidPoker {
                 frontHand.classList.add('valid');
                 submitBtn.disabled = false;
 
+                // Check for automatic if automatics are allowed
+                const automaticBtn = document.getElementById('submitAutomatic');
+                if (gameConfig.config.automaticsAllowed === 'yes') {
+                    const arrangement = {
+                        back: playerData.back,
+                        middle: playerData.middle,
+                        front: playerData.front
+                    };
+                    const automatic = detectAutomatic(arrangement);
+                    if (automatic) {
+                        automaticBtn.disabled = false;
+                        automaticBtn.title = `Automatic: ${automatic.type.replace(/-/g, ' ')}`;
+                    } else {
+                        automaticBtn.disabled = true;
+                        automaticBtn.title = '';
+                    }
+                } else {
+                    automaticBtn.disabled = true;
+                    automaticBtn.title = '';
+                }
+
                 const readyCount = this.playerManager.getReadyCount();
                 statusDiv.innerHTML = `Round ${this.currentRound} of ${this.maxRounds}.  Player ${currentPlayer.name}'s turn - <span style="color: #4ecdc4; font-weight: bold;">✓ SETUP VALID</span>`;
             } else {
@@ -840,6 +871,8 @@ class PyramidPoker {
                 middleHand.classList.add('invalid');
                 frontHand.classList.add('invalid');
                 submitBtn.disabled = true;
+                const automaticBtn = document.getElementById('submitAutomatic');
+                if (automaticBtn) automaticBtn.disabled = true;
 
                 let reason = '';
                 if (!frontIsValid) reason = '5-card front hand must be at least a Straight';
@@ -852,6 +885,8 @@ class PyramidPoker {
         } else {
             // Incomplete setup
             submitBtn.disabled = true;
+            const automaticBtn = document.getElementById('submitAutomatic');
+            if (automaticBtn) automaticBtn.disabled = true;
             document.getElementById('backStrength').textContent = `${backCount}/5 cards`;
             document.getElementById('middleStrength').textContent = `${middleCount}/5 cards`;
             document.getElementById('frontStrength').textContent = `${frontCount}/3 cards`;
@@ -962,6 +997,61 @@ class PyramidPoker {
         this.loadCurrentPlayerHand();
     }
 
+    submitAutomatic() {
+        // Check if automatics are allowed
+        if (gameConfig.config.automaticsAllowed !== 'yes') {
+            return;
+        }
+
+        // Validate hands first
+        if (!this.validateHands()) {
+            return;
+        }
+
+        const currentPlayer = this.playerManager.getCurrentPlayer();
+        const playerData = this.playerHands.get(currentPlayer.name);
+
+        if (!playerData) return;
+
+        // Check if this is actually an automatic
+        const arrangement = {
+            back: playerData.back,
+            middle: playerData.middle,
+            front: playerData.front
+        };
+        const automatic = detectAutomatic(arrangement);
+        
+        if (!automatic) {
+            alert('This hand does not qualify as an automatic.');
+            return;
+        }
+
+        // Store as automatic
+        this.submittedHands.set(currentPlayer.name, {
+            back: [...playerData.back],
+            middle: [...playerData.middle],
+            front: [...playerData.front]
+        });
+        this.automaticHands.set(currentPlayer.name, automatic);
+
+        this.playerManager.setPlayerReady(currentPlayer.name, true);
+        this.playerManager.nextPlayer();
+
+        // Reset auto button for next turn
+        this.autoArrangeUsed = false;
+        document.getElementById('autoArrange').textContent = 'Auto';
+        document.getElementById('submitAutomatic').disabled = true;
+
+        if (this.playerManager.areAllPlayersReady()) {
+            this.calculateScores();
+            this.gameState = 'scoring';
+        } else {
+            this.loadCurrentPlayerHand();
+        }
+
+        updateDisplay(this);
+    }
+
     submitCurrentHand() {
 
         // Replace validation with the good function
@@ -979,6 +1069,9 @@ class PyramidPoker {
             middle: [...playerData.middle],
             front: [...playerData.front]
         });
+        
+        // Clear any automatic flag for this player (they submitted normally)
+        this.automaticHands.delete(currentPlayer.name);
 
         this.playerManager.setPlayerReady(currentPlayer.name, true);
         this.playerManager.nextPlayer();
@@ -987,6 +1080,7 @@ class PyramidPoker {
          // Reset auto button for next turn (always happens after submit)
         this.autoArrangeUsed = false;
         document.getElementById('autoArrange').textContent = 'Auto';
+        document.getElementById('submitAutomatic').disabled = true;
 
         if (this.playerManager.areAllPlayersReady()) {
             this.calculateScores();
@@ -997,6 +1091,249 @@ class PyramidPoker {
 
         updateDisplay(this);
     }
+
+    handleMultiAutomatics(automaticPlayers, roundScores, detailedResults) {
+        // Group players by automatic type
+        const playersByType = new Map();
+        automaticPlayers.forEach(playerName => {
+            const automatic = this.automaticHands.get(playerName);
+            const type = automatic.type;
+            if (!playersByType.has(type)) {
+                playersByType.set(type, []);
+            }
+            playersByType.get(type).push(playerName);
+        });
+
+        // Find the highest precedence automatic type
+        let highestPrecedence = -1;
+        let highestType = null;
+        playersByType.forEach((players, type) => {
+            const automatic = this.automaticHands.get(players[0]);
+            if (automatic.precedence > highestPrecedence) {
+                highestPrecedence = automatic.precedence;
+                highestType = type;
+            }
+        });
+
+        // Only players with the highest precedence automatic compete
+        const competingPlayers = playersByType.get(highestType);
+
+        if (competingPlayers.length === 1) {
+            // Only one player has the highest automatic - they win 3 points per regular player
+            const winner = competingPlayers[0];
+            const regularPlayers = Array.from(roundScores.keys()).filter(name => !automaticPlayers.includes(name));
+            
+            // Automatic player gets 3 points per regular player
+            const automaticPoints = 3 * regularPlayers.length;
+            roundScores.set(winner, roundScores.get(winner) + automaticPoints);
+            
+            // Each regular player gets -3 points
+            if (regularPlayers.length > 0) {
+                regularPlayers.forEach(regularPlayer => {
+                    roundScores.set(regularPlayer, roundScores.get(regularPlayer) - 3);
+                });
+                console.log(`🎯 ${winner} wins ${automaticPoints} points for highest automatic: ${highestType} (3 per player)`);
+                console.log(`🎯 Each regular player gets -3 points (zero-sum)`);
+            }
+        } else {
+            // Multiple players with same automatic - play out all three hands
+            // Track total automatic points awarded for zero-sum calculation
+            let totalAutomaticPointsAwarded = 0;
+            
+            for (let i = 0; i < competingPlayers.length; i++) {
+                for (let j = i + 1; j < competingPlayers.length; j++) {
+                    const player1 = competingPlayers[i];
+                    const player2 = competingPlayers[j];
+
+                    const hand1 = this.submittedHands.get(player1);
+                    const hand2 = this.submittedHands.get(player2);
+                    const auto1 = this.automaticHands.get(player1);
+
+                    // ✅ DRAGON vs DRAGON
+                    if (auto1.type === 'dragon') {
+                        console.log(`🐉 Comparing two dragons: ${player1} vs ${player2}`);
+                        const dragonWinner = compareDragons(hand1, hand2);
+
+                        const points = dragonWinner === 'tie' ? 0 : 3;
+                        if (dragonWinner === 'player1') {
+                            roundScores.set(player1, roundScores.get(player1) + points);
+                            roundScores.set(player2, roundScores.get(player2) - points);
+                            totalAutomaticPointsAwarded += points;
+                        } else if (dragonWinner === 'player2') {
+                            roundScores.set(player2, roundScores.get(player2) + points);
+                            roundScores.set(player1, roundScores.get(player1) - points);
+                            totalAutomaticPointsAwarded += points;
+                        }
+                        // Skip to next pair
+                        continue;
+                    }
+
+                    // Compare all three hands
+                    const back1 = evaluateHand(hand1.back);
+                    const back2 = evaluateHand(hand2.back);
+                    const middle1 = evaluateHand(hand1.middle);
+                    const middle2 = evaluateHand(hand2.middle);
+                    const front1 = evaluateThreeCardHand(hand1.front);
+                    const front2 = evaluateThreeCardHand(hand2.front);
+
+                    let player1Wins = 0;
+                    let player2Wins = 0;
+                    let pushes = 0;
+
+                    // Back hand
+                    const backComparison = compareTuples(back1.handStrength, back2.handStrength);
+                    if (backComparison > 0) player1Wins++;
+                    else if (backComparison < 0) player2Wins++;
+                    else pushes++;
+
+                    // Middle hand
+                    const middleComparison = compareTuples(middle1.handStrength, middle2.handStrength);
+                    if (middleComparison > 0) player1Wins++;
+                    else if (middleComparison < 0) player2Wins++;
+                    else pushes++;
+
+                    // Front hand
+                    const frontComparison = compareTuples(front1.handStrength, front2.handStrength);
+                    if (frontComparison > 0) player1Wins++;
+                    else if (frontComparison < 0) player2Wins++;
+                    else pushes++;
+
+                    // Calculate points based on results
+                    let player1Points = 0;
+                    let player2Points = 0;
+
+                    if (player1Wins === 3) {
+                        // Player 1 sweeps - 3 points
+                        player1Points = 3;
+                    } else if (player2Wins === 3) {
+                        // Player 2 sweeps - 3 points
+                        player2Points = 3;
+                    } else if (player1Wins === 2 && player2Wins === 1) {
+                        // Player 1 wins 2, player 2 wins 1 - 1 point each
+                        player1Points = 1;
+                        player2Points = 1;
+                    } else if (player2Wins === 2 && player1Wins === 1) {
+                        // Player 2 wins 2, player 1 wins 1 - 1 point each
+                        player1Points = 1;
+                        player2Points = 1;
+                    } else if (player1Wins === 2 && pushes === 1) {
+                        // Player 1 wins 2, one push - 2 points
+                        player1Points = 2;
+                    } else if (player2Wins === 2 && pushes === 1) {
+                        // Player 2 wins 2, one push - 2 points
+                        player2Points = 2;
+                    } else if (player1Wins === 1 && player2Wins === 1 && pushes === 1) {
+                        // Each wins 1, one push - 0 points each
+                        player1Points = 0;
+                        player2Points = 0;
+                    }
+
+                    roundScores.set(player1, roundScores.get(player1) + player1Points);
+                    roundScores.set(player2, roundScores.get(player2) + player2Points);
+                    
+                    // Track total automatic points awarded
+                    totalAutomaticPointsAwarded += (player1Points + player2Points);
+
+                    console.log(`🎯 Automatic tie-breaker: ${player1} vs ${player2} - ${player1Wins}-${player2Wins}-${pushes} (${player1Points}-${player2Points} points)`);
+                }
+            }
+            
+            // Zero-sum: distribute negative total among regular players
+            const regularPlayers = Array.from(roundScores.keys()).filter(name => !automaticPlayers.includes(name));
+            if (regularPlayers.length > 0 && totalAutomaticPointsAwarded > 0) {
+                const pointsPerPlayer = -totalAutomaticPointsAwarded / regularPlayers.length;
+                regularPlayers.forEach(regularPlayer => {
+                    roundScores.set(regularPlayer, roundScores.get(regularPlayer) + pointsPerPlayer);
+                });
+                console.log(`🎯 Automatic players awarded ${totalAutomaticPointsAwarded} total points`);
+                console.log(`🎯 Regular players each get ${pointsPerPlayer.toFixed(2)} points (zero-sum)`);
+            }
+        }
+
+                    const hand1 = this.submittedHands.get(player1);
+                    const hand2 = this.submittedHands.get(player2);
+
+                    // Compare all three hands
+                    const back1 = evaluateHand(hand1.back);
+                    const back2 = evaluateHand(hand2.back);
+                    const middle1 = evaluateHand(hand1.middle);
+                    const middle2 = evaluateHand(hand2.middle);
+                    const front1 = evaluateThreeCardHand(hand1.front);
+                    const front2 = evaluateThreeCardHand(hand2.front);
+
+                    let player1Wins = 0;
+                    let player2Wins = 0;
+                    let pushes = 0;
+
+                    // Back hand
+                    const backComparison = compareTuples(back1.handStrength, back2.handStrength);
+                    if (backComparison > 0) player1Wins++;
+                    else if (backComparison < 0) player2Wins++;
+                    else pushes++;
+
+                    // Middle hand
+                    const middleComparison = compareTuples(middle1.handStrength, middle2.handStrength);
+                    if (middleComparison > 0) player1Wins++;
+                    else if (middleComparison < 0) player2Wins++;
+                    else pushes++;
+
+                    // Front hand
+                    const frontComparison = compareTuples(front1.handStrength, front2.handStrength);
+                    if (frontComparison > 0) player1Wins++;
+                    else if (frontComparison < 0) player2Wins++;
+                    else pushes++;
+
+                    // Calculate points based on results
+                    let player1Points = 0;
+                    let player2Points = 0;
+
+                    if (player1Wins === 3) {
+                        // Player 1 sweeps - 3 points
+                        player1Points = 3;
+                    } else if (player2Wins === 3) {
+                        // Player 2 sweeps - 3 points
+                        player2Points = 3;
+                    } else if (player1Wins === 2 && player2Wins === 1) {
+                        // Player 1 wins 2, player 2 wins 1 - 1 point each
+                        player1Points = 1;
+                        player2Points = 1;
+                    } else if (player2Wins === 2 && player1Wins === 1) {
+                        // Player 2 wins 2, player 1 wins 1 - 1 point each
+                        player1Points = 1;
+                        player2Points = 1;
+                    } else if (player1Wins === 2 && pushes === 1) {
+                        // Player 1 wins 2, one push - 2 points
+                        player1Points = 2;
+                    } else if (player2Wins === 2 && pushes === 1) {
+                        // Player 2 wins 2, one push - 2 points
+                        player2Points = 2;
+                    } else if (player1Wins === 1 && player2Wins === 1 && pushes === 1) {
+                        // Each wins 1, one push - 0 points each
+                        player1Points = 0;
+                        player2Points = 0;
+                    }
+
+                    roundScores.set(player1, roundScores.get(player1) + player1Points);
+                    roundScores.set(player2, roundScores.get(player2) + player2Points);
+                    
+                    // Track total automatic points awarded
+                    totalAutomaticPointsAwarded += (player1Points + player2Points);
+
+                    console.log(`🎯 Automatic tie-breaker: ${player1} vs ${player2} - ${player1Wins}-${player2Wins}-${pushes} (${player1Points}-${player2Points} points)`);
+
+
+            
+            // Zero-sum: distribute negative total among regular players
+            const regularPlayers = Array.from(roundScores.keys()).filter(name => !automaticPlayers.includes(name));
+            if (regularPlayers.length > 0 && totalAutomaticPointsAwarded > 0) {
+                const pointsPerPlayer = -totalAutomaticPointsAwarded / regularPlayers.length;
+                regularPlayers.forEach(regularPlayer => {
+                    roundScores.set(regularPlayer, roundScores.get(regularPlayer) + pointsPerPlayer);
+                });
+                console.log(`🎯 Automatic players awarded ${totalAutomaticPointsAwarded} total points`);
+                console.log(`🎯 Regular players each get ${pointsPerPlayer.toFixed(2)} points (zero-sum)`);
+            }
+        }
 
     async calculateScores() {
 //        console.log('🚀 calculateScores() START - this.maxRounds:', this.maxRounds);
@@ -1025,12 +1362,92 @@ class PyramidPoker {
 
 //        console.log('🔍 After initialization - this.maxRounds:', this.maxRounds);
 
-        // Head-to-head comparisons (same as before)
-        for (let i = 0; i < playerNames.length; i++) {
-            for (let j = i + 1; j < playerNames.length; j++) {
-                const player1 = playerNames[i];
-                const player2 = playerNames[j];
+        // Handle automatics if allowed
+        let automaticPlayers = [];
+        if (gameConfig.config.automaticsAllowed === 'yes') {
+            automaticPlayers = playerNames.filter(name => this.automaticHands.has(name));
+            
+            if (automaticPlayers.length > 0) {
+                // If only one automatic, award 3 points (zero-sum: other players get -3 total)
+                if (automaticPlayers.length === 1) {
+                    const automaticPlayer = automaticPlayers[0];
+                    const regularPlayers = playerNames.filter(name => name !== automaticPlayer);
+                    
+                    // Automatic player gets 3 points per regular player
+                    const automaticPoints = 3 * regularPlayers.length;
+                    roundScores.set(automaticPlayer, roundScores.get(automaticPlayer) + automaticPoints);
+                    
+                    // Each regular player gets -3 points
+                    if (regularPlayers.length > 0) {
+                        regularPlayers.forEach(regularPlayer => {
+                            roundScores.set(regularPlayer, roundScores.get(regularPlayer) - 3);
+                        });
+                        console.log(`🎯 ${automaticPlayer} wins ${automaticPoints} points for automatic: ${this.automaticHands.get(automaticPlayer).type} (3 per player)`);
+                        console.log(`🎯 Each regular player gets -3 points (zero-sum)`);
+                    }
+                } else {
+                    // Multiple automatics - apply multi-automatic rules
+                    this.handleMultiAutomatics(automaticPlayers, roundScores, detailedResults);
+                }
+            }
+        }
 
+        // Head-to-head comparisons - skip players with automatics
+        // Players with automatics have special handling
+        const regularPlayers = playerNames.filter(name => !this.automaticHands.has(name));
+
+        for (let i = 0; i < regularPlayers.length; i++) {
+            for (let j = i + 1; j < regularPlayers.length; j++) {
+                const player1 = regularPlayers[i];
+                const player2 = regularPlayers[j];
+
+                // Check if automatics are enabled AND either player has one
+                const automaticsEnabled = gameConfig.config.automaticsAllowed === 'yes';
+                const player1HasAuto = automaticsEnabled && automaticPlayers.includes(player1);
+                const player2HasAuto = automaticsEnabled && automaticPlayers.includes(player2);
+
+                if (player1HasAuto || player2HasAuto) {
+                    // Get automatic info for both players
+                    const hand1 = this.submittedHands.get(player1);
+                    const hand2 = this.submittedHands.get(player2);
+                    const auto1 = player1HasAuto ? this.automaticHands.get(player1) : null;
+                    const auto2 = player2HasAuto ? this.automaticHands.get(player2) : null;
+
+                    if (auto1 && auto2 && auto1.type === auto2.type) {
+                        // SAME automatic - fall through to normal comparison
+                        console.log(`🔄 Both have ${auto1.type} - doing normal comparison`);
+                    } else {
+                        // Different automatics OR one automatic vs regular
+                        // Skip hand comparison - automatic bonus already applied above
+                        console.log(`⚡ Skipping ${player1} vs ${player2} - automatic played`);
+
+                        // Create result for UI showing automatic winner
+                        detailedResults.push({
+                            player1,
+                            player2,
+                            player1Score: auto1 ? 3 : -3,
+                            player2Score: auto2 ? 3 : -3,
+                            details: [{
+                                hand: 'Back',
+                                winner: auto1 ? 'player1' : 'player2',
+                                automatic: true
+                            }, {
+                                hand: 'Middle',
+                                winner: auto1 ? 'player1' : 'player2',
+                                automatic: true
+                            }, {
+                                hand: 'Front',
+                                winner: auto1 ? 'player1' : 'player2',
+                                automatic: true
+                            }],
+                            automaticType: auto1?.type || auto2?.type
+                        });
+
+                        continue;
+                    }
+                }
+
+                // Normal hand comparison
                 const hand1 = this.submittedHands.get(player1);
                 const hand2 = this.submittedHands.get(player2);
 
@@ -1049,6 +1466,42 @@ class PyramidPoker {
                     player2Score: result.player2Score,
                     details: result.details
                 });
+            }
+        }
+        
+        // If there are automatics, also compare automatic players against regular players
+        // Regular players still play head-to-head against automatic players
+        // Automatic players don't get additional points (they already have their automatic points)
+        if (automaticPlayers.length > 0) {
+            for (let i = 0; i < automaticPlayers.length; i++) {
+                for (let j = 0; j < regularPlayers.length; j++) {
+                    const automaticPlayer = automaticPlayers[i];
+                    const regularPlayer = regularPlayers[j];
+
+                    // Skip if EITHER player has automatic - handleAutomatics already dealt with it
+                    if (automaticPlayers.includes(player1) || automaticPlayers.includes(player2)) {
+                        console.log(`⚡ Skipping ${player1} vs ${player2} - handled by automatics`);
+                        continue;
+                    }
+
+
+                    const hand1 = this.submittedHands.get(automaticPlayer);
+                    const hand2 = this.submittedHands.get(regularPlayer);
+                    
+                    const result = compareHands(hand1, hand2);
+                    
+                    // Regular player gets points from comparison (can be positive or negative)
+                    // Automatic player's score is already set (they don't get additional points)
+                    roundScores.set(regularPlayer, roundScores.get(regularPlayer) + result.player2Score);
+                    
+                    detailedResults.push({
+                        player1: automaticPlayer,
+                        player2: regularPlayer,
+                        player1Score: 0, // Automatic player doesn't get regular points (already has automatic points)
+                        player2Score: result.player2Score, // Regular player gets points from comparison
+                        details: result.details
+                    });
+                }
             }
         }
 
@@ -1489,6 +1942,47 @@ function updateGameChipDisplays() {
             });
         });
     }
+}
+
+/**
+ * Compare two dragons - 13 cards A-2, compare by suit from Ace down
+ * @param {Object} hand1 - {back, middle, front}
+ * @param {Object} hand2 - {back, middle, front}
+ * @returns {string} - 'player1', 'player2', or 'tie'
+ */
+function compareDragons(hand1, hand2) {
+    // Combine all cards from each dragon
+    const dragon1Cards = [...hand1.back, ...hand1.middle, ...hand1.front];
+    const dragon2Cards = [...hand2.back, ...hand2.middle, ...hand2.front];
+
+    // Create rank->card map for each dragon
+    const ranks = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
+    const dragon1Map = new Map();
+    const dragon2Map = new Map();
+
+    dragon1Cards.forEach(card => {
+        if (!card.isWild) dragon1Map.set(card.rank, card);
+    });
+    dragon2Cards.forEach(card => {
+        if (!card.isWild) dragon2Map.set(card.rank, card);
+    });
+
+    // Compare suits rank by rank (Ace first, then K, etc.)
+    const suitOrder = ['♠', '♥', '♦', '♣'];
+
+    for (const rank of ranks) {
+        const card1 = dragon1Map.get(rank);
+        const card2 = dragon2Map.get(rank);
+
+        const suit1Index = suitOrder.indexOf(card1.suit);
+        const suit2Index = suitOrder.indexOf(card2.suit);
+
+        if (suit1Index < suit2Index) return 'player1';
+        if (suit2Index < suit1Index) return 'player2';
+        // If equal, continue to next rank
+    }
+
+    return 'tie'; // All suits matched
 }
 
 document.addEventListener('DOMContentLoaded', () => {
