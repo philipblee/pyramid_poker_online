@@ -1663,61 +1663,6 @@ class PyramidPoker {
     }
 }
 
-function handleFindAutomatics() {
-    // Get all 17 cards from staging area (playerHand)
-    const stagingArea = document.getElementById('playerHand');
-
-    if (!stagingArea) {
-        console.error('❌ playerHand element not found');
-        showAutomaticMessage('❌ Error: Staging area not found');
-        return;
-    }
-
-    const cardElements = stagingArea.querySelectorAll('.card');
-
-    if (cardElements.length === 0) {
-        showAutomaticMessage('❌ No cards in staging area');
-        return;
-    }
-
-    // Convert DOM elements to card objects
-    const allCards = Array.from(cardElements).map(cardEl => {
-        return {
-            rank: cardEl.dataset.rank,
-            suit: cardEl.dataset.suit,
-            value: parseInt(cardEl.dataset.value),
-            isWild: cardEl.classList.contains('wild-card'),
-            element: cardEl  // Keep reference for moving
-        };
-    });
-
-    console.log('🔍 Searching for automatics with', allCards.length, 'cards...');
-    const result = findAndArrangeBestAutomatic(allCards);
-
-    if (result) {
-        const automaticName = result.type.replace(/-/g, ' ').toUpperCase();
-        showAutomaticMessage(`✨ Automatic Found: ${automaticName}`);
-
-        // Move actual card elements to positions
-        result.arrangement.back.forEach(card => {
-            document.getElementById('backHand').appendChild(card.element);
-        });
-        result.arrangement.middle.forEach(card => {
-            document.getElementById('middleHand').appendChild(card.element);
-        });
-        result.arrangement.front.forEach(card => {
-            document.getElementById('frontHand').appendChild(card.element);
-        });
-
-        // Enable submit button
-        document.getElementById('submitHand').disabled = false;
-
-        console.log(`✅ Arranged ${result.type}`);
-    } else {
-        showAutomaticMessage('❌ No automatic possible with these cards');
-    }
-}
-
 function showAutomaticMessage(message) {
     const messageDiv = document.getElementById('automaticMessage');
     if (messageDiv) {
@@ -1730,6 +1675,88 @@ function showAutomaticMessage(message) {
     } else {
         console.log(message); // Fallback
     }
+}
+
+function handleFindAutomatics() {
+    const stagingArea = document.getElementById('playerHand');
+    if (!stagingArea) {
+        console.error('❌ playerHand element not found');
+        showAutomaticMessage('❌ Error: Staging area not found');
+        return;
+    }
+
+    const cardElements = stagingArea.querySelectorAll('.card');
+    if (cardElements.length === 0) {
+        showAutomaticMessage('❌ No cards in staging area');
+        return;
+    }
+
+    const allCards = Array.from(cardElements).map(cardEl => {
+        const card = JSON.parse(cardEl.dataset.card);
+        card.element = cardEl;
+        return card;
+    });
+
+    console.log('🔍 Searching for automatics with', allCards.length, 'cards...');
+    const result = findAndArrangeBestAutomatic(allCards);
+
+    if (result) {
+        const automaticName = result.type.replace(/-/g, ' ').toUpperCase();
+        showAutomaticMessage(`✨ Automatic Found: ${automaticName}`);
+
+        // Update DOM (visual)
+        result.arrangement.back.forEach(card => {
+            document.getElementById('backHand').appendChild(card.element);
+        });
+        result.arrangement.middle.forEach(card => {
+            document.getElementById('middleHand').appendChild(card.element);
+        });
+        result.arrangement.front.forEach(card => {
+            document.getElementById('frontHand').appendChild(card.element);
+        });
+
+        // Update this.playerHands (data store) - CRITICAL!
+        const currentPlayer = window.game.playerManager.getCurrentPlayer();
+        const playerData = window.game.playerHands.get(currentPlayer.name);
+        if (playerData) {
+            playerData.back = result.arrangement.back;
+            playerData.middle = result.arrangement.middle;
+            playerData.front = result.arrangement.front;
+        }
+
+        // Store automatic type
+        window.currentAutomatic = result.type;
+
+        // Change button text
+        const autoButton = document.getElementById('findAutomatics');
+        autoButton.textContent = 'PLAY AUTO';
+
+        // Enable submit
+        document.getElementById('submitHand').disabled = false;
+
+        console.log(`✅ Arranged ${result.type}`);
+    } else {
+        showAutomaticMessage('❌ No automatic possible with these cards');
+    }
+}
+
+function handlePlayAutomatic() {
+    if (!window.currentAutomatic) return;
+
+    // Clear flag
+    window.currentAutomatic = null;
+
+    // Call existing method - it reads from this.playerHands
+    window.game.submitAutomatic();
+
+    console.log(`🎯 Submitted automatic`);
+}
+
+function resetAutomaticButton() {
+    const autoButton = document.getElementById('findAutomatics');
+    autoButton.textContent = 'DETECT-AUTOMATICS';
+    autoButton.onclick = handleFindAutomatics;
+    window.currentAutomatic = null;
 }
 
 // this function is used to update GameChipDisplay for table screeb and game screen
@@ -1822,6 +1849,7 @@ function compareDragons(hand1, hand2) {
 
 document.addEventListener('DOMContentLoaded', () => {
     game = new PyramidPoker();
+    window.game = game;  // Expose globally
 
     // Add safety check for loadVersionInfo
     if (typeof loadVersionInfo === 'function') {

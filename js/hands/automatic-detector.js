@@ -74,7 +74,7 @@ function hasThreeFullHouses(arrangement) {
 
     return canBeFullHouse(backCards, backWilds, 5) &&
            canBeFullHouse(middleCards, middleWilds, 5) &&
-           canBeFullHouse(frontCards, frontWilds, 3); // Front just needs trips
+           canBeFullHouse(frontCards, frontWilds, 5);
 }
 
 function hasThreeFlush(arrangement) {
@@ -88,7 +88,7 @@ function hasThreeFlush(arrangement) {
 
     return canBeFlush(backCards, backWilds, 5) &&
            canBeFlush(middleCards, middleWilds, 5) &&
-           canBeFlush(frontCards, frontWilds, 3);
+           canBeFlush(frontCards, frontWilds, 5);
 }
 
 function hasThreeStraight(arrangement) {
@@ -102,21 +102,13 @@ function hasThreeStraight(arrangement) {
 
     return canBeStraight(backCards, backWilds, 5) &&
            canBeStraight(middleCards, middleWilds, 5) &&
-           canBeStraight(frontCards, frontWilds, 3);
+           canBeStraight(frontCards, frontWilds, 5);
 }
 
-// Helper: Can make full house (trips+pair for 5 cards, just trips for 3 cards)
+// Helper: Can make full house (trips+pair for 5 cards)
 function canBeFullHouse(cards, wildCount, handSize) {
     const rankCounts = {};
     cards.forEach(c => rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1);
-
-    if (handSize === 3) {
-        // Front hand - just need trips
-        for (const count of Object.values(rankCounts)) {
-            if (count + wildCount >= 3) return true;
-        }
-        return wildCount >= 3; // All wilds
-    }
 
     // Back/Middle - need trips + pair
     const counts = Object.values(rankCounts).sort((a, b) => b - a);
@@ -126,12 +118,6 @@ function canBeFullHouse(cards, wildCount, handSize) {
         const wildsNeededForTrips = Math.max(0, 3 - counts[0]);
         const wildsNeededForPair = Math.max(0, 2 - counts[1]);
         if (wildsNeededForTrips + wildsNeededForPair <= wildCount) return true;
-    }
-
-    // Single rank + wilds
-    if (counts.length === 1) {
-        const wildsNeeded = Math.max(0, 5 - counts[0]); // Make 5 of same rank
-        return wildsNeeded <= wildCount;
     }
 
     // All wilds
@@ -377,58 +363,55 @@ function findAndArrangeBestAutomatic(allCards) {
 }
 
 // Arrange cards for dragon (distribute across back/middle/front showing all 13 ranks)
-function arrangeDragon(allCards) {
-    // Dragon arrangement: just needs all 13 ranks visible
-    // Distribute: back=5, middle=5, front=3
-    return {
-        back: allCards.slice(0, 5),
-        middle: allCards.slice(5, 10),
-        front: allCards.slice(10, 13)
-    };
-}
-
-// Arrange for three full houses (greedy approach)
+// Three-full-houses - build trips+pairs
 function arrangeThreeFullHouses(allCards) {
-    // Sort by rank to group similar cards
-    const sorted = [...allCards].sort((a, b) => {
-        if (a.isWild && !b.isWild) return 1;
-        if (!a.isWild && b.isWild) return -1;
-        return b.value - a.value;
+    const wilds = allCards.filter(c => c.isWild);
+    const naturals = allCards.filter(c => !c.isWild);
+
+    // Count ranks
+    const rankGroups = {};
+    naturals.forEach(c => {
+        if (!rankGroups[c.rank]) rankGroups[c.rank] = [];
+        rankGroups[c.rank].push(c);
     });
 
-    // Greedy: put trips+pair in back, trips+pair in middle, trips in front
-    // This is simplified - a real implementation would optimize
-    return {
-        back: sorted.slice(0, 5),
-        middle: sorted.slice(5, 10),
-        front: sorted.slice(10, 15)
-    };
-}
+    // Separate: TRIPS (exactly 3+) and PAIRS (exactly 2, NOT from trips)
+    const tripsRanks = [];
+    const pairsRanks = [];
 
-// Arrange for three flush
-function arrangeThreeFlush(allCards) {
-    // Group by suit
-    const suitGroups = { '♠': [], '♥': [], '♦': [], '♣': [] };
-    const wilds = [];
-
-    allCards.forEach(card => {
-        if (card.isWild) {
-            wilds.push(card);
-        } else {
-            suitGroups[card.suit].push(card);
+    for (const [rank, cards] of Object.entries(rankGroups)) {
+        if (cards.length >= 3) {
+            tripsRanks.push({rank, cards});
+        } else if (cards.length === 2) {  // ONLY pairs, not from trips
+            pairsRanks.push({rank, cards});
         }
-    });
+    }
 
-    // Sort suits by count (descending)
-    const sortedSuits = Object.entries(suitGroups)
-        .sort((a, b) => b[1].length - a[1].length);
+    // Sort by value
+    tripsRanks.sort((a, b) => b.cards[0].value - a.cards[0].value);
+    pairsRanks.sort((a, b) => b.cards[0].value - a.cards[0].value);
 
-    // Distribute: 5 to back, 5 to middle, 5 to front, fill with wilds
-    const back = sortedSuits[0][1].slice(0, 5);
-    const middle = sortedSuits[1][1].slice(0, 5);
-    const front = sortedSuits[2][1].slice(0, 5);
+    const back = [];
+    const middle = [];
+    const front = [];
 
-    // Fill gaps with wilds
+    // Allocate: trips[0]+pair[0], trips[1]+pair[1], trips[2]+pair[2]
+    if (tripsRanks[0] && pairsRanks[0]) {
+        back.push(...tripsRanks[0].cards.slice(0, 3));
+        back.push(...pairsRanks[0].cards.slice(0, 2));
+    }
+
+    if (tripsRanks[1] && pairsRanks[1]) {
+        middle.push(...tripsRanks[1].cards.slice(0, 3));
+        middle.push(...pairsRanks[1].cards.slice(0, 2));
+    }
+
+    if (tripsRanks[2] && pairsRanks[2]) {
+        front.push(...tripsRanks[2].cards.slice(0, 3));
+        front.push(...pairsRanks[2].cards.slice(0, 2));
+    }
+
+    // Fill with wilds if needed
     while (back.length < 5 && wilds.length > 0) back.push(wilds.shift());
     while (middle.length < 5 && wilds.length > 0) middle.push(wilds.shift());
     while (front.length < 5 && wilds.length > 0) front.push(wilds.shift());
@@ -436,22 +419,221 @@ function arrangeThreeFlush(allCards) {
     return { back, middle, front };
 }
 
-// Arrange for three straight
-function arrangeThreeStraight(allCards) {
-    // Sort by value
-    const sorted = [...allCards].sort((a, b) => {
-        if (a.isWild && !b.isWild) return 1;
-        if (!a.isWild && b.isWild) return -1;
-        return b.value - a.value;
-    });
-
-    // Simple distribution - real implementation would find actual straights
+// Dragon - should already work, but here's a cleaner version
+function arrangeDragon(allCards) {
+    // Dragon just needs all 13 unique ranks visible
+    // Simple distribution works fine
     return {
-        back: sorted.slice(0, 5),
-        middle: sorted.slice(5, 10),
-        front: sorted.slice(10, 15)
+        back: allCards.slice(0, 5),
+        middle: allCards.slice(5, 10),
+        front: allCards.slice(10, 13)
     };
 }
+
+// Arrange for three flush
+function arrangeThreeFlush(allCards) {
+    // Separate wilds from naturals
+    const wilds = allCards.filter(c => c.isWild);
+    const naturals = allCards.filter(c => !c.isWild);
+
+    // Group naturals by suit
+    const suitGroups = { '♠': [], '♥': [], '♦': [], '♣': [] };
+    naturals.forEach(c => suitGroups[c.suit].push(c));
+
+    // Sort suits by count (descending)
+    const sortedSuits = Object.entries(suitGroups)
+        .sort((a, b) => b[1].length - a[1].length);
+
+    // Take 5 from each of top 3 suits
+    const back = [...sortedSuits[0][1].slice(0, 5)];
+    const middle = [...sortedSuits[1][1].slice(0, 5)];
+    const front = [...sortedSuits[2][1].slice(0, 5)];
+
+    // Fill gaps with wilds
+    let wildIndex = 0;
+    while (back.length < 5 && wildIndex < wilds.length) {
+        back.push(wilds[wildIndex++]);
+    }
+    while (middle.length < 5 && wildIndex < wilds.length) {
+        middle.push(wilds[wildIndex++]);
+    }
+    while (front.length < 5 && wildIndex < wilds.length) {
+        front.push(wilds[wildIndex++]);
+    }
+
+    return { back, middle, front };
+}
+
+// Three-straight - find 3 consecutive sequences
+function arrangeThreeStraight(allCards) {
+    const wilds = allCards.filter(c => c.isWild);
+    const naturals = allCards.filter(c => !c.isWild);
+
+    // Sort by value descending
+    naturals.sort((a, b) => b.value - a.value);
+
+    // Try to build three 5-card straights
+    // Strategy: greedy approach - find highest straight first
+
+    const back = [];
+    const middle = [];
+    const front = [];
+    const used = new Set();
+
+    // Helper: try to build a 5-card straight starting at highCard
+    function buildStraight(targetHand, startValue) {
+        const needed = [];
+        for (let i = 0; i < 5; i++) {
+            needed.push(startValue - i);
+        }
+
+        // Find cards for this straight
+        for (const val of needed) {
+            // Try to find natural card with this value
+            const card = naturals.find(c => c.value === val && !used.has(c.id));
+            if (card) {
+                targetHand.push(card);
+                used.add(card.id);
+            } else if (wilds.length > 0) {
+                // Use wild as substitute
+                targetHand.push(wilds.shift());
+            } else {
+                return false; // Can't complete this straight
+            }
+        }
+        return true;
+    }
+
+    // Try to build 3 straights (start high, work down)
+    const attempts = [
+        [back, 14],    // A-high
+        [middle, 9],   // 9-high
+        [front, 5]     // 5-high (wheel)
+    ];
+
+    for (const [hand, start] of attempts) {
+        buildStraight(hand, start);
+    }
+
+    // If any hand is incomplete, fill with remaining cards
+    const remaining = allCards.filter(c => !used.has(c.id) && !c.isWild);
+    while (back.length < 5 && remaining.length > 0) back.push(remaining.shift());
+    while (middle.length < 5 && remaining.length > 0) middle.push(remaining.shift());
+    while (front.length < 5 && remaining.length > 0) front.push(remaining.shift());
+
+    return { back, middle, front };
+}
+
+
+window.dealAutomatic = function(type) {
+    // Clear everything first
+    document.getElementById('playerHand').innerHTML = '';
+    document.getElementById('backHand').innerHTML = '';
+    document.getElementById('middleHand').innerHTML = '';
+    document.getElementById('frontHand').innerHTML = '';
+
+    const automaticHands = {
+        // DRAGON: All 13 unique ranks (A-K-Q-J-10-9-8-7-6-5-4-3-2)
+        'dragon': [
+            {id: 'A♠_1', rank: 'A', suit: '♠', value: 14, isWild: false},
+            {id: 'K♠_2', rank: 'K', suit: '♠', value: 13, isWild: false},
+            {id: 'Q♠_3', rank: 'Q', suit: '♠', value: 12, isWild: false},
+            {id: 'J♠_4', rank: 'J', suit: '♠', value: 11, isWild: false},
+            {id: '10♠_5', rank: '10', suit: '♠', value: 10, isWild: false},
+            {id: '9♥_6', rank: '9', suit: '♥', value: 9, isWild: false},
+            {id: '8♥_7', rank: '8', suit: '♥', value: 8, isWild: false},
+            {id: '7♥_8', rank: '7', suit: '♥', value: 7, isWild: false},
+            {id: '6♥_9', rank: '6', suit: '♥', value: 6, isWild: false},
+            {id: '5♥_10', rank: '5', suit: '♥', value: 5, isWild: false},
+            {id: '4♦_11', rank: '4', suit: '♦', value: 4, isWild: false},
+            {id: '3♦_12', rank: '3', suit: '♦', value: 3, isWild: false},
+            {id: '2♦_13', rank: '2', suit: '♦', value: 2, isWild: false},
+            {id: 'A♣_14', rank: 'A', suit: '♣', value: 14, isWild: false},
+            {id: 'K♣_15', rank: 'K', suit: '♣', value: 13, isWild: false},
+            {id: 'Q♣_16', rank: 'Q', suit: '♣', value: 12, isWild: false},
+            {id: 'J♣_17', rank: 'J', suit: '♣', value: 11, isWild: false}
+        ],
+
+        // THREE-FLUSH: 5♠ + 5♥ + 5♦ (NOT dragon - only 5 ranks: A,K,Q,J,10)
+        'three-flush': [
+            {id: 'A♠_1', rank: 'A', suit: '♠', value: 14, isWild: false},
+            {id: 'K♠_2', rank: 'K', suit: '♠', value: 13, isWild: false},
+            {id: 'Q♠_3', rank: 'Q', suit: '♠', value: 12, isWild: false},
+            {id: 'J♠_4', rank: 'J', suit: '♠', value: 11, isWild: false},
+            {id: '10♠_5', rank: '10', suit: '♠', value: 10, isWild: false},
+            {id: 'A♥_6', rank: 'A', suit: '♥', value: 14, isWild: false},
+            {id: 'K♥_7', rank: 'K', suit: '♥', value: 13, isWild: false},
+            {id: 'Q♥_8', rank: 'Q', suit: '♥', value: 12, isWild: false},
+            {id: 'J♥_9', rank: 'J', suit: '♥', value: 11, isWild: false},
+            {id: '10♥_10', rank: '10', suit: '♥', value: 10, isWild: false},
+            {id: 'A♦_11', rank: 'A', suit: '♦', value: 14, isWild: false},
+            {id: 'K♦_12', rank: 'K', suit: '♦', value: 13, isWild: false},
+            {id: 'Q♦_13', rank: 'Q', suit: '♦', value: 12, isWild: false},
+            {id: 'J♦_14', rank: 'J', suit: '♦', value: 11, isWild: false},
+            {id: '10♦_15', rank: '10', suit: '♦', value: 10, isWild: false},
+            {id: '9♣_16', rank: '9', suit: '♣', value: 9, isWild: false},
+            {id: '8♣_17', rank: '8', suit: '♣', value: 8, isWild: false}
+        ],
+
+        // THREE-STRAIGHT: Mixed suits, overlapping ranks (NOT dragon - only 9 ranks: A,2,3,4,5,6,7,8,9)
+        'three-straight': [
+            {id: 'A♠_1', rank: 'A', suit: '♠', value: 14, isWild: false},
+            {id: '2♥_2', rank: '2', suit: '♥', value: 2, isWild: false},
+            {id: '3♦_3', rank: '3', suit: '♦', value: 3, isWild: false},
+            {id: '4♣_4', rank: '4', suit: '♣', value: 4, isWild: false},
+            {id: '5♠_5', rank: '5', suit: '♠', value: 5, isWild: false},
+            {id: '7♥_6', rank: '7', suit: '♥', value: 7, isWild: false},
+            {id: '6♦_7', rank: '6', suit: '♦', value: 6, isWild: false},
+            {id: '5♣_8', rank: '5', suit: '♣', value: 5, isWild: false},
+            {id: '4♠_9', rank: '4', suit: '♠', value: 4, isWild: false},
+            {id: '3♥_10', rank: '3', suit: '♥', value: 3, isWild: false},
+            {id: '9♦_11', rank: '9', suit: '♦', value: 9, isWild: false},
+            {id: '8♣_12', rank: '8', suit: '♣', value: 8, isWild: false},
+            {id: '7♠_13', rank: '7', suit: '♠', value: 7, isWild: false},
+            {id: '6♥_14', rank: '6', suit: '♥', value: 6, isWild: false},
+            {id: '5♦_15', rank: '5', suit: '♦', value: 5, isWild: false},
+            {id: 'K♣_16', rank: 'K', suit: '♣', value: 13, isWild: false},
+            {id: 'Q♣_17', rank: 'Q', suit: '♣', value: 12, isWild: false}
+        ],
+
+        // THREE-FULL-HOUSES: AAA22 + KKK88 + QQQ77 (15 cards)
+        'three-full-houses': [
+            {id: 'A♠_1', rank: 'A', suit: '♠', value: 14, isWild: false},
+            {id: 'A♥_2', rank: 'A', suit: '♥', value: 14, isWild: false},
+            {id: 'A♦_3', rank: 'A', suit: '♦', value: 14, isWild: false},
+            {id: '2♠_4', rank: '2', suit: '♠', value: 2, isWild: false},
+            {id: '2♥_5', rank: '2', suit: '♥', value: 2, isWild: false},
+            {id: 'K♠_6', rank: 'K', suit: '♠', value: 13, isWild: false},
+            {id: 'K♥_7', rank: 'K', suit: '♥', value: 13, isWild: false},
+            {id: 'K♦_8', rank: 'K', suit: '♦', value: 13, isWild: false},
+            {id: '8♠_9', rank: '8', suit: '♠', value: 8, isWild: false},
+            {id: '8♥_10', rank: '8', suit: '♥', value: 8, isWild: false},
+            {id: 'Q♠_11', rank: 'Q', suit: '♠', value: 12, isWild: false},
+            {id: 'Q♥_12', rank: 'Q', suit: '♥', value: 12, isWild: false},
+            {id: 'Q♦_13', rank: 'Q', suit: '♦', value: 12, isWild: false},
+            {id: '7♠_14', rank: '7', suit: '♠', value: 7, isWild: false},
+            {id: '7♥_15', rank: '7', suit: '♥', value: 7, isWild: false},
+            {id: '3♣_16', rank: '3', suit: '♣', value: 3, isWild: false},
+            {id: '4♣_17', rank: '4', suit: '♣', value: 4, isWild: false}
+        ]
+    };
+
+    // Clear staging and deal
+    const stagingArea = document.getElementById('playerHand');
+    stagingArea.innerHTML = '';
+
+    if (!automaticHands[type]) {
+        console.error(`❌ Unknown automatic type: ${type}`);
+        return;
+    }
+
+    automaticHands[type].forEach(card => {
+        const cardEl = createCardElement(card);
+        stagingArea.appendChild(cardEl);
+    });
+
+    console.log(`✅ Dealt ${type} automatic`);
+};
 
 // Export or add to window
 if (typeof module !== 'undefined' && module.exports) {
@@ -460,7 +642,3 @@ if (typeof module !== 'undefined' && module.exports) {
     window.detectPossibleAutomatics = detectPossibleAutomatics;
 }
 
-// After dealing 17 cards
-//const possibleAutomatics = detectPossibleAutomatics(game.players[0].hand);
-//console.log('Possible automatics:', possibleAutomatics);
-// Output: ['dragon', 'three-flush'] or [] if none possible
