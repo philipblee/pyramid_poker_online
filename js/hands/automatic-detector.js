@@ -230,10 +230,9 @@ function canFormDragon(naturalCards, wildCount) {
 
 /**
  * Can the cards form three full houses?
- * Need: Back 3+2, Middle 3+2, Front 3 = 13 cards with FH pattern
+ * Need: Back 3+2, Middle 3+2, Front 3+2 = 15 cards with FH pattern
  */
 function canFormThreeFullHouses(naturalCards, wildCount) {
-    // Count ranks
     const rankCounts = {};
     naturalCards.forEach(c => {
         if (c.rank) rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1;
@@ -241,89 +240,76 @@ function canFormThreeFullHouses(naturalCards, wildCount) {
 
     const counts = Object.values(rankCounts).sort((a, b) => b - a);
 
-    // Ideal: 3+3+3+2+2 = 13 cards (5 ranks)
-    // With wilds: we need at least some pairs/trips
+    // Need at least 15 cards total for three 5-card full houses
+    if (naturalCards.length + wildCount < 15) return false;
 
-    // Strategy: Try to form Back(3+2), Middle(3+2), Front(3)
-    // Minimum: 3 different ranks with enough cards + wilds
-
-    // Need at least 13 cards total
-    if (naturalCards.length + wildCount < 13) return false;
-
-    // Greedy approach: count how many sets of 3 and pairs we can make
+    // Count available trips and pairs
     let tripsAvailable = 0;
     let pairsAvailable = 0;
-    let wildsRemaining = wildCount;
 
     for (const count of counts) {
         if (count >= 3) {
             tripsAvailable++;
+            // A rank with 5+ can provide BOTH trips and pair
             if (count >= 5) {
-                pairsAvailable++; // Can split into trips + pair
+                pairsAvailable++;
             }
         } else if (count === 2) {
             pairsAvailable++;
         }
     }
 
-    // Can we make 3 trips and 2 pairs with wilds?
-    // Back: 1 trips + 1 pair
-    // Middle: 1 trips + 1 pair
-    // Front: 1 trips
-    // Total needed: 3 trips, 2 pairs
+    // Calculate what we need to build with wilds
+    // Need: 3 trips and 3 pairs (but FH uses trips+pair from different ranks)
+    const tripsNeeded = Math.max(0, 3 - tripsAvailable);
+    const pairsNeeded = Math.max(0, 3 - pairsAvailable);
 
-    // Simple heuristic: if we have enough rank diversity + wilds
-    const uniqueRanks = counts.length;
+    // Estimate wilds needed (rough heuristic)
+    // Converting pair→trips needs 1 wild
+    // Creating pair from singles needs 2 wilds
+    // Creating trips from singles needs 3 wilds
 
-    // With 3+ ranks and enough wilds, we can probably make it
-    if (uniqueRanks >= 3 && wildsRemaining >= 2) return true;
+    // Simplified: if we have lots of wilds, we can fill gaps
+    if (wildCount >= 6) return true;  // Very flexible with many wilds
 
-    // With 5+ ranks, easier to make FH pattern
-    if (uniqueRanks >= 5) return true;
+    // Conservative: need at least 2 trips OR 1 trip + 2 pairs
+    if (tripsAvailable >= 3 && pairsAvailable >= 3) return true;
+    if (tripsAvailable >= 2 && pairsAvailable >= 2 && wildCount >= 3) return true;
+    if (tripsAvailable >= 1 && pairsAvailable >= 3 && wildCount >= 2) return true;
 
-    // More precise: simulate allocation
-    // This is simplified - a full implementation would try combinations
-    return tripsAvailable >= 2 || (tripsAvailable >= 1 && pairsAvailable >= 2);
+    return false;
 }
 
 /**
  * Can the cards form three flushes?
- * Need: 5 cards same suit, 5 cards same suit, 3 cards same suit
+ * Need: 5 cards same suit, 5 cards same suit, 5 cards same suit
  */
 function canFormThreeFlush(naturalCards, wildCount) {
-    // Count suits
-    const suitCounts = {};
+    // Count natural cards by suit
+    const suitCounts = { '♠': 0, '♥': 0, '♦': 0, '♣': 0 };
     naturalCards.forEach(c => {
-        if (c.suit) suitCounts[c.suit] = (suitCounts[c.suit] || 0) + 1;
+        if (c.suit) suitCounts[c.suit]++;
     });
 
-    const suits = ['♠', '♥', '♦', '♣'];
-    const counts = suits.map(s => suitCounts[s] || 0).sort((a, b) => b - a);
+    // Get counts in descending order
+    const counts = Object.values(suitCounts).sort((a, b) => b - a);
 
-    // Need to make 5+5+3 = 13 cards in flushes
-    // Best case: largest suit has 5+, second has 5+, third has 3+
-    // With wilds: top 3 suits + wilds must sum to 13
+    // Need at least 15 cards total for three 5-card flushes
+    if (naturalCards.length + wildCount < 15) return false;
 
-    const top3Sum = counts[0] + counts[1] + counts[2];
+    // Calculate wilds needed to bring top 3 suits to 5 cards each
+    const wildsForSuit1 = Math.max(0, 5 - counts[0]);
+    const wildsForSuit2 = Math.max(0, 5 - counts[1]);
+    const wildsForSuit3 = Math.max(0, 5 - counts[2]);
 
-    // Can we fill gaps with wilds?
-    const neededForFlushes = 13;
-    const wildsNeeded = Math.max(0, neededForFlushes - top3Sum);
+    const totalWildsNeeded = wildsForSuit1 + wildsForSuit2 + wildsForSuit3;
 
-    if (wildsNeeded > wildCount) return false;
-
-    // Check if distribution is feasible
-    // Largest suit needs at least (5 - wildCount) natural cards
-    // Second largest needs at least (5 - wildCount) natural cards
-    // Third needs at least (3 - wildCount) natural cards
-
-    return (counts[0] >= Math.max(1, 5 - wildCount)) ||
-           (counts[0] + counts[1] + counts[2] + wildCount >= 13);
+    return totalWildsNeeded <= wildCount;
 }
 
 /**
  * Can the cards form three straights?
- * Need: 5-card straight, 5-card straight, 3-card straight
+ * Need: 5-card straight, 5-card straight, 5-card straight
  */
 function canFormThreeStraight(naturalCards, wildCount) {
     // Get unique ranks (by value)
@@ -352,18 +338,6 @@ function canFormThreeStraight(naturalCards, wildCount) {
  */
 function compareAutomatics(auto1, auto2) {
     return auto2.precedence - auto1.precedence; // Higher precedence wins
-}
-
-// Display message on UI
-function showAutomaticMessage(message) {
-    const messageDiv = document.getElementById('automaticMessage');
-    messageDiv.textContent = message;
-    messageDiv.style.display = 'block';
-
-    // Auto-hide after 10 seconds
-    setTimeout(() => {
-        messageDiv.style.display = 'none';
-    }, 10000);
 }
 
 /**
@@ -427,7 +401,7 @@ function arrangeThreeFullHouses(allCards) {
     return {
         back: sorted.slice(0, 5),
         middle: sorted.slice(5, 10),
-        front: sorted.slice(10, 13)
+        front: sorted.slice(10, 15)
     };
 }
 
@@ -449,15 +423,15 @@ function arrangeThreeFlush(allCards) {
     const sortedSuits = Object.entries(suitGroups)
         .sort((a, b) => b[1].length - a[1].length);
 
-    // Distribute: 5 to back, 5 to middle, 3 to front, fill with wilds
+    // Distribute: 5 to back, 5 to middle, 5 to front, fill with wilds
     const back = sortedSuits[0][1].slice(0, 5);
     const middle = sortedSuits[1][1].slice(0, 5);
-    const front = sortedSuits[2][1].slice(0, 3);
+    const front = sortedSuits[2][1].slice(0, 5);
 
     // Fill gaps with wilds
     while (back.length < 5 && wilds.length > 0) back.push(wilds.shift());
     while (middle.length < 5 && wilds.length > 0) middle.push(wilds.shift());
-    while (front.length < 3 && wilds.length > 0) front.push(wilds.shift());
+    while (front.length < 5 && wilds.length > 0) front.push(wilds.shift());
 
     return { back, middle, front };
 }
@@ -475,7 +449,7 @@ function arrangeThreeStraight(allCards) {
     return {
         back: sorted.slice(0, 5),
         middle: sorted.slice(5, 10),
-        front: sorted.slice(10, 13)
+        front: sorted.slice(10, 15)
     };
 }
 

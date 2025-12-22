@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automatic Detection Tests (Detection Only)</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-suite {
+            margin-bottom: 30px;
+            border: 1px solid #3c3c3c;
+            padding: 15px;
+            background: #252526;
+        }
+        .test-case {
+            margin: 15px 0;
+            padding: 10px;
+            border-left: 3px solid #007acc;
+            background: #1e1e1e;
+        }
+        .test-case.pass {
+            border-left-color: #4ec9b0;
+        }
+        .test-case.fail {
+            border-left-color: #f48771;
+        }
+        .test-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .pass { color: #4ec9b0; }
+        .fail { color: #f48771; }
+        .warning { color: #dcdcaa; }
+        .label { color: #9cdcfe; }
+        .cards {
+            font-family: monospace;
+            background: #2d2d2d;
+            padding: 5px;
+            margin: 5px 0;
+            border-radius: 3px;
+        }
+        .diff {
+            background: #3c1f1e;
+            padding: 5px;
+            margin: 5px 0;
+            border-radius: 3px;
+        }
+        .summary {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #252526;
+            border: 2px solid #007acc;
+            padding: 15px;
+            border-radius: 5px;
+            min-width: 200px;
+        }
+        .instructions {
+            background: #2d2d2d;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 3px solid #dcdcaa;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Automatic Detection Tests (Detection Only)</h1>
+
+    <div class="instructions">
+        <strong>⚠️ Instructions:</strong><br>
+        1. Place this HTML file in the same directory as <code>automatic-detector.js</code><br>
+        2. Open in Chrome/Firefox<br>
+        3. Tests will automatically run<br>
+        <br>
+        <strong>Testing:</strong> Only detection functions (<code>detectPossibleAutomatics</code>, <code>canForm*</code>)<br>
+        <strong>NOT testing:</strong> Arrangement functions (<code>arrange*</code>)
+    </div>
+
+    <div class="summary" id="summary">
+        <div>Running tests...</div>
+    </div>
+    <div id="results"></div>
+
+    <!-- Load the ACTUAL automatic-detector.js file -->
+    <script src="automatic-detector.js"></script>
+
+    <script>
+        // Test framework
+        class TestRunner {
+            constructor() {
+                this.tests = [];
+                this.results = { passed: 0, failed: 0, total: 0 };
+            }
+
+            addTest(name, testFn) {
+                this.tests.push({ name, testFn });
+            }
+
+            run() {
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '';
+
+                this.tests.forEach(({ name, testFn }) => {
+                    this.results.total++;
+                    const result = testFn();
+
+                    if (result.pass) {
+                        this.results.passed++;
+                    } else {
+                        this.results.failed++;
+                    }
+
+                    this.renderTestResult(resultsDiv, name, result);
+                });
+
+                this.updateSummary();
+            }
+
+            renderTestResult(container, name, result) {
+                const div = document.createElement('div');
+                div.className = `test-case ${result.pass ? 'pass' : 'fail'}`;
+
+                let html = `
+                    <div class="test-header">
+                        ${result.pass ? '✅' : '❌'} ${name}
+                    </div>
+                `;
+
+                if (result.input) {
+                    html += `<div class="cards"><span class="label">Input:</span> ${result.input}</div>`;
+                }
+
+                if (result.expected) {
+                    html += `<div class="cards"><span class="label">Expected:</span> ${result.expected}</div>`;
+                }
+
+                if (result.actual) {
+                    html += `<div class="cards"><span class="label">Actual:</span> ${result.actual}</div>`;
+                }
+
+                if (result.message) {
+                    html += `<div class="${result.pass ? 'pass' : 'fail'}">${result.message}</div>`;
+                }
+
+                div.innerHTML = html;
+                container.appendChild(div);
+            }
+
+            updateSummary() {
+                const summaryDiv = document.getElementById('summary');
+                const passRate = ((this.results.passed / this.results.total) * 100).toFixed(1);
+
+                summaryDiv.innerHTML = `
+                    <h3>Test Summary</h3>
+                    <div class="pass">✅ Passed: ${this.results.passed}</div>
+                    <div class="fail">❌ Failed: ${this.results.failed}</div>
+                    <div>Total: ${this.results.total}</div>
+                    <div class="warning">Pass Rate: ${passRate}%</div>
+                `;
+            }
+        }
+
+        // Helper: Create card object
+        function card(rank, suit, isWild = false) {
+            const rankValues = {
+                'A': 14, 'K': 13, 'Q': 12, 'J': 11, '10': 10,
+                '9': 9, '8': 8, '7': 7, '6': 6, '5': 5, '4': 4, '3': 3, '2': 2
+            };
+            return {
+                rank,
+                suit,
+                value: isWild ? 0 : rankValues[rank],
+                isWild,
+                toString() {
+                    return isWild ? `🃏` : `${rank}${suit}`;
+                }
+            };
+        }
+
+        // Helper: Format card array
+        function formatCards(cards) {
+            if (!cards) return 'null';
+            return cards.map(c => c.toString()).join(' ');
+        }
+
+        // Test Suite Setup
+        const runner = new TestRunner();
+
+        // ===== DRAGON DETECTION TESTS =====
+        runner.addTest('Dragon: Perfect natural (all 13 ranks, no wilds)', () => {
+            const cards = [
+                card('A', '♠'), card('K', '♠'), card('Q', '♠'), card('J', '♠'), card('10', '♠'),
+                card('9', '♥'), card('8', '♥'), card('7', '♥'), card('6', '♥'), card('5', '♥'),
+                card('4', '♦'), card('3', '♦'), card('2', '♦'),
+                card('A', '♣'), card('K', '♣'), card('Q', '♣'), card('J', '♣')
+            ];
+
+            const detected = detectPossibleAutomatics(cards);
+            const hasDragon = detected.includes('dragon');
+
+            return {
+                pass: hasDragon,
+                input: '13 unique ranks (A-K-Q-J-10-9-8-7-6-5-4-3-2) + 4 garbage',
+                expected: 'Should detect: dragon',
+                actual: detected.length > 0 ? detected.join(', ') : 'none',
+                message: hasDragon ? 'Correctly detected dragon' : 'Failed to detect dragon'
+            };
+        });
+
+        runner.addTest('Dragon: With 2 wilds filling gaps', () => {
+            const cards = [
+                card('A', '♠'), card('K', '♠'), card('Q', '♠'), card('J', '♠'), card('10', '♠'),
+                card('9', '♥'), card('8', '♥'), card('7', '♥'), card('6', '♥'),
+                card('4', '♦'), card('3', '♦'), card('2', '♦'),
+                card('', '', true), card('', '', true), // 2 wilds fill 5 and one other
+                card('A', '♣'), card('K', '♣'), card('Q', '♣')
+            ];
+
+            const detected = detectPossibleAutomatics(cards);
+            const hasDragon = detected.includes('dragon');
+
+            return {
+                pass: hasDragon,
+                input: '11 natural ranks + 2 wilds (can make all 13)',
+                expected: 'Should detect: dragon',
+                actual: detected.length > 0 ? detected.join(', ') : 'none',
+                message: hasDragon ? 'Correctly detected dragon with wilds' : 'Failed to detect dragon with wilds'
+            };
+        });
+
+        runner.addTest('Dragon: Insufficient (only 11 ranks, no wilds)', () => {
+            const cards = [
+                card('A', '♠'), card('K', '♠'), card('Q', '♠'), card('J', '♠'), card('10', '♠'),
+                card('9', '♥'), card('8', '♥'), card('7', '♥'), card('6', '♥'),
+                card('4', '♦'), card('3', '♦'),
+                card('A', '♣'), card('K', '♣'), card('Q', '♣'), card('J', '♣'), card('10', '♣'), card('9', '♣')
+            ];
+
+            const detected = detectPossibleAutomatics(cards);
+            const hasDragon = detected.includes('dragon');
+
+            return {
+                pass: !hasDragon,
+                input: 'Only 11 unique ranks (missing 2 and 5)',
+                expected: 'Should NOT detect dragon',
+                actual: detected.length > 0 ? detected.join(', ') : 'none',
+                message: !hasDragon ? 'Correctly rejected (insufficient ranks)' : 'False positive - detected dragon with insufficient ranks'
+            };
+        });
+
+        // ===== THREE FULL HOUSES DETECTION TESTS =====
+        runner.addTest('Three Full Houses: Natural (AAA22 KKK88 QQQ77)', () => {
+            const cards = [
+                card('A', '♠'), card('A', '♥'), card('A', '♦'), card('2', '♠'), card('2', '♥'),
+                card('K', '♠'), card('K', '♥'), card('K', '♦'), card('8', '♠'), card('8', '♥'),
+                card('Q', '♠'), card('Q', '♥'), card('Q', '♦'), card('7', '♠'), card('7', '♥'),
+                card('3', '♠'), card('4', '♠')
+            ];
+
+            const detected = detectPossibleAutomatics(cards);
+            const hasFH = detected.includes('three-full-houses');
+
+            return {
+                pass: hasFH,
+                input: '3 trips + 3 pairs (perfect for 3 full houses)',
+                expected: 'Should detect: three-full-houses',
+                actual: detected.length > 0 ? detected.join(', ') : 'none',
+                message: hasFH ? 'Correctly detected three-full-houses' : 'Failed to detect three-full-houses'
+            };
+        });
+
+        runner.addTest('Three Full Houses: With wilds', () => {
+            const cards = [
+                card('A', '♠'), card('A', '♥'), card('A', '♦'), card('2', '♠'), card('2', '♥'),
+                card('K', '♠'), card('K', '♥'), card('8', '♠'),
+                card('Q', '♠'), card('Q', '♥'), card('Q', '♦'),
+                card('', '', true), card('', '', true), card('', '', true),
+                card('3', '♠'), card('4', '♠'), card('5', '♠')
+            ];
+
+            const detected = detectPossibleAutomatics(cards);
+            const hasFH = detected.includes('three-full-houses');
+
+            return {
+                pass: hasFH,
+                input: '2 trips + 2 pairs + 3 wilds',
+                expected: 'Should detect: three-full-houses (wilds complete)',
+                actual: detected.length > 0 ? detected.join(', ') : 'none',
+                message: hasFH ? 'Correctly detected with wilds' : 'Failed to detect with wilds'
+            };
+        });
+
+        runner.addTest('Three Full Houses: Insufficient (not enough pairs)', () => {
+            const cards = [
+                card('A', '♠'), card('A', '♥'), card('A', '♦'),
+                card('K', '♠'), card('K', '♥'), card('K', '♦'),
+                card('Q', '♠'), card('8', '♠'), card('7', '♠'), card('6', '♠'), card('5', '♠'),
+                card('4', '♠'), card('3', '♠'), card('2', '♠'), card('A', '♣'), card('K', '♣'), card('Q', '♣')
+            ];
+
+            const detected = detectPossibleAutomatics(cards);
+            const hasFH = detected.includes('three-full-houses');
+
+            return {
+                pass: !hasFH,
+                input: '2 trips but no pairs (all other cards singles)',
+                expected: 'Should NOT detect three-full-houses',
+                actual: detected.length > 0 ? detected.join(', ') : 'none',
+                message: !hasFH ? 'Correctly rejected' : 'False positive'
+            };
+        });
+
+        // ===== THREE FLUSH DETECTION TESTS =====
+        runner.addTest('Three Flush: Natural (5♠ 5♥ 5♦)', () => {
+            const cards = [
+                card('A', '♠'), card('K', '♠'), card('Q', '♠'), card('J', '♠'), card('10', '♠'),
+                card('9', '♥'), card('8', '♥'), card('7', '♥'), card('6', '♥'), card('5', '♥'),
+                card('4', '♦'), card('3', '♦'), card('2', '♦'), card('A', '♦'), card('K', '♦'),
+                card('A', '♣'), card('K', '♣')
+            ];
+
+            const detected = detectPossibleAutomatics(cards);
+            const hasFlush = detected.includes('three-flush');
+
+            return {
+                pass: hasFlush,
+                input: '5 spades + 5 hearts + 5 diamonds',
+                expected: 'Should detect: three-flush',
+                actual: detected.length > 0 ? detected.join(', ') : 'none',
+                message: hasFlush ? 'Correctly detected three-flush' : 'Failed to detect three-flush'
+            };
+        });
+
+        runner.addTest('Three Flush: With 4 wilds filling gaps', () => {
+            const cards = [
+                card('A', '♠'), card('K', '♠'), card('Q', '♠'), card('J', '♠'),
+                card('9', '♥'), card('8', '♥'), card('7', '♥'),
+                card('4', '♦'), card('3', '♦'), card('2', '♦'), card('A', '♦'),
+                card('', '', true), card('', '', true), card('', '', true), card('', '', true),
+                card('A', '♣'), card('K', '♣')
+            ];
+
+            const detected = detectPossibleAutomatics(cards);
+            const hasFlush = detected.includes('three-flush');
+
+            return {
+                pass: hasFlush,
+                input: '4♠ + 3♥ + 4♦ + 4 wilds = 5+5+5',
+                expected: 'Should detect: three-flush (wilds fill to 5 each)',
+                actual: detected.length > 0 ? detected.join(', ') : 'none',
+                message: hasFlush ? 'Correctly detected with wilds' : 'Failed to detect with wilds'
+            };
+        });
+
+        runner.addTest('Three Flush: Insufficient (only 13 cards total)', () => {
+            const cards = [
+                card('A', '♠'), card('K', '♠'), card('Q', '♠'), card('J', '♠'), card('10', '♠'),
+                card('9', '♥'), card('8', '♥'), card('7', '♥'),
+                card('4', '♦'), card('3', '♦'), card('2', '♦'), card('A', '♦'),
+                card('A', '♣')
+            ];
+
+            const detected = detectPossibleAutomatics(cards);
+            const hasFlush = detected.includes('three-flush');
+
+            return {
+                pass: !hasFlush,
+                input: 'Only 13 cards total (need 15 for three-flush)',
+                expected: 'Should NOT detect three-flush',
+                actual: detected.length > 0 ? detected.join(', ') : 'none',
+                message: !hasFlush ? 'Correctly rejected (insufficient cards)' : 'False positive'
+            };
+        });
+
+        // ===== THREE STRAIGHT DETECTION TESTS =====
+        runner.addTest('Three Straight: Natural consecutive ranks', () => {
+            const cards = [
+                card('A', '♠'), card('K', '♥'), card('Q', '♦'), card('J', '♠'), card('10', '♥'),
+                card('9', '♦'), card('8', '♠'), card('7', '♥'), card('6', '♦'), card('5', '♠'),
+                card('4', '♥'), card('3', '♦'), card('2', '♠'), card('A', '♣'), card('K', '♣'),
+                card('Q', '♣'), card('J', '♣')
+            ];
+
+            const detected = detectPossibleAutomatics(cards);
+            const hasStraight = detected.includes('three-straight');
+
+            return {
+                pass: hasStraight,
+                input: 'A-K-Q-J-10-9-8-7-6-5-4-3-2 (13 consecutive ranks)',
+                expected: 'Should detect: three-straight',
+                actual: detected.length > 0 ? detected.join(', ') : 'none',
+                message: hasStraight ? 'Correctly detected three-straight' : 'Failed to detect three-straight'
+            };
+        });
+
+        runner.addTest('Three Straight: With wheel and wilds', () => {
+            const cards = [
+                card('A', '♠'), card('2', '♥'), card('3', '♦'), card('4', '♠'), card('5', '♥'),
+                card('9', '♦'), card('8', '♠'), card('7', '♥'), card('6', '♦'), card('5', '♠'),
+                card('K', '♥'), card('Q', '♦'), card('J', '♣'), card('10', '♥'),
+                card('', '', true),
+                card('A', '♣'), card('K', '♣')
+            ];
+
+            const detected = detectPossibleAutomatics(cards);
+            const hasStraight = detected.includes('three-straight');
+
+            return {
+                pass: hasStraight,
+                input: 'Wheel (A-2-3-4-5) + 9-8-7-6-5 + K-Q-J-10 + wild',
+                expected: 'Should detect: three-straight',
+                actual: detected.length > 0 ? detected.join(', ') : 'none',
+                message: hasStraight ? 'Correctly detected with wheel' : 'Failed to detect with wheel'
+            };
+        });
+
+        runner.addTest('Three Straight: Insufficient (too few ranks)', () => {
+            const cards = [
+                card('A', '♠'), card('A', '♥'), card('A', '♦'),
+                card('K', '♠'), card('K', '♥'), card('K', '♦'),
+                card('Q', '♠'), card('Q', '♥'), card('Q', '♦'),
+                card('J', '♠'), card('J', '♥'), card('J', '♦'),
+                card('10', '♠'), card('10', '♥'), card('10', '♦'), card('10', '♣'), card('9', '♠')
+            ];
+
+            const detected = detectPossibleAutomatics(cards);
+            const hasStraight = detected.includes('three-straight');
+
+            return {
+                pass: !hasStraight,
+                input: 'Only 6 unique ranks (A-K-Q-J-10-9) - need ~13 for three 5-card straights',
+                expected: 'Should NOT detect three-straight',
+                actual: detected.length > 0 ? detected.join(', ') : 'none',
+                message: !hasStraight ? 'Correctly rejected (insufficient rank diversity)' : 'False positive'
+            };
+        });
+
+        // ===== PRECEDENCE TEST =====
+        runner.addTest('Precedence: Cards that can make multiple automatics', () => {
+            const cards = [
+                card('A', '♠'), card('A', '♥'), card('A', '♦'), card('2', '♠'), card('2', '♥'),
+                card('K', '♠'), card('K', '♥'), card('K', '♦'), card('8', '♠'), card('8', '♥'),
+                card('Q', '♠'), card('Q', '♥'), card('Q', '♦'), card('7', '♠'), card('7', '♥'),
+                card('3', '♠'), card('4', '♠')
+            ];
+
+            const detected = detectPossibleAutomatics(cards);
+            const hasFH = detected.includes('three-full-houses');
+
+            return {
+                pass: hasFH,
+                input: 'Cards with many pairs/trips (might make FH or other patterns)',
+                expected: 'Should at minimum detect: three-full-houses',
+                actual: detected.length > 0 ? detected.join(', ') : 'none',
+                message: detected.length > 0 ? `Detected: ${detected.join(', ')}` : 'No automatics detected'
+            };
+        });
+
+        // Run all tests
+        window.addEventListener('load', () => {
+            // Check if detectPossibleAutomatics exists
+            if (typeof detectPossibleAutomatics === 'undefined') {
+                document.getElementById('results').innerHTML = `
+                    <div class="test-case fail">
+                        <h2 class="fail">❌ ERROR: automatic-detector.js not loaded!</h2>
+                        <p>Make sure this HTML file is in the same directory as <code>automatic-detector.js</code></p>
+                        <p>Current location: ${window.location.href}</p>
+                    </div>
+                `;
+                document.getElementById('summary').innerHTML = '<h3>Error</h3><div class="fail">Script not loaded</div>';
+            } else {
+                runner.run();
+            }
+        });
+    </script>
+</body>
+</html>

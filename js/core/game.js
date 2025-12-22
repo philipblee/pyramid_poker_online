@@ -1663,7 +1663,6 @@ class PyramidPoker {
     }
 }
 
-
 function handleFindAutomatics() {
     // Get all 17 cards from staging area (playerHand)
     const stagingArea = document.getElementById('playerHand');
@@ -1727,7 +1726,7 @@ function showAutomaticMessage(message) {
 
         setTimeout(() => {
             messageDiv.style.display = 'none';
-        }, 3000);
+        }, 10000);
     } else {
         console.log(message); // Fallback
     }
