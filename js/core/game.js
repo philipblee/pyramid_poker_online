@@ -198,6 +198,7 @@ class PyramidPoker {
         this.deckManager.createNewDeck();
         this.gameState = 'playing';
         this.tableState = TABLE_STATES.DEALING; // Add this - parallel tracking
+        resetAutomaticButton()
         this.playerManager.currentPlayerIndex = 0;
         this.submittedHands.clear();
 
@@ -324,6 +325,7 @@ class PyramidPoker {
         // IN startNewRound() method, ADD this block after the card dealing loop:
 
         await this.dealCardsToAllPlayers();
+        resetAutomaticButton();
 
         // Only load hand immediately for owner/single-player AND not kitty variant
         // Multi-device kitty uses state machine, everything else loads immediately
@@ -497,6 +499,8 @@ class PyramidPoker {
 
         const isKittyVariant = gameConfig.config.gameVariant === 'kitty';
         const shouldShowLimited = isDecisionPhase || (isKittyVariant && this.tableState === TABLE_STATES.DEALING);
+
+        resetAutomaticButton();
 
         if (shouldShowLimited) {
             cardsToDisplay = playerData.cards.slice(0, 13);
@@ -1729,7 +1733,7 @@ function handleFindAutomatics() {
 
         // Change button text
         const autoButton = document.getElementById('findAutomatics');
-        autoButton.textContent = 'PLAY AUTO';
+        autoButton.textContent = 'PLAY-AUTOMATIC';
 
         // Enable submit
         document.getElementById('submitHand').disabled = false;
@@ -1737,6 +1741,17 @@ function handleFindAutomatics() {
         console.log(`✅ Arranged ${result.type}`);
     } else {
         showAutomaticMessage('❌ No automatic possible with these cards');
+
+        // IMPORTANT: Do NOT touch any cards or hands when no automatic is found.
+        // Just reset any automatic-related state so we don't accidentally reuse
+        // a previous automatic on a later click.
+        window.currentAutomatic = null;
+
+        const autoButton = document.getElementById('findAutomatics');
+        if (autoButton) {
+            autoButton.textContent = 'DETECT-AUTOMATIC';
+            autoButton.title = '';
+        }
     }
 }
 
@@ -1754,7 +1769,7 @@ function handlePlayAutomatic() {
 
 function resetAutomaticButton() {
     const autoButton = document.getElementById('findAutomatics');
-    autoButton.textContent = 'DETECT-AUTOMATICS';
+    autoButton.textContent = 'DETECT-AUTOMATIC';
     autoButton.onclick = handleFindAutomatics;
     window.currentAutomatic = null;
 }
