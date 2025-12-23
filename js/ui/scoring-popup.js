@@ -808,6 +808,34 @@ function showRoundRobinScoring(detailedResults, game, containerElement) {
     // Clear previous content
     containerElement.innerHTML = '';
 
+    // Show automatic bonuses first
+    const automaticInfo = game.automaticHands;
+    if (automaticInfo && automaticInfo.size > 0) {
+        const automaticDiv = document.createElement('div');
+        automaticDiv.style.cssText = 'background: rgba(255, 215, 0, 0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px;';
+
+        let automaticHTML = '<h3 style="color: #ffd700; margin-bottom: 10px;">⚡ Automatic Hands Played</h3>';
+
+        automaticInfo.forEach((automatic, playerName) => {
+            const automaticType = automatic.type.replace(/-/g, ' ').toUpperCase();
+            const allPlayers = Array.from(game.playerManager.players).map(p => p.name);
+            const opponents = allPlayers.filter(p => p !== playerName);
+
+            automaticHTML += `<p style="color: #4ecdc4; margin: 8px 0; font-weight: bold;">
+                <strong>${playerName} played <strong style="color: #ffd700;">${automaticType} and won +3 points</strong> from each opponent
+            </p>`;
+
+            opponents.forEach(opponent => {
+                automaticHTML += `<p style="color: #ff6b6b; margin: 5px 0; padding-left: 20px;">
+                    <strong> Opponent ${opponent} lost -3 points</strong>
+                </p>`;
+            });
+        });
+
+        automaticDiv.innerHTML = automaticHTML;
+        containerElement.appendChild(automaticDiv);
+    }
+
     detailedResults.forEach(result => {
         const matchupDiv = document.createElement('div');
         matchupDiv.className = 'matchup';
