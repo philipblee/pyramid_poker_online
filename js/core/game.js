@@ -42,9 +42,16 @@ class PyramidPoker {
         // Find Automatics button (may not exist on all pages)
         const findAutomaticsBtn = document.getElementById('findAutomatics');
         if (findAutomaticsBtn) {
-            findAutomaticsBtn.addEventListener('click', () => handleFindAutomatics());
+            console.log('🔧 Attaching findAutomatics listener');
+            findAutomaticsBtn.addEventListener('click', () => {
+                console.log('🔧 Button clicked, currentAutomatic:', window.currentAutomatic);
+                if (window.currentAutomatic) {
+                    handlePlayAutomatic();
+                } else {
+                    handleFindAutomatics();
+                }
+            });
         }
-
 
         const toggleButton = document.getElementById('sidebarToggle');
         if (toggleButton) {
@@ -850,25 +857,22 @@ class PyramidPoker {
                 frontHand.classList.add('valid');
                 submitBtn.disabled = false;
 
-                // Check for automatic if automatics are allowed
-                const automaticBtn = document.getElementById('findAutomatics'); // CHANGED
-                if (automaticBtn && gameConfig.config.automaticsAllowed === 'yes') { // ADDED null check
+                // Check PLAY AUTO button state
+                const playAutoBtn = document.getElementById('findAutomatics');
+                if (playAutoBtn && window.currentAutomatic) {
+                    // Validate that current hands still form the detected automatic
                     const arrangement = {
                         back: playerData.back,
                         middle: playerData.middle,
                         front: playerData.front
                     };
-                    const automatic = detectAutomatic(arrangement);
-                    if (automatic) {
-                        automaticBtn.disabled = false;
-                        automaticBtn.title = `Automatic: ${automatic.type.replace(/-/g, ' ')}`;
-                    } else {
-                        automaticBtn.disabled = true;
-                        automaticBtn.title = '';
-                    }
-                } else if (automaticBtn) { // ADDED null check
-                    automaticBtn.disabled = true;
-                    automaticBtn.title = '';
+                    const isValidAutomatic = this.validateAutomaticArrangement(
+                        window.currentAutomatic,
+                        arrangement
+                    );
+                    playAutoBtn.disabled = !isValidAutomatic;
+                } else if (playAutoBtn) {
+                    playAutoBtn.disabled = true;
                 }
 
                 const readyCount = this.playerManager.getReadyCount();
@@ -988,6 +992,64 @@ class PyramidPoker {
         return false;
     }
 
+    validateAutomaticArrangement(type, arrangement) {
+        const { front, middle, back } = arrangement;
+
+        switch(type) {
+            case 'dragon':
+                return this.validateDragonArrangement(front, middle, back);
+            case 'three-flush':
+                return this.validateThreeFlushArrangement(front, middle, back);
+            case 'three-full-houses':
+                return this.validateThreeFullHousesArrangement(front, middle, back);
+            case 'three-straight':
+                return this.validateThreeStraightArrangement(front, middle, back);
+            default:
+                return false;
+        }
+    }
+
+    validateDragonArrangement(front, middle, back) {
+        const allCards = [...back, ...middle, ...front];
+        const ranks = new Set();
+        allCards.forEach(card => {
+            if (!card.isWild) ranks.add(card.rank);
+        });
+        return ranks.size === 13; // Must have all 13 unique ranks
+    }
+
+    validateThreeFlushArrangement(front, middle, back) {
+        // Check each row is 5 cards of same suit
+        const checkFlush = (hand) => {
+            if (hand.length !== 5) return false;
+            const suits = new Set();
+            hand.forEach(card => {
+                if (!card.isWild) suits.add(card.suit);
+            });
+            return suits.size === 1; // All same suit (wilds don't count)
+        };
+        return checkFlush(back) && checkFlush(middle) && checkFlush(front);
+    }
+
+    validateThreeFullHousesArrangement(front, middle, back) {
+        // Check each row forms a full house
+        const checkFullHouse = (hand) => {
+            const strength = evaluateHand(hand);
+            return strength.handType === 7; // Full house = 7
+        };
+        return checkFullHouse(back) && checkFullHouse(middle) && checkFullHouse(front);
+    }
+
+    validateThreeStraightArrangement(front, middle, back) {
+        // Check each row forms a straight
+        const checkStraight = (hand) => {
+            const strength = evaluateHand(hand);
+            return strength.handType >= 5; // Straight = 5, Straight Flush = 9
+        };
+        return checkStraight(back) && checkStraight(middle) && checkStraight(front);
+    }
+
+
     resetCards() {
         const currentPlayer = this.playerManager.getCurrentPlayer();
         const playerData = this.playerHands.get(currentPlayer.name);
@@ -1048,7 +1110,11 @@ class PyramidPoker {
         // Reset auto button for next turn
         this.autoArrangeUsed = false;
         document.getElementById('autoArrange').textContent = 'Auto';
-        document.getElementById('submitAutomatic').disabled = true;
+
+        const findAutomaticsBtn = document.getElementById('findAutomatics');
+        if (findAutomaticsBtn) {
+            resetAutomaticButton(); // Use the existing reset function
+        }
 
         if (this.playerManager.areAllPlayersReady()) {
             this.calculateScores();
@@ -1130,41 +1196,39 @@ class PyramidPoker {
             bonusPoints.set(name, 0);
         });
 
-//        console.log('🔍 After initialization - this.maxRounds:', this.maxRounds);
+//        console.log('🔍 After initialization - this.maxRounds:', this.maxRounds)
 
         // Handle automatics if allowed
         let automaticPlayers = [];
+        let regularPlayers = [];
+
         if (gameConfig.config.automaticsAllowed === 'yes') {
             automaticPlayers = playerNames.filter(name => this.automaticHands.has(name));
-            
+            regularPlayers = playerNames.filter(name => !this.automaticHands.has(name));
+
             if (automaticPlayers.length > 0) {
-                // If only one automatic, award 3 points (zero-sum: other players get -3 total)
                 if (automaticPlayers.length === 1) {
                     const automaticPlayer = automaticPlayers[0];
-                    const regularPlayers = playerNames.filter(name => name !== automaticPlayer);
-                    
-                    // Automatic player gets 3 points per regular player
                     const automaticPoints = 3 * regularPlayers.length;
+
                     roundScores.set(automaticPlayer, roundScores.get(automaticPlayer) + automaticPoints);
-                    
-                    // Each regular player gets -3 points
-                    if (regularPlayers.length > 0) {
-                        regularPlayers.forEach(regularPlayer => {
-                            roundScores.set(regularPlayer, roundScores.get(regularPlayer) - 3);
-                        });
-                        console.log(`🎯 ${automaticPlayer} wins ${automaticPoints} points for automatic: ${this.automaticHands.get(automaticPlayer).type} (3 per player)`);
-                        console.log(`🎯 Each regular player gets -3 points (zero-sum)`);
-                    }
+
+                    regularPlayers.forEach(regularPlayer => {
+                        roundScores.set(regularPlayer, roundScores.get(regularPlayer) - 3);
+                    });
+
+                    console.log(`🎯 ${automaticPlayer} wins ${automaticPoints} points for automatic`);
+
+                    // DON'T ADD detailedResults - causes UI errors
                 } else {
-                    // Multiple automatics - apply multi-automatic rules
                     this.handleMultiAutomatics(automaticPlayers, roundScores, detailedResults);
                 }
             }
+        } else {
+            regularPlayers = [...playerNames];
         }
 
-        // Head-to-head comparisons - skip players with automatics
-        // Players with automatics have special handling
-        const regularPlayers = playerNames.filter(name => !this.automaticHands.has(name));
+
 
         for (let i = 0; i < regularPlayers.length; i++) {
             for (let j = i + 1; j < regularPlayers.length; j++) {
@@ -1236,42 +1300,6 @@ class PyramidPoker {
                     player2Score: result.player2Score,
                     details: result.details
                 });
-            }
-        }
-        
-        // If there are automatics, also compare automatic players against regular players
-        // Regular players still play head-to-head against automatic players
-        // Automatic players don't get additional points (they already have their automatic points)
-        if (automaticPlayers.length > 0) {
-            for (let i = 0; i < automaticPlayers.length; i++) {
-                for (let j = 0; j < regularPlayers.length; j++) {
-                    const automaticPlayer = automaticPlayers[i];
-                    const regularPlayer = regularPlayers[j];
-
-                    // Skip if EITHER player has automatic - handleAutomatics already dealt with it
-                    if (automaticPlayers.includes(player1) || automaticPlayers.includes(player2)) {
-                        console.log(`⚡ Skipping ${player1} vs ${player2} - handled by automatics`);
-                        continue;
-                    }
-
-
-                    const hand1 = this.submittedHands.get(automaticPlayer);
-                    const hand2 = this.submittedHands.get(regularPlayer);
-                    
-                    const result = compareHands(hand1, hand2);
-                    
-                    // Regular player gets points from comparison (can be positive or negative)
-                    // Automatic player's score is already set (they don't get additional points)
-                    roundScores.set(regularPlayer, roundScores.get(regularPlayer) + result.player2Score);
-                    
-                    detailedResults.push({
-                        player1: automaticPlayer,
-                        player2: regularPlayer,
-                        player1Score: 0, // Automatic player doesn't get regular points (already has automatic points)
-                        player2Score: result.player2Score, // Regular player gets points from comparison
-                        details: result.details
-                    });
-                }
             }
         }
 
@@ -1682,6 +1710,15 @@ function showAutomaticMessage(message) {
 }
 
 function handleFindAutomatics() {
+    console.log('🎯 handleFindAutomatics CALLED');
+    console.log('🎯 window.currentAutomatic:', window.currentAutomatic);
+
+    // GUARD: If automatic already detected, do nothing
+    if (window.currentAutomatic) {
+        console.log('⚠️ Automatic already detected, ignoring duplicate call');
+        return;
+    }
+
     const stagingArea = document.getElementById('playerHand');
     if (!stagingArea) {
         console.error('❌ playerHand element not found');
@@ -1723,9 +1760,26 @@ function handleFindAutomatics() {
         const currentPlayer = window.game.playerManager.getCurrentPlayer();
         const playerData = window.game.playerHands.get(currentPlayer.name);
         if (playerData) {
-            playerData.back = result.arrangement.back;
-            playerData.middle = result.arrangement.middle;
-            playerData.front = result.arrangement.front;
+            // Get IDs of moved cards
+            const movedCards = [...result.arrangement.back, ...result.arrangement.middle, ...result.arrangement.front];
+            const movedCardIds = new Set(movedCards.map(c => c.id));
+
+            // Remove moved cards from staging
+            playerData.cards = playerData.cards.filter(c => !movedCardIds.has(c.id));
+
+            // Store card data WITHOUT .element property
+            playerData.back = result.arrangement.back.map(c => {
+                const {element, ...cardData} = c;
+                return cardData;
+            });
+            playerData.middle = result.arrangement.middle.map(c => {
+                const {element, ...cardData} = c;
+                return cardData;
+            });
+            playerData.front = result.arrangement.front.map(c => {
+                const {element, ...cardData} = c;
+                return cardData;
+            });
         }
 
         // Store automatic type
@@ -1756,6 +1810,8 @@ function handleFindAutomatics() {
 }
 
 function handlePlayAutomatic() {
+    console.log('🎯 handlePlayAutomatic CALLED');
+    console.log('🎯 window.currentAutomatic:', window.currentAutomatic);
     if (!window.currentAutomatic) return;
 
     // Clear flag
@@ -1769,8 +1825,12 @@ function handlePlayAutomatic() {
 
 function resetAutomaticButton() {
     const autoButton = document.getElementById('findAutomatics');
-    autoButton.textContent = 'DETECT-AUTOMATIC';
-    autoButton.onclick = handleFindAutomatics;
+    if (autoButton) {
+        autoButton.textContent = 'DETECT-AUTOMATIC';
+        // DON'T set onclick - addEventListener already handles it
+        autoButton.title = '';
+        autoButton.disabled = false; // Enable until valid arrangement
+    }
     window.currentAutomatic = null;
 }
 
