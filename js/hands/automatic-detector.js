@@ -219,51 +219,126 @@ function canFormDragon(naturalCards, wildCount) {
  * Need: Back 3+2, Middle 3+2, Front 3+2 = 15 cards with FH pattern
  */
 function canFormThreeFullHouses(naturalCards, wildCount) {
+    console.log('🔍 canFormThreeFullHouses - checking with', naturalCards.length, 'naturals +', wildCount, 'wilds');
+
+    // Count inventory of each rank
     const rankCounts = {};
     naturalCards.forEach(c => {
-        if (c.rank) rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1;
+        if (c.rank) {
+            rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1;
+        }
     });
 
-    const counts = Object.values(rankCounts).sort((a, b) => b - a);
+    console.log('📊 Rank inventory:', rankCounts);
 
-    // Need at least 15 cards total for three 5-card full houses
-    if (naturalCards.length + wildCount < 15) return false;
+    let availableWilds = wildCount;
+    let fullHousesBuilt = 0;
 
-    // Count available trips and pairs
-    let tripsAvailable = 0;
-    let pairsAvailable = 0;
+    // Try to build a single full house (trips + pair from different ranks)
+    function tryBuildFullHouse() {
+        console.log(`\n🎯 Attempting full house #${fullHousesBuilt + 1}, wilds available: ${availableWilds}`);
 
-    for (const count of counts) {
-        if (count >= 3) {
-            tripsAvailable++;
-            // A rank with 5+ can provide BOTH trips and pair
-            if (count >= 5) {
-                pairsAvailable++;
+        // Find best trips candidate (rank with most cards)
+        let tripsRank = null;
+        let tripsCount = 0;
+
+        for (const [rank, count] of Object.entries(rankCounts)) {
+            if (count > tripsCount) {
+                tripsRank = rank;
+                tripsCount = count;
             }
-        } else if (count === 2) {
-            pairsAvailable++;
         }
+
+        if (!tripsRank) {
+            console.log('❌ No ranks available for trips');
+            return false;
+        }
+
+        // Calculate wilds needed for trips
+        const wildsForTrips = Math.max(0, 3 - tripsCount);
+
+        if (wildsForTrips > availableWilds) {
+            console.log(`❌ Need ${wildsForTrips} wilds for trips, only have ${availableWilds}`);
+            return false;
+        }
+
+        console.log(`✓ Found trips candidate: ${tripsRank} (${tripsCount} cards, need ${wildsForTrips} wilds)`);
+
+        // Find best pair candidate (different rank)
+        // PREFER ranks with exactly 2 cards (pure pairs, not wasted trips)
+        let pairRank = null;
+        let pairCount = 0;
+        let preferPurePair = true;
+
+        // First pass: look for pure pairs (count === 2)
+        for (const [rank, count] of Object.entries(rankCounts)) {
+            if (rank !== tripsRank && count === 2) {
+                if (count > pairCount) {
+                    pairRank = rank;
+                    pairCount = count;
+                }
+            }
+        }
+
+        // Second pass: if no pure pairs, use any rank with ≥2 cards
+        if (!pairRank) {
+            for (const [rank, count] of Object.entries(rankCounts)) {
+                if (rank !== tripsRank && count >= 2) {
+                    if (count > pairCount) {
+                        pairRank = rank;
+                        pairCount = count;
+                        preferPurePair = false;
+                    }
+                }
+            }
+        }
+
+        if (!pairRank) {
+            console.log('❌ No second rank available for pair');
+            return false;
+        }
+
+        // Calculate wilds needed for pair
+        const wildsForPair = Math.max(0, 2 - pairCount);
+        const totalWildsNeeded = wildsForTrips + wildsForPair;
+
+        console.log(`✓ Found pair candidate: ${pairRank} (${pairCount} cards, ${preferPurePair ? 'pure pair' : 'from trips'}, need ${wildsForPair} wilds)`);
+
+        if (totalWildsNeeded > availableWilds) {
+            console.log(`❌ Need ${totalWildsNeeded} total wilds (${wildsForTrips} trips + ${wildsForPair} pair), only have ${availableWilds}`);
+            return false;
+        }
+
+        console.log(`✓ Found pair candidate: ${pairRank} (${pairCount} cards, need ${wildsForPair} wilds)`);
+        console.log(`✅ Built full house: ${tripsRank}-${tripsRank}-${tripsRank}-${pairRank}-${pairRank} (used ${totalWildsNeeded} wilds)`);
+
+        // Consume cards
+        rankCounts[tripsRank] -= Math.min(3, tripsCount);
+        if (rankCounts[tripsRank] === 0) delete rankCounts[tripsRank];
+
+        rankCounts[pairRank] -= Math.min(2, pairCount);
+        if (rankCounts[pairRank] === 0) delete rankCounts[pairRank];
+
+        availableWilds -= totalWildsNeeded;
+
+        console.log('📊 Remaining inventory:', rankCounts);
+        console.log('🃏 Remaining wilds:', availableWilds);
+
+        return true;
     }
 
-    // Calculate what we need to build with wilds
-    // Need: 3 trips and 3 pairs (but FH uses trips+pair from different ranks)
-    const tripsNeeded = Math.max(0, 3 - tripsAvailable);
-    const pairsNeeded = Math.max(0, 3 - pairsAvailable);
+    // Try to build 3 full houses
+    const fh1 = tryBuildFullHouse();
+    if (fh1) fullHousesBuilt++;
 
-    // Estimate wilds needed (rough heuristic)
-    // Converting pair→trips needs 1 wild
-    // Creating pair from singles needs 2 wilds
-    // Creating trips from singles needs 3 wilds
+    const fh2 = fh1 && tryBuildFullHouse();
+    if (fh2) fullHousesBuilt++;
 
-    // Simplified: if we have lots of wilds, we can fill gaps
-    if (wildCount >= 6) return true;  // Very flexible with many wilds
+    const fh3 = fh2 && tryBuildFullHouse();
+    if (fh3) fullHousesBuilt++;
 
-    // Conservative: need at least 2 trips OR 1 trip + 2 pairs
-    if (tripsAvailable >= 3 && pairsAvailable >= 3) return true;
-    if (tripsAvailable >= 2 && pairsAvailable >= 2 && wildCount >= 3) return true;
-    if (tripsAvailable >= 1 && pairsAvailable >= 3 && wildCount >= 2) return true;
-
-    return false;
+    console.log(`\n🏁 Final result: Built ${fullHousesBuilt}/3 full houses`);
+    return fullHousesBuilt === 3;
 }
 
 /**
@@ -298,22 +373,111 @@ function canFormThreeFlush(naturalCards, wildCount) {
  * Need: 5-card straight, 5-card straight, 5-card straight
  */
 function canFormThreeStraight(naturalCards, wildCount) {
-    // Get unique ranks (by value)
-    const rankValues = [...new Set(naturalCards.map(c => c.value))].sort((a, b) => b - a);
+    console.log('🔍 canFormThreeStraight - checking with', naturalCards.length, 'naturals +', wildCount, 'wilds');
 
-    // Need enough rank coverage for 3 straights
-    // 5-card straight needs 5 consecutive ranks (or gaps filled by wilds)
-    // 3-card straight needs 3 consecutive ranks
+    // Count inventory of each rank
+    const rankCounts = {};
+    for (let i = 2; i <= 14; i++) {
+        rankCounts[i] = 0;
+    }
 
-    // Heuristic: if we have 8+ unique ranks + some wilds, likely possible
-    const uniqueRankCount = rankValues.length;
+    naturalCards.forEach(c => {
+        rankCounts[c.value]++;
+    });
 
-    if (uniqueRankCount >= 10) return true; // Lots of ranks = easy
-    if (uniqueRankCount >= 7 && wildCount >= 2) return true;
+    console.log('📊 Rank inventory:', rankCounts);
 
-    // More precise: check for consecutive sequences
-    // This is complex - simplified version:
-    return (uniqueRankCount + wildCount) >= 11; // Need ~11 ranks worth
+    let availableWilds = wildCount;
+    let straightsBuilt = 0;
+
+    // Try to build 3 straights greedily (highest first)
+    function tryBuildStraight() {
+        console.log(`\n🎯 Attempting straight #${straightsBuilt + 1}, wilds available: ${availableWilds}`);
+
+        // Try each possible 5-card straight
+        for (let high = 14; high >= 5; high--) {
+            const needed = [];
+            for (let i = 0; i < 5; i++) {
+                needed.push(high - i);
+            }
+
+            // Check if we have enough cards for this straight
+            let wildsNeeded = 0;
+            let canBuild = true;
+
+            for (const rank of needed) {
+                if (rankCounts[rank] > 0) {
+                    // Have natural card
+                } else if (wildsNeeded < availableWilds) {
+                    wildsNeeded++;
+                } else {
+                    canBuild = false;
+                    break;
+                }
+            }
+
+            if (canBuild) {
+                console.log(`✅ Built straight: ${needed.join('-')} (used ${wildsNeeded} wilds)`);
+                // Consume cards for this straight
+                for (const rank of needed) {
+                    if (rankCounts[rank] > 0) {
+                        rankCounts[rank]--;
+                    } else {
+                        availableWilds--;
+                    }
+                }
+                console.log('📊 Remaining inventory:', rankCounts);
+                console.log('🃏 Remaining wilds:', availableWilds);
+                return true;
+            }
+        }
+
+        // Try wheel (A-2-3-4-5)
+        const wheelRanks = [14, 2, 3, 4, 5];
+        let wildsNeeded = 0;
+        let canBuild = true;
+
+        for (const rank of wheelRanks) {
+            if (rankCounts[rank] > 0) {
+                // Have natural card
+            } else if (wildsNeeded < availableWilds) {
+                wildsNeeded++;
+            } else {
+                canBuild = false;
+                break;
+            }
+        }
+
+        if (canBuild) {
+            console.log(`✅ Built wheel straight: A-2-3-4-5 (used ${wildsNeeded} wilds)`);
+            for (const rank of wheelRanks) {
+                if (rankCounts[rank] > 0) {
+                    rankCounts[rank]--;
+                } else {
+                    availableWilds--;
+                }
+            }
+            console.log('📊 Remaining inventory:', rankCounts);
+            console.log('🃏 Remaining wilds:', availableWilds);
+            return true;
+        }
+
+        console.log('❌ Could not build straight #' + (straightsBuilt + 1));
+        return false;
+    }
+
+    // Try to build 3 straights
+    const straight1 = tryBuildStraight();
+    if (straight1) straightsBuilt++;
+
+    const straight2 = straight1 && tryBuildStraight();
+    if (straight2) straightsBuilt++;
+
+    const straight3 = straight2 && tryBuildStraight();
+    if (straight3) straightsBuilt++;
+
+    console.log(`\n🏁 Final result: Built ${straightsBuilt}/3 straights`);
+    return straightsBuilt === 3;
 }
 
 /**
@@ -362,61 +526,165 @@ function findAndArrangeBestAutomatic(allCards) {
     return { type: bestAutomatic, arrangement };
 }
 
-// Arrange cards for dragon (distribute across back/middle/front showing all 13 ranks)
 // Three-full-houses - build trips+pairs
 function arrangeThreeFullHouses(allCards) {
+    console.log('🎨 arrangeThreeFullHouses - arranging 17 cards');
+
     const wilds = allCards.filter(c => c.isWild);
     const naturals = allCards.filter(c => !c.isWild);
 
-    // Count ranks
-    const rankGroups = {};
+    // Build rank inventory (rank → array of cards)
+    const rankInventory = {};
     naturals.forEach(c => {
-        if (!rankGroups[c.rank]) rankGroups[c.rank] = [];
-        rankGroups[c.rank].push(c);
+        if (!rankInventory[c.rank]) rankInventory[c.rank] = [];
+        rankInventory[c.rank].push(c);
     });
 
-    // Separate: TRIPS (exactly 3+) and PAIRS (exactly 2, NOT from trips)
-    const tripsRanks = [];
-    const pairsRanks = [];
+    console.log('📊 Initial inventory:',
+        Object.fromEntries(Object.entries(rankInventory).map(([k,v]) => [k, v.length])));
 
-    for (const [rank, cards] of Object.entries(rankGroups)) {
-        if (cards.length >= 3) {
-            tripsRanks.push({rank, cards});
-        } else if (cards.length === 2) {  // ONLY pairs, not from trips
-            pairsRanks.push({rank, cards});
+    let availableWilds = [...wilds];
+
+    // Build a single full house
+    function buildFullHouse(targetHand) {
+
+        const fhNumber = hands.length + 1;
+        console.log(`\n🎯 Building full house #${fhNumber}`);
+        console.log(`   Wilds available: ${availableWilds.length}`);
+
+        // Find best trips candidate (rank with most cards)
+        let tripsRank = null;
+        let tripsCount = 0;
+
+        for (const [rank, cards] of Object.entries(rankInventory)) {
+            if (cards.length > tripsCount) {
+                tripsRank = rank;
+                tripsCount = cards.length;
+            }
         }
+
+        if (!tripsRank) {
+            console.log('❌ No ranks available for trips');
+            return false;
+        }
+
+        const wildsForTrips = Math.max(0, 3 - tripsCount);
+
+        if (wildsForTrips > availableWilds.length) {
+            console.log(`❌ Need ${wildsForTrips} wilds for trips, only have ${availableWilds.length}`);
+            return false;
+        }
+
+        console.log(`✓ Using trips: ${tripsRank} (${tripsCount} cards, need ${wildsForTrips} wilds)`);
+
+        // Find best pair candidate (different rank)
+        // PREFER ranks with exactly 2 cards (pure pairs, not wasted trips)
+        let pairRank = null;
+        let pairCount = 0;
+        let isPurePair = false;
+
+        // First pass: look for pure pairs (count === 2)
+        for (const [rank, cards] of Object.entries(rankInventory)) {
+            if (rank !== tripsRank && cards.length === 2) {
+                pairRank = rank;
+                pairCount = 2;
+                isPurePair = true;
+                break; // Found pure pair, use it
+            }
+        }
+
+        // Second pass: if no pure pairs, use any rank with most cards
+        if (!pairRank) {
+            for (const [rank, cards] of Object.entries(rankInventory)) {
+                if (rank !== tripsRank && cards.length > pairCount) {
+                    pairRank = rank;
+                    pairCount = cards.length;
+                }
+            }
+        }
+
+        if (!pairRank) {
+            console.log('❌ No second rank available for pair');
+            return false;
+        }
+
+        const wildsForPair = Math.max(0, 2 - pairCount);
+        const totalWildsNeeded = wildsForTrips + wildsForPair;
+
+        if (totalWildsNeeded > availableWilds.length) {
+            console.log(`❌ Need ${totalWildsNeeded} total wilds, only have ${availableWilds.length}`);
+            return false;
+        }
+
+        console.log(`✓ Using pair: ${pairRank} (${pairCount} cards, ${isPurePair ? 'pure pair' : 'from trips'}, need ${wildsForPair} wilds)`);
+
+        console.log(`✅ Built full house: ${tripsRank}-${tripsRank}-${tripsRank}-${pairRank}-${pairRank}`);
+
+        // Add trips to hand
+        const tripsToUse = Math.min(3, tripsCount);
+        for (let i = 0; i < tripsToUse; i++) {
+            targetHand.push(rankInventory[tripsRank].shift());
+        }
+        for (let i = 0; i < wildsForTrips; i++) {
+            targetHand.push(availableWilds.shift());
+        }
+
+        // Clean up empty rank
+        if (rankInventory[tripsRank].length === 0) {
+            delete rankInventory[tripsRank];
+        }
+
+        // Add pair to hand
+        const pairToUse = Math.min(2, pairCount);
+        for (let i = 0; i < pairToUse; i++) {
+            targetHand.push(rankInventory[pairRank].shift());
+        }
+        for (let i = 0; i < wildsForPair; i++) {
+            targetHand.push(availableWilds.shift());
+        }
+
+        // Clean up empty rank
+        if (rankInventory[pairRank].length === 0) {
+            delete rankInventory[pairRank];
+        }
+
+        console.log('📊 Remaining inventory:',
+            Object.fromEntries(Object.entries(rankInventory).map(([k,v]) => [k, v.length])));
+
+        return true;
     }
 
-    // Sort by value
-    tripsRanks.sort((a, b) => b.cards[0].value - a.cards[0].value);
-    pairsRanks.sort((a, b) => b.cards[0].value - a.cards[0].value);
+    // Build 3 full houses
+    const hands = [];
 
-    const back = [];
-    const middle = [];
-    const front = [];
+    const hand1 = [];
+    if (buildFullHouse(hand1)) hands.push(hand1);
 
-    // Allocate: trips[0]+pair[0], trips[1]+pair[1], trips[2]+pair[2]
-    if (tripsRanks[0] && pairsRanks[0]) {
-        back.push(...tripsRanks[0].cards.slice(0, 3));
-        back.push(...pairsRanks[0].cards.slice(0, 2));
-    }
+    const hand2 = [];
+    if (buildFullHouse(hand2)) hands.push(hand2);
 
-    if (tripsRanks[1] && pairsRanks[1]) {
-        middle.push(...tripsRanks[1].cards.slice(0, 3));
-        middle.push(...pairsRanks[1].cards.slice(0, 2));
-    }
+    const hand3 = [];
+    if (buildFullHouse(hand3)) hands.push(hand3);
 
-    if (tripsRanks[2] && pairsRanks[2]) {
-        front.push(...tripsRanks[2].cards.slice(0, 3));
-        front.push(...pairsRanks[2].cards.slice(0, 2));
-    }
+    // Sort by hand strength (strongest first)
+    hands.sort((a, b) => {
+        const strengthA = evaluateHand(a);
+        const strengthB = evaluateHand(b);
+        return compareTuples(strengthB.handStrength, strengthA.handStrength);
+    });
 
-    // Fill with wilds if needed
-    while (back.length < 5 && wilds.length > 0) back.push(wilds.shift());
-    while (middle.length < 5 && wilds.length > 0) middle.push(wilds.shift());
-    while (front.length < 5 && wilds.length > 0) front.push(wilds.shift());
+    // Assign to back/middle/front (strongest to weakest)
+    const back = hands[0] || [];
+    const middle = hands[1] || [];
+    const front = hands[2] || [];
+
+    console.log('🏁 Arrangement complete (sorted by strength)');
+    console.log(`   Back: ${back.length} cards`);
+    console.log(`   Middle: ${middle.length} cards`);
+    console.log(`   Front: ${front.length} cards`);
 
     return { back, middle, front };
+
 }
 
 // Dragon - should already work, but here's a cleaner version
@@ -464,66 +732,154 @@ function arrangeThreeFlush(allCards) {
     return { back, middle, front };
 }
 
-// Three-straight - find 3 consecutive sequences
 function arrangeThreeStraight(allCards) {
+    console.log('🎨 arrangeThreeStraight - arranging 17 cards');
+
     const wilds = allCards.filter(c => c.isWild);
     const naturals = allCards.filter(c => !c.isWild);
 
-    // Sort by value descending
-    naturals.sort((a, b) => b.value - a.value);
+    // Build rank inventory (rank → array of cards)
+    const rankInventory = {};
+    for (let i = 2; i <= 14; i++) {
+        rankInventory[i] = [];
+    }
 
-    // Try to build three 5-card straights
-    // Strategy: greedy approach - find highest straight first
+    naturals.forEach(c => {
+        rankInventory[c.value].push(c);
+    });
 
-    const back = [];
-    const middle = [];
-    const front = [];
-    const used = new Set();
+    console.log('📊 Initial inventory counts:',
+        Object.fromEntries(Object.entries(rankInventory).map(([k,v]) => [k, v.length])));
 
-    // Helper: try to build a 5-card straight starting at highCard
-    function buildStraight(targetHand, startValue) {
-        const needed = [];
-        for (let i = 0; i < 5; i++) {
-            needed.push(startValue - i);
-        }
+    let availableWilds = [...wilds];
 
-        // Find cards for this straight
-        for (const val of needed) {
-            // Try to find natural card with this value
-            const card = naturals.find(c => c.value === val && !used.has(c.id));
-            if (card) {
-                targetHand.push(card);
-                used.add(card.id);
-            } else if (wilds.length > 0) {
-                // Use wild as substitute
-                targetHand.push(wilds.shift());
-            } else {
-                return false; // Can't complete this straight
+    // NESTED FUNCTION - can access parent variables
+    function buildStraight(targetHand) {
+
+        // Try each possible 5-card straight (high to low)
+        for (let high = 14; high >= 5; high--) {
+            const needed = [];
+            for (let i = 0; i < 5; i++) {
+                needed.push(high - i);
+            }
+
+            // Check if we can build this straight
+            let wildsNeeded = 0;
+            const cardsForStraight = [];
+            let canBuild = true;
+
+            for (const rank of needed) {
+                if (rankInventory[rank] && rankInventory[rank].length > 0) {
+                    cardsForStraight.push(rankInventory[rank][0]);
+                } else if (wildsNeeded < availableWilds.length) {
+                    cardsForStraight.push(null);
+                    wildsNeeded++;
+                } else {
+                    canBuild = false;
+                    break;
+                }
+            }
+
+            if (canBuild) {
+                console.log(`✅ Building straight: ${needed.join('-')} (using ${wildsNeeded} wilds)`);
+
+                // Consume cards from inventory
+                for (let i = 0; i < cardsForStraight.length; i++) {
+                    if (cardsForStraight[i]) {
+                        const rank = needed[i];
+                        const card = rankInventory[rank].shift();
+                        targetHand.push(card);
+                        if (rankInventory[rank].length === 0) {
+                            delete rankInventory[rank];
+                        }
+                    } else {
+                        targetHand.push(availableWilds.shift());
+                    }
+                }
+
+                console.log('📊 Remaining inventory:',
+                    Object.fromEntries(Object.entries(rankInventory).map(([k,v]) => [k, v.length])));
+                return true;
             }
         }
-        return true;
+
+        // Try wheel (A-2-3-4-5)
+        const wheelRanks = [14, 2, 3, 4, 5];
+        let wildsNeeded = 0;
+        const cardsForStraight = [];
+        let canBuild = true;
+
+        for (const rank of wheelRanks) {
+            if (rankInventory[rank] && rankInventory[rank].length > 0) {
+                cardsForStraight.push(rankInventory[rank][0]);
+            } else if (wildsNeeded < availableWilds.length) {
+                cardsForStraight.push(null);
+                wildsNeeded++;
+            } else {
+                canBuild = false;
+                break;
+            }
+        }
+
+        if (canBuild) {
+            console.log(`✅ Building wheel straight: A-2-3-4-5 (using ${wildsNeeded} wilds)`);
+
+            for (let i = 0; i < cardsForStraight.length; i++) {
+                if (cardsForStraight[i]) {
+                    const rank = wheelRanks[i];
+                    const card = rankInventory[rank].shift();
+                    targetHand.push(card);
+                    if (rankInventory[rank].length === 0) {
+                        delete rankInventory[rank];
+                    }
+                } else {
+                    targetHand.push(availableWilds.shift());
+                }
+            }
+
+            console.log('📊 Remaining inventory:',
+                Object.fromEntries(Object.entries(rankInventory).map(([k,v]) => [k, v.length])));
+            return true;
+        }
+
+        console.log('❌ Could not build straight');
+        return false;
     }
 
-    // Try to build 3 straights (start high, work down)
-    const attempts = [
-        [back, 14],    // A-high
-        [middle, 9],   // 9-high
-        [front, 5]     // 5-high (wheel)
-    ];
+    // Build 3 straights (at the end of arrangeThreeStraight, replace the build calls)
+    const hands = [];
 
-    for (const [hand, start] of attempts) {
-        buildStraight(hand, start);
-    }
+    // Build first straight
+    const hand1 = [];
+    if (buildStraight(hand1)) hands.push(hand1);
 
-    // If any hand is incomplete, fill with remaining cards
-    const remaining = allCards.filter(c => !used.has(c.id) && !c.isWild);
-    while (back.length < 5 && remaining.length > 0) back.push(remaining.shift());
-    while (middle.length < 5 && remaining.length > 0) middle.push(remaining.shift());
-    while (front.length < 5 && remaining.length > 0) front.push(remaining.shift());
+    // Build second straight
+    const hand2 = [];
+    if (buildStraight(hand2)) hands.push(hand2);
+
+    // Build third straight
+    const hand3 = [];
+    if (buildStraight(hand3)) hands.push(hand3);
+
+    // Sort by hand strength (strongest first)
+    hands.sort((a, b) => {
+        const strengthA = evaluateHand(a);
+        const strengthB = evaluateHand(b);
+        return compareTuples(strengthB.handStrength, strengthA.handStrength);
+    });
+
+    // Assign to back/middle/front (strongest to weakest)
+    let back = hands[0] || [];
+    let middle = hands[1] || [];
+    let front = hands[2] || [];
+
+    console.log('🏁 Arrangement complete (sorted by strength)');
+    console.log(`   Back: ${back.length} cards`);
+    console.log(`   Middle: ${middle.length} cards`);
+    console.log(`   Front: ${front.length} cards`);
 
     return { back, middle, front };
 }
-
 
 window.dealAutomatic = function(type) {
     // Clear everything first
@@ -641,4 +997,3 @@ if (typeof module !== 'undefined' && module.exports) {
 } else {
     window.detectPossibleAutomatics = detectPossibleAutomatics;
 }
-

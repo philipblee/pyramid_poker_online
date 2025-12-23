@@ -822,7 +822,7 @@ function showRoundRobinScoring(detailedResults, game, containerElement) {
             const opponents = allPlayers.filter(p => p !== playerName);
 
             automaticHTML += `<p style="color: #4ecdc4; margin: 8px 0; font-weight: bold;">
-                <strong>${playerName} played <strong style="color: #ffd700;">${automaticType} and won +3 points</strong> from each opponent
+                <strong>${playerName} played the Automatic <strong style="color: #ffd700;">${automaticType} and won +3 points</strong> from each opponent
             </p>`;
 
             opponents.forEach(opponent => {
