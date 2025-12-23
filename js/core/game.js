@@ -46,9 +46,9 @@ class PyramidPoker {
             findAutomaticsBtn.addEventListener('click', () => {
                 console.log('🔧 Button clicked, currentAutomatic:', window.currentAutomatic);
                 if (window.currentAutomatic) {
-                    handlePlayAutomatic();
+                    window.handlePlayAutomatic();
                 } else {
-                    handleFindAutomatics();
+                    window.handleFindAutomatics();
                 }
             });
         }
@@ -1695,144 +1695,6 @@ class PyramidPoker {
     }
 }
 
-function showAutomaticMessage(message) {
-    const messageDiv = document.getElementById('automaticMessage');
-    if (messageDiv) {
-        messageDiv.textContent = message;
-        messageDiv.style.display = 'block';
-
-        setTimeout(() => {
-            messageDiv.style.display = 'none';
-        }, 10000);
-    } else {
-        console.log(message); // Fallback
-    }
-}
-
-function handleFindAutomatics() {
-    console.log('🎯 handleFindAutomatics CALLED');
-    console.log('🎯 window.currentAutomatic:', window.currentAutomatic);
-
-    // GUARD: If automatic already detected, do nothing
-    if (window.currentAutomatic) {
-        console.log('⚠️ Automatic already detected, ignoring duplicate call');
-        return;
-    }
-
-    const stagingArea = document.getElementById('playerHand');
-    if (!stagingArea) {
-        console.error('❌ playerHand element not found');
-        showAutomaticMessage('❌ Error: Staging area not found');
-        return;
-    }
-
-    const cardElements = stagingArea.querySelectorAll('.card');
-    if (cardElements.length === 0) {
-        showAutomaticMessage('❌ No cards in staging area');
-        return;
-    }
-
-    const allCards = Array.from(cardElements).map(cardEl => {
-        const card = JSON.parse(cardEl.dataset.card);
-        card.element = cardEl;
-        return card;
-    });
-
-    console.log('🔍 Searching for automatics with', allCards.length, 'cards...');
-    const result = findAndArrangeBestAutomatic(allCards);
-
-    if (result) {
-        const automaticName = result.type.replace(/-/g, ' ').toUpperCase();
-        showAutomaticMessage(`✨ Automatic Found: ${automaticName}`);
-
-        // Update DOM (visual)
-        result.arrangement.back.forEach(card => {
-            document.getElementById('backHand').appendChild(card.element);
-        });
-        result.arrangement.middle.forEach(card => {
-            document.getElementById('middleHand').appendChild(card.element);
-        });
-        result.arrangement.front.forEach(card => {
-            document.getElementById('frontHand').appendChild(card.element);
-        });
-
-        // Update this.playerHands (data store) - CRITICAL!
-        const currentPlayer = window.game.playerManager.getCurrentPlayer();
-        const playerData = window.game.playerHands.get(currentPlayer.name);
-        if (playerData) {
-            // Get IDs of moved cards
-            const movedCards = [...result.arrangement.back, ...result.arrangement.middle, ...result.arrangement.front];
-            const movedCardIds = new Set(movedCards.map(c => c.id));
-
-            // Remove moved cards from staging
-            playerData.cards = playerData.cards.filter(c => !movedCardIds.has(c.id));
-
-            // Store card data WITHOUT .element property
-            playerData.back = result.arrangement.back.map(c => {
-                const {element, ...cardData} = c;
-                return cardData;
-            });
-            playerData.middle = result.arrangement.middle.map(c => {
-                const {element, ...cardData} = c;
-                return cardData;
-            });
-            playerData.front = result.arrangement.front.map(c => {
-                const {element, ...cardData} = c;
-                return cardData;
-            });
-        }
-
-        // Store automatic type
-        window.currentAutomatic = result.type;
-
-        // Change button text
-        const autoButton = document.getElementById('findAutomatics');
-        autoButton.textContent = 'PLAY-AUTOMATIC';
-
-        // Enable submit
-        document.getElementById('submitHand').disabled = false;
-
-        console.log(`✅ Arranged ${result.type}`);
-    } else {
-        showAutomaticMessage('❌ No automatic possible with these cards');
-
-        // IMPORTANT: Do NOT touch any cards or hands when no automatic is found.
-        // Just reset any automatic-related state so we don't accidentally reuse
-        // a previous automatic on a later click.
-        window.currentAutomatic = null;
-
-        const autoButton = document.getElementById('findAutomatics');
-        if (autoButton) {
-            autoButton.textContent = 'DETECT-AUTOMATIC';
-            autoButton.title = '';
-        }
-    }
-}
-
-function handlePlayAutomatic() {
-    console.log('🎯 handlePlayAutomatic CALLED');
-    console.log('🎯 window.currentAutomatic:', window.currentAutomatic);
-    if (!window.currentAutomatic) return;
-
-    // Clear flag
-    window.currentAutomatic = null;
-
-    // Call existing method - it reads from this.playerHands
-    window.game.submitAutomatic();
-
-    console.log(`🎯 Submitted automatic`);
-}
-
-function resetAutomaticButton() {
-    const autoButton = document.getElementById('findAutomatics');
-    if (autoButton) {
-        autoButton.textContent = 'DETECT-AUTOMATIC';
-        // DON'T set onclick - addEventListener already handles it
-        autoButton.title = '';
-        autoButton.disabled = false; // Enable until valid arrangement
-    }
-    window.currentAutomatic = null;
-}
 
 // this function is used to update GameChipDisplay for table screeb and game screen
 function updateGameChipDisplays() {
