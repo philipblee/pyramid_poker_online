@@ -728,20 +728,14 @@ function createTableSettingsModal() {
 
             <div style="margin-bottom: 20px;">
                 <label style="color: #ffd700; display: block; margin-bottom: 8px;">Rounds (1-5):</label>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="range" id="tableRounds" min="1" max="5" value="3"
-                           oninput="updateRoundsDisplay(this.value)" style="flex: 1;">
-                    <span id="roundsValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">3</span>
-                </div>
+                <input type="number" id="tableRounds" min="1" max="5" value="3"
+                       style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
             </div>
 
             <div style="margin-bottom: 20px;">
                 <label style="color: #ffd700; display: block; margin-bottom: 8px;">Wild Cards (0-2):</label>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="range" id="tableWildCardCounts" min="0" max="2" value="2"
-                           oninput="updateWildCardsDisplay(this.value)" style="flex: 1;">
-                    <span id="wildCardsValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">2</span>
-                </div>
+                <input type="number" id="tableWildCardCounts" min="0" max="2" value="2"
+                       style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
             </div>
 
             <div style="margin-bottom: 20px;">
@@ -758,20 +752,14 @@ function createTableSettingsModal() {
 
             <div style="margin-bottom: 20px;">
                 <label style="color: #ffd700; display: block; margin-bottom: 8px;">Stakes Multiplier (1x-5x):</label>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="range" id="stakesMultiplierAmount" min="1" max="5" value="2"
-                           oninput="updateMultiplierDisplay(this.value)" style="flex: 1;">
-                    <span id="multiplierValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">2x</span>
-                </div>
+                <input type="number" id="stakesMultiplierAmount" min="1" max="5" value="2"
+                       style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
             </div>
 
             <div style="margin-bottom: 20px;">
                 <label style="color: #ffd700; display: block; margin-bottom: 8px;">AI Players (0-5):</label>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="range" id="tableComputerPlayers" min="0" max="5" value="1"
-                           oninput="updateAiPlayersDisplay(this.value)" style="flex: 1;">
-                    <span id="aiPlayersValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">1</span>
-                </div>
+                <input type="number" id="tableComputerPlayers" min="0" max="5" value="1"
+                       style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
             </div>
 
             <div style="margin-bottom: 20px;">
@@ -812,39 +800,14 @@ function updateRoundsDisplay(value) {
     document.getElementById('rounds').textContent = value;
 }
 
-
 // Open table settings modal
 function openTableSettings() {
-
-        // Force recreate modal every time
+    // Force recreate modal every time
     const existingModal = document.getElementById('tableSettingsModal');
     if (existingModal) {
         existingModal.remove();
     }
     createTableSettingsModal();
-
-    // Debug: Check which fields exist
-    console.log('🔍 Checking modal fields:');
-    console.log('tableRounds:', document.getElementById('tableRounds'));
-    console.log('tableWildCardCounts:', document.getElementById('tableWildCardCounts'));
-    console.log('stakesAnteAmount:', document.getElementById('stakesAnteAmount'));
-    console.log('stakesSurrenderAmount:', document.getElementById('stakesSurrenderAmount'));
-    console.log('stakesMultiplierAmount:', document.getElementById('stakesMultiplierAmount'));
-    console.log('tableComputerPlayers:', document.getElementById('tableComputerPlayers'));
-    console.log('winProbabilityMethod:', document.getElementById('winProbabilityMethod'));
-    console.log('automaticsAllowed:', document.getElementById('automaticsAllowed'));
-
-    // Update slider displays
-    console.log('🔍 Checking display spans:');
-    console.log('roundsValue:', document.getElementById('roundsValue'));
-    console.log('wildCardsValue:', document.getElementById('wildCardsValue'));
-    console.log('multiplierValue:', document.getElementById('multiplierValue'));
-    console.log('aiPlayersValue:', document.getElementById('aiPlayersValue'));
-
-    updateRoundsDisplay(tableSettings.rounds || 3);
-    updateWildCardsDisplay(tableSettings.wildCardCount || 2);
-    updateMultiplierDisplay(tableSettings.stakesMultiplierAmount || 2);
-    updateAiPlayersDisplay(tableSettings.computerPlayers || 1);
 
     // Populate current settings (all 8)
     document.getElementById('tableRounds').value = tableSettings.rounds || 3;
@@ -855,12 +818,6 @@ function openTableSettings() {
     document.getElementById('tableComputerPlayers').value = tableSettings.computerPlayers || 1;
     document.getElementById('winProbabilityMethod').value = tableSettings.winProbabilityMethod || 'netEV';
     document.getElementById('automaticsAllowed').value = tableSettings.automaticsAllowed || 'yes';
-
-    // Update slider displays
-    updateRoundsDisplay(tableSettings.rounds || 3);
-    updateWildCardsDisplay(tableSettings.wildCardCount || 2);
-    updateMultiplierDisplay(tableSettings.stakesMultiplierAmount || 2);
-    updateAiPlayersDisplay(tableSettings.computerPlayers || 1);
 
     // Show modal
     document.getElementById('tableSettingsModal').style.display = 'block';
@@ -896,23 +853,6 @@ function saveTableSettings() {
 
     // Close modal
     closeTableSettings();
-}
-
-// Update display functions
-function updateRoundsDisplay(value) {
-    document.getElementById('roundsValue').textContent = value;
-}
-
-function updateWildCardsDisplay(value) {
-    document.getElementById('wildCardsValue').textContent = value;
-}
-
-function updateMultiplierDisplay(value) {
-    document.getElementById('multiplierValue').textContent = value + 'x';
-}
-
-function updateAiPlayersDisplay(value) {
-    document.getElementById('aiPlayersValue').textContent = value;
 }
 
 // Close, save, and update functions
