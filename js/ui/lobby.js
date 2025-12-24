@@ -21,8 +21,9 @@ let tableSettings = {
     stakes: 'yes',                   // 'yes', 'no'
     stakesAnteAmount: 10,           // 0, 10, 20, etc.
     stakesMultiplierAmount: 2,      // 0, 1, 2, 3, etc.
-    stakesSurrenderAmount: 0,      // 10, 20, etc.
-
+    stakesSurrenderAmount: 10,      // 10, 20, etc.
+    automaticsAllowed: 'yes',        // NEW
+    autoArrangeAllowed: 'yes',       // NEW
     // countdown:
     countdownTime: 5,              // 10, 20, 30, etc.
     tableId: null,                   // For multiplayer table identification
@@ -33,7 +34,7 @@ let tableSettings = {
 const defaultTables = [
     {
         id: 1,
-        name: '1. No-Surrender - Offline vs. 1 AI Opponents',
+        name: '1. SINGLE PLAYER - NO SURRENDER',
         settings: {
                     ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'single-human',
@@ -49,7 +50,7 @@ const defaultTables = [
 
     {
         id: 2,
-        name: '2. kitty - Offline vs. 1 AI Opponents - 1 Wild',
+        name: '2. SINGLE PLAYER - NO SURRENDER',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'single-human',
@@ -65,7 +66,7 @@ const defaultTables = [
 
     {
         id: 3,
-        name: '3. Offline vs 3 AI Opponents - 2 Wilds',
+        name: '3. SINGLE PLAYER - NO SURRENDER',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'single-human',
@@ -80,7 +81,7 @@ const defaultTables = [
 
     {
         id: 4,
-        name: '4. Offline vs 5 AI Opponents - 2 Wilds',
+        name: '4. SINGLE PLAYER - NO SURRENDER',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'single-human',
@@ -95,7 +96,7 @@ const defaultTables = [
 
     {
         id: 5,
-        name: '5. Offline Challenge - 2 Wilds',
+        name: '5. SINGLE PLAYER - NO SURRENDER',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'single-human',
@@ -110,13 +111,13 @@ const defaultTables = [
 
     {
         id: 6,
-        name: '6. Online - 2 Wild Card',
+        name: '6. SINGLE PLAYER - NO SURRENDER',
         settings: {
 
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'single-human',
-                    gameConnectMode: 'online',
-                    gameDeviceMode: 'multi-device',
+                    gameConnectMode: 'offline',
+                    gameDeviceMode: 'single-device',
                     computerPlayers: 2,
                     rounds: 3,
                     wildCardCount: 2,
@@ -126,7 +127,7 @@ const defaultTables = [
 
     {
         id: 7,
-        name: '7. Online - No-surrender',
+        name: '7. MULTIPLAYER - NO SURRENDER',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'multiple-humans',
@@ -143,7 +144,7 @@ const defaultTables = [
 
     {
         id: 8,
-        name: '8. Online - Kitty',
+        name: '8. MULTIPLAYER - 4-CARD KITTY',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'multiple-humans',
@@ -160,7 +161,7 @@ const defaultTables = [
 
     {
         id: 9,
-        name: '9. Online - 2 Wild Card',
+        name: '9. MULTIPLAYER - NO SURRENDER',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'multiple-humans',
@@ -252,29 +253,23 @@ function createTableCard(table) {
     const card = document.createElement('div');
     card.className = 'table-card';
 
-    card.onclick = () => joinTable(table);
     const settings = table.settings;
-
-
     const currentPlayers = settings.humanPlayers || 0;
     const maxPlayers = settings.maxHumanPlayers || 1;
     const isFull = currentPlayers >= maxPlayers;
 
-//    console.log('🔍 isFull calculation:', isFull, `(${currentPlayers}/${maxPlayers})`);
-
     // Set onclick only if table isn't full
     if (!isFull) {
-//        console.log('🔍 Adding click handler for table:', table.name);
         card.onclick = () => joinTable(table);
     } else {
-        console.log('🔍 Table is full, NOT adding click handler');
         card.classList.add('table-full');
         card.style.cursor = 'not-allowed';
     }
 
-
     const gameConnectModeText = settings.gameConnectMode === 'online' ? 'Online' : 'Offline';
-    const gameModeText = settings.gameMode === 'single-human' ? 'Single Human Player' : 'Multiple Human Players';
+    const gameModeText = settings.gameMode === 'single-human' ? 'SINGLE PLAYER' : 'MULTIPLAYER';
+    const gameVariantText = settings.gameVariant === 'no-surrender' ? 'NO SURRENDER' : '4-CARD KITTY';
+
 
     card.innerHTML = `
         <div class="table-header">
@@ -282,12 +277,14 @@ function createTableCard(table) {
             <div class="table-icon">${table.icon}</div>
         </div>
         <div class="table-settings">
-            Player(s): ${gameModeText}<br>
-            Computer Players: ${settings.computerPlayers}<br>
-            Connect Mode: ${gameConnectModeText}<br>
-            Computer Methodology: ${settings.winProbabilityMethod}<br>
             Rounds: ${settings.rounds}<br>
-            Wild Cards: ${settings.wildCardCount}
+            Wild Cards: ${settings.wildCardCount}<br>
+            Stakes Ante: ${settings.stakesAnteAmount}<br>
+            Stakes Surrender: ${settings.stakesSurrenderAmount}<br>
+            Stakes Multiplier: ${settings.stakesMultiplierAmount}x<br>
+            AI Players: ${settings.computerPlayers}<br>
+            AI Algorithm: ${settings.winProbabilityMethod}<br>
+            Automatics Allowed: ${settings.automaticsAllowed || 'yes'}<br>
         </div>
         <div class="table-status">Join Table</div>
     `;
@@ -718,49 +715,85 @@ function returnToTable() {
     }
 }
 
-// Create table settings modal HTML (add this function to lobby.js)
+// Create table settings modal HTML (replace this function)
 function createTableSettingsModal() {
     const modal = document.createElement('div');
     modal.id = 'tableSettingsModal';
-    modal.className = 'modal';
-    modal.style.display = 'none';
+    modal.className = 'scoring-popup';
 
     modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>🎯 Table Settings</h2>
-                <span class="close" onclick="closeTableSettings()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="setting-group">
-                    <label for="tableRounds">Rounds (3-20):</label>
-                    <input type="range" id="tableRounds" min="3" max="20" value="3" oninput="updateRoundsDisplay(this.value)">
-                    <span id="rounds">3</span>
-                </div>
+        <div class="scoring-content">
+            <button class="close-popup" onclick="closeTableSettings()">&times;</button>
+            <h2 style="text-align: center; margin-bottom: 30px; color: #ffd700;">⚙️ Table Settings</h2>
 
-                <div class="setting-group">
-                    <label for="winProbabilityMethod">AI Method:</label>
-                    <select id="winProbabilityMethod">
-                        <option value="points">Points</option>
-                        <option value="tiered2">Tiered2</option>
-                        <option value="netEV">NetEV</option>
-                    </select>
-                </div>
-
-                <div class="setting-group">
-                    <label for="tableWildCardCounts">Wild Cards (0-4):</label>
-                    <input type="range" id="tableWildCardCounts" min="0" max="4" value="2" oninput="updateWildCardsDisplay(this.value)">
-                    <span id="wildCardsValue">2</span>
-                </div>
-
-                <div class="setting-group">
-                    <label for="tableComputerPlayers">AI Players (1-5):</label>
-                    <input type="range" id="tableComputerPlayers" min="1" max="5" value="4" oninput="updateAiPlayersDisplay(this.value)">
-                    <span id="aiPlayersValue">4</span>
+            <div style="margin-bottom: 20px;">
+                <label style="color: #ffd700; display: block; margin-bottom: 8px;">Rounds (1-5):</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="range" id="tableRounds" min="1" max="5" value="3"
+                           oninput="updateRoundsDisplay(this.value)" style="flex: 1;">
+                    <span id="roundsValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">3</span>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeTableSettings()">Cancel</button>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #ffd700; display: block; margin-bottom: 8px;">Wild Cards (0-2):</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="range" id="tableWildCardCounts" min="0" max="2" value="2"
+                           oninput="updateWildCardsDisplay(this.value)" style="flex: 1;">
+                    <span id="wildCardsValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">2</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #ffd700; display: block; margin-bottom: 8px;">Stakes Ante:</label>
+                <input type="number" id="stakesAnteAmount" min="0" max="100" step="10" value="10"
+                       style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #ffd700; display: block; margin-bottom: 8px;">Stakes Surrender:</label>
+                <input type="number" id="stakesSurrenderAmount" min="0" max="100" step="10" value="10"
+                       style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #ffd700; display: block; margin-bottom: 8px;">Stakes Multiplier (1x-5x):</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="range" id="stakesMultiplierAmount" min="1" max="5" value="2"
+                           oninput="updateMultiplierDisplay(this.value)" style="flex: 1;">
+                    <span id="multiplierValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">2x</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #ffd700; display: block; margin-bottom: 8px;">AI Players (0-5):</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="range" id="tableComputerPlayers" min="0" max="5" value="1"
+                           oninput="updateAiPlayersDisplay(this.value)" style="flex: 1;">
+                    <span id="aiPlayersValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">1</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #ffd700; display: block; margin-bottom: 8px;">AI Algorithm:</label>
+                <select id="winProbabilityMethod" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
+                    <option value="points">Points</option>
+                    <option value="tiered">Tiered</option>
+                    <option value="tiered2">Tiered2</option>
+                    <option value="netEV">NetEV</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #ffd700; display: block; margin-bottom: 8px;">Automatics Allowed:</label>
+                <select id="automaticsAllowed" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-secondary" onclick="closeTableSettings()" style="margin-right: 15px;">Cancel</button>
                 <button class="btn btn-primary" onclick="saveTableSettings()">Save Settings</button>
             </div>
         </div>
@@ -779,91 +812,107 @@ function updateRoundsDisplay(value) {
     document.getElementById('rounds').textContent = value;
 }
 
-function updateAiPlayersDisplay(value) {
-    document.getElementById('aiPlayersValue').textContent = value;
+
+// Open table settings modal
+function openTableSettings() {
+
+        // Force recreate modal every time
+    const existingModal = document.getElementById('tableSettingsModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    createTableSettingsModal();
+
+    // Debug: Check which fields exist
+    console.log('🔍 Checking modal fields:');
+    console.log('tableRounds:', document.getElementById('tableRounds'));
+    console.log('tableWildCardCounts:', document.getElementById('tableWildCardCounts'));
+    console.log('stakesAnteAmount:', document.getElementById('stakesAnteAmount'));
+    console.log('stakesSurrenderAmount:', document.getElementById('stakesSurrenderAmount'));
+    console.log('stakesMultiplierAmount:', document.getElementById('stakesMultiplierAmount'));
+    console.log('tableComputerPlayers:', document.getElementById('tableComputerPlayers'));
+    console.log('winProbabilityMethod:', document.getElementById('winProbabilityMethod'));
+    console.log('automaticsAllowed:', document.getElementById('automaticsAllowed'));
+
+    // Update slider displays
+    console.log('🔍 Checking display spans:');
+    console.log('roundsValue:', document.getElementById('roundsValue'));
+    console.log('wildCardsValue:', document.getElementById('wildCardsValue'));
+    console.log('multiplierValue:', document.getElementById('multiplierValue'));
+    console.log('aiPlayersValue:', document.getElementById('aiPlayersValue'));
+
+    updateRoundsDisplay(tableSettings.rounds || 3);
+    updateWildCardsDisplay(tableSettings.wildCardCount || 2);
+    updateMultiplierDisplay(tableSettings.stakesMultiplierAmount || 2);
+    updateAiPlayersDisplay(tableSettings.computerPlayers || 1);
+
+    // Populate current settings (all 8)
+    document.getElementById('tableRounds').value = tableSettings.rounds || 3;
+    document.getElementById('tableWildCardCounts').value = tableSettings.wildCardCount || 2;
+    document.getElementById('stakesAnteAmount').value = tableSettings.stakesAnteAmount || 10;
+    document.getElementById('stakesSurrenderAmount').value = tableSettings.stakesSurrenderAmount || 10;
+    document.getElementById('stakesMultiplierAmount').value = tableSettings.stakesMultiplierAmount || 2;
+    document.getElementById('tableComputerPlayers').value = tableSettings.computerPlayers || 1;
+    document.getElementById('winProbabilityMethod').value = tableSettings.winProbabilityMethod || 'netEV';
+    document.getElementById('automaticsAllowed').value = tableSettings.automaticsAllowed || 'yes';
+
+    // Update slider displays
+    updateRoundsDisplay(tableSettings.rounds || 3);
+    updateWildCardsDisplay(tableSettings.wildCardCount || 2);
+    updateMultiplierDisplay(tableSettings.stakesMultiplierAmount || 2);
+    updateAiPlayersDisplay(tableSettings.computerPlayers || 1);
+
+    // Show modal
+    document.getElementById('tableSettingsModal').style.display = 'block';
+}
+
+// Save table settings
+function saveTableSettings() {
+    // Save all 8 settings
+    tableSettings.rounds = parseInt(document.getElementById('tableRounds').value);
+    tableSettings.wildCardCount = parseInt(document.getElementById('tableWildCardCounts').value);
+    tableSettings.stakesAnteAmount = parseInt(document.getElementById('stakesAnteAmount').value);
+    tableSettings.stakesSurrenderAmount = parseInt(document.getElementById('stakesSurrenderAmount').value);
+    tableSettings.stakesMultiplierAmount = parseInt(document.getElementById('stakesMultiplierAmount').value);
+    tableSettings.computerPlayers = parseInt(document.getElementById('tableComputerPlayers').value);
+    tableSettings.winProbabilityMethod = document.getElementById('winProbabilityMethod').value;
+    tableSettings.automaticsAllowed = document.getElementById('automaticsAllowed').value;
+
+    // Sync to gameConfig immediately
+    if (window.gameConfig) {
+        window.gameConfig.config.rounds = tableSettings.rounds;
+        window.gameConfig.config.wildCardCount = tableSettings.wildCardCount;
+        window.gameConfig.config.stakesAnteAmount = tableSettings.stakesAnteAmount;
+        window.gameConfig.config.stakesSurrenderAmount = tableSettings.stakesSurrenderAmount;
+        window.gameConfig.config.stakesMultiplierAmount = tableSettings.stakesMultiplierAmount;
+        window.gameConfig.config.computerPlayers = tableSettings.computerPlayers;
+        window.gameConfig.config.winProbabilityMethod = tableSettings.winProbabilityMethod;
+        window.gameConfig.config.automaticsAllowed = tableSettings.automaticsAllowed;
+        console.log('✅ Synced all settings to gameConfig');
+    }
+
+    // Update the display
+    updateTableDisplay();
+
+    // Close modal
+    closeTableSettings();
+}
+
+// Update display functions
+function updateRoundsDisplay(value) {
+    document.getElementById('roundsValue').textContent = value;
 }
 
 function updateWildCardsDisplay(value) {
     document.getElementById('wildCardsValue').textContent = value;
 }
 
-// Open table settings modal
-function openTableSettings() {
-    // Create modal if it doesn't exist
-    if (!document.getElementById('tableSettingsModal')) {
-        createTableSettingsModal();
-    }
-
-    // Populate current settings
-    document.getElementById('tableRounds').value = tableSettings.rounds || 3;
-    document.getElementById('winProbabilityMethod').value = tableSettings.winProbabilityMethod || 'tiered2';
-    document.getElementById('tableWildCardCounts').value = tableSettings.wildCardCount || 2;
-    document.getElementById('tableComputerPlayers').value = tableSettings.computerPlayers || 4;
-
-    // Update displays
-    updateRoundsDisplay(tableSettings.rounds || 3);
-    updateAiPlayersDisplay(tableSettings.computerPlayers || 4);
-    updateWildCardsDisplay(tableSettings.wildCardCount || 2);
-
-    // Show modal
-    document.getElementById('tableSettingsModal').style.display = 'block';
+function updateMultiplierDisplay(value) {
+    document.getElementById('multiplierValue').textContent = value + 'x';
 }
 
-// Create modal dynamically (matches your scoring popup style)
-function createTableSettingsModal() {
-    const modal = document.createElement('div');
-    modal.id = 'tableSettingsModal';
-    modal.className = 'scoring-popup'; // Reuse existing popup CSS
-
-    modal.innerHTML = `
-        <div class="scoring-content">
-            <button class="close-popup" onclick="closeTableSettings()">&times;</button>
-            <h2 style="text-align: center; margin-bottom: 30px; color: #ffd700;">⚙️ Table Settings</h2>
-
-            <div style="margin-bottom: 20px;">
-                <label style="color: #ffd700; display: block; margin-bottom: 8px;">Rounds (3-20):</label>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="range" id="tableRounds" min="3" max="20" value="3"
-                           oninput="updateRoundsDisplay(this.value)" style="flex: 1;">
-                    <span id="rounds" style="color: #ffd700; font-weight: bold; min-width: 30px;">3</span>
-                </div>
-            </div>
-
-            <div style="margin-bottom: 20px;">
-                <label style="color: #ffd700; display: block; margin-bottom: 8px;">AI Method:</label>
-                <select id="winProbabilityMethod" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
-                    <option value="points">Points</option>
-                    <option value="tiered2">Tiered2</option>
-                    <option value="netEV">NetEV</option>
-                </select>
-            </div>
-
-            <div style="margin-bottom: 20px;">
-                <label style="color: #ffd700; display: block; margin-bottom: 8px;">Wild Cards (0-4):</label>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="range" id="tableWildCardCounts" min="0" max="4" value="2"
-                           oninput="updateWildCardsDisplay(this.value)" style="flex: 1;">
-                    <span id="wildCardsValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">2</span>
-                </div>
-            </div>
-
-            <div style="margin-bottom: 20px;">
-                <label style="color: #ffd700; display: block; margin-bottom: 8px;">AI Players (1-5):</label>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="range" id="tableComputerPlayers" min="1" max="5" value="4"
-                           oninput="updateAiPlayersDisplay(this.value)" style="flex: 1;">
-                    <span id="aiPlayersValue" style="color: #ffd700; font-weight: bold; min-width: 30px;">4</span>
-                </div>
-            </div>
-
-            <div style="text-align: center; margin-top: 30px;">
-                <button class="btn btn-secondary" onclick="closeTableSettings()" style="margin-right: 15px;">Cancel</button>
-                <button class="btn btn-primary" onclick="saveTableSettings()">Save Settings</button>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
+function updateAiPlayersDisplay(value) {
+    document.getElementById('aiPlayersValue').textContent = value;
 }
 
 // Close, save, and update functions
@@ -893,10 +942,6 @@ function saveTableSettings() {
     updateTableDisplay();
     closeTableSettings();
     console.log('✅ Table settings saved:', tableSettings);
-}
-
-function updateRoundsDisplay(value) {
-    document.getElementById('rounds').textContent = value;
 }
 
 function updateAiPlayersDisplay(value) {
@@ -995,8 +1040,6 @@ function updatePlayerListUI(players, tableId) {
 
 // DEBUG: Clear stuck tables
 async function clearTable(tableId) {
-    if (!confirm(`Clear ALL data from Table ${tableId}?`)) return;
-
     console.log(`🗑️ Clearing table ${tableId}...`);
 
     try {
@@ -1013,7 +1056,7 @@ async function clearTable(tableId) {
             console.log(`ℹ️ Firestore table ${tableId} not found (okay)`);
         }
 
-        alert(`✅ Table ${tableId} cleared successfully`);
+//        alert(`✅ Table ${tableId} cleared successfully`);
 
     } catch (error) {
         console.error(`❌ Error clearing table ${tableId}:`, error);

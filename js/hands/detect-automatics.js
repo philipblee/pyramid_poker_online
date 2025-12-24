@@ -1,4 +1,4 @@
-// js/hands/handle-find-automatics.js
+// js/hands/detect-automatics.js
 // Encapsulates UI handling for detecting and playing automatic hands
 
 (function attachAutomaticHandlers() {
@@ -16,9 +16,9 @@
         }
     }
 
-    function handleFindAutomatics() {
+    function detectAutomatics() {
 
-        console.log('🎯 handleFindAutomatics CALLED');
+        console.log('🎯 detectAutomatics CALLED');
         console.log('🎯 window.currentAutomatic:', window.currentAutomatic);
 
         // GUARD: If automatic already detected, do nothing
@@ -120,7 +120,7 @@
         }
     }
 
-    function handlePlayAutomatic() {
+    function playAutomatic() {
         if (!window.currentAutomatic) return;
 
         // Clear flag
@@ -145,7 +145,7 @@
 
     // Expose to global scope
     window.showAutomaticMessage = showAutomaticMessage;
-    window.handleFindAutomatics = handleFindAutomatics;
-    window.handlePlayAutomatic = handlePlayAutomatic;
+    window.detectAutomatics = detectAutomatics;
+    window.playAutomatic = playAutomatic;
     window.resetAutomaticButton = resetAutomaticButton;
 })();

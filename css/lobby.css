@@ -42,3 +42,201 @@
     font-weight: bold;
     color: #4ecdc4;
 }
+
+/* Add to your existing CSS */
+
+.settings-section {
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.settings-section h3 {
+    margin: 0 0 15px 0;
+    color: #4ecdc4;
+    font-size: 16px;
+}
+
+.setting-row {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    gap: 10px;
+}
+
+.setting-row label {
+    flex: 0 0 180px;
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.setting-row select,
+.setting-row input[type="number"] {
+    flex: 1;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #666;
+    background: #2c3e50;
+    color: white;
+}
+
+.setting-row .help-text {
+    flex: 0 0 200px;
+    font-size: 12px;
+    color: #95a5a6;
+    font-style: italic;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #444;
+}
+
+.btn-primary {
+    background: #4ecdc4;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-secondary {
+    background: #666;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Lobby Container */
+#lobbyTables {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+/* Table Card */
+.table-card {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.table-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Type Badge */
+.table-type-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.table-type-badge.single-player {
+    background: rgba(78, 205, 196, 0.2);
+    color: #4ecdc4;
+    border: 1px solid #4ecdc4;
+}
+
+.table-type-badge.multi-player {
+    background: rgba(255, 107, 107, 0.2);
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b;
+}
+
+/* Table Name */
+.table-name {
+    color: #ffd700;
+    font-size: 18px;
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+/* Settings Summary */
+.table-settings-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 15px 0;
+}
+
+.setting-pill {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 13px;
+    display: flex;
+    gap: 5px;
+}
+
+.setting-label {
+    color: #95a5a6;
+    font-weight: normal;
+}
+
+.setting-value {
+    color: #4ecdc4;
+    font-weight: bold;
+}
+
+/* Action Buttons */
+.table-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-edit {
+    flex: 1;
+    background: #7f8c8d;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.btn-edit:hover {
+    background: #95a5a6;
+}
+
+.btn-join {
+    flex: 2;
+    background: #4ecdc4;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.btn-join:hover {
+    background: #45b7aa;
+}
+
+.btn-join:disabled {
+    background: #666;
+    cursor: not-allowed;
+}

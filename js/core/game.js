@@ -40,15 +40,15 @@ class PyramidPoker {
         document.getElementById('submitHand').addEventListener('click', () => this.submitCurrentHand());
 
         // Find Automatics button (may not exist on all pages)
-        const findAutomaticsBtn = document.getElementById('findAutomatics');
-        if (findAutomaticsBtn) {
+        const detectAutomaticsBtn = document.getElementById('findAutomatics');
+        if (detectAutomaticsBtn) {
             console.log('🔧 Attaching findAutomatics listener');
-            findAutomaticsBtn.addEventListener('click', () => {
+            detectAutomaticsBtn.addEventListener('click', () => {
                 console.log('🔧 Button clicked, currentAutomatic:', window.currentAutomatic);
                 if (window.currentAutomatic) {
-                    window.handlePlayAutomatic();
+                    window.playAutomatic();
                 } else {
-                    window.handleFindAutomatics();
+                    window.detectAutomatics();
                 }
             });
         }
@@ -205,7 +205,7 @@ class PyramidPoker {
         this.deckManager.createNewDeck();
         this.gameState = 'playing';
         this.tableState = TABLE_STATES.DEALING; // Add this - parallel tracking
-        resetAutomaticButton()
+        window.resetAutomaticButton()
         this.playerManager.currentPlayerIndex = 0;
         this.submittedHands.clear();
 
@@ -1111,8 +1111,8 @@ class PyramidPoker {
         this.autoArrangeUsed = false;
         document.getElementById('autoArrange').textContent = 'Auto';
 
-        const findAutomaticsBtn = document.getElementById('findAutomatics');
-        if (findAutomaticsBtn) {
+        const detectAutomaticsBtn = document.getElementById('findAutomatics');
+        if (detectAutomaticsBtn) {
             resetAutomaticButton(); // Use the existing reset function
         }
 
@@ -1155,9 +1155,9 @@ class PyramidPoker {
         this.autoArrangeUsed = false;
         document.getElementById('autoArrange').textContent = 'Auto';
 
-        const findAutomaticsBtn = document.getElementById('findAutomatics'); // CHANGED - added 's'
-        if (findAutomaticsBtn) {
-            findAutomaticsBtn.disabled = false;
+        const detectAutomaticsBtn = document.getElementById('findAutomatics'); // CHANGED - added 's'
+        if (detectAutomaticsBtn) {
+            detectAutomaticsBtn.disabled = false;
         }
 
         if (this.playerManager.areAllPlayersReady()) {

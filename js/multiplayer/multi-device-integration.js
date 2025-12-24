@@ -317,6 +317,51 @@ class MultiDeviceIntegration {
         submitBtn.addEventListener('click', this.enhancedSubmitHandler, true);
     }
 
+        // Enhanced submit button with submission coordination
+    enhanceSubmitAutomaticButton() {
+//        const submitAutomaticBtn = document.getElementById('submitHand');
+//        if (!submitBtn) return;
+//
+//        // Store handler as property so we can remove it later
+//        this.enhancedSubmitHandler = async (e) => {
+//            e.stopImmediatePropagation();
+//
+//            const playerName = window.uniquePlayerName;
+//
+//            const playerData = window.game.playerHands.get(window.game.players[0].name);
+//            if (playerData) {
+//                window.game.playerHands.set(playerName, {
+//                    back: [...playerData.back],
+//                    middle: [...playerData.middle],
+//                    front: [...playerData.front],
+//                    cards: [...playerData.cards],
+//                    originalCards: [...playerData.originalCards]
+//                });
+//            }
+//
+//            try {
+//                await this.storePlayerArrangementToFirebase(playerName);
+//
+//                const submitBtn = document.getElementById('submitHand');
+//                if (submitBtn) {
+//                    submitBtn.disabled = true;
+//                    submitBtn.textContent = 'Submitted ✓';
+//                }
+//
+//                if (await this.isTableOwner()) {
+//                    await this.checkAllPlayersSubmitted();
+//                } else {
+//                    console.log('Not owner - skipping submission check');
+//                }
+//            } catch (error) {
+//                console.error('❌ Error in enhanced submit:', error);
+//            }
+//        };
+//
+//        // Add the stored handler
+//        submitBtn.addEventListener('click', this.enhancedSubmitHandler, true);
+    }
+
     // enhanceContinueButton changes tableState to round_complete, then only owner can click continue to progress
     enhanceContinueButton() {
 

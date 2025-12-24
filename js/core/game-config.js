@@ -11,8 +11,9 @@ class GameConfig {
             computerPlayers: 5,              //5 Number of computer opponents (1-5)
             wildCardCount: 2,                //6 Number of wild cards (0-4)
             deckCount: 2,                    //7 Number of standard decks (1-3)
-            winProbabilityMethod: 'tiered2', //8 'points', 'empirical', 'tiered', 'tiered2', "netEV"
-            rounds: 3,                       //9 Number of rounds to play
+            autoArrangeAllowed: 'yes',       //8
+            winProbabilityMethod: 'tiered2', //9 'points', 'empirical', 'tiered', 'tiered2', "netEV"
+            rounds: 3,                       //10 Number of rounds to play
             currentRound: 0,                 // Track current round
 
             // Table/Lobby settings
@@ -31,7 +32,6 @@ class GameConfig {
             aiPersonality: 'balanced',       // 'aggressive', 'balanced', 'conservative'
 
             // stakes:
-            stakes: 'yes',                   // 'yes', 'no'
             stakesAnteAmount: 10,           // 0, 10, 20, etc.
             stakesMultiplierAmount: 2,      // 0, 1, 2, 3, etc.
             stakesSurrenderAmount: 0,      // 10, 20, etc.
