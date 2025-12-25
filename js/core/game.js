@@ -1067,7 +1067,7 @@ class PyramidPoker {
         this.loadCurrentPlayerHand();
     }
 
-    submitAutomatic() {
+    async submitAutomatic() {
         // Check if automatics are allowed
         if (gameConfig.config.automaticsAllowed !== 'yes') {
             return;
@@ -1078,8 +1078,9 @@ class PyramidPoker {
             return;
         }
 
-        const currentPlayer = this.playerManager.getCurrentPlayer();
-        const playerData = this.playerHands.get(currentPlayer.name);
+        // For multiplayer: always use player 0's hand (local player)
+        const localPlayerName = this.players[0].name;
+        const playerData = this.playerHands.get(localPlayerName);
 
         if (!playerData) return;
 
@@ -1090,21 +1091,49 @@ class PyramidPoker {
             front: playerData.front
         };
         const automatic = detectAutomatic(arrangement);
-        
+
         if (!automatic) {
             alert('This hand does not qualify as an automatic.');
             return;
         }
 
-        // Store as automatic
-        this.submittedHands.set(currentPlayer.name, {
+        // For multiplayer, use uniquePlayerName; for single-player use currentPlayer
+        const playerName = gameConfig.config.gameConnectMode === 'online'
+            ? window.uniquePlayerName
+            : this.playerManager.getCurrentPlayer().name;
+
+        // Store as automatic WITH UNIQUE NAME
+        this.submittedHands.set(playerName, {
             back: [...playerData.back],
             middle: [...playerData.middle],
             front: [...playerData.front]
         });
-        this.automaticHands.set(currentPlayer.name, automatic);
+        this.automaticHands.set(playerName, automatic);
 
-        this.playerManager.setPlayerReady(currentPlayer.name, true);
+        this.playerManager.setPlayerReady(localPlayerName, true);
+
+        // NEW: For multiplayer, use Firebase coordination
+        if (gameConfig.config.gameConnectMode === 'online') {
+            await window.multiDeviceIntegration.storePlayerArrangementToFirebase(playerName, true);
+
+            const autoBtn = document.getElementById('findAutomatics');
+            if (autoBtn) {
+                autoBtn.disabled = true;
+                autoBtn.textContent = 'Submitted ✓';
+            }
+
+            if (await window.multiDeviceIntegration.isTableOwner()) {
+                await window.multiDeviceIntegration.checkAllPlayersSubmitted();
+            }
+
+            return; // Exit early for multiplayer
+        }
+
+        // Single-player logic continues below
+        this.playerManager.nextPlayer();
+
+
+        // Single-player logic continues below
         this.playerManager.nextPlayer();
 
         // Reset auto button for next turn
@@ -1113,51 +1142,7 @@ class PyramidPoker {
 
         const detectAutomaticsBtn = document.getElementById('findAutomatics');
         if (detectAutomaticsBtn) {
-            resetAutomaticButton(); // Use the existing reset function
-        }
-
-        if (this.playerManager.areAllPlayersReady()) {
-            this.calculateScores();
-            this.gameState = 'scoring';
-        } else {
-            this.loadCurrentPlayerHand();
-        }
-
-        updateDisplay(this);
-    }
-
-    submitCurrentHand() {
-
-        // Replace validation with the good function
-        if (!this.validateHands()) {
-            return; // Don't submit if validation failed
-        }
-
-        const currentPlayer = this.playerManager.getCurrentPlayer();
-        const playerData = this.playerHands.get(currentPlayer.name);
-
-        if (!playerData) return;
-
-        this.submittedHands.set(currentPlayer.name, {
-            back: [...playerData.back],
-            middle: [...playerData.middle],
-            front: [...playerData.front]
-        });
-        
-        // Clear any automatic flag for this player (they submitted normally)
-        this.automaticHands.delete(currentPlayer.name);
-
-        this.playerManager.setPlayerReady(currentPlayer.name, true);
-        this.playerManager.nextPlayer();
-
-
-        // Reset auto button for next turn (always happens after submit)
-        this.autoArrangeUsed = false;
-        document.getElementById('autoArrange').textContent = 'Auto';
-
-        const detectAutomaticsBtn = document.getElementById('findAutomatics'); // CHANGED - added 's'
-        if (detectAutomaticsBtn) {
-            detectAutomaticsBtn.disabled = false;
+            resetAutomaticButton();
         }
 
         if (this.playerManager.areAllPlayersReady()) {
@@ -1172,10 +1157,10 @@ class PyramidPoker {
 
 
     async calculateScores() {
-//        console.log('🚀 calculateScores() START - this.maxRounds:', this.maxRounds);
+        console.log('🚀 calculateScores() START - this.maxRounds:', this.maxRounds);
 
         const allPlayerNames = this.playerManager.getPlayerNames();
-//        console.log('🔍 After getPlayerNames() - this.maxRounds:', this.maxRounds);
+        console.log('🔍 After getPlayerNames() - this.maxRounds:', this.maxRounds);
 
        // Filter out surrendered players from scoring
         const playerNames = allPlayerNames.filter(name => {
@@ -1196,8 +1181,8 @@ class PyramidPoker {
             bonusPoints.set(name, 0);
         });
 
-//        console.log('🔍 After initialization - this.maxRounds:', this.maxRounds)
 
+        console.log("In calculateScores, added code to handle automatics")
         // Handle automatics if allowed
         let automaticPlayers = [];
         let regularPlayers = [];
@@ -1205,6 +1190,9 @@ class PyramidPoker {
         if (gameConfig.config.automaticsAllowed === 'yes') {
             automaticPlayers = playerNames.filter(name => this.automaticHands.has(name));
             regularPlayers = playerNames.filter(name => !this.automaticHands.has(name));
+
+            console.log(`In calculateScores, Automatic Players: ${automaticPlayers}`)
+            console.log(`In calculateScores, Regular Players: ${regularPlayers}`)
 
             if (automaticPlayers.length > 0) {
                 if (automaticPlayers.length === 1) {
@@ -1228,8 +1216,7 @@ class PyramidPoker {
             regularPlayers = [...playerNames];
         }
 
-
-
+        console.log(`regularPlayers.length: {regularPlayers.length}`)
         for (let i = 0; i < regularPlayers.length; i++) {
             for (let j = i + 1; j < regularPlayers.length; j++) {
                 const player1 = regularPlayers[i];
@@ -1285,8 +1272,8 @@ class PyramidPoker {
                 const hand1 = this.submittedHands.get(player1);
                 const hand2 = this.submittedHands.get(player2);
 
-//                console.log(`🔍 Player in calculateScores ${player1} hand:`, hand1);
-//                console.log(`🔍 Player in calculateScores ${player2} hand:`, hand2);
+                console.log(`🔍 Player in calculateScores ${player1} hand:`, hand1);
+                console.log(`🔍 Player in calculateScores ${player2} hand:`, hand2);
 
                 const result = compareHands(hand1, hand2);
 
@@ -1302,10 +1289,6 @@ class PyramidPoker {
                 });
             }
         }
-
-//        console.log('Detailed Results from calculateScores()', detailedResults)
-//        console.log(`📊 Storing round ${this.currentRound}, history length: ${this.roundHistory.length}`);
-//        console.log('🔍 After head-to-head comparisons - this.maxRounds:', this.maxRounds);
 
         // NEW: Only store round history ONCE per round
         const roundAlreadyStored = this.roundHistory.some(round => round.roundNumber === this.currentRound);
@@ -1383,6 +1366,76 @@ class PyramidPoker {
             bonusPoints
         };
 
+    }
+
+    handleMultiAutomatics(automaticPlayers, roundScores, detailedResults) {
+        console.log('🎯 Multiple automatics detected:', automaticPlayers);
+
+        // Rank automatics by strength
+        const automaticRanking = {
+            'three-full-houses': 4,
+            'dragon': 3,
+            'three-flush': 2,
+            'three-straight': 1
+        };
+
+        // Group players by automatic type
+        const byType = {};
+        automaticPlayers.forEach(player => {
+            const automatic = this.automaticHands.get(player);
+            const type = automatic.type;
+            if (!byType[type]) byType[type] = [];
+            byType[type].push(player);
+        });
+
+        // Find highest automatic type
+        const types = Object.keys(byType).sort((a, b) => automaticRanking[b] - automaticRanking[a]);
+        const highestType = types[0];
+        const winners = byType[highestType];
+
+        // If one clear winner (highest automatic type, alone)
+        if (winners.length === 1 && types.length > 1) {
+            const winner = winners[0];
+            const losers = automaticPlayers.filter(p => p !== winner);
+
+            roundScores.set(winner, roundScores.get(winner) + (3 * losers.length));
+            losers.forEach(loser => {
+                roundScores.set(loser, roundScores.get(loser) - 3);
+            });
+
+            console.log(`🏆 ${winner} wins with ${highestType} automatic (+${3 * losers.length} points)`);
+        } else {
+            // Multiple players with same highest automatic - compare head-to-head
+            console.log(`⚖️ ${winners.length} players with ${highestType} - comparing hands head-to-head`);
+
+            // Compare all pairs of automatic winners
+            for (let i = 0; i < winners.length; i++) {
+                for (let j = i + 1; j < winners.length; j++) {
+                    const p1 = winners[i];
+                    const p2 = winners[j];
+
+                    const comparison = this.comparePlayerHands(p1, p2);
+
+                    roundScores.set(p1, roundScores.get(p1) + comparison.p1Score);
+                    roundScores.set(p2, roundScores.get(p2) + comparison.p2Score);
+
+                    if (detailedResults) {
+                        detailedResults.push(comparison);
+                    }
+                }
+            }
+
+            // Lower-ranked automatics lose -3 to each winner
+            if (types.length > 1) {
+                const losers = types.slice(1).flatMap(type => byType[type]);
+                losers.forEach(loser => {
+                    roundScores.set(loser, roundScores.get(loser) - (3 * winners.length));
+                });
+                winners.forEach(winner => {
+                    roundScores.set(winner, roundScores.get(winner) + (3 * losers.length));
+                });
+            }
+        }
     }
 
     showTournamentSummary() {

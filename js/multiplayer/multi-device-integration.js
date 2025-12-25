@@ -317,51 +317,6 @@ class MultiDeviceIntegration {
         submitBtn.addEventListener('click', this.enhancedSubmitHandler, true);
     }
 
-        // Enhanced submit button with submission coordination
-    enhanceSubmitAutomaticButton() {
-//        const submitAutomaticBtn = document.getElementById('submitHand');
-//        if (!submitBtn) return;
-//
-//        // Store handler as property so we can remove it later
-//        this.enhancedSubmitHandler = async (e) => {
-//            e.stopImmediatePropagation();
-//
-//            const playerName = window.uniquePlayerName;
-//
-//            const playerData = window.game.playerHands.get(window.game.players[0].name);
-//            if (playerData) {
-//                window.game.playerHands.set(playerName, {
-//                    back: [...playerData.back],
-//                    middle: [...playerData.middle],
-//                    front: [...playerData.front],
-//                    cards: [...playerData.cards],
-//                    originalCards: [...playerData.originalCards]
-//                });
-//            }
-//
-//            try {
-//                await this.storePlayerArrangementToFirebase(playerName);
-//
-//                const submitBtn = document.getElementById('submitHand');
-//                if (submitBtn) {
-//                    submitBtn.disabled = true;
-//                    submitBtn.textContent = 'Submitted ✓';
-//                }
-//
-//                if (await this.isTableOwner()) {
-//                    await this.checkAllPlayersSubmitted();
-//                } else {
-//                    console.log('Not owner - skipping submission check');
-//                }
-//            } catch (error) {
-//                console.error('❌ Error in enhanced submit:', error);
-//            }
-//        };
-//
-//        // Add the stored handler
-//        submitBtn.addEventListener('click', this.enhancedSubmitHandler, true);
-    }
-
     // enhanceContinueButton changes tableState to round_complete, then only owner can click continue to progress
     enhanceContinueButton() {
 
@@ -626,38 +581,61 @@ class MultiDeviceIntegration {
         Object.entries(firebaseArrangements).forEach(([playerEmail, arrangement]) => {
             window.game.submittedHands.set(playerEmail, arrangement);
             console.log(`  Debug RetrieveAllArrangements 2 : ${playerEmail} ${arrangement}`)
+
+            if (arrangement.playedAutomatic === 'yes') {
+                window.game.automaticHands.set(playerEmail, {
+                    type: arrangement.automaticType,  // Already stored in Firebase
+                    arrangement: {
+                        back: arrangement.back,
+                        middle: arrangement.middle,
+                        front: arrangement.front
+                    }       // Already stored in Firebase
+                });
+            }
+
         });
 
         console.log('✅ Loaded arrangements with correct keys');
     }
 
-    async storePlayerArrangementToFirebase(playerName) {
-        const playerHand = window.game.playerHands.get(playerName);
-//        console.log('🔍 DEBUG - Retrieved playerHand:', playerHand);
-//        console.log('🔍 DEBUG - playerHand exists:', !!playerHand);
+    async storePlayerArrangementToFirebase(playerName, isAutomatic = false) {
+        console.log('🔍 DEBUG storePlayerArrangementToFirebase:');
+        console.log('  Looking for playerName:', playerName);
+        console.log('  isAutomatic:', isAutomatic);
+        console.log('  submittedHands keys:', Array.from(window.game.submittedHands.keys()));
+        console.log('  playerHands keys:', Array.from(window.game.playerHands.keys()));
 
-        const player = window.game.players.find(p => p.name === playerName);
+        // For automatics, read from submittedHands instead of playerHands
+        const playerHand = isAutomatic
 
-        const uniquePlayerName = playerName;
-//        console.log('🔍 DEBUG - Using uniquePlayerName:', uniquePlayerName);
+            ? window.game.submittedHands.get(playerName)
+            : window.game.playerHands.get(playerName);
+
+        console.log('  Found playerHand:', !!playerHand);
+
+        if (!playerHand) {
+            console.error('❌ No hand found for', playerName);
+            return;
+        }
 
         const arrangementData = {
-            [uniquePlayerName]: {
+            [playerName]: {
                 back: playerHand.back,
                 middle: playerHand.middle,
                 front: playerHand.front,
+                playedAutomatic: isAutomatic ? 'yes' : 'no',
+                automaticType: isAutomatic ? window.game.automaticHands.get(playerName)?.type : null,
                 timestamp: Date.now()
             }
         };
-    ;
 
         await this.tableManager.tablesRef.doc(this.currentTableId.toString()).set({
             'currentGame': {
                 'arrangements': arrangementData
             }
         }, { merge: true });
-
     }
+
     // Sync tournament results to Firebase for cloud storage
     async syncResultsToFirebase() {
         if (!this.isMultiDevice) return;

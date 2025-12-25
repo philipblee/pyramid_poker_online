@@ -241,7 +241,7 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
 
     // Show Round Robin Scoring (detailed matchups)
     roundRobinResults.innerHTML = '';
-    showRoundRobinScoring(detailedResults, game, roundRobinResults);
+    showRoundRobinScoring(detailedResults, game, roundRobinResults, roundScores);
 
     // Distribute chips and then show Round Summary for Chips
     // This chart includes initial ante, pot winnings and net payouts
@@ -804,11 +804,11 @@ async function showPlayerHands(game, handsToDisplay, containerElement) {
     });
 }
 
-function showRoundRobinScoring(detailedResults, game, containerElement) {
+function showRoundRobinScoring(detailedResults, game, containerElement, roundScores) {
     // Clear previous content
     containerElement.innerHTML = '';
 
-    // Show automatic bonuses first
+    // Show automatic wins first
     const automaticInfo = game.automaticHands;
     if (automaticInfo && automaticInfo.size > 0) {
         const automaticDiv = document.createElement('div');
@@ -818,18 +818,20 @@ function showRoundRobinScoring(detailedResults, game, containerElement) {
 
         automaticInfo.forEach((automatic, playerName) => {
             const automaticType = automatic.type.replace(/-/g, ' ').toUpperCase();
-            const allPlayers = Array.from(game.playerManager.players).map(p => p.name);
-            const opponents = allPlayers.filter(p => p !== playerName);
 
-            automaticHTML += `<p style="color: #4ecdc4; margin: 8px 0; font-weight: bold;">
-                <strong>${playerName} played the Automatic <strong style="color: #ffd700;">${automaticType} and won +3 points</strong> from each opponent
-            </p>`;
+            // Check if this player won or lost
+            const playerScore = roundScores.get(playerName) || 0;
+            const wonAutomatic = playerScore > 0;
 
-            opponents.forEach(opponent => {
-                automaticHTML += `<p style="color: #ff6b6b; margin: 5px 0; padding-left: 20px;">
-                    <strong> Opponent ${opponent} lost -3 points</strong>
+            if (wonAutomatic) {
+                automaticHTML += `<p style="color: #4ecdc4; margin: 8px 0; font-weight: bold;">
+                    ${playerName} played <span style="color: #ffd700;">${automaticType}</span> and won +${playerScore} points
                 </p>`;
-            });
+            } else {
+                automaticHTML += `<p style="color: #ff6b6b; margin: 8px 0; font-weight: bold;">
+                    ${playerName} played <span style="color: #ffd700;">${automaticType}</span> but lost ${playerScore} points (opponent had better automatic)
+                </p>`;
+            }
         });
 
         automaticDiv.innerHTML = automaticHTML;
