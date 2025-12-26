@@ -25,7 +25,7 @@ let tableSettings = {
     automaticsAllowed: 'yes',        // NEW
     autoArrangeAllowed: 'yes',       // NEW
     // countdown:
-    countdownTime: 5,              // 10, 20, 30, etc.
+    countdownTime: 3,              // 10, 20, 30, etc.
     tableId: null,                   // For multiplayer table identification
     tableName: ''                   // Display name for table
 };
@@ -588,9 +588,6 @@ function updateTableDisplay() {
     const humanPlayers = tableSettings.humanPlayers + 1
     const settingsHtml = `
 
-        Connect: ${tableSettings.gameConnectMode}<br>
-        Device: ${tableSettings.gameDeviceMode}<br>
-        Humans: ${tableSettings.gameMode}<br>
         AI Players: ${tableSettings.computerPlayers}<br>
         Tournament Rounds: ${tableSettings.rounds}<br>
         Decks: ${tableSettings.deckCount}<br>
@@ -599,7 +596,6 @@ function updateTableDisplay() {
         Stakes Ante: ${tableSettings.stakesAnteAmount}<br>
         Stakes SurrenderAmount: ${tableSettings.stakesSurrenderAmount}<br>
         Stakes Multiplier: ${tableSettings.stakesMultiplierAmount}<br>
-        Game Variation: ${tableSettings.gameVariant}<br>
         AI Method: ${tableSettings.winProbabilityMethod}
     `;
 
@@ -790,16 +786,6 @@ function createTableSettingsModal() {
     document.body.appendChild(modal);
 }
 
-// Close table settings modal
-function closeTableSettings() {
-    document.getElementById('tableSettingsModal').style.display = 'none';
-}
-
-// Update display functions for sliders
-function updateRoundsDisplay(value) {
-    document.getElementById('rounds').textContent = value;
-}
-
 // Open table settings modal
 function openTableSettings() {
     // Force recreate modal every time
@@ -821,38 +807,6 @@ function openTableSettings() {
 
     // Show modal
     document.getElementById('tableSettingsModal').style.display = 'block';
-}
-
-// Save table settings
-function saveTableSettings() {
-    // Save all 8 settings
-    tableSettings.rounds = parseInt(document.getElementById('tableRounds').value);
-    tableSettings.wildCardCount = parseInt(document.getElementById('tableWildCardCounts').value);
-    tableSettings.stakesAnteAmount = parseInt(document.getElementById('stakesAnteAmount').value);
-    tableSettings.stakesSurrenderAmount = parseInt(document.getElementById('stakesSurrenderAmount').value);
-    tableSettings.stakesMultiplierAmount = parseInt(document.getElementById('stakesMultiplierAmount').value);
-    tableSettings.computerPlayers = parseInt(document.getElementById('tableComputerPlayers').value);
-    tableSettings.winProbabilityMethod = document.getElementById('winProbabilityMethod').value;
-    tableSettings.automaticsAllowed = document.getElementById('automaticsAllowed').value;
-
-    // Sync to gameConfig immediately
-    if (window.gameConfig) {
-        window.gameConfig.config.rounds = tableSettings.rounds;
-        window.gameConfig.config.wildCardCount = tableSettings.wildCardCount;
-        window.gameConfig.config.stakesAnteAmount = tableSettings.stakesAnteAmount;
-        window.gameConfig.config.stakesSurrenderAmount = tableSettings.stakesSurrenderAmount;
-        window.gameConfig.config.stakesMultiplierAmount = tableSettings.stakesMultiplierAmount;
-        window.gameConfig.config.computerPlayers = tableSettings.computerPlayers;
-        window.gameConfig.config.winProbabilityMethod = tableSettings.winProbabilityMethod;
-        window.gameConfig.config.automaticsAllowed = tableSettings.automaticsAllowed;
-        console.log('✅ Synced all settings to gameConfig');
-    }
-
-    // Update the display
-    updateTableDisplay();
-
-    // Close modal
-    closeTableSettings();
 }
 
 // Close, save, and update functions
@@ -882,100 +836,6 @@ function saveTableSettings() {
     updateTableDisplay();
     closeTableSettings();
     console.log('✅ Table settings saved:', tableSettings);
-}
-
-function updateAiPlayersDisplay(value) {
-    document.getElementById('aiPlayersValue').textContent = value;
-}
-
-function updateWildCardsDisplay(value) {
-    document.getElementById('wildCardsValue').textContent = value;
-}
-function updatePlayerListUI(players, tableId) {
-//    console.log('🖥️ Updating player list UI:', players);
-
-    // NEW: Sync Firebase players to local PlayerManager
-    if (window.game?.playerManager) {
-        window.game.playerManager.players = players.map(firebasePlayer => ({
-            name: firebasePlayer.name,
-            id: firebasePlayer.id,
-            isAI: false
-        }));
-//        console.log(`✅ Synced ${window.game.playerManager.players.length} Firebase players to PlayerManager`);
-    }
-
-    // DEBUG: Find the player manager object (remove after testing)
-//    console.log('🔍 window.playerManager:', window.playerManager);
-//    console.log('🔍 window.game:', window.game);
-//    console.log('🔍 window.game?.playerManager:', window.game?.playerManager);
-
-    // NEW: Sync Firebase players to local player manager array
-    if (window.playerManager) {
-        window.playerManager.players = players.map(firebasePlayer => ({
-            name: firebasePlayer.name,
-            id: firebasePlayer.id,
-            isAI: false,
-            // Add any other properties that existing validation expects
-        }));
-        console.log(`✅ Synced ${window.playerManager.players.length} Firebase players to local array`);
-    }
-
-    // ADD THIS DEBUG BLOCK:
-    players.forEach((player, index) => {
-//        console.log(`🔍 Player ${index}:`, player);
-//        console.log(`🔍 Player ${index} name:`, player.name);
-//        console.log(`🔍 Player ${index} type:`, typeof player.name);
-    });
-
-    const playerCount = players.length;
-    const maxPlayers = 6;
-
-    // Update player count
-    const playerCountElement = document.querySelector('.player-count');
-    if (playerCountElement) {
-        playerCountElement.textContent = `${playerCount} of ${maxPlayers} players`;
-    }
-
-    // Update individual player slots
-    const playerSlots = document.querySelectorAll('.player-slot');
-//    console.log('🔧 Found player slots:', playerSlots.length);
-
-    playerSlots.forEach((slot, index) => {
-        if (index < players.length) {
-            // Player exists - show their info
-            slot.innerHTML = `
-                <span class="player-icon">👤</span>
-                <span class="player-name">${players[index].name}</span>
-            `;
-            slot.classList.remove('waiting');
-            slot.classList.add('occupied');
-        } else {
-            // Empty slot - show waiting
-            slot.innerHTML = `
-                <span class="player-icon">⏳</span>
-                <span class="player-name">Waiting for players...</span>
-            `;
-            slot.classList.add('waiting');
-            slot.classList.remove('occupied');
-        }
-    });
-
-//    console.log('✅ Updated all player slots');
-
-    // Update the player count display
-//    const playerCountElement = document.getElementById('currentPlayerCount');
-    if (playerCountElement) {
-        playerCountElement.textContent = players.length;
-    }
-
-    // Update start game button
-    updateStartGameButton(players.length);
-
-//    console.log('Updated all player slots');
-
-    // In your updatePlayerListUI function, add this at the end:
-    tableOwnerManager(players ? players.length : 0, players,tableId);
-
 }
 
 // DEBUG: Clear stuck tables
