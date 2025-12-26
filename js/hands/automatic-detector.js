@@ -219,7 +219,6 @@ function canFormDragon(naturalCards, wildCount) {
  * Need: Back 3+2, Middle 3+2, Front 3+2 = 15 cards with FH pattern
  */
 function canFormThreeFullHouses(naturalCards, wildCount) {
-    console.log('🔍 canFormThreeFullHouses - checking with', naturalCards.length, 'naturals +', wildCount, 'wilds');
 
     // Count inventory of each rank
     const rankCounts = {};
@@ -229,14 +228,11 @@ function canFormThreeFullHouses(naturalCards, wildCount) {
         }
     });
 
-    console.log('📊 Rank inventory:', rankCounts);
-
     let availableWilds = wildCount;
     let fullHousesBuilt = 0;
 
     // Try to build a single full house (trips + pair from different ranks)
     function tryBuildFullHouse() {
-        console.log(`\n🎯 Attempting full house #${fullHousesBuilt + 1}, wilds available: ${availableWilds}`);
 
         // Find best trips candidate (rank with most cards)
         let tripsRank = null;
@@ -250,7 +246,6 @@ function canFormThreeFullHouses(naturalCards, wildCount) {
         }
 
         if (!tripsRank) {
-            console.log('❌ No ranks available for trips');
             return false;
         }
 
@@ -258,11 +253,8 @@ function canFormThreeFullHouses(naturalCards, wildCount) {
         const wildsForTrips = Math.max(0, 3 - tripsCount);
 
         if (wildsForTrips > availableWilds) {
-            console.log(`❌ Need ${wildsForTrips} wilds for trips, only have ${availableWilds}`);
             return false;
         }
-
-        console.log(`✓ Found trips candidate: ${tripsRank} (${tripsCount} cards, need ${wildsForTrips} wilds)`);
 
         // Find best pair candidate (different rank)
         // PREFER ranks with exactly 2 cards (pure pairs, not wasted trips)
@@ -294,7 +286,6 @@ function canFormThreeFullHouses(naturalCards, wildCount) {
         }
 
         if (!pairRank) {
-            console.log('❌ No second rank available for pair');
             return false;
         }
 
@@ -302,15 +293,9 @@ function canFormThreeFullHouses(naturalCards, wildCount) {
         const wildsForPair = Math.max(0, 2 - pairCount);
         const totalWildsNeeded = wildsForTrips + wildsForPair;
 
-        console.log(`✓ Found pair candidate: ${pairRank} (${pairCount} cards, ${preferPurePair ? 'pure pair' : 'from trips'}, need ${wildsForPair} wilds)`);
-
         if (totalWildsNeeded > availableWilds) {
-            console.log(`❌ Need ${totalWildsNeeded} total wilds (${wildsForTrips} trips + ${wildsForPair} pair), only have ${availableWilds}`);
             return false;
         }
-
-        console.log(`✓ Found pair candidate: ${pairRank} (${pairCount} cards, need ${wildsForPair} wilds)`);
-        console.log(`✅ Built full house: ${tripsRank}-${tripsRank}-${tripsRank}-${pairRank}-${pairRank} (used ${totalWildsNeeded} wilds)`);
 
         // Consume cards
         rankCounts[tripsRank] -= Math.min(3, tripsCount);
@@ -320,10 +305,6 @@ function canFormThreeFullHouses(naturalCards, wildCount) {
         if (rankCounts[pairRank] === 0) delete rankCounts[pairRank];
 
         availableWilds -= totalWildsNeeded;
-
-        console.log('📊 Remaining inventory:', rankCounts);
-        console.log('🃏 Remaining wilds:', availableWilds);
-
         return true;
     }
 
@@ -337,7 +318,6 @@ function canFormThreeFullHouses(naturalCards, wildCount) {
     const fh3 = fh2 && tryBuildFullHouse();
     if (fh3) fullHousesBuilt++;
 
-    console.log(`\n🏁 Final result: Built ${fullHousesBuilt}/3 full houses`);
     return fullHousesBuilt === 3;
 }
 
@@ -373,7 +353,6 @@ function canFormThreeFlush(naturalCards, wildCount) {
  * Need: 5-card straight, 5-card straight, 5-card straight
  */
 function canFormThreeStraight(naturalCards, wildCount) {
-    console.log('🔍 canFormThreeStraight - checking with', naturalCards.length, 'naturals +', wildCount, 'wilds');
 
     // Count inventory of each rank
     const rankCounts = {};
@@ -385,15 +364,11 @@ function canFormThreeStraight(naturalCards, wildCount) {
         rankCounts[c.value]++;
     });
 
-    console.log('📊 Rank inventory:', rankCounts);
-
     let availableWilds = wildCount;
     let straightsBuilt = 0;
 
     // Try to build 3 straights greedily (highest first)
     function tryBuildStraight() {
-        console.log(`\n🎯 Attempting straight #${straightsBuilt + 1}, wilds available: ${availableWilds}`);
-
         // Try each possible 5-card straight
         for (let high = 14; high >= 5; high--) {
             const needed = [];
@@ -417,7 +392,6 @@ function canFormThreeStraight(naturalCards, wildCount) {
             }
 
             if (canBuild) {
-                console.log(`✅ Built straight: ${needed.join('-')} (used ${wildsNeeded} wilds)`);
                 // Consume cards for this straight
                 for (const rank of needed) {
                     if (rankCounts[rank] > 0) {
@@ -426,8 +400,6 @@ function canFormThreeStraight(naturalCards, wildCount) {
                         availableWilds--;
                     }
                 }
-                console.log('📊 Remaining inventory:', rankCounts);
-                console.log('🃏 Remaining wilds:', availableWilds);
                 return true;
             }
         }
@@ -449,7 +421,6 @@ function canFormThreeStraight(naturalCards, wildCount) {
         }
 
         if (canBuild) {
-            console.log(`✅ Built wheel straight: A-2-3-4-5 (used ${wildsNeeded} wilds)`);
             for (const rank of wheelRanks) {
                 if (rankCounts[rank] > 0) {
                     rankCounts[rank]--;
@@ -457,12 +428,9 @@ function canFormThreeStraight(naturalCards, wildCount) {
                     availableWilds--;
                 }
             }
-            console.log('📊 Remaining inventory:', rankCounts);
-            console.log('🃏 Remaining wilds:', availableWilds);
             return true;
         }
 
-        console.log('❌ Could not build straight #' + (straightsBuilt + 1));
         return false;
     }
 
@@ -476,7 +444,6 @@ function canFormThreeStraight(naturalCards, wildCount) {
     const straight3 = straight2 && tryBuildStraight();
     if (straight3) straightsBuilt++;
 
-    console.log(`\n🏁 Final result: Built ${straightsBuilt}/3 straights`);
     return straightsBuilt === 3;
 }
 

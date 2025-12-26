@@ -529,9 +529,15 @@ class PyramidPoker {
         this.validateHands();
 
         // Add the guard to prevent multiple AI turns
-        if (currentPlayer.type === 'ai' && !currentPlayer.isReady && !currentPlayer.aiTurnInProgress) {
-            currentPlayer.aiTurnInProgress = true; // Set flag
-            this.handleAITurn();
+        // At the END of loadCurrentPlayerHand(), replace the guard:
+        if (currentPlayer.type === 'ai') {
+
+            if (!currentPlayer.isReady && !currentPlayer.aiTurnInProgress) {
+                console.log('✅ Guard passed - triggering AI turn');
+                currentPlayer.aiTurnInProgress = true;
+                this.handleAITurn();
+            } else {
+            }
         }
     }
 
@@ -1132,10 +1138,6 @@ class PyramidPoker {
         // Single-player logic continues below
         this.playerManager.nextPlayer();
 
-
-        // Single-player logic continues below
-        this.playerManager.nextPlayer();
-
         // Reset auto button for next turn
         this.autoArrangeUsed = false;
         document.getElementById('autoArrange').textContent = 'Auto';
@@ -1149,8 +1151,10 @@ class PyramidPoker {
             this.calculateScores();
             this.gameState = 'scoring';
         } else {
+            const currentPlayer = this.playerManager.getCurrentPlayer();
             this.loadCurrentPlayerHand();
         }
+
 
         updateDisplay(this);
     }
