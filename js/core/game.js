@@ -1155,6 +1155,49 @@ class PyramidPoker {
         updateDisplay(this);
     }
 
+   submitCurrentHand() {
+
+        // Replace validation with the good function
+        if (!this.validateHands()) {
+            return; // Don't submit if validation failed
+        }
+
+        const currentPlayer = this.playerManager.getCurrentPlayer();
+        const playerData = this.playerHands.get(currentPlayer.name);
+
+        if (!playerData) return;
+
+        this.submittedHands.set(currentPlayer.name, {
+            back: [...playerData.back],
+            middle: [...playerData.middle],
+            front: [...playerData.front]
+        });
+
+        // Clear any automatic flag for this player (they submitted normally)
+        this.automaticHands.delete(currentPlayer.name);
+
+        this.playerManager.setPlayerReady(currentPlayer.name, true);
+        this.playerManager.nextPlayer();
+
+
+        // Reset auto button for next turn (always happens after submit)
+        this.autoArrangeUsed = false;
+        document.getElementById('autoArrange').textContent = 'Auto';
+
+        const detectAutomaticsBtn = document.getElementById('findAutomatics'); // CHANGED - added 's'
+        if (detectAutomaticsBtn) {
+            detectAutomaticsBtn.disabled = false;
+        }
+
+        if (this.playerManager.areAllPlayersReady()) {
+            this.calculateScores();
+            this.gameState = 'scoring';
+        } else {
+            this.loadCurrentPlayerHand();
+        }
+
+        updateDisplay(this);
+    }
 
     async calculateScores() {
         console.log('🚀 calculateScores() START - this.maxRounds:', this.maxRounds);
