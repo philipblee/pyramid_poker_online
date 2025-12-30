@@ -50,7 +50,7 @@ const defaultTables = [
 
     {
         id: 2,
-        name: '2. SINGLE PLAYER - NO SURRENDER',
+        name: '2. SINGLE PLAYER - 4-CARD KITTY',
         settings: {
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'single-human',
