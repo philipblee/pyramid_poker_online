@@ -1,5 +1,8 @@
-// js/ui/lobby-default-tables.js
-// These are
+// lobby-default-tables.js
+// Default table settings and pre-configured tables
+
+(function() {
+    'use strict';
 
 let tableSettings = {
     gameConnectMode: 'offline',
@@ -174,3 +177,11 @@ const defaultTables = [
     }
 
 ];
+
+    // Export to window
+    window.PyramidPokerDefaults = {
+        tableSettings: tableSettings,
+        defaultTables: defaultTables
+    };
+
+})();
