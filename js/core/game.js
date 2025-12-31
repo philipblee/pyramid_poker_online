@@ -1055,7 +1055,6 @@ class PyramidPoker {
         return checkStraight(back) && checkStraight(middle) && checkStraight(front);
     }
 
-
     resetCards() {
         const currentPlayer = this.playerManager.getCurrentPlayer();
         const playerData = this.playerHands.get(currentPlayer.name);

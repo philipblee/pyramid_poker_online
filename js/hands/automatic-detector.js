@@ -696,6 +696,23 @@ function arrangeThreeFlush(allCards) {
         front.push(wilds[wildIndex++]);
     }
 
+    // Sort by hand strength (strongest first)
+    hands.sort((a, b) => {
+        const strengthA = evaluateHand(a);
+        const strengthB = evaluateHand(b);
+        return compareTuples(strengthB.handStrength, strengthA.handStrength);
+    });
+
+    // Assign to back/middle/front (strongest to weakest)
+//    let back = hands[0] || [];
+//    let middle = hands[1] || [];
+//    let front = hands[2] || [];
+
+    console.log('🏁 Arrangement complete (sorted by strength)');
+    console.log(`   Back: ${back.length} cards`);
+    console.log(`   Middle: ${middle.length} cards`);
+    console.log(`   Front: ${front.length} cards`);
+
     return { back, middle, front };
 }
 

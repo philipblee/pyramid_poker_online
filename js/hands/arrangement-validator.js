@@ -88,24 +88,6 @@ class ArrangementValidator {
     }
 
     /**
-     * Validate that 6+ card hands follow special rules
-     */
-    validateLargeHands(arrangement) {
-        const backCount = arrangement.back.length;
-        const middleCount = arrangement.middle.length;
-
-        const isValidBackHand = backCount < 6 || this.game.validateLargeHand(arrangement.back);
-        const isValidMiddleHand = middleCount < 6 || this.game.validateLargeHand(arrangement.middle);
-
-        if (!isValidBackHand || !isValidMiddleHand) {
-            console.log('❌ Final validation: Large hands do not follow special rules');
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * Validate 5-card front hand must be at least a straight
      */
     validateFrontHandConstraint(arrangement, frontStrength) {
