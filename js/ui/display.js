@@ -31,6 +31,7 @@ function createCardElement(card) {
 
     cardEl.draggable = true;
     cardEl.dataset.card = JSON.stringify(card);
+    cardEl.dataset.cardId = card.id;
     return cardEl;
 }
 
@@ -57,9 +58,66 @@ function setupDragAndDrop(game) {
         }
     });
 
+    // Add click handler for wild cards
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('card')) {
+            const cardData = JSON.parse(e.target.dataset.card);
+            if (cardData.isWild) {
+                // Find the actual card object in game data (not the JSON copy)
+                const currentPlayer = game.playerManager.getCurrentPlayer();
+                const playerData = game.playerHands.get(currentPlayer.name);
+
+                // Search all hands for the card with matching id
+                const allCards = [
+                    ...playerData.cards,
+                    ...playerData.back,
+                    ...playerData.middle,
+                    ...playerData.front
+                ];
+
+                const actualCard = allCards.find(c => c.id === cardData.id);
+                if (actualCard) {
+                    window.wildCardModal.show(actualCard);
+                }
+            }
+        }
+    });
+
     document.addEventListener('dragend', (e) => {
         if (e.target.classList.contains('card')) {
             e.target.classList.remove('dragging');
+        }
+    });
+
+    // ADD THIS ENTIRE BLOCK:
+    // Click handler for wild cards
+    document.addEventListener('click', (e) => {
+        const cardElement = e.target.closest('.card');
+        if (cardElement) {
+            const cardData = JSON.parse(cardElement.dataset.card);
+            console.log('🔍 Card data:', cardData);
+
+            if (cardData.isWild || cardData.wasWild) {
+                console.log('🔍 IS WILD! Opening modal...');
+                const cardId = cardElement.dataset.cardId;
+
+                const currentPlayer = game.playerManager.getCurrentPlayer();
+                const playerData = game.playerHands.get(currentPlayer.name);
+
+                if (!playerData) return;
+
+                const allCards = [
+                    ...playerData.cards,
+                    ...playerData.back,
+                    ...playerData.middle,
+                    ...playerData.front
+                ];
+
+                const actualCard = allCards.find(c => c.id === cardId);
+                if (actualCard && window.wildCardModal) {
+                    window.wildCardModal.show(actualCard);
+                }
+            }
         }
     });
 
