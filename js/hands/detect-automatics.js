@@ -2,19 +2,6 @@
 // Encapsulates UI handling for detecting and playing automatic hands
 
 (function attachAutomaticHandlers() {
-    function showAutomaticMessage(message) {
-        const messageDiv = document.getElementById('automaticMessage');
-        if (messageDiv) {
-            messageDiv.textContent = message;
-            messageDiv.style.display = 'block';
-
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 10000);
-        } else {
-            console.log(message); // Fallback
-        }
-    }
 
     function detectAutomatics() {
 
@@ -95,11 +82,14 @@
             // Store automatic type
             window.currentAutomatic = result.type;
 
-            // Enable submit
-            const submitBtn = document.getElementById('submitHand');
-            if (submitBtn) submitBtn.disabled = false;
+            console.log('🔍 About to call validateHands, window.game:', window.game);
+            console.log('🔍 validateHands function exists?', typeof window.game.validateHands);
+
+            // Trigger validation to update displays and PLAY-A button
+            window.game.validateHands();
 
             console.log(`✅ Arranged ${result.type}`);
+
         } else {
             showAutomaticMessage('❌ No automatic possible with these cards');
 
@@ -108,9 +98,24 @@
 
             const autoButton = document.getElementById('detectAutomatics');
             if (autoButton) {
-                autoButton.textContent = 'DETECT-AUTOMATIC';
+                autoButton.textContent = 'DETECT-A';
                 autoButton.title = '';
             }
+
+        }
+    }
+
+    function showAutomaticMessage(message) {
+        const messageDiv = document.getElementById('automaticMessage');
+        if (messageDiv) {
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 10000);
+        } else {
+            console.log(message); // Fallback
         }
     }
 
@@ -121,7 +126,7 @@
         window.currentAutomatic = null;
 
         // Submit using existing method
-        window.game.submitAutomatic();
+        window.game.playAutomatic();
 
         console.log(`🎯 Submitted automatic`);
     }
@@ -129,7 +134,7 @@
     function resetAutomaticButton() {
         const autoButton = document.getElementById('detectAutomatics');
         if (autoButton) {
-            autoButton.textContent = 'DETECT-AUTOMATIC';
+            autoButton.textContent = 'DETECT-A';
             // DON'T set onclick - addEventListener already handles routing
             autoButton.title = '';
             autoButton.disabled = false;

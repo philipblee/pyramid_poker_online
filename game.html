@@ -450,8 +450,8 @@
             <button id="reorderRank" class="btn btn-secondary" onclick="reorderStagingByRank(game)">Rank</button>
             <button id="reorderSuit" class="btn btn-secondary" onclick="reorderStagingBySuit(game)">Suit</button>
             <button id="submitHand" class="btn btn-primary" disabled>Submit</button>
-            <button id="detectAutomatics" class="btn btn-primary">Detect-Automatic</button>
-            <button id="playAutomatic" class="btn btn-primary" onclick="game.submitAutomatic()">PLAY AUTOMATIC</button>
+            <button id="detectAutomatics" class="btn btn-primary">Detect-A</button>
+            <button id="playAutomatic" class="btn btn-primary" onclick="game.playAutomatic()"disabled>PLAY-A</button>
             <button id="playButton" class="btn btn-success decision-btn" style="display: none;">Play</button>
             <button id="surrenderButton" class="btn btn-secondary decision-btn" style="display: none;">Surrender</button>
             <button id="submitDecision" class="btn btn-primary decision-btn" style="display: none;">Submit-Decision</button>
@@ -745,7 +745,7 @@
     <script src="js/utilities/netEV-lookup-table.js"></script>
     <script src="js/utilities/convert-to-card-model.js"></script>
     <script src="js/hands/evaluate-hand.js"></script>
-    <script src="js/hands/automatic-detector.js"></script>
+    <script src="js/hands/validate-automatic-arrangement.js"></script>
     <script src="js/hands/detect-automatics.js"></script>
     <script src="js/hands/hand-utilities.js"></script>
     <script src="js/hands/scoring-utilities.js"></script>

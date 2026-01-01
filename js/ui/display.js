@@ -89,7 +89,6 @@ function setupDragAndDrop(game) {
         }
     });
 
-    // ADD THIS ENTIRE BLOCK:
     // Click handler for wild cards
     document.addEventListener('click', (e) => {
         const cardElement = e.target.closest('.card');
@@ -365,15 +364,14 @@ function updateScoring(game) {
 
 // Update button states based on game state
 function updateButtonStates(game) {
-//    console.log('🎮 updateButtonStates() called from:', new Error().stack.split('\n')[2].trim());
-      const newGameBtn = document.getElementById('newGame');
+    //    console.log('🎮 updateButtonStates() called from:', new Error().stack.split('\n')[2].trim());
+    const newGameBtn = document.getElementById('newGame');
     const newRoundBtn = document.getElementById('newRound');
-//    const addPlayerBtn = document.getElementById('addPlayer');
     const autoBtn = document.getElementById('autoArrange');
     const rankBtn = document.getElementById('sortByRank');
     const suitBtn = document.getElementById('sortBySuit');
     const submitBtn = document.getElementById('submitHand');
-    const automaticBtn = document.getElementById('submitAutomatic');
+    const automaticBtn = document.getElementById('playAutomatic');
 
     if (game.gameState === 'waiting') {
 //        addPlayerBtn.disabled = false;

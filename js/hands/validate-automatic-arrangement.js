@@ -1,4 +1,4 @@
-// js/hands/automatic-detector.js
+// js/hands/validateAutomaticArrangement.js
 // Automatic hand detection for Pyramid Poker
 
 /**
@@ -16,7 +16,7 @@ const AUTOMATIC_TYPES = {
  * @param {Object} arrangement - {back, middle, front} with cards
  * @returns {Object|null} - {type, precedence} or null if no automatic
  */
-function detectAutomatic(arrangement) {
+function validateAutomaticArrangement(arrangement) {
     // Check in precedence order (highest first)
     if (hasThreeFullHouses(arrangement)) {
         return { type: 'three-full-houses', precedence: AUTOMATIC_TYPES['three-full-houses'] };

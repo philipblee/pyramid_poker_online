@@ -736,6 +736,8 @@ class PyramidPoker {
 
     validateHands() {
 
+        console.log('🔍 validateHands() CALLED');
+
         const currentPlayer = this.playerManager.getCurrentPlayer();
         const playerData = this.playerHands.get(currentPlayer.name);
 
@@ -863,22 +865,18 @@ class PyramidPoker {
                 frontHand.classList.add('valid');
                 submitBtn.disabled = false;
 
-                // Check PLAY AUTO button state
-                const playAutoBtn = document.getElementById('detectAutomatics');
-                if (playAutoBtn && window.currentAutomatic) {
-                    // Validate that current hands still form the detected automatic
+                // Check PLAY-A button state
+                const playABtn = document.getElementById('playAutomatic');
+                if (playABtn) {
                     const arrangement = {
                         back: playerData.back,
                         middle: playerData.middle,
                         front: playerData.front
                     };
-                    const isValidAutomatic = this.validateAutomaticArrangement(
-                        window.currentAutomatic,
-                        arrangement
-                    );
-                    playAutoBtn.disabled = !isValidAutomatic;
-                } else if (playAutoBtn) {
-                    playAutoBtn.disabled = true;
+                    console.log('🔍 Checking for automatic with arrangement:', arrangement);
+                    const automatic = validateAutomaticArrangement(arrangement);
+                    console.log('🔍 detectAutomatic returned:', automatic);
+                    playABtn.disabled = !automatic;
                 }
 
                 const readyCount = this.playerManager.getReadyCount();
@@ -903,7 +901,7 @@ class PyramidPoker {
         } else {
             // Incomplete setup
             submitBtn.disabled = true;
-            const automaticBtn = document.getElementById('submitAutomatic');
+            const automaticBtn = document.getElementById('playAutomatic');
             if (automaticBtn) automaticBtn.disabled = true;
             document.getElementById('backStrength').textContent = `${backCount}/5 cards`;
             document.getElementById('middleStrength').textContent = `${middleCount}/5 cards`;
@@ -1072,7 +1070,7 @@ class PyramidPoker {
         this.loadCurrentPlayerHand();
     }
 
-    async submitAutomatic() {
+    async playAutomatic() {
         // Check if automatics are allowed
         if (gameConfig.config.automaticsAllowed !== 'yes') {
             return;
@@ -1095,7 +1093,7 @@ class PyramidPoker {
             middle: playerData.middle,
             front: playerData.front
         };
-        const automatic = detectAutomatic(arrangement);
+        const automatic = validateAutomaticArrangement(arrangement);
 
         if (!automatic) {
             alert('This hand does not qualify as an automatic.');
