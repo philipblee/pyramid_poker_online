@@ -667,51 +667,85 @@ function arrangeDragon(allCards) {
 
 // Arrange for three flush
 function arrangeThreeFlush(allCards) {
-    // Separate wilds from naturals
     const wilds = allCards.filter(c => c.isWild);
     const naturals = allCards.filter(c => !c.isWild);
 
-    // Group naturals by suit
+    // Group naturals by suit and sort by rank
     const suitGroups = { '♠': [], '♥': [], '♦': [], '♣': [] };
     naturals.forEach(c => suitGroups[c.suit].push(c));
 
-    // Sort suits by count (descending)
-    const sortedSuits = Object.entries(suitGroups)
-        .sort((a, b) => b[1].length - a[1].length);
+    // Get top 5 from each suit, sorted by rank
+    const flushHands = Object.entries(suitGroups)
+        .map(([suit, cards]) => {
+            return {
+                suit: suit,
+                cards: cards.sort((a, b) => b.value - a.value).slice(0, 5)
+            };
+        })
+        .filter(hand => hand.cards.length > 0);
 
-    // Take 5 from each of top 3 suits
-    const back = [...sortedSuits[0][1].slice(0, 5)];
-    const middle = [...sortedSuits[1][1].slice(0, 5)];
-    const front = [...sortedSuits[2][1].slice(0, 5)];
-
-    // Fill gaps with wilds
+    // Fill each hand to 5 cards with wilds
     let wildIndex = 0;
-    while (back.length < 5 && wildIndex < wilds.length) {
-        back.push(wilds[wildIndex++]);
-    }
-    while (middle.length < 5 && wildIndex < wilds.length) {
-        middle.push(wilds[wildIndex++]);
-    }
-    while (front.length < 5 && wildIndex < wilds.length) {
-        front.push(wilds[wildIndex++]);
-    }
-
-    // Sort by hand strength (strongest first)
-    hands.sort((a, b) => {
-        const strengthA = evaluateHand(a);
-        const strengthB = evaluateHand(b);
-        return compareTuples(strengthB.handStrength, strengthA.handStrength);
+    flushHands.forEach(hand => {
+        while (hand.cards.length < 5 && wildIndex < wilds.length) {
+            hand.cards.push(wilds[wildIndex++]);
+        }
     });
 
-    // Assign to back/middle/front (strongest to weakest)
-//    let back = hands[0] || [];
-//    let middle = hands[1] || [];
-//    let front = hands[2] || [];
+    // Evaluate and sort by handRank (descending)
+    const evaluatedHands = flushHands
+        .map(hand => {
+            console.log(`  📋 Hand suit ${hand.suit}, cards:`, hand.cards.map(c => `${c.rank||'WILD'}${c.suit} (isWild:${c.isWild})`).join(', '));
 
-    console.log('🏁 Arrangement complete (sorted by strength)');
-    console.log(`   Back: ${back.length} cards`);
-    console.log(`   Middle: ${middle.length} cards`);
-    console.log(`   Front: ${front.length} cards`);
+            const evalCards = hand.cards.map(card => {
+                if (card.isWild) {
+                    const replacement = {
+                        ...card,
+                        id: `A${hand.suit}_wild`,
+                        rank: "A",
+                        suit: hand.suit,
+                        value: 14,
+                        isWild: false,
+                        wasWild: true
+                    };
+                    console.log('  🔄 WILD REPLACEMENT:', replacement);
+                    return replacement;
+                }
+                return card;
+            });
+
+            console.log('🔄 Before evaluateHand:');
+            console.log('  evalCards:', evalCards.map(c => `${c.rank}${c.suit} (isWild:${c.isWild})`).join(', '));
+
+            return {
+                cards: evalCards,  // ✅ Return replaced cards, not originals
+                handRank: evaluateHand(evalCards)
+            };
+        })
+        .filter(hand => hand.cards.length === 5)
+        .sort((a, b) => {
+            if (b.handRank.handType !== a.handRank.handType) {
+                return b.handRank.handType - a.handRank.handType;
+            }
+            for (let i = 0; i < a.handRank.handStrength.length; i++) {
+                if (b.handRank.handStrength[i] !== a.handRank.handStrength[i]) {
+                    return b.handRank.handStrength[i] - a.handRank.handStrength[i];
+                }
+            }
+            return 0;
+        });
+
+    console.log('🃏 Three-Flush Evaluation:');
+    evaluatedHands.forEach((hand, index) => {
+        const handType = index === 0 ? 'BACK' : index === 1 ? 'MIDDLE' : 'FRONT';
+        const cardList = hand.cards.map(c => `${c.rank}${c.suit}`).join(' ');
+        console.log(`  ${handType}: ${cardList}`);
+        console.log(`    Type: ${hand.handRank.handType}, Strength: [${hand.handRank.handStrength.join(', ')}]`);
+    });
+
+    const back = evaluatedHands[0]?.cards || [];
+    const middle = evaluatedHands[1]?.cards || [];
+    const front = evaluatedHands[2]?.cards || [];
 
     return { back, middle, front };
 }
@@ -955,7 +989,58 @@ window.dealAutomatic = function(type) {
             {id: '7♥_15', rank: '7', suit: '♥', value: 7, isWild: false},
             {id: '3♣_16', rank: '3', suit: '♣', value: 3, isWild: false},
             {id: '4♣_17', rank: '4', suit: '♣', value: 4, isWild: false}
+        ],
+
+        // TEST 1: Three flushes, no wilds - scrambled order to test sorting
+        // Expected result after sorting:
+        // Back: Spades A-K-Q-J-10 (best)
+        // Middle: Diamonds A-10-9-8-7 (second - Ace high beats King high)
+        // Front: Hearts K-Q-J-9-8 (third - King high)
+        'three-flush-no-wild': [
+            {id: 'K♥_1', rank: 'K', suit: '♥', value: 13, isWild: false},
+            {id: 'A♠_2', rank: 'A', suit: '♠', value: 14, isWild: false},
+            {id: '10♦_3', rank: '10', suit: '♦', value: 10, isWild: false},
+            {id: 'J♥_4', rank: 'J', suit: '♥', value: 11, isWild: false},
+            {id: 'K♠_5', rank: 'K', suit: '♠', value: 13, isWild: false},
+            {id: 'A♦_6', rank: 'A', suit: '♦', value: 14, isWild: false},
+            {id: '9♥_7', rank: '9', suit: '♥', value: 9, isWild: false},
+            {id: 'Q♠_8', rank: 'Q', suit: '♠', value: 12, isWild: false},
+            {id: '9♦_9', rank: '9', suit: '♦', value: 9, isWild: false},
+            {id: 'J♠_10', rank: 'J', suit: '♠', value: 11, isWild: false},
+            {id: '8♥_11', rank: '8', suit: '♥', value: 8, isWild: false},
+            {id: '8♦_12', rank: '8', suit: '♦', value: 8, isWild: false},
+            {id: '10♠_13', rank: '10', suit: '♠', value: 10, isWild: false},
+            {id: 'Q♥_14', rank: 'Q', suit: '♥', value: 12, isWild: false},
+            {id: '7♦_15', rank: '7', suit: '♦', value: 7, isWild: false},
+            {id: '5♣_16', rank: '5', suit: '♣', value: 5, isWild: false},
+            {id: '4♣_17', rank: '4', suit: '♣', value: 4, isWild: false}
+        ],
+
+        // TEST 2: Three flushes with ONE wild card
+        // Expected result after wild becomes Ace of Diamonds:
+        // Back: Diamonds A-Q-J-10-9 (best with wild as A♦)
+        // Middle: Spades K-Q-J-10-9 (second)
+        // Front: Hearts K-Q-J-10-8 (third)
+        'three-flush-one-wild': [
+            {id: 'Q♦_1', rank: 'Q', suit: '♦', value: 12, isWild: false},
+            {id: 'K♠_2', rank: 'K', suit: '♠', value: 13, isWild: false},
+            {id: 'J♦_3', rank: 'J', suit: '♦', value: 11, isWild: false},
+            {id: 'Q♥_4', rank: 'Q', suit: '♥', value: 12, isWild: false},
+            {id: '10♠_5', rank: '10', suit: '♠', value: 10, isWild: false},
+            {id: '10♦_6', rank: '10', suit: '♦', value: 10, isWild: false},
+            {id: 'J♥_7', rank: 'J', suit: '♥', value: 11, isWild: false},
+            {id: '9♠_8', rank: '9', suit: '♠', value: 9, isWild: false},
+            {id: 'K♥_9', rank: 'K', suit: '♥', value: 13, isWild: false},
+            {id: 'Q♠_10', rank: 'Q', suit: '♠', value: 12, isWild: false},
+            {id: '9♦_11', rank: '9', suit: '♦', value: 9, isWild: false},
+            {id: '10♥_12', rank: '10', suit: '♥', value: 10, isWild: false},
+            {id: 'J♠_13', rank: 'J', suit: '♠', value: 11, isWild: false},
+            {id: '8♥_14', rank: '8', suit: '♥', value: 8, isWild: false},
+            {id: 'WILD_15', rank: '', suit: '', value: 0, isWild: true},
+            {id: '6♣_16', rank: '6', suit: '♣', value: 6, isWild: false},
+            {id: '5♣_17', rank: '5', suit: '♣', value: 5, isWild: false}
         ]
+
     };
 
     // Clear staging and deal
