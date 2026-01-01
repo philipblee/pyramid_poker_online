@@ -450,16 +450,11 @@
             <button id="reorderRank" class="btn btn-secondary" onclick="reorderStagingByRank(game)">Rank</button>
             <button id="reorderSuit" class="btn btn-secondary" onclick="reorderStagingBySuit(game)">Suit</button>
             <button id="submitHand" class="btn btn-primary" disabled>Submit</button>
-            <button id="findAutomatics" class="btn btn-primary">Detect-Automatics</button>
-            <button id="playButton" class="btn btn-success decision-btn" style="display: none;">
-                Play
-            </button>
-            <button id="surrenderButton" class="btn btn-secondary decision-btn" style="display: none;">
-                Surrender
-            </button>
-            <button id="submitDecision" class="btn btn-primary decision-btn" style="display: none;">
-                Submit Decision
-            </button>
+            <button id="detectAutomatics" class="btn btn-primary">Detect-Automatic</button>
+            <button id="playAutomatic" class="btn btn-primary" onclick="game.submitAutomatic()">PLAY AUTOMATIC</button>
+            <button id="playButton" class="btn btn-success decision-btn" style="display: none;">Play</button>
+            <button id="surrenderButton" class="btn btn-secondary decision-btn" style="display: none;">Surrender</button>
+            <button id="submitDecision" class="btn btn-primary decision-btn" style="display: none;">Submit-Decision</button>
             <button class="btn btn-secondary" onclick="window.location.href='index.html'">Website</button>
         </div>
 

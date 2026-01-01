@@ -95,12 +95,6 @@
             // Store automatic type
             window.currentAutomatic = result.type;
 
-            // Change button text
-            const autoButton = document.getElementById('findAutomatics');
-            if (autoButton) {
-                autoButton.textContent = 'PLAY-AUTOMATIC';
-            }
-
             // Enable submit
             const submitBtn = document.getElementById('submitHand');
             if (submitBtn) submitBtn.disabled = false;
@@ -112,7 +106,7 @@
             // Do not move any cards; just reset state/button
             window.currentAutomatic = null;
 
-            const autoButton = document.getElementById('findAutomatics');
+            const autoButton = document.getElementById('detectAutomatics');
             if (autoButton) {
                 autoButton.textContent = 'DETECT-AUTOMATIC';
                 autoButton.title = '';
@@ -133,7 +127,7 @@
     }
 
     function resetAutomaticButton() {
-        const autoButton = document.getElementById('findAutomatics');
+        const autoButton = document.getElementById('detectAutomatics');
         if (autoButton) {
             autoButton.textContent = 'DETECT-AUTOMATIC';
             // DON'T set onclick - addEventListener already handles routing

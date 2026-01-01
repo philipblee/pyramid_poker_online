@@ -40,9 +40,9 @@ class PyramidPoker {
         document.getElementById('submitHand').addEventListener('click', () => this.submitCurrentHand());
 
         // Find Automatics button (may not exist on all pages)
-        const detectAutomaticsBtn = document.getElementById('findAutomatics');
+        const detectAutomaticsBtn = document.getElementById('detectAutomatics');
         if (detectAutomaticsBtn) {
-            console.log('🔧 Attaching findAutomatics listener');
+            console.log('🔧 Attaching detectAutomatics listener');
             detectAutomaticsBtn.addEventListener('click', () => {
                 console.log('🔧 Button clicked, currentAutomatic:', window.currentAutomatic);
                 if (window.currentAutomatic) {
@@ -864,7 +864,7 @@ class PyramidPoker {
                 submitBtn.disabled = false;
 
                 // Check PLAY AUTO button state
-                const playAutoBtn = document.getElementById('findAutomatics');
+                const playAutoBtn = document.getElementById('detectAutomatics');
                 if (playAutoBtn && window.currentAutomatic) {
                     // Validate that current hands still form the detected automatic
                     const arrangement = {
@@ -889,7 +889,7 @@ class PyramidPoker {
                 middleHand.classList.add('invalid');
                 frontHand.classList.add('invalid');
                 submitBtn.disabled = true;
-                const automaticBtn = document.getElementById('findAutomatics'); // CHANGED
+                const automaticBtn = document.getElementById('detectAutomatics'); // CHANGED
                 if (automaticBtn) automaticBtn.disabled = true; // null check already there
 
                 let reason = '';
@@ -1121,7 +1121,7 @@ class PyramidPoker {
         if (gameConfig.config.gameConnectMode === 'online') {
             await window.multiDeviceIntegration.storePlayerArrangementToFirebase(playerName, true);
 
-            const autoBtn = document.getElementById('findAutomatics');
+            const autoBtn = document.getElementById('detectAutomatics');
             if (autoBtn) {
                 autoBtn.disabled = true;
                 autoBtn.textContent = 'Submitted ✓';
@@ -1141,7 +1141,7 @@ class PyramidPoker {
         this.autoArrangeUsed = false;
         document.getElementById('autoArrange').textContent = 'Auto';
 
-        const detectAutomaticsBtn = document.getElementById('findAutomatics');
+        const detectAutomaticsBtn = document.getElementById('detectAutomatics');
         if (detectAutomaticsBtn) {
             resetAutomaticButton();
         }
@@ -1187,7 +1187,7 @@ class PyramidPoker {
         this.autoArrangeUsed = false;
         document.getElementById('autoArrange').textContent = 'Auto';
 
-        const detectAutomaticsBtn = document.getElementById('findAutomatics'); // CHANGED - added 's'
+        const detectAutomaticsBtn = document.getElementById('detectAutomatics'); // CHANGED - added 's'
         if (detectAutomaticsBtn) {
             detectAutomaticsBtn.disabled = false;
         }
