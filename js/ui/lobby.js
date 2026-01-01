@@ -419,9 +419,6 @@ function updateTableDisplay() {
     const humanPlayers = tableSettings.humanPlayers + 1
     const settingsHtml = `
 
-        Connect: ${tableSettings.gameConnectMode}<br>
-        Device: ${tableSettings.gameDeviceMode}<br>
-        Humans: ${tableSettings.gameMode}<br>
         AI Players: ${tableSettings.computerPlayers}<br>
         Tournament Rounds: ${tableSettings.rounds}<br>
         Decks: ${tableSettings.deckCount}<br>
@@ -430,7 +427,6 @@ function updateTableDisplay() {
         Stakes Ante: ${tableSettings.stakesAnteAmount}<br>
         Stakes SurrenderAmount: ${tableSettings.stakesSurrenderAmount}<br>
         Stakes Multiplier: ${tableSettings.stakesMultiplierAmount}<br>
-        Game Variation: ${tableSettings.gameVariant}<br>
         AI Method: ${tableSettings.winProbabilityMethod}
     `;
 

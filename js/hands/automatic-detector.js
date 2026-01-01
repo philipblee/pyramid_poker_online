@@ -684,6 +684,9 @@ function arrangeThreeFlush(allCards) {
         })
         .filter(hand => hand.cards.length > 0);
 
+    // Sort hands by card count (descending) - prioritize nearly-complete flushes
+    flushHands.sort((a, b) => b.cards.length - a.cards.length);
+
     // Fill each hand to 5 cards with wilds
     let wildIndex = 0;
     flushHands.forEach(hand => {
