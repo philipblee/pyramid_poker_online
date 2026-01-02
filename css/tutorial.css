@@ -1,0 +1,238 @@
+/* Tutorial Modal Styles */
+
+.tutorial-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 10000;
+    animation: fadeIn 0.3s;
+}
+
+.tutorial-overlay.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tutorial-modal {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid #4ecdc4;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 900px;
+    max-height: 85vh;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+.tutorial-header {
+    background: linear-gradient(90deg, #0f3460 0%, #16213e 100%);
+    padding: 20px 30px;
+    border-bottom: 2px solid #4ecdc4;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tutorial-header h2 {
+    color: #4ecdc4;
+    margin: 0;
+    font-size: 28px;
+}
+
+.tutorial-close {
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.tutorial-close:hover {
+    background: #ff5252;
+    transform: scale(1.1);
+}
+
+.tutorial-tabs {
+    display: flex;
+    background: #0f3460;
+    border-bottom: 2px solid #4ecdc4;
+}
+
+.tutorial-tab {
+    flex: 1;
+    padding: 15px;
+    background: none;
+    border: none;
+    color: #b0b0b0;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-bottom: 3px solid transparent;
+}
+
+.tutorial-tab:hover {
+    color: #4ecdc4;
+    background: rgba(78, 205, 196, 0.1);
+}
+
+.tutorial-tab.active {
+    color: #4ecdc4;
+    border-bottom: 3px solid #4ecdc4;
+    font-weight: bold;
+}
+
+.tutorial-content {
+    padding: 30px;
+    overflow-y: auto;
+    flex: 1;
+    color: #e0e0e0;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.tutorial-section {
+    display: none;
+}
+
+.tutorial-section.active {
+    display: block;
+    animation: slideIn 0.3s;
+}
+
+.tutorial-section h3 {
+    color: #4ecdc4;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 22px;
+}
+
+.tutorial-section h4 {
+    color: #ffd700;
+    margin-top: 25px;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.tutorial-section p {
+    margin-bottom: 15px;
+}
+
+.tutorial-section ul {
+    margin-left: 20px;
+    margin-bottom: 20px;
+}
+
+.tutorial-section li {
+    margin-bottom: 8px;
+}
+
+.tutorial-example {
+    background: rgba(78, 205, 196, 0.1);
+    border-left: 4px solid #4ecdc4;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 5px;
+}
+
+.tutorial-card-display {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+    flex-wrap: wrap;
+}
+
+.tutorial-mini-card {
+    background: white;
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 18px;
+    font-weight: bold;
+    min-width: 45px;
+    text-align: center;
+}
+
+.tutorial-mini-card.wild {
+    background: #ffd700;
+    color: #333;
+}
+
+.tutorial-mini-card.red {
+    color: #ff0000;
+}
+
+.tutorial-mini-card.black {
+    color: #000000;
+}
+
+.automatic-type {
+    background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+    border: 2px solid #4ecdc4;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.automatic-type h4 {
+    margin-top: 0;
+    color: #4ecdc4;
+    font-size: 20px;
+}
+
+.hand-row {
+    margin: 10px 0;
+}
+
+.hand-label {
+    color: #ffd700;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Scrollbar styling for tutorial content */
+.tutorial-content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.tutorial-content::-webkit-scrollbar-track {
+    background: #0f3460;
+}
+
+.tutorial-content::-webkit-scrollbar-thumb {
+    background: #4ecdc4;
+    border-radius: 5px;
+}
+
+.tutorial-content::-webkit-scrollbar-thumb:hover {
+    background: #3ba89c;
+}
