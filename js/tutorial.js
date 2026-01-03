@@ -138,27 +138,18 @@ class Tutorial {
 
             <p>Wild cards can represent any card you choose. They are <strong>dealt randomly</strong> at the start of each round.</p>
 
-            <h4>How Wild Cards Work</h4>
-                <div class="tutorial-example">
-                    <ul>
-                        <li>Wild cards appear as <span style="color: #ffd700; font-weight: bold;">WILD</span> in your hand</li>
-                        <li>Click the wild card to open the Wild Card Modal</li>
-                        <li>Select the specific card you want it to become (suit and rank)</li>
-                        <li>The wild becomes that card for the hand</li>
-                        <li>You can change it by clicking the wild card again</li>
-                    </ul>
-                </div>
-
-            <h4>Wild Card Strategy</h4>
+            <h4>Important: Wild Cards must be set to a specific card</h4>
+            <div class="tutorial-example">
                 <ul>
-                    <li>Set wilds to <strong>complete strong hands</strong> (flushes, straights, full houses)</li>
-                    <li>Can create <strong>Five of a Kind</strong> with multiple wilds</li>
-                    <li>Essential for forming <strong>automatic patterns</strong></li>
-                    <li>Change wild assignments as your strategy develops</li>
+
+                    <li><strong>To set a wild card</strong> you must click the wild card to open the Wild Card Modal</li>
+                    <li><strong>Select the specific card</strong> you want it to become (rank and suit)</li>
+                    <li>The wild becomes that card unless you change it</li>
+                    <li>You can <strong>change it again</strong> by clicking the wild again</li>
                 </ul>
+            </div>
 
             <h4>Example: Using a Wild Card</h4>
-
             <div class="tutorial-example">
                 <p><strong>Your hand includes:</strong></p>
                 <div class="tutorial-card-display">
@@ -180,56 +171,50 @@ class Tutorial {
             <div id="section-buttons" class="tutorial-section">
                 <h3>🎮 Game Buttons</h3>
 
-                <h4>Arrangement Buttons</h4>
+                <h4>Buttons</h4>
+
+                <div class="tutorial-example">
                 <ul>
                     <li><strong>AUTO</strong> - Automatically arranges cards into best valid hands</li>
                     <li><strong>RANK</strong> - Sorts staging area cards by rank (A-2)</li>
                     <li><strong>SUIT</strong> - Sorts staging area cards by suit ( ♠ ♥ ♦ ♣ )</li>
+                    <li><strong>SUBMIT</strong> -   Disabled until there is a valid arrangement</li>
+                    <li><strong>DETECT-A</strong> - Abbreviation for Detect AUTOMATIC</li>
+                    <li><strong>PLAY-A</strong> - Abbreviation for Play AUTOMATIC. Disabled until there is a valid AUTOMATIC</li>
+                    <li><strong>WEBSITE</strong> - Main Pyramid Poker Website</li>
+                    <li><strong>?</strong> - Brings up this Tutorial</li>
                 </ul>
+                </div>
 
-                <h4>Submit Buttons (When Enabled)</h4>
-
-                <p><strong>SUBMIT Button</strong></p>
-                <ul>
-                    <li><strong>Enabled when:</strong> You have a valid arrangement</li>
-                    <li>✓ All hands are valid (Back 5-8, Middle 5-7, Front 3 or 5)</li>
-                    <li>✓ Hands in valid order: Back ≥ Middle ≥ Front</li>
-                    <li>✓ 5-card front must be at least a Straight</li>
-                    <li><strong>Click SUBMIT</strong> to play arrangement for scoring</li>
-                </ul>
+            <h4>PLAY-A - Play AUTOMATIC</h4>
 
                 <div class="tutorial-example">
-                    <p><strong>PLAY-A Button (Play Automatic)</strong></p>
                     <ul>
-                        <li><strong>Enabled when:</strong> Valid arrangement smf Automatic detected</li>
-                        <li>✓ One of four automatics detected:
+                        <li><strong>Enabled when:</strong> Valid Automatic is detected</li>
+                        <li>One of four automatics detected:
                             <ul style="margin-top: 8px;">
                                 <li>Three-Full-Houses (all three hands are full houses)</li>
                                 <li>Dragon (13 cards in sequence)</li>
                                 <li>Three-Flush (all three hands are flushes)</li>
                                 <li>Three-Straight (all three hands are straights)</li>
+
                             </ul>
                         </li>
-                        <li><strong>Click PLAY A</strong> to play the automatic for +3 points vs. regular hands</li>
+                        <li><strong>Click PLAY A</strong> to play the AUTOMATIC</li>
                     </ul>
                 </div>
 
+                <h4>DETECT-A - Detect AUTOMATIC</h4>
+
                 <div class="tutorial-example">
-                <h4>DETECT-A Button - Detect Automatic</h4>
+
                 <ul>
-                    <li>Using cards in staging area, detect for automatic and arranges if found</li>
-                    <li>Automatically fills Back/Middle/Front hands</li>
-                    <li>Once arranged, PLAY-A button is enabled automatically</li>
+                    <li><strong>DETECT-A</strong> - Searches staging area for automatics and arranges if found</li>
+                    <li>Automatically fills Back/Middle/Front if automatic pattern exists</li>
+                    <li>Once arranged, PLAY-A button is enabled</li>
                 </ul>
                 </div>
 
-                <h4>Tips</h4>
-                <div class="tutorial-example">
-                    <p>⚡ The game <strong>checks</strong> your arrangement</p>
-                    <p>✓ SUBMIT enables when valid arrangement is detected</p>
-                    <p>✓ PLAY-A enables when valid automatic is detected</p>
-                    <p>📊 Hand strengths update in real-time as you arrange cards</p>
-                </div>
             </div>
         `;
     }
@@ -239,19 +224,17 @@ class Tutorial {
             <div id="section-automatics" class="tutorial-section">
                 <h3>✨ Automatic Hands</h3>
 
-                <p>Automatics are special hands that score +3 points if you win</p>
-
                 <div class="automatic-type">
-                    <h4>🏠 Three-Full-Houses (3 Points)</h4>
+                    <h4>🏠 Three-Full-Houses</h4>
                     <p>All three hands are <strong>full houses</strong> (3 of a kind + pair)</p>
                     <div class="hand-row">
-                        <span class="hand-label">Back:</span> Full House or better
+                        <span class="hand-label">Back:</span> Full House
                     </div>
                     <div class="hand-row">
-                        <span class="hand-label">Middle:</span> Full House or better
+                        <span class="hand-label">Middle:</span> Full House
                     </div>
                     <div class="hand-row">
-                        <span class="hand-label">Front:</span> Full House or better
+                        <span class="hand-label">Front:</span> Full House
                     </div>
                     <div class="tutorial-example" style="margin-top: 15px;">
                         <p><strong>Example:</strong></p>
@@ -259,8 +242,9 @@ class Tutorial {
                         <div class="hand-row">Middle: 7♦ 7♠ 7♥ 4♣ 4♦ (Sevens full of Fours)</div>
                         <div class="hand-row">Front: A♠ A♥ A♦ 2♣ 2♠ (Aces full of Twos)</div>
                     </div>
-                    <p style="margin-top: 10px; color: #ffd700;">💰 Scoring: Win all three hands automatically + 3 points</p>
+                   
                 </div>
+
 
                 <div class="automatic-type">
                     <h4>🐉 Dragon</h4>
@@ -274,7 +258,7 @@ class Tutorial {
                     <div class="hand-row">
                         <span class="hand-label">Front:</span> 3-card straight (e.g., Q-K-A)
                     </div>
-                    <p style="margin-top: 10px; color: #ffd700;">💰 Scoring: Win all three hands automatically + 13 points</p>
+                
                 </div>
 
                 <div class="automatic-type">
@@ -295,7 +279,7 @@ class Tutorial {
                         <div class="hand-row">Middle: A♥ J♥ 9♥ 7♥ 5♥ (Flush)</div>
                         <div class="hand-row">Front: K♦ Q♦ 10♦ 8♦ 6♦ (Flush)</div>
                     </div>
-                    <p style="margin-top: 10px; color: #ffd700;">💰 Scoring: Win all three hands automatically + 10 points</p>
+                    
                 </div>
 
                 <div class="automatic-type">
@@ -316,14 +300,16 @@ class Tutorial {
                         <div class="hand-row">Middle: K♦ Q♠ J♥ 10♣ 9♦ (Straight)</div>
                         <div class="hand-row">Front: 5♥ 4♠ 3♦ 2♣ A♠ (Straight)</div>
                     </div>
-                    <p style="margin-top: 10px; color: #ffd700;">💰 Scoring: Win all three hands automatically + 6 points</p>
+                   
                 </div>
+
 
                 <h4 style="margin-top: 30px;">🎯 Key Points</h4>
                 <ul>
-                    <li><strong>Automatic wins</strong> beat any normal arrangement</li>
-                    <li>Use <strong>DETECT-A</strong> button to automatically find and arrange automatics</li>
-                    <li><strong>Wild cards</strong> can help complete automatic patterns</li>
+                    <li><strong>Automatic wins</strong> against any regular arrangement</li>
+                    <li>Higher automatic wins (Three Full House > Dragon > Three-Flush > Three-Straight)</li>
+                    <li>Use <strong>DETECT-A</strong> button to automatically find automatics</li>
+                    <li><strong>Wild cards</strong> can help complete automatics</li>
                 </ul>
             </div>
         `;
@@ -334,12 +320,19 @@ class Tutorial {
             <div id="section-scoring" class="tutorial-section">
                 <h3>📊 Scoring System</h3>
 
-                <h4>Hand Values (Normal Play)</h4>
-                <p>Each hand has a point value based on its type:</p>
+                <h4>Hand Values (Regular Play)</h4>
+                <p>Each hand has a point value based on its type and whether it's in back, middle, or front hand position:</p>
 
                 <div class="tutorial-example">
                     <h4 style="color: #ffd700; margin-top: 0;">Back Hand (5-8 cards)</h4>
                     <ul>
+                        <li>Eight of a Kind: 18 points</li>                        
+                        <li>Eight-Card Straight Flush: 14 points</li> 
+                        <li>Seven of a Kind: 14 points</li>                        
+                        <li>Seven-Card Straight Flush: 11 points</li>  
+                        <li>Six of a Kind: 10 points</li>                        
+                        <li>Six-Card Straight Flush: 8 points</li>                        
+                        <li>Five of a Kind: 6 points</li>
                         <li>Straight Flush: 5 points</li>
                         <li>Four of a Kind: 4 points</li>
                         <li>Full House: 1 points</li>
@@ -351,9 +344,13 @@ class Tutorial {
                 <div class="tutorial-example">
                     <h4 style="color: #ffd700; margin-top: 0;">Middle Hand (5-7 cards)</h4>
                     <ul>
+                        <li>Seven of a Kind: 28 points</li>                        
+                        <li>Seven-Card Straight Flush: 22 points</li>  
+                        <li>Six of a Kind: 20 points</li>                        
+                        <li>Six-Card Straight Flush: 16 points</li>         
                         <li>Straight Flush: 10 points</li>
                         <li>Four of a Kind: 8 points</li>
-                        <li>Full House or less: 2 point</li>
+                        <li>Full House: 2 point</li>
                     </ul>
                 </div>
 
@@ -369,13 +366,15 @@ class Tutorial {
                     </ul>
                 </div>
 
-                <h4>How Scoring Works</h4>
-                <ol>
+            <h4>How Scoring Works</h4>
+            <div class="tutorial-example">
+                <ul>
                     <li><strong>Compare hands:</strong> Back vs Back, Middle vs Middle, Front vs Front</li>
                     <li><strong>For each hand:</strong> you either win or lose that number of points from each opponent</li>
                     <li><strong>If you win x points and multiplier is y, you win x*y chips</strong></li>
                     <li><strong>Conversely, the opponent loses x*y chips.  It's always zero sum.'</strong></li>
-                </ol>
+                </ul>
+            </div>
 
                 <div class="tutorial-example">
                     <h4 style="margin-top: 0;">Example Round</h4>
