@@ -1714,6 +1714,16 @@ class PyramidPoker {
 
     initializeTournament() {
         console.log('🏆 from window.game.initializeTournament: Starting new tournament...');
+        // Clear decisions from previous tournament
+        if (this.surrenderDecisions) {
+            this.surrenderDecisions.clear();
+        }
+
+        // Clear Firebase decisions (owner only)
+        if (this.multiDeviceMode && window.isOwner && this.currentTableId) {
+            firebase.database().ref(`tables/${this.currentTableId}/surrenderDecisions`).remove();
+        }
+
         this.currentRound = 1;
         this.roundHistory = [];
         this.tournamentScores.clear();
