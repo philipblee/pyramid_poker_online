@@ -595,6 +595,20 @@ class MultiDeviceIntegration {
 
         });
 
+
+        // Load surrender decisions into Map
+        const surrenderSnapshot = await firebase.database()
+            .ref(`tables/${this.currentTableId}/surrenderDecisions`)
+            .once('value');
+        const surrenderDecisions = surrenderSnapshot.val() || {};
+
+        window.game.surrenderDecisions = window.game.surrenderDecisions || new Map();
+        Object.entries(surrenderDecisions).forEach(([playerKey, decision]) => {
+            const playerName = playerKey.replace(/_at_/g, '@').replace(/,/g, '.');
+            window.game.surrenderDecisions.set(playerName, decision);
+            console.log(`📥 Loaded surrender decision: ${playerName} = ${decision}`);
+        });
+
         console.log('✅ Loaded arrangements with correct keys');
     }
 

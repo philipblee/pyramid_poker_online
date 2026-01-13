@@ -143,6 +143,30 @@ function submitSurrenderDecision(decision) {
             .set(decision)
             .then(() => {
                 console.log(`📤 Wrote ${decision} decision to Firebase for ${currentPlayer.name}`);
+
+                // 🔧 NEW: If surrendering, also write empty arrangement to Firestore
+                if (decision === 'surrender') {
+                    const surrenderedHand = {
+                        back: [],
+                        middle: [],
+                        front: [],
+                        surrendered: true,
+                        timestamp: Date.now()
+                    };
+
+                    firebase.firestore()
+                        .collection('tables')
+                        .doc(tableId.toString())
+                        .set({
+                            currentGame: {
+                                arrangements: {
+                                    [currentPlayer.name]: surrenderedHand
+                                }
+                            }
+                        }, { merge: true })
+                        .then(() => console.log(`✅ Stored surrendered arrangement for ${currentPlayer.name}`))
+                        .catch(err => console.error('❌ Error storing surrender arrangement:', err));
+                }
             })
             .catch((error) => {
                 console.error('❌ Failed to write decision to Firebase:', error);
