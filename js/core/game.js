@@ -505,12 +505,21 @@ class PyramidPoker {
         let cardsToDisplay = playerData.cards;  // ← KEEP THIS LINE!
 
         const isKittyVariant = gameConfig.config.gameVariant === 'kitty';
-        const shouldShowLimited = isDecisionPhase || (isKittyVariant && this.tableState === TABLE_STATES.DEALING);
+
+        // ADD THESE TWO LINES HERE:
+        console.log('🎴 Loading hand - tableState:', this.tableState, 'isKittyVariant:', isKittyVariant, 'isDecisionPhase:', isDecisionPhase);
+
+        const shouldShowLimited = isDecisionPhase ||
+            (isKittyVariant && (this.tableState === TABLE_STATES.DEALING || this.tableState === TABLE_STATES.HANDS_DEALT));
+
+        // AND THIS LINE:
+        console.log('🎴 shouldShowLimited:', shouldShowLimited, 'cardsToDisplay.length:', cardsToDisplay.length);
 
         resetAutomaticButton();
 
         if (shouldShowLimited) {
             cardsToDisplay = playerData.cards.slice(0, 13);
+            console.log('🎴 After slice - cardsToDisplay.length:', cardsToDisplay.length);
         }
 
         // Show appropriate buttons based on state
