@@ -43,6 +43,9 @@ function showDecisionButtons() {
         suitBtn.style.display = 'none';
     }
 
+    const detectAutoBtn = document.getElementById('detectAutomatics');
+    const playAutoBtn = document.getElementById('playAutomatic');
+
     const playBtn = document.getElementById('playButton');
     const surrenderBtn = document.getElementById('surrenderButton');
     const submitBtn = document.getElementById('submitDecision');
@@ -54,6 +57,10 @@ function showDecisionButtons() {
     // Hide traditional rank/suit buttons
     if (rankBtn) rankBtn.style.display = 'none';
     if (suitBtn) suitBtn.style.display = 'none';
+
+    // Add to the HIDE section:
+    if (detectAutoBtn) detectAutoBtn.style.display = 'none';
+    if (playAutoBtn) playAutoBtn.style.display = 'none';
 
     // Show reorder and decision buttons
     if (reorderRankBtn) {
@@ -88,6 +95,8 @@ function showDecisionButtons() {
 }
 
 function hideDecisionButtons() {
+    const detectAutoBtn = document.getElementById('detectAutomatics');
+    const playAutoBtn = document.getElementById('playAutomatic');
     const rankBtn = document.getElementById('sortByRank');
     const suitBtn = document.getElementById('sortBySuit');
     const playBtn = document.getElementById('playButton');
@@ -112,6 +121,11 @@ function hideDecisionButtons() {
     // Show all game buttons
     if (submitHandBtn) submitHandBtn.style.display = 'inline-block';
     if (autoArrangeBtn) autoArrangeBtn.style.display = 'inline-block';
+
+    // Add to the SHOW section:
+    if (detectAutoBtn) detectAutoBtn.style.display = 'inline-block';
+    if (playAutoBtn) playAutoBtn.style.display = 'inline-block';
+
 }
 
 function submitSurrenderDecision(decision) {
@@ -258,7 +272,13 @@ async function handleAllDecided() {
     revealKittyCards();
 
     // Then transition
-    setTableState(TABLE_STATES.PLAYING);
+    if (window.game.multiDeviceMode) {
+        setTableState(TABLE_STATES.PLAYING);
+    } else {
+        // Single-player: directly set state and reload hand
+        window.game.tableState = TABLE_STATES.PLAYING;
+        window.game.loadCurrentPlayerHand(); // This triggers hideDecisionButtons() and shows 17 cards
+    }
 }
 
 async function collectSurrenderPenalties() {

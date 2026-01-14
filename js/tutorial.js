@@ -207,7 +207,7 @@ class Tutorial {
                 <div class="tutorial-example">
 
                 <ul>
-                    <li><strong>DETECT-A</strong> - Searches staging area for automatics and arranges if found</li>
+                    <li><strong>FIND-AUTO</strong> - Searches staging area for automatics and arranges if found</li>
                     <li>Automatically fills Back/Middle/Front if automatic pattern exists</li>
                     <li>Once arranged, PLAY-A button is enabled</li>
                 </ul>
@@ -306,7 +306,7 @@ class Tutorial {
                 <ul>
                     <li><strong>Automatic wins</strong> against any regular arrangement</li>
                     <li>Higher automatic wins (Three Full House > Dragon > Three-Flush > Three-Straight)</li>
-                    <li>Use <strong>DETECT-A</strong> button to automatically find automatics</li>
+                    <li>Use <strong>FIND-AUTO</strong> button to automatically find automatics</li>
                     <li><strong>Wild cards</strong> can help complete automatics</li>
                 </ul>
             </div>
