@@ -75,13 +75,33 @@ async function handleTableStateChange(tableState) {
             }
             break;
 
-        case TABLE_STATES.PLAYING:
+         case TABLE_STATES.PLAYING:
             console.log('🎮 Moving to playing phase - showing all cards');
 
-            // Reload hand to show all 17 cards (slice logic won't apply outside DECIDE_PLAYING)
+            // Load surrender decisions FIRST
+            if (window.game?.multiDeviceMode && window.game.currentTableId) {
+                const surrenderSnapshot = await firebase.database()
+                    .ref(`tables/${window.game.currentTableId}/surrenderDecisions`)
+                    .once('value');
+                const surrenderDecisions = surrenderSnapshot.val() || {};
+
+                window.game.surrenderDecisions = window.game.surrenderDecisions || new Map();
+                Object.entries(surrenderDecisions).forEach(([playerKey, decision]) => {
+                    const playerName = playerKey.replace(/_at_/g, '@').replace(/,/g, '.');
+                    window.game.surrenderDecisions.set(playerName, decision);
+                    console.log(`📥 PLAYING state - loaded decision: ${playerName} = ${decision}`);
+                });
+
+                // 🔧 NEW: Check if all surrendered - manually trigger check
+                if (window.isOwner && window.multiDeviceIntegration) {
+                    window.multiDeviceIntegration.checkAllPlayersSubmitted();
+                }
+            }
+
+            // NOW load hand
             if (window.game) {
                 window.game.loadCurrentPlayerHand();
-                updateDisplay(window.game);  // ← Add this line
+                updateDisplay(window.game);
             }
             break;
 

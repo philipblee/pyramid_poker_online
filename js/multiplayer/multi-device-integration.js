@@ -384,7 +384,11 @@ class MultiDeviceIntegration {
         const tableRef = this.tableManager.tablesRef.doc(this.currentTableId.toString());
 
         this.submissionListener = tableRef.onSnapshot(async (doc) => {
-//            console.log('📡 FIRESTORE LISTENER TRIGGERED!');
+            console.log('📡 FIRESTORE LISTENER TRIGGERED!');
+
+            // 🔧 SYNC isOwner from window (source of truth)
+            this.isOwner = window.isOwner;
+            console.log('📡 this.isOwner:', this.isOwner);
 
             if (this.isOwner) {
                 const stateSnapshot = await firebase.database().ref(`tables/${this.tableId}/tableState`).once('value');
@@ -398,6 +402,7 @@ class MultiDeviceIntegration {
                 } else {
                     console.log('📡 Skipping check - not in PLAYING state:', currentState);
                 }
+
             }
         });
     }

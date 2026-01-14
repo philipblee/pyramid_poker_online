@@ -22,12 +22,16 @@ function getCompactName(playerName) {
     return playerName.replace(/@gmail\.com$/, '');
 }
 
-
 async function distributeChips() {
     console.log('🔍 distributeChips START');
 
     const playerTotals = window.game?.lastRoundTotals || {};
-    const pot = window.game?.currentRoundPot || 0;
+
+    // 🔧 Read pot from Firebase, not cached value
+    const tableId = window.game?.currentTableId;
+    const potSnapshot = await firebase.database().ref(`tables/${tableId}/pot`).once('value');
+    const pot = potSnapshot.val() || 0;
+
     const multiplier = window.gameConfig?.config?.stakesMultiplierAmount || 1;
 
     console.log('🔍 playerTotals:', playerTotals);
@@ -43,13 +47,59 @@ async function distributeChips() {
 
     console.log('🔍 activePlayers eligible for pot:', activePlayers);
     console.log('🔍 All playerTotals:', Object.keys(playerTotals));
-    console.log('🔍 surrenderDecisions Map:', Array.from(window.game.surrenderDecisions?.entries() || []));
+    console.log('🔍 surrenderDecisions Map:', Array.from(window.game.surrenderDecisions || new Map()));
 
-    // Find pot winner(s) - only among active players
+    // 🔧 NEW: Check if ALL players surrendered
+    const allPlayerNames = Object.keys(playerTotals);
+    const allSurrendered = allPlayerNames.every(name =>
+        window.game.surrenderDecisions?.get(name) === 'surrender'
+    );
+
+    if (allSurrendered) {
+        console.log('⚖️ All players surrendered - splitting pot equally');
+        const equalShare = Math.floor(pot / allPlayerNames.length);
+        const anteAmount = window.gameConfig?.config?.anteAmount || 10;
+        const chipChanges = new Map();
+
+        for (const playerName of allPlayerNames) {
+            // Update chips in Firebase
+            const playerKey = playerName.replace(/\./g, ',').replace(/@/g, '_at_');
+            await firebase.database().ref(`players/${playerKey}/chips`)
+                .transaction(currentChips => (currentChips || 0) + equalShare);
+
+            // Build chip change: got equalShare back, paid ante + 10 penalty
+            const totalChange = equalShare - anteAmount - 10;
+            chipChanges.set(playerName, totalChange);
+            console.log(`⚖️ ${playerName}: share=${equalShare}, ante=${anteAmount}, penalty=10, net=${totalChange}`);
+        }
+
+        // Store for summary display
+        if (window.game) {
+            window.game.lastRoundChipChanges = chipChanges;
+        }
+
+        // 🔧 NEW: Set winners to ALL players for display
+        window.lastRoundFinancial = {
+            surrenderDecisions: window.game.surrenderDecisions,
+            pot: pot,
+            winners: allPlayerNames,  // ← Everyone is a winner!
+            potShare: equalShare,
+            playerTotals: playerTotals
+        };
+
+        // Clear the pot
+//        await firebase.database().ref(`tables/${window.game.currentTableId}/pot`).set(0);
+        console.log('✅ Pot split equally among all surrendered players');
+
+        return chipChanges; // Return the map
+    }
+
+    // Normal chip distribution continues - calculate winners
     const maxTotal = Math.max(...activePlayers.map(name => playerTotals[name]));
     const winners = activePlayers.filter(p => playerTotals[p] === maxTotal);
-    const potShare = Math.floor(pot / winners.length);
+    const potShare = winners.length > 0 ? Math.floor(pot / winners.length) : 0;
 
+    // Normal chip distribution continues
     console.log('🔍 maxTotal:', maxTotal);
     console.log('🔍 winners:', winners);
     console.log('🔍 potShare:', potShare);
@@ -247,14 +297,23 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
     // This chart includes initial ante, pot winnings and net payouts
     const chipChanges = await distributeChips();
 
+    // 🔧 NEW: If all surrendered, use corrected financial data
+    let finalPot = pot;
+    let finalWinners = winners;
+    if (window.lastRoundFinancial?.winners) {
+        finalPot = window.lastRoundFinancial.pot;
+        finalWinners = window.lastRoundFinancial.winners;
+        console.log('🔧 Using corrected financial data for all-surrendered case');
+    }
+
     const financialHtml = showRoundSummaryForChips(
         game,
-        window.game.surrenderDecisions,           // current surrenders
-        pot,                                      // current pot (just fetched)
-        winners,                                  // current winners
-        null,                                     // potShare — calculate inside if needed, or pass pot/winners.length
-        playerTotals,                             // current round points → payouts
-        chipChanges                               // per-player chip deltas
+        window.game.surrenderDecisions,
+        finalPot,                                 // ← Use corrected pot
+        finalWinners,                            // ← Use corrected winners
+        null,
+        playerTotals,
+        chipChanges
     );
 
     if (financialHtml) {
@@ -361,6 +420,7 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
 
 // Close scoring popup and clear all hands for next round
 let isClosingPopup = false; // Guard against double calls
+
 async function closeScoringPopup() {
     // Prevent double calls - if already closing, return early
     if (isClosingPopup) {
@@ -621,10 +681,6 @@ function getGameLength() {
 }
 
 async function showHeadToHeadMatrix(game, detailedResults, playerTotals, pot, winners, containerSelector = '.scoring-content') {
-
-
-
-
 
     // Build the player names list
     const playerNames = game.players.map(p => p.name);

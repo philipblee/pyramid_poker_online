@@ -247,23 +247,18 @@ function checkAllDecided() {
     }
 }
 
-function handleAllDecided() {
+async function handleAllDecided() {
+    // Load decisions first
+    await loadSurrenderDecisionsIntoMap();
 
-    // Step 1: Collect surrender penalties
-    collectSurrenderPenalties();
+    // Then collect penalties
+    await collectSurrenderPenalties();
 
-    // Step 2: Reveal remaining 4 cards for "play" players
+    // Then reveal cards
     revealKittyCards();
 
-    // Step 3: Transition to PLAYING state - write to Firebase!
-    if (gameConfig.config.gameDeviceMode === 'multi-device') {
-        setTableState(TABLE_STATES.PLAYING);
-    } else {
-        console.log('🔍 Taking SINGLE-PLAYER path');
-        game.tableState = 'playing';  // ← ADD THIS
-        game.loadCurrentPlayerHand();
-        updateDisplay(game);  // ← Add this line
-    }
+    // Then transition
+    setTableState(TABLE_STATES.PLAYING);
 }
 
 async function collectSurrenderPenalties() {
@@ -314,6 +309,23 @@ async function collectSurrenderPenalties() {
 
         console.log(`✅ Collected ${totalPenalties} in surrender penalties. Added to pot.`);
     }
+}
+
+async function loadSurrenderDecisionsIntoMap() {
+    const tableId = window.game?.currentTableId;
+    if (!tableId) return;
+
+    const snapshot = await firebase.database()
+        .ref(`tables/${tableId}/surrenderDecisions`)
+        .once('value');
+    const decisions = snapshot.val() || {};
+
+    window.game.surrenderDecisions = window.game.surrenderDecisions || new Map();
+    Object.entries(decisions).forEach(([playerKey, decision]) => {
+        const playerName = playerKey.replace(/_at_/g, '@').replace(/,/g, '.');
+        window.game.surrenderDecisions.set(playerName, decision);
+        console.log(`📥 Loaded: ${playerName} = ${decision}`);
+    });
 }
 
 function revealKittyCards() {

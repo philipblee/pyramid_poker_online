@@ -465,6 +465,15 @@ class PyramidPoker {
 
         const currentPlayer = this.playerManager.getCurrentPlayer();
 
+        // 🔧 Check surrender based on actual player in multi-device mode
+        const playerToCheck = this.multiDeviceMode ? window.uniquePlayerName : currentPlayer.name;
+
+        if (this.surrenderDecisions?.get(playerToCheck) === 'surrender') {
+            console.log(`⏭️ Skipping hand load - ${playerToCheck} surrendered`);
+            return;
+        }
+
+
         // Check if player surrendered - skip their turn
         if (this.surrenderDecisions && this.surrenderDecisions.get(currentPlayer.name) === 'surrender') {
 
