@@ -219,18 +219,21 @@
     <div class="bg-particles" id="bgParticles"></div>
 
     <!-- Sidebar Toggle Button -->
-    <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
-        <span id="toggleIcon">◀</span>
-        <span id="toggleText">Hide</span>
-    </button>
+<!--    <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">-->
+<!--        <span id="toggleIcon">◀</span>-->
+<!--        <span id="toggleText">Hide</span>-->
+<!--    </button>-->
 
+    <!-- Line 227-233: Header section -->
     <div class="header">
         <div class="header-content">
             <h1>🔺 Pyramid Poker Online</h1>
             <div class="version-tag" id="version-info" title="Click for build details"> Loading...</div>
             <button id="loginButton" class="btn btn-secondary login-btn">Login</button>
+            <button id="websiteBtn" class="btn btn-secondary" onclick="window.location.href='index.html'" title="Return to main website">Website</button>
         </div>
     </div>
+
 
     <style>
     /* Welcome Screen - Non-conflicting styles */
@@ -445,18 +448,17 @@
 
         <!-- Your existing game area - add style="display: none;" -->
         <div class="game-controls">
-            <button id="autoArrange" class="btn btn-secondary">Auto</button>
+            <button id="autoArrange" class="btn btn-secondary">BEST</button>
             <button id="sortByRank" class="btn btn-secondary">Rank</button>
             <button id="sortBySuit" class="btn btn-secondary">Suit</button>
             <button id="reorderRank" class="btn btn-secondary" onclick="reorderStagingByRank(game)">Rank</button>
             <button id="reorderSuit" class="btn btn-secondary" onclick="reorderStagingBySuit(game)">Suit</button>
             <button id="submitHand" class="btn btn-primary" disabled>Submit</button>
-            <button id="detectAutomatics" class="btn btn-primary">Detect-A</button>
-            <button id="playAutomatic" class="btn btn-primary" onclick="game.playAutomatic()"disabled>PLAY-A</button>
+            <button id="detectAutomatics" class="btn btn-primary">FIND-AUTO</button>
+            <button id="playAutomatic" class="btn btn-primary" onclick="game.playAutomatic()"disabled>PLAY-AUTO</button>
             <button id="playButton" class="btn btn-success decision-btn" style="display: none;">Play</button>
             <button id="surrenderButton" class="btn btn-secondary decision-btn" style="display: none;">Surr.</button>
             <button id="submitDecision" class="btn btn-primary decision-btn" style="display: none;">Declare</button>
-            <button class="btn btn-secondary" onclick="window.location.href='index.html'">Website</button>
         </div>
 
         <!-- Add near the Find Automatics button -->

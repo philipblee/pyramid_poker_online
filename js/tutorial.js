@@ -19,8 +19,8 @@ class Tutorial {
     }
 
     createTutorialButton() {
-        console.log('🎓 Looking for .game-controls');
-        const headerButtons = document.querySelector('.game-controls'); // Changed from .header-buttons
+        console.log('🎓 Looking for .header-content');
+        const headerButtons = document.querySelector('.header-content'); // Changed from .header-buttons
         console.log('🎓 Found game-controls:', headerButtons);
         if (!headerButtons) {
             console.log('❌ .game-controls not found! Button not created.');
@@ -30,9 +30,9 @@ class Tutorial {
         const tutorialBtn = document.createElement('button');
         tutorialBtn.id = 'tutorialBtn';
         tutorialBtn.className = 'btn btn-info';
-        tutorialBtn.innerHTML = '?';
+        tutorialBtn.innerHTML = 'Tutorial';
         tutorialBtn.title = 'Game Tutorial';
-        tutorialBtn.style.cssText = 'width: 60px; height: 45px; font-size: 24px; font-weight: bold;';
+        tutorialBtn.style.cssText = 'width: 120px; height: 42px; font-size: 16px;';
         tutorialBtn.onclick = () => this.show();
 
         // Insert before WEBSITE button
@@ -175,18 +175,16 @@ class Tutorial {
 
                 <div class="tutorial-example">
                 <ul>
-                    <li><strong>AUTO</strong> - Automatically arranges cards into best valid hands</li>
+                    <li><strong>BEST</strong> - Automatically arranges cards into best valid hands</li>
                     <li><strong>RANK</strong> - Sorts staging area cards by rank (A-2)</li>
                     <li><strong>SUIT</strong> - Sorts staging area cards by suit ( ♠ ♥ ♦ ♣ )</li>
                     <li><strong>SUBMIT</strong> -   Disabled until there is a valid arrangement</li>
-                    <li><strong>DETECT-A</strong> - Abbreviation for Detect AUTOMATIC</li>
-                    <li><strong>PLAY-A</strong> - Abbreviation for Play AUTOMATIC. Disabled until there is a valid AUTOMATIC</li>
-                    <li><strong>WEBSITE</strong> - Main Pyramid Poker Website</li>
-                    <li><strong>?</strong> - Brings up this Tutorial</li>
+                    <li><strong>FIND-AUTO</strong> - Abbreviation for Find AUTOMATIC</li>
+                    <li><strong>PLAY-AUTO</strong> - Abbreviation for Play AUTOMATIC. Disabled until there is a valid AUTOMATIC</li>
                 </ul>
                 </div>
 
-            <h4>PLAY-A - Play AUTOMATIC</h4>
+            <h4>PLAY-AUTO - Play AUTOMATIC</h4>
 
                 <div class="tutorial-example">
                     <ul>
@@ -204,7 +202,7 @@ class Tutorial {
                     </ul>
                 </div>
 
-                <h4>DETECT-A - Detect AUTOMATIC</h4>
+                <h4>FIND-AUTO - Detect AUTOMATIC</h4>
 
                 <div class="tutorial-example">
 
