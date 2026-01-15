@@ -146,13 +146,13 @@ body {
 }
 
 .btn:disabled {
-    background: #555 !important;
-    color: #999 !important;
+    background: #cccccc !important;
+    color: #666666 !important;
     opacity: 0.8;
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
-    border: 2px solid #fff !important;  /* Changed from #444 to #888 */
+    border: 2px solid #dddddd !important;
 }
 
 .btn:disabled::before {
