@@ -23,21 +23,39 @@ async function handleTableStateChange(tableState) {
 
         case TABLE_STATES.NEW_TOURNAMENT:
             console.log('🎮 Handling NEW_TOURNAMENT state...');
+
+            // For kitty variant, hide arrangement buttons immediately
+            if (gameConfig.config.gameVariant === 'kitty') {
+                const autoBtn = document.getElementById('autoArrange');
+                const detectAutoBtn = document.getElementById('detectAutomatics');
+                const playAutoBtn = document.getElementById('playAutomatic');
+                if (autoBtn) autoBtn.style.display = 'none';
+                if (detectAutoBtn) detectAutoBtn.style.display = 'none';
+                if (playAutoBtn) playAutoBtn.style.display = 'none';
+            }
+
             window.game.initializeTournament();
 
             // since it's a new tournament, call transition from lobby to dealing
             transitionFromLobbyToDealing();
 
-            // Then transition to DEALING
+            // Then transition to COUNTDOWN
             setTableState(TABLE_STATES.COUNTDOWN);
             break;
 
         case TABLE_STATES.COUNTDOWN:
             console.log('⏱️ Starting countdown phase...');
+
+            // For kitty variant, set up decision buttons early
+            if (gameConfig.config.gameVariant === 'kitty' && typeof showDecisionButtons === 'function') {
+                console.log('🎯 Calling showDecisionButtons from COUNTDOWN');
+                showDecisionButtons();
+            }
+
             if (window.isOwner) {
-                await transitionToCountdownPhase();
+                transitionToCountdownPhase(handleTableStateChange);
             } else {
-                await displayCountdownOnly();  // ADD THIS
+                displayCountdownOnly();
             }
             break;
 
@@ -75,8 +93,30 @@ async function handleTableStateChange(tableState) {
             }
             break;
 
-         case TABLE_STATES.PLAYING:
-            console.log('🎮 Moving to playing phase - showing all cards');
+        case TABLE_STATES.PLAYING:
+            console.log('🎬 Moving to playing phase - showing all cards');
+
+            // Hide decision buttons, show arrangement buttons
+            const playBtn = document.getElementById('playButton');
+            const surrenderBtn = document.getElementById('surrenderButton');
+            const submitDecisionBtn = document.getElementById('submitDecision');
+            const autoBtn = document.getElementById('autoArrange');
+            const rankBtn = document.getElementById('sortByRank');
+            const suitBtn = document.getElementById('sortBySuit');
+            const submitHandBtn = document.getElementById('submitHand');
+            const detectAutoBtn = document.getElementById('detectAutomatics');
+            const playAutoBtn = document.getElementById('playAutomatic');
+
+            if (playBtn) playBtn.style.display = 'none';
+            if (surrenderBtn) surrenderBtn.style.display = 'none';
+            if (submitDecisionBtn) submitDecisionBtn.style.display = 'none';
+
+            if (autoBtn) autoBtn.style.display = 'inline-block';
+            if (rankBtn) rankBtn.style.display = 'inline-block';
+            if (suitBtn) suitBtn.style.display = 'inline-block';
+            if (submitHandBtn) submitHandBtn.style.display = 'inline-block';
+            if (detectAutoBtn) detectAutoBtn.style.display = 'inline-block';
+            if (playAutoBtn) playAutoBtn.style.display = 'inline-block';
 
             if (window.game?.multiDeviceMode && window.game.currentTableId) {
                 // Load surrender decisions from Firebase

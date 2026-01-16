@@ -32,6 +32,7 @@ function initializeSurrenderDecision() {
 }
 
 function showDecisionButtons() {
+    console.log('🎯 showDecisionButtons CALLED - stack:', new Error().stack.split('\n')[2]?.trim());
     const rankBtn = document.getElementById('sortByRank');
     const suitBtn = document.getElementById('sortBySuit');
 
@@ -92,6 +93,7 @@ function showDecisionButtons() {
     // Hide Auto and Submit Hand
     if (submitHandBtn) submitHandBtn.style.display = 'none';
     if (autoArrangeBtn) autoArrangeBtn.style.display = 'none';
+    console.log('✅ Decision buttons set - PLAY/SURRENDER/DECLARE visible');
 }
 
 function hideDecisionButtons() {

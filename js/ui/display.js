@@ -364,7 +364,7 @@ function updateScoring(game) {
 
 // Update button states based on game state
 function updateButtonStates(game) {
-    //    console.log('🎮 updateButtonStates() called from:', new Error().stack.split('\n')[2].trim());
+    console.log(`🎛️ updateButtonStates - gameState: ${game.gameState}, tableState: ${game.tableState}`);
     const newGameBtn = document.getElementById('newGame');
     const newRoundBtn = document.getElementById('newRound');
     const autoBtn = document.getElementById('autoArrange');
@@ -384,16 +384,25 @@ function updateButtonStates(game) {
         if (automaticBtn) automaticBtn.disabled = true;
     } else if (game.gameState === 'playing') {
 
+        // Don't change buttons during kitty variant decision phases
+        if (gameConfig.config.gameVariant === 'kitty' &&
+            (game.tableState === 'hands_dealt' ||
+             game.tableState === 'dealing' ||
+             game.tableState === 'decide_playing')) {
+            console.log('⏭️ Skipping button update - in decision phase');
+            return; // Exit early, keep decision buttons
+        }
+
         // NEW LOGIC: Check if any players have started playing (moved cards around)
         const gameInProgress = game.playerManager.getReadyCount() > 0 ||
                               Array.from(game.playerHands.values()).some(hand =>
                                   hand.back.length > 0 || hand.middle.length > 0 || hand.front.length > 0
                               );
 
-//        newRoundBtn.disabled = gameInProgress || game.currentRound >= game.maxRounds;
         autoBtn.disabled = false;
         rankBtn.disabled = false;
         suitBtn.disabled = false;
+
     } else if (game.gameState === 'scoring') {
 //        addPlayerBtn.disabled = false;
 //        newGameBtn.disabled = false;
@@ -470,4 +479,17 @@ async function showHistoricalRound(game, roundNumber) {
     // For now, just show the scoring popup with historical data
     // We'll enhance this in Phase 3B to have round selector tabs
     await showScoringPopup(game, roundData.detailedResults, roundData.roundScores, new Map(), roundNumber);
+}
+
+// Monitor button visibility changes
+const observer = new MutationObserver(() => {
+    const autoBtn = document.getElementById('autoArrange');
+    if (autoBtn && autoBtn.style.display !== 'none') {
+        console.log('⚠️ Arrangement buttons shown! Stack:', new Error().stack.split('\n')[2]?.trim());
+    }
+});
+
+const autoBtn = document.getElementById('autoArrange');
+if (autoBtn) {
+    observer.observe(autoBtn, { attributes: true, attributeFilter: ['style'] });
 }
