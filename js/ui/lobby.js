@@ -337,6 +337,8 @@ async function joinTable(table) {
                 // NEW: Add table state listener
                 window.multiDeviceIntegration.setupTableStateListener(table.id, handleTableStateChange);
 
+                listenForStatusUpdates(table.id);
+
                 // Set up lobby state listener
                 setupLobbyStateListener(table.id);
 

@@ -320,3 +320,23 @@ async function setupLobbyStateListener(tableId) {
         }
     });
 }
+
+// Listen for status message updates from owner
+function listenForStatusUpdates(tableId) {
+    console.log(`🎧 Setting up status message listener for table ${tableId}`);
+
+    firebase.database()
+        .ref(`tables/${tableId}/statusMessage`)
+        .on('value', (snapshot) => {
+            const statusMessage = snapshot.val();
+            console.log(`📨 Status message received: ${statusMessage}`);
+
+            if (statusMessage) {
+                const statusDiv = document.getElementById('status');
+                if (statusDiv) {
+                    statusDiv.innerHTML = statusMessage;
+                    console.log(`✅ Updated status div`);
+                }
+            }
+        });
+}

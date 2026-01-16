@@ -188,10 +188,18 @@ class MultiDeviceIntegration {
 //        console.log('🔍 DEBUG - Arrangements count:', submittedCount);
 //        console.log('🔍 DEBUG - Total players needed:', totalPlayers);
 //
-//        console.log('🔍 submittedCount >= totalPlayers:', submittedCount >= totalPlayers);
+        console.log('🔍 submittedCount >= totalPlayers:', submittedCount >= totalPlayers);
 //        console.log('🔍 this.tableState !== all_submitted:', this.tableState !== 'all_submitted');
 //        console.log('🔍 this.isOwner:', this.isOwner);
 //        console.log('🔍 Full condition result:', (submittedCount >= totalPlayers && this.tableState !== 'all_submitted' && this.isOwner));
+
+        // Broadcast submission progress
+        if (this.isOwner && submittedCount < totalPlayers) {
+            const message = `Round ${window.game.currentRound} of ${window.game.maxRounds}<br>Waiting for submissions: ${submittedCount}/${totalPlayers} players submitted`;
+            firebase.database()
+                .ref(`tables/${this.tableId}/statusMessage`)
+                .set(message);
+        }
 
 
         if (submittedCount >= totalPlayers && this.tableState !== 'all_submitted' && this.isOwner) {

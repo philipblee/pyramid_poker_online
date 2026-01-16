@@ -249,18 +249,23 @@ function evaluateHandForSurrender(cards) {
 }
 
 function checkAllDecided() {
-
     const allPlayers = window.game.playerManager.players;
     const decidedCount = window.game.surrenderDecisions.size;
 
+    console.log(`🔍 DECISION - Checking if all decided. Count: ${decidedCount}, Total: ${allPlayers.length}`);
 
-    console.log(`🔍 DECISION - Checking if all decided. Count:, ${decidedCount}, 'Total:', ${allPlayers}`);
+    // Write status message for owner
+    if (window.isOwner) {
+        const message = `Round ${window.game.currentRound} of ${window.game.maxRounds}<br>Waiting for decisions: ${decidedCount}/${allPlayers.length} players decided`;
+        firebase.database()
+            .ref(`tables/${window.game.currentTableId}/statusMessage`)
+            .set(message);
+    }
 
     if (decidedCount === allPlayers.length) {
         handleAllDecided();
     }
 }
-
 async function handleAllDecided() {
     // Load decisions first
     await loadSurrenderDecisionsIntoMap();
@@ -270,6 +275,15 @@ async function handleAllDecided() {
 
     // Then reveal cards
     revealKittyCards();
+
+    // Write final decision count BEFORE transitioning
+    if (window.isOwner) {
+        const allPlayers = window.game.playerManager.players;
+        const message = `Round ${window.game.currentRound} of ${window.game.maxRounds}<br>All ${allPlayers.length} players decided - distributing kitty cards`;
+        await firebase.database()
+            .ref(`tables/${window.game.currentTableId}/statusMessage`)
+            .set(message);
+    }
 
     // Then transition
     if (window.game.multiDeviceMode) {
