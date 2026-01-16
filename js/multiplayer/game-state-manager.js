@@ -78,8 +78,8 @@ async function handleTableStateChange(tableState) {
          case TABLE_STATES.PLAYING:
             console.log('🎮 Moving to playing phase - showing all cards');
 
-            // Load surrender decisions FIRST
             if (window.game?.multiDeviceMode && window.game.currentTableId) {
+                // Load surrender decisions from Firebase
                 const surrenderSnapshot = await firebase.database()
                     .ref(`tables/${window.game.currentTableId}/surrenderDecisions`)
                     .once('value');
@@ -89,19 +89,35 @@ async function handleTableStateChange(tableState) {
                 Object.entries(surrenderDecisions).forEach(([playerKey, decision]) => {
                     const playerName = playerKey.replace(/_at_/g, '@').replace(/,/g, '.');
                     window.game.surrenderDecisions.set(playerName, decision);
-                    console.log(`📥 PLAYING state - loaded decision: ${playerName} = ${decision}`);
+                    console.log(`🔑 Loaded surrender decision: ${playerName} = ${decision}`);
                 });
 
-                // 🔧 NEW: Check if all surrendered - manually trigger check
-                if (window.isOwner && window.multiDeviceIntegration) {
-                    window.multiDeviceIntegration.checkAllPlayersSubmitted();
-                }
-            }
+                // Check if LOCAL player surrendered
+                const localDecision = window.game.surrenderDecisions.get(window.uniquePlayerName);
 
-            // NOW load hand
-            if (window.game) {
-                window.game.loadCurrentPlayerHand();
+                if (localDecision === 'surrender') {
+                    console.log(`🏳️ ${window.uniquePlayerName} surrendered - hiding cards`);
+                    const handArea = document.getElementById('hand-area');
+                    if (handArea) handArea.style.display = 'none';
+                } else {
+                    console.log(`🎴 ${window.uniquePlayerName} playing - loading their hand`);
+                    // Find local player's index and set as current player
+                    const playerNames = window.game.playerManager.getPlayerNames();
+                    const localIndex = playerNames.indexOf(window.uniquePlayerName);
+
+                    if (localIndex >= 0) {
+                        window.game.playerManager.currentPlayerIndex = localIndex;
+                        window.game.loadCurrentPlayerHand();
+                    }
+                }
                 updateDisplay(window.game);
+
+            } else {
+                // Single-device mode
+                if (window.game) {
+                    window.game.loadCurrentPlayerHand();
+                    updateDisplay(window.game);
+                }
             }
             break;
 

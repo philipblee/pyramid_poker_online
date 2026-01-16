@@ -172,7 +172,7 @@ class MultiDeviceIntegration {
         const arrangementsSnapshot = await firebase.firestore()
             .collection('tables')
             .doc(this.tableId.toString())
-            .get();
+            .get({ source: 'server' });  // ← ADD THIS to force read from server
 
         const arrangementsData = arrangementsSnapshot.data()?.currentGame?.arrangements;
 
@@ -578,7 +578,10 @@ class MultiDeviceIntegration {
         console.log('📖 Reading from table:', this.currentTableId, 'Tournament:', this.currentTournament, 'Round:', this.currentRound);
         console.log('☁ log from RetrieveAllArrangements: Loading arrangements from Firestore...');
         console.log(`  Debug RetrieveAllArrangementsFromFirebase 1 - this.currentTableId: ${this.currentTableId}`)
-        const doc = await this.tableManager.tablesRef.doc(this.currentTableId.toString()).get();
+        const doc = await this.tableManager.tablesRef
+            .doc(this.currentTableId.toString())
+            .get({ source: 'server' });  // ← ADD THIS to force server read
+
         const data = doc.data();
 
         const firebaseArrangements = data?.currentGame?.arrangements || {};
