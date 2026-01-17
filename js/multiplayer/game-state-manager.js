@@ -362,7 +362,7 @@ async function setupLobbyStateListener(tableId) {
 }
 
 // Listen for status message updates from owner
-function listenForStatusUpdates(tableId) {
+function setupListenForStatusUpdates(tableId) {
     console.log(`🎧 Setting up status message listener for table ${tableId}`);
 
     firebase.database()

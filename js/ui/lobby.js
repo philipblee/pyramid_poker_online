@@ -337,7 +337,8 @@ async function joinTable(table) {
                 // NEW: Add table state listener
                 window.multiDeviceIntegration.setupTableStateListener(table.id, handleTableStateChange);
 
-                listenForStatusUpdates(table.id);
+                setupListenForStatusUpdates(table.id);
+                setupListenForSettingsChanges(table.id);
 
                 // Set up lobby state listener
                 setupLobbyStateListener(table.id);
@@ -654,6 +655,9 @@ function openTableSettings() {
 
 // Save table settings
 function saveTableSettings() {
+
+    console.log('🎯 saveTableSettings CALLED');
+
     // Save all 8 settings
     tableSettings.rounds = parseInt(document.getElementById('tableRounds').value);
     tableSettings.wildCardCount = parseInt(document.getElementById('tableWildCardCounts').value);
@@ -677,6 +681,29 @@ function saveTableSettings() {
         console.log('✅ Synced all settings to gameConfig');
     }
 
+
+    // Write to Firebase if in multi-device mode
+    console.log('🔍 Checking Firebase write conditions:');
+    console.log('  currentTableId:', window.game?.currentTableId);
+    console.log('  gameDeviceMode:', tableSettings.gameDeviceMode);
+
+    if (window.game?.currentTableId && tableSettings.gameDeviceMode === 'multi-device') {
+        firebase.database()
+            .ref(`tables/${window.game.currentTableId}/settings`)
+            .set({
+                rounds: tableSettings.rounds,
+                wildCardCount: tableSettings.wildCardCount,
+                stakesAnteAmount: tableSettings.stakesAnteAmount,
+                stakesSurrenderAmount: tableSettings.stakesSurrenderAmount,
+                stakesMultiplierAmount: tableSettings.stakesMultiplierAmount,
+                computerPlayers: tableSettings.computerPlayers,
+                winProbabilityMethod: tableSettings.winProbabilityMethod,
+                automaticsAllowed: tableSettings.automaticsAllowed
+            })
+            .then(() => console.log('✅ Settings saved to Firebase'))
+            .catch(err => console.error('❌ Error saving settings:', err));
+    }
+
     // Update the display
     updateTableDisplay();
 
@@ -684,33 +711,41 @@ function saveTableSettings() {
     closeTableSettings();
 }
 
+// Listen for settings changes from owner
+function setupListenForSettingsChanges(tableId) {
+    console.log(`🎧 Setting up settings listener for table ${tableId}`);
+
+    firebase.database()
+        .ref(`tables/${tableId}/settings`)
+        .on('value', (snapshot) => {
+            const settings = snapshot.val();
+            if (settings) {
+                console.log('📨 Settings updated from Firebase:', settings);
+
+                // Update tableSettings
+                Object.assign(tableSettings, settings);
+
+                // Update gameConfig
+                if (window.gameConfig) {
+                    window.gameConfig.config.rounds = settings.rounds;
+                    window.gameConfig.config.wildCardCount = settings.wildCardCount;
+                    window.gameConfig.config.stakesAnteAmount = settings.stakesAnteAmount;
+                    window.gameConfig.config.stakesSurrenderAmount = settings.stakesSurrenderAmount;
+                    window.gameConfig.config.stakesMultiplierAmount = settings.stakesMultiplierAmount;
+                    window.gameConfig.config.computerPlayers = settings.computerPlayers;
+                    window.gameConfig.config.winProbabilityMethod = settings.winProbabilityMethod;
+                    window.gameConfig.config.automaticsAllowed = settings.automaticsAllowed;
+                }
+
+                // Update display
+                updateTableDisplay();
+            }
+        });
+}
+
 // Close, save, and update functions
 function closeTableSettings() {
     document.getElementById('tableSettingsModal').style.display = 'none';
-}
-
-function saveTableSettings() {
-    tableSettings.rounds = parseInt(document.getElementById('tableRounds').value);
-    tableSettings.winProbabilityMethod = document.getElementById('winProbabilityMethod').value;
-    tableSettings.wildCardCount = parseInt(document.getElementById('tableWildCardCounts').value);
-    tableSettings.computerPlayers = parseInt(document.getElementById('tableComputerPlayers').value);
-
-    // 🔧 FIX: Sync to gameConfig immediately
-    if (window.gameConfig) {
-        window.gameConfig.config.rounds = tableSettings.rounds;
-        window.gameConfig.config.winProbabilityMethod = tableSettings.winProbabilityMethod;
-        window.gameConfig.config.wildCardCount = tableSettings.wildCardCount;
-        window.gameConfig.config.computerPlayers = tableSettings.computerPlayers;
-        console.log('✅ Synced rounds to gameConfig:', tableSettings.rounds);
-    }
-
-    if (currentTable) {
-        currentTable.settings = { ...tableSettings };
-    }
-
-    updateTableDisplay();
-    closeTableSettings();
-    console.log('✅ Table settings saved:', tableSettings);
 }
 
 function updateAiPlayersDisplay(value) {
