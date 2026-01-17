@@ -309,6 +309,8 @@ async function handleAllDecided() {
         window.game.tableState = TABLE_STATES.PLAYING;
         window.game.loadCurrentPlayerHand(); // This triggers hideDecisionButtons() and shows 17 cards
     }
+// At the very end of handleAllDecided()
+updateDisplay(window.game);
 }
 
 async function collectSurrenderPenalties() {
