@@ -32,7 +32,7 @@ function initializeSurrenderDecision() {
 }
 
 function showDecisionButtons() {
-    console.log('🎯 showDecisionButtons CALLED - stack:', new Error().stack.split('\n')[2]?.trim());
+    console.log('🎯 showDecisionButtons CALLED');
     const rankBtn = document.getElementById('sortByRank');
     const suitBtn = document.getElementById('sortBySuit');
 
@@ -94,6 +94,20 @@ function showDecisionButtons() {
     if (submitHandBtn) submitHandBtn.style.display = 'none';
     if (autoArrangeBtn) autoArrangeBtn.style.display = 'none';
     console.log('✅ Decision buttons set - PLAY/SURRENDER/DECLARE visible');
+
+    // Mark buttons so we can detect if they're replaced
+    const autoBtn = document.getElementById('autoArrange');
+    if (autoBtn) {
+        autoBtn.setAttribute('data-hidden-by', 'showDecisionButtons');
+        autoBtn.style.display = 'none';
+    }
+
+    // Check if button still has our marker after 2 seconds
+    setTimeout(() => {
+        const autoBtn = document.getElementById('autoArrange');
+        const marker = autoBtn?.getAttribute('data-hidden-by');
+        console.log('🔍 2s later - marker exists:', marker, 'display:', autoBtn?.style.display);
+    }, 2000);
 }
 
 function hideDecisionButtons() {

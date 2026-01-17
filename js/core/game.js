@@ -528,6 +528,11 @@ class PyramidPoker {
         // Show appropriate buttons based on state
         if (this.tableState === TABLE_STATES.DECIDE_PLAYING) {
             showDecisionButtons();
+        } else if (gameConfig.config.gameVariant === 'kitty' &&
+                  (this.tableState === TABLE_STATES.HANDS_DEALT ||
+                   this.tableState === TABLE_STATES.DEALING)) {
+            // Don't change buttons during transition states - keep decision buttons
+            console.log('⏭️ Keeping decision buttons during transition');
         } else {
             hideDecisionButtons();
         }

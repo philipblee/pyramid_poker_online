@@ -482,8 +482,9 @@ async function showHistoricalRound(game, roundNumber) {
 }
 
 // Monitor button visibility changes
-const observer = new MutationObserver(() => {
+const observer = new MutationObserver((mutations) => {
     const autoBtn = document.getElementById('autoArrange');
+    console.log('🔍 Mutation detected - style attr:', autoBtn?.getAttribute('style'), 'display:', autoBtn?.style.display);
     if (autoBtn && autoBtn.style.display !== 'none') {
         console.log('⚠️ Arrangement buttons shown! Stack:', new Error().stack.split('\n')[2]?.trim());
     }
