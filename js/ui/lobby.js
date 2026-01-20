@@ -297,6 +297,22 @@ async function joinTable(table) {
 
         window.isOwner = playerInfo.isOwner;
 
+        // If owner, write initial settings to Firebase
+        if (playerInfo.isOwner) {
+            await firebase.database().ref(`tables/${table.id}/settings`).set({
+                rounds: table.settings.rounds,
+                wildCardCount: table.settings.wildCardCount,
+                stakesAnteAmount: table.settings.stakesAnteAmount,
+                stakesSurrenderAmount: table.settings.stakesSurrenderAmount,
+                stakesMultiplierAmount: table.settings.stakesMultiplierAmount,
+                computerPlayers: table.settings.computerPlayers,
+                winProbabilityMethod: table.settings.winProbabilityMethod,
+                automaticsAllowed: table.settings.automaticsAllowed,
+                humanPlayers: 1
+            });
+            console.log('✅ Owner wrote initial settings to Firebase');
+        }
+
         window.multiDeviceIntegration.enhanceContinueButton();
 
         console.log('🔍 userName, isOwner:', uniquePlayerName, isOwner);
