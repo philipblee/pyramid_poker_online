@@ -270,18 +270,11 @@ function checkAllDecided() {
 
     console.log(`🔍 DECISION - Checking if all decided. Count: ${decidedCount}, Total: ${allPlayers.length}`);
 
-    // Write status message for owner
-    if (window.isOwner) {
-        const message = `Round ${window.game.currentRound} of ${window.game.maxRounds}<br>Waiting for decisions: ${decidedCount}/${allPlayers.length} players decided`;
-        firebase.database()
-            .ref(`tables/${window.game.currentTableId}/statusMessage`)
-            .set(message);
-    }
-
     if (decidedCount === allPlayers.length) {
         handleAllDecided();
     }
 }
+
 async function handleAllDecided() {
     // Load decisions first
     await loadSurrenderDecisionsIntoMap();
@@ -414,6 +407,28 @@ function setupOwnerDecisionListener() {
         const decidedCount = Object.keys(decisions).length;
 
         console.log(`📊 Decisions: ${decidedCount}/${playerCount}`);
+
+        // ✅ Show which players are waiting
+        if (decidedCount > 0 && decidedCount < playerCount) {
+            const currentRound = window.game.currentRound || 1;
+            const maxRounds = window.game.maxRounds || 3;
+
+            // Get list of players who haven't decided yet
+            const allPlayers = window.game.playerManager.getPlayerNames();
+            const decidedPlayers = Object.keys(decisions);
+
+            // ✅ FIX: Convert Firebase keys back to email format
+            const decidedEmails = decidedPlayers.map(key =>
+                key.replace(/_at_/g, '@').replace(/,/g, '.')
+            );
+
+            const waitingPlayers = allPlayers.filter(p => !decidedEmails.includes(p));
+
+            const statusMessage = `Round ${currentRound} of ${maxRounds}<br>Waiting for decisions: ${decidedCount}/${playerCount} decided (${waitingPlayers.join(', ')})`;
+
+            firebase.database().ref(`tables/${tableId}/statusMessage`).set(statusMessage);
+            console.log(`📨 Status updated: Waiting for ${waitingPlayers.join(', ')}`);
+        }
 
         if (decidedCount === playerCount) {
             console.log('✅ All players decided! Transitioning...');

@@ -10,10 +10,11 @@ let tableSettings = {
     gameMode: 'single-human',
     gameVariant: 'no-surrender',
     computerPlayers: 4,
+    rounds: 5,
     wildCardCount: 2,
     deckCount: 2,
     winProbabilityMethod: 'tiered2',  // NEW - added AI method
-    rounds: 3,           // NEW - changed from totalRounds
+    rounds: 10,           // NEW - changed from totalRounds
     // Table/Lobby settings
     maxPlayers: 6,                   // Maximum players allowed at table (2-6)
     minPlayers: 2,                   // Minimum players to start game
@@ -44,7 +45,6 @@ const defaultTables = [
                     gameDeviceMode: 'single-device',
                     gameVariant: 'no-surrender',
                     computerPlayers: 1,
-                    rounds: 3,
                     wildCardCount: 2,
                     winProbabilityMethod: 'netEV' },
         icon: '🏓'
@@ -60,7 +60,6 @@ const defaultTables = [
                     gameDeviceMode: 'single-device',
                     gameVariant: 'kitty',
                     computerPlayers: 2,
-                    rounds: 3,
                     wildCardCount: 1,
                     winProbabilityMethod: 'netEV' },
         icon: '🏓'
@@ -75,7 +74,6 @@ const defaultTables = [
                     gameConnectMode: 'offline',
                     gameDeviceMode: 'single-device',
                     computerPlayers: 5,
-                    rounds: 5,
                     wildCardCount: 2,
                     winProbabilityMethod: 'tiered2' },
         icon: '🏓'
@@ -90,7 +88,6 @@ const defaultTables = [
                     gameConnectMode: 'offline',
                     gameDeviceMode: 'single-device',
                     computerPlayers: 5,
-                    rounds: 5,
                     wildCardCount: 2,
                     winProbabilityMethod: 'tiered2' },
         icon: '🏓'
@@ -105,7 +102,6 @@ const defaultTables = [
                     gameDeviceMode: 'single-device',
                     gameConnectMode: 'offline',
                     computerPlayers: 5,
-                    rounds: 5,
                     wildCardCount: 2,
                     winProbabilityMethod: 'tiered2' },
         icon: '🏓'
@@ -121,7 +117,6 @@ const defaultTables = [
                     gameConnectMode: 'offline',
                     gameDeviceMode: 'single-device',
                     computerPlayers: 2,
-                    rounds: 3,
                     wildCardCount: 2,
                     winProbabilityMethod: 'netEV' },
         icon: '☁️'
@@ -137,7 +132,6 @@ const defaultTables = [
                     gameDeviceMode: 'multi-device',
                     gameVariant: 'no-surrender',
                     computerPlayers: 0,
-                    rounds: 3,
                     wildCardCount: 2,
                     maxPlayers: 6,
                     winProbabilityMethod: 'netEV' },
@@ -154,7 +148,6 @@ const defaultTables = [
                     gameDeviceMode: 'multi-device',
                     gameVariant: 'kitty',
                     computerPlayers: 0,
-                    rounds: 3,
                     wildCardCount: 2,
                     maxPlayers: 6,
                     winProbabilityMethod: 'netEV' },
@@ -170,7 +163,6 @@ const defaultTables = [
                     gameConnectMode: 'online',
                     gameDeviceMode: 'multi-device',
                     computerPlayers: 5,
-                    rounds: 3,
                     wildCardCount: 2,
                     winProbabilityMethod: 'netEV' },
         icon: '☁️'
