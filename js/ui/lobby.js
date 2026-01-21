@@ -813,13 +813,15 @@ function updatePlayerListUI(players, tableId) {
         playerCountElement.textContent = players.length;
     }
 
-    // Update start game button
-    updateStartGameButton(players.length);
+    // Update start game button - call through the instance
+    if (window.multiDeviceIntegration) {
+        window.multiDeviceIntegration.updateStartGameButton(players.length);
+    }
 
 //    console.log('Updated all player slots');
 
     // In your updatePlayerListUI function, add this at the end:
-    tableOwnerManager(players ? players.length : 0, players,tableId);
+//    tableOwnerManager(players ? players.length : 0, players,tableId);
 
 }
 

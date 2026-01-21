@@ -595,45 +595,6 @@
         }, 3000);
     }
 
-    function updateStartGameButton(playerCount) {
-<!--        console.log("Log - updateStartGameButton called")-->
-        const startBtn = document.getElementById('startGameBtn');
-
-        const gameMode = tableSettings.gameMode;
-        const minPlayers = tableSettings.minPlayers || 2;
-
-<!--        console.log("Log - updateStartGameButton gameMode:", gameMode)-->
-
-        const isOwner = window.isOwner;
-<!--        console.log("Log in game.html, isOwner:", isOwner);-->
-
-        if (gameMode === 'single-human') {
-            console.log('🔍 Single-human mode - enabling button');
-            startBtn.disabled = false;
-            startBtn.textContent = '🎯 Start Tournament';
-        } // Added missing closing brace
-
-        if (gameMode === 'multiple-humans') {
-<!--            console.log('🔍 Multi-human mode - ready to disable/enable start button');-->
-            if (playerCount >= minPlayers) {
-                if (isOwner) { // Changed from IsOwner to isOwner
-                    startBtn.disabled = false;
-                    startBtn.textContent = '👑 Start Multi-User Game';
-<!--                    console.log('🔍 Is Owner & Enough Players - enabling Start Multi-User Game button');-->
-                }
-                else {
-                    startBtn.disabled = true;
-                    startBtn.textContent = 'Waiting for Owner';
-<!--                    console.log('🔍 Not Owner & Enough Players - disabling button - Waiting for Owner');-->
-                }
-            }
-            else {
-                startBtn.disabled = true;
-                startBtn.textContent = `Need ${minPlayers - playerCount} more players`;
-<!--                console.log('🔍 Multi-human mode - not enough players, disabling button - Waiting for more players');-->
-            }
-        }
-    }
         // Existing game initialization
         window.addEventListener('DOMContentLoaded', async () => {
 <!--            console.log('🚀 Initializing Pyramid Poker...');-->

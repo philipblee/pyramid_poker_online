@@ -71,7 +71,7 @@ class MultiDeviceIntegration {
         this.playerCountListener = playerCountRef.on('value', (snapshot) => {
             const playerCount = snapshot.val() || 0;
             console.log(`🔍 Shared player count: ${playerCount}`);
-            updateStartGameButton(playerCount);
+            this.updateStartGameButton(playerCount);
         });
 
         // Store ref for cleanup
@@ -1031,24 +1031,39 @@ class MultiDeviceIntegration {
         });
 
         // Update start button
-        this.updateStartButton(playerCount);
+        this.updateStartGameButton(playerCount);
 
         // Update status message
         this.updateLobbyStatus(playerCount);
     }
 
     // Update start button based on player count
-    updateStartButton(playerCount) {
-        const startBtn = document.getElementById('startGameBtn');
-        if (!startBtn) return;
+    updateStartGameButton(playerCount) {
+    console.log('🔍 updateStartGameButton - isOwner:', window.isOwner, 'playerCount:', playerCount);
 
-        if (playerCount >= 2) {
-            startBtn.disabled = false;
-            startBtn.textContent = `Start Game (${playerCount} Players)`;
-        } else {
-            startBtn.disabled = true;
-            startBtn.textContent = 'Need 2+ Players';
-        }
+    const startBtn = document.getElementById('startGameBtn');
+    if (!startBtn) {
+        console.log('❌ startGameBtn not found!');
+        return;
+    }
+
+    // ✅ ADD OWNER CHECK
+    if (window.isOwner && playerCount >= 2) {
+        console.log('✅ OWNER PATH - Enabling button');
+        startBtn.disabled = false;
+        startBtn.textContent = `Start Game (${playerCount} Players)`;
+    } else if (!window.isOwner) {
+        console.log('⛔ NON-OWNER PATH - Disabling button');
+        startBtn.disabled = true;
+        startBtn.textContent = 'Waiting for owner...';
+    } else {
+        console.log('⏳ OWNER WAITING - Not enough players');
+        // Owner but not enough players
+        startBtn.disabled = true;
+        startBtn.textContent = 'Need 2+ Players';
+    }
+
+    console.log('🔍 After update - disabled:', startBtn.disabled, 'text:', startBtn.textContent);
     }
 
     // Update status message
@@ -1188,6 +1203,13 @@ class MultiDeviceIntegration {
         console.log('✅ Cleanup complete');
     }
 }
+
+// Make updateStartGameButton globally accessible for lobby.js
+window.updateStartGameButton = function(playerCount) {
+    if (window.multiDeviceIntegration) {
+        window.multiDeviceIntegration.updateStartGameButton(playerCount);
+    }
+};
 
 // Export for use in other modules
 window.MultiDeviceIntegration = MultiDeviceIntegration;
