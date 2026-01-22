@@ -368,7 +368,15 @@ class MultiDeviceIntegration {
         } else {
             console.log('🔍 Non-owner path - disabling button')
             // Non-owner: Show waiting state
-            q
+            buttons.forEach(button => {
+                button.disabled = true;
+                button.textContent = 'Waiting for Owner';
+                button.title = "Waiting for table owner...";
+                button.style.opacity = '0.5';
+                button.style.cursor = 'not-allowed';
+                button.style.pointerEvents = 'none';  // Prevent all click events
+                button.onclick = null;  // Remove the click handler
+            });
 
             // Add waiting message
             const waitingMsg = document.createElement('div');
