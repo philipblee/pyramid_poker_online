@@ -1012,7 +1012,8 @@ function showRoundSummaryForChips(game, surrenderDecisions, pot, winners, potSha
                     </td>
 
                     <td style="padding: 12px; text-align: center; color: ${anteColor};">${ante}</td>
-                    <td style="padding: 12px; text-align: center; color: ${surrenderColor};">${surrenderDisplay}</td>
+
+                      q<td style="padding: 12px; text-align: center; color: ${surrenderColor};">${surrenderDisplay}</td>
                     <td style="padding: 12px; text-align: center; color: ${payoutColor};">${payoutDisplay}</td>
                     <td style="padding: 12px; text-align: center; color: ${potColor};">${potDisplay}</td>
 

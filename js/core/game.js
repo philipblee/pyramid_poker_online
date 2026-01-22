@@ -893,7 +893,8 @@ class PyramidPoker {
                     console.log('🔍 Checking for automatic with arrangement:', arrangement);
                     const automatic = validateAutomaticArrangement(arrangement);
                     console.log('🔍 detectAutomatic returned:', automatic);
-                    playABtn.disabled = !automatic;
+                    const handsNotEmpty = playerData.back.length > 0 && playerData.middle.length > 0 && playerData.front.length > 0;
+                    playABtn.disabled = !(automatic && handsNotEmpty);
                 }
 
                 const readyCount = this.playerManager.getReadyCount();

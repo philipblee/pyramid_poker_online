@@ -368,11 +368,7 @@ class MultiDeviceIntegration {
         } else {
             console.log('🔍 Non-owner path - disabling button')
             // Non-owner: Show waiting state
-            buttons.forEach(button => {
-                button.disabled = true;
-                button.title = "Waiting for table owner...";
-                button.style.opacity = '0.5';
-            });
+            q
 
             // Add waiting message
             const waitingMsg = document.createElement('div');
