@@ -996,6 +996,12 @@ function showRoundSummaryForChips(game, surrenderDecisions, pot, winners, potSha
             const potDisplay = potWin > 0 ? `+${potWin}` : '-';
             const surrenderDisplay = surrenderPenalty < 0 ? surrenderPenalty : '-';
 
+            // Add these lines:
+            const anteColor = ante < 0 ? '#ff6b6b' : ante > 0 ? '#4ecdc4' : '#ffd700';
+            const surrenderColor = surrenderPenalty < 0 ? '#ff6b6b' : surrenderPenalty > 0 ? '#4ecdc4' : '#ffd700';
+            const payoutColor = payout > 0 ? '#4ecdc4' : payout < 0 ? '#ff6b6b' : '#ffd700';
+            const potColor = potWin > 0 ? '#4ecdc4' : potWin < 0 ? '#ff6b6b' : '#ffd700';
+
             const totalColor = totalChange > 0 ? '#4ecdc4' : totalChange < 0 ? '#ff6b6b' : '#ffd700';
             const totalSign = totalChange > 0 ? '+' : '';
 
@@ -1004,10 +1010,12 @@ function showRoundSummaryForChips(game, surrenderDecisions, pot, winners, potSha
                     <td style="padding: 12px; color: #ecf0f1; text-align: left; font-weight: bold;">
                         ${getCompactName(name)}
                     </td>
-                    <td style="padding: 12px; text-align: center; color: #ffd700;">${ante}</td>
-                    <td style="padding: 12px; text-align: center; color: #ff6b6b;">${surrenderDisplay}</td>
-                    <td style="padding: 12px; text-align: center; color: #ffd700;">${payoutDisplay}</td>
-                    <td style="padding: 12px; text-align: center; color: #ffd700;">${potDisplay}</td>
+
+                    <td style="padding: 12px; text-align: center; color: ${anteColor};">${ante}</td>
+                    <td style="padding: 12px; text-align: center; color: ${surrenderColor};">${surrenderDisplay}</td>
+                    <td style="padding: 12px; text-align: center; color: ${payoutColor};">${payoutDisplay}</td>
+                    <td style="padding: 12px; text-align: center; color: ${potColor};">${potDisplay}</td>
+
                     <td style="padding: 12px; text-align: center; color: ${totalColor}; font-weight: bold; font-size: 18px;">
                         ${totalSign}${totalChange}
                     </td>
