@@ -23,7 +23,6 @@ function getCompactName(playerName) {
 }
 
 async function distributeChips() {
-    console.log('🔍 distributeChips START');
 
     const playerTotals = window.game?.lastRoundTotals || {};
 
@@ -34,20 +33,11 @@ async function distributeChips() {
 
     const multiplier = window.gameConfig?.config?.stakesMultiplierAmount || 1;
 
-    console.log('🔍 playerTotals:', playerTotals);
-    console.log('🔍 pot:', pot);
-    console.log('🔍 multiplier:', multiplier);
-
     // Filter out surrendered players from pot eligibility
     const activePlayers = Object.keys(playerTotals).filter(playerName => {
         const decision = window.game.surrenderDecisions?.get(playerName);
-        console.log(`🔍 ${playerName}: decision=${decision}, surrenderDecisions exists=${!!window.game.surrenderDecisions}`);
         return decision !== 'surrender';
     });
-
-    console.log('🔍 activePlayers eligible for pot:', activePlayers);
-    console.log('🔍 All playerTotals:', Object.keys(playerTotals));
-    console.log('🔍 surrenderDecisions Map:', Array.from(window.game.surrenderDecisions || new Map()));
 
     // 🔧 NEW: Check if ALL players surrendered
     const allPlayerNames = Object.keys(playerTotals);
@@ -99,11 +89,6 @@ async function distributeChips() {
     const winners = activePlayers.filter(p => playerTotals[p] === maxTotal);
     const potShare = winners.length > 0 ? Math.floor(pot / winners.length) : 0;
 
-    // Normal chip distribution continues
-    console.log('🔍 maxTotal:', maxTotal);
-    console.log('🔍 winners:', winners);
-    console.log('🔍 potShare:', potShare);
-
     // ONLY OWNER updates Firebase
     if (window.isOwner) {
         // Update each player's chips
@@ -116,13 +101,10 @@ async function distributeChips() {
             const isAI = playerName.endsWith('_AI') || playerName.includes(' AI');
             const playerKey = isAI ? playerName : playerName.replace(/\./g, ',').replace(/@/g, '_at_');
 
-            console.log(`🔍 ${playerName}: netPoints=${netPoints}, payout=${payout}, potWin=${potWin}, totalChange=${totalChange}`);
-
             const result = await firebase.database().ref(`players/${playerKey}/chips`)
                 .transaction(current => (current || 0) + totalChange);
 
             const newChips = result.snapshot.val();
-            console.log(`🔍 ${playerName}: newChips=${newChips}`);
 
             // Reload if less than 0
             if (newChips < 0) {
@@ -192,8 +174,6 @@ function getCardCountFromSubmittedHands(game, playerName, position) {
 // Enhanced showScoringPopup with proper large hand support
 async function showScoringPopup(game, detailedResults, roundScores, specialPoints, roundNumber = null) {
 
-    console.log ('DEBUG: showScoringPopup called')
-
     // CAPTURE SCORES FOR STATS - Check all possible score sources
     window.lastGameDetailedResults = detailedResults;
     window.lastGameRoundScores = roundScores;
@@ -201,18 +181,12 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
 
     // Try detailedResults first
     if (detailedResults && detailedResults.length > 0) {
-        console.log('🔍 Using detailedResults:', detailedResults);
         detailedResults.forEach(result => {
             window.lastGameScores[result.player1] = (window.lastGameScores[result.player1] || 0) + result.player1Score;
             window.lastGameScores[result.player2] = (window.lastGameScores[result.player2] || 0) + result.player2Score;
         });
     }
 
-
-
-//    console.log('🔍 Final captured scores:', window.lastGameScores);
-    // In showScoringPopup, after line 80, add:
-//    console.log('🔍 Final captured scores DETAILS:', JSON.stringify(window.lastGameScores, null, 2));
 
     const popup = document.getElementById('scoringPopup');
     const allPlayerHands = document.getElementById('allPlayerHands');
@@ -263,13 +237,8 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
     // === Fetch pot from Firebase ===
     const tableId = window.game?.currentTableId;
 
-    console.log('🔍 DISTRIBUTE - tableId:', tableId);
-    console.log('🔍 DISTRIBUTE - Reading from path: tables/' + tableId + '/pot');
-
     const potSnapshot = await firebase.database().ref(`tables/${tableId}/pot`).once('value');
     const pot = potSnapshot.val() || 0;
-    console.log('🔍 Current Round Pot from Firebase:', pot);
-    console.log(`🔍 distributeChips - tableId: ${tableId}, reading from: tables/${tableId}/pot`);
 
     window.game.currentRoundPot = pot;
 
@@ -424,7 +393,6 @@ let isClosingPopup = false; // Guard against double calls
 async function closeScoringPopup() {
     // Prevent double calls - if already closing, return early
     if (isClosingPopup) {
-        console.log('🔍 closeScoringPopup: Already closing, skipping duplicate call');
         return;
     }
     
@@ -466,7 +434,6 @@ async function closeScoringPopup() {
         const currentRoundData = window.game.roundHistory.find(r => r.roundNumber === window.game.currentRound);
         if (currentRoundData) {
             currentRoundData.chipChanges = new Map(window.game.lastRoundChipChanges);
-            console.log('🔍 Updated roundData with chipChanges:', Array.from(currentRoundData.chipChanges.entries()));
         } else {
             console.log('🔍 Could not find roundData for round:', window.game.currentRound);
         }

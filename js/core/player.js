@@ -9,7 +9,6 @@ class PlayerManager {
     }
 
     async generateUniquePlayerName(originalEmail, tableId) {
-        console.log(`🔧 generateUniquePlayerName called with: ${originalEmail}`);
 
         // Get current active emails from Firebase
         const activeEmailsRef = firebase.database().ref(`tables/${tableId}/activeEmails`);
@@ -48,7 +47,6 @@ class PlayerManager {
     async addDefaultPlayers() {
 
         const config = window.gameConfig.getConfig();
-        console.log('gameConfig:', config);
 
         if (config.gameMode === 'single-human') {
             // Create 1 human player + configured number of AI players
@@ -58,7 +56,6 @@ class PlayerManager {
 
             // ✅ LOAD CHIPS (ADD THIS LINE!)
             const humanPlayerData = await this.loadPlayerChips(humanPlayerName);
-            console.log('🔍 humanPlayerData:', humanPlayerData);
 
             // Create human player with actual email as the name
             this.players.push({
@@ -101,7 +98,6 @@ class PlayerManager {
                 this.scores.set(aiName, 0);
             }
 
-            console.log(`Auto-added single player mode: 1 human + ${config.computerPlayers} AI players (${this.players.length} total)`);
         } else {
             // Multiplayer mode - create default human players
             if (config.gameDeviceMode === 'single-device'){

@@ -174,26 +174,17 @@ async function handleTableStateChange(tableState) {
             break;
 
         case TABLE_STATES.ROUND_COMPLETE:
-            console.log('🔍 ROUND_COMPLETE handler called');
-            console.log('🔍 currentRound:', game.currentRound, 'maxRounds:', game.maxRounds);
-            console.log('🔍 isOwner:', window.isOwner);
-            console.log('🔍 About to check if more rounds needed');
-
 
             if (!window.isOwner) {
                 closeScoringPopup();
                 const waitingEl = document.getElementById('waiting-for-table-owner');
                 if (waitingEl) waitingEl.remove();
             } else {
-                // Check if tournament is complete
-                // Where owner decides COUNTDOWN or TOURNAMENT_COMPLETE
-                console.log('🔍 Owner deciding next state - currentRound:', game.currentRound);
 
                 if (window.game?.currentRound >= window.game?.maxRounds) {
                     console.log('🏆 Tournament complete! Transitioning to TOURNAMENT_COMPLETE');
                     setTableState(TABLE_STATES.TOURNAMENT_COMPLETE);
                 } else {
-                    console.log('🔍 Owner transitioning to COUNTDOWN for next round');
                     setTableState(TABLE_STATES.COUNTDOWN);
                 }
             }
@@ -210,7 +201,7 @@ async function handleTableStateChange(tableState) {
 
 
 async function transitionToCountdownPhase() {
-    console.log('🔍 transitionToCountdownPhase CALLED');
+
     const config = window.gameConfig?.config;
 
     // Only transition UI on first round (coming from NEW_TOURNAMENT)

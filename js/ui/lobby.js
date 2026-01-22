@@ -169,7 +169,6 @@ async function claimOwnershipIfNeeded(tableId, playerName) {
 }
 
 async function joinTable(table) {
-    console.log('🔍 joinTable called for:', table.name);
 
     // Initialize window.game if needed and set tableId for ALL modes
     window.game = window.game || {};
@@ -273,7 +272,6 @@ async function joinTable(table) {
 //            console.log('🔧 Log in joinTable - Generated uniquePlayerName:', uniquePlayerName);
             // Add this line:
             window.uniquePlayerName = uniquePlayerName;
-            console.log('🔧 Log in joinTable - Set window.uniquePlayerName to:', window.uniquePlayerName);
         }
 
         // this  is needed.  isOwner is false for owner without it
@@ -287,13 +285,6 @@ async function joinTable(table) {
             isOwner: isOwner
         };
 
-        console.log('log in joinTable Creating playerInfo with isOwner:', isOwner);
-        console.log('log in joinTable Final playerInfo:', playerInfo);
-
-        // In your joinTable function, after table selection
-        console.log('🔍 Selected table from menu - id:', table.id);
-        console.log('🔍 Selected table name:', table.name);
-        console.log('🔍 tableSettings.tableId before join:', tableSettings.tableId);
 
         window.isOwner = playerInfo.isOwner;
 
@@ -314,8 +305,6 @@ async function joinTable(table) {
         }
 
         window.multiDeviceIntegration.enhanceContinueButton();
-
-        console.log('🔍 userName, isOwner:', uniquePlayerName, isOwner);
 
         // Clear previous round's game data from Firestore
         if (window.isOwner && window.multiDeviceIntegration) {
@@ -346,9 +335,6 @@ async function joinTable(table) {
                 // Set up listener for real-time updates
                 window.multiDeviceIntegration.setupPlayerListListener(table.id, updatePlayerListUI);
                 window.multiDeviceIntegration.setupScoreListener(); // Add this line
-
-                // Then after joining
-                console.log('🔍 tableSettings.tableId after join:', tableSettings.tableId);
 
                 // NEW: Add table state listener
                 window.multiDeviceIntegration.setupTableStateListener(table.id, handleTableStateChange);

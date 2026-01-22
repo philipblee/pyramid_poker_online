@@ -140,7 +140,6 @@ class PyramidPoker {
 
         // Set multiDeviceMode based on gameConfig
         this.multiDeviceMode = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
-        console.log('🔧 Constructor set multiDeviceMode:', this.multiDeviceMode);
 
         // Add this when a new game starts
         resetGameTimer();
@@ -149,7 +148,6 @@ class PyramidPoker {
         const playersAdded = this.playerManager.ensurePlayersExist();
         if (playersAdded) {
             updateDisplay(this);
-            console.log('Added default players for testing');
         }
 
         try {
@@ -252,11 +250,6 @@ class PyramidPoker {
             hideDecisionButtons();
         }
 
-        console.log('🔍 startNewRound CALLED');
-        console.log('🔍 isOwner:', window.isOwner);
-        console.log('🔍 multiDeviceMode:', this.multiDeviceMode);
-//        console.trace('Call stack:');  // This shows where it was called from
-
         // Must have existing players to start a new round
         if (this.playerManager.players.length < 2) {
             alert('Need at least 2 players to start a round. Click "New Game" to configure players.');
@@ -305,8 +298,6 @@ class PyramidPoker {
                 window.cleanupDecisionListener();
             }
         }
-
-        console.log('🔍 startNewRound - tableState before dealing:', this.tableState);
 
         hideDecisionButtons();
 
@@ -397,8 +388,6 @@ class PyramidPoker {
                 console.error('❌ Firebase sync failed:', error);
             }
         }
-        // At the very end of the function
-        console.log('🔍 dealCardsToAllPlayers - gameVariant:', gameConfig.config.gameVariant);
         }
     }
 
@@ -509,20 +498,13 @@ class PyramidPoker {
 
         const isKittyVariant = gameConfig.config.gameVariant === 'kitty';
 
-        // ADD THESE TWO LINES HERE:
-        console.log('🎴 Loading hand - tableState:', this.tableState, 'isKittyVariant:', isKittyVariant, 'isDecisionPhase:', isDecisionPhase);
-
         const shouldShowLimited = isDecisionPhase ||
             (isKittyVariant && (this.tableState === TABLE_STATES.DEALING || this.tableState === TABLE_STATES.HANDS_DEALT));
-
-        // AND THIS LINE:
-        console.log('🎴 shouldShowLimited:', shouldShowLimited, 'cardsToDisplay.length:', cardsToDisplay.length);
 
         resetAutomaticButton();
 
         if (shouldShowLimited) {
             cardsToDisplay = playerData.cards.slice(0, 13);
-            console.log('🎴 After slice - cardsToDisplay.length:', cardsToDisplay.length);
         }
 
         // Show appropriate buttons based on state
@@ -753,8 +735,6 @@ class PyramidPoker {
 
     validateHands() {
 
-        console.log('🔍 validateHands() CALLED');
-
         const currentPlayer = this.playerManager.getCurrentPlayer();
         const playerData = this.playerHands.get(currentPlayer.name);
 
@@ -890,9 +870,8 @@ class PyramidPoker {
                         middle: playerData.middle,
                         front: playerData.front
                     };
-                    console.log('🔍 Checking for automatic with arrangement:', arrangement);
+
                     const automatic = validateAutomaticArrangement(arrangement);
-                    console.log('🔍 detectAutomatic returned:', automatic);
                     const handsNotEmpty = playerData.back.length > 0 && playerData.middle.length > 0 && playerData.front.length > 0;
                     playABtn.disabled = !(automatic && handsNotEmpty);
                 }
@@ -1219,10 +1198,8 @@ class PyramidPoker {
     }
 
     async calculateScores() {
-        console.log('🚀 calculateScores() START - this.maxRounds:', this.maxRounds);
 
         const allPlayerNames = this.playerManager.getPlayerNames();
-        console.log('🔍 After getPlayerNames() - this.maxRounds:', this.maxRounds);
 
        // Filter out surrendered players from scoring
         const playerNames = allPlayerNames.filter(name => {
@@ -1243,8 +1220,6 @@ class PyramidPoker {
             bonusPoints.set(name, 0);
         });
 
-
-        console.log("In calculateScores, added code to handle automatics")
         // Handle automatics if allowed
         let automaticPlayers = [];
         let regularPlayers = [];
@@ -1252,9 +1227,6 @@ class PyramidPoker {
         if (gameConfig.config.automaticsAllowed === 'yes') {
             automaticPlayers = playerNames.filter(name => this.automaticHands.has(name));
             regularPlayers = playerNames.filter(name => !this.automaticHands.has(name));
-
-            console.log(`In calculateScores, Automatic Players: ${automaticPlayers}`)
-            console.log(`In calculateScores, Regular Players: ${regularPlayers}`)
 
             if (automaticPlayers.length > 0) {
                 if (automaticPlayers.length === 1) {
@@ -1278,7 +1250,6 @@ class PyramidPoker {
             regularPlayers = [...playerNames];
         }
 
-        console.log(`regularPlayers.length: {regularPlayers.length}`)
         for (let i = 0; i < regularPlayers.length; i++) {
             for (let j = i + 1; j < regularPlayers.length; j++) {
                 const player1 = regularPlayers[i];
@@ -1334,9 +1305,6 @@ class PyramidPoker {
                 const hand1 = this.submittedHands.get(player1);
                 const hand2 = this.submittedHands.get(player2);
 
-                console.log(`🔍 Player in calculateScores ${player1} hand:`, hand1);
-                console.log(`🔍 Player in calculateScores ${player2} hand:`, hand2);
-
                 const result = compareHands(hand1, hand2);
 
                 roundScores.set(player1, roundScores.get(player1) + result.player1Score);
@@ -1366,7 +1334,7 @@ class PyramidPoker {
                 submittedHands: new Map(this.submittedHands),
                 timestamp: new Date()
             };
-            console.log('🔍 Storing roundData with chipChanges:', Array.from(roundData.chipChanges.entries()));
+
             this.roundHistory.push(roundData);
 
             // Update tournament totals only once per round
@@ -1385,24 +1353,12 @@ class PyramidPoker {
             }
         });
 
-//        console.log('🔍 After updatePlayerScore - this.maxRounds:', this.maxRounds);
-//        console.log('🔍 Just before showScoringPopup - this.maxRounds:', this.maxRounds);
-
         // In calculateScores(), after generating detailed results
         window.game.detailedResults = detailedResults; // Store for later extraction
 
         await showScoringPopup(this, detailedResults, roundScores, new Map());
 
         updateDisplay(this);
-
-//        console.log(`🔍 Round Check: currentRound=${this.currentRound}, maxRounds=${this.maxRounds}, this.currentRound=${this.currentRound}`);
-//        console.log(`🔍 Comparison: currentRound >= maxRounds = ${this.currentRound >= this.maxRounds}`);
-
-        // NEW - No popup, just return to display
-        /*
-        MODIFICATION 4: Optional - Add Firebase cleanup when tournament completes
-        Location: In calculateScores() when tournament ends
-        */
 
         // IN calculateScores() method, after tournament complete logic:
 
@@ -1754,13 +1710,10 @@ class PyramidPoker {
 
     async collectAntes() {
         const anteAmount = window.gameConfig?.config?.stakesAnteAmount || 0;
-        console.log(`Log from collectAntes - anteAmount , ${anteAmount}`)
+
         if (anteAmount === 0) return;
 
         const tableId = window.game?.currentTableId;
-
-        console.log('🔍 ANTE - tableId:', tableId);
-        console.log('🔍 ANTE - Writing to path: tables/' + tableId + '/pot');
 
         if (!tableId) {
             console.warn('No tableId for ante collection');
@@ -1791,9 +1744,6 @@ class PyramidPoker {
 
         }
 
-//        const tableId = window.game?.currentTableId;
-        console.log(`🔍 collectAntes - tableId: ${tableId}, path: tables/${tableId}/pot`);
-
         // Set pot (not transaction - owner controls it)
         await firebase.database().ref(`tables/${tableId}/pot`).set(totalPot);
 
@@ -1801,9 +1751,7 @@ class PyramidPoker {
     }
 
     async handleCountdown() {
-        console.log('🔍 handleCountdown CALLED');
         const config = window.gameConfig?.config;
-        console.log('🔍 countdownTime:', config?.countdownTime);
 
         const countdownTime = config.countdownTime || 0;
 

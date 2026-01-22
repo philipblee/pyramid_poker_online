@@ -19,9 +19,7 @@ class Tutorial {
     }
 
     createTutorialButton() {
-        console.log('🎓 Looking for .header-content');
         const headerButtons = document.querySelector('.header-content'); // Changed from .header-buttons
-        console.log('🎓 Found game-controls:', headerButtons);
         if (!headerButtons) {
             console.log('❌ .game-controls not found! Button not created.');
             return;

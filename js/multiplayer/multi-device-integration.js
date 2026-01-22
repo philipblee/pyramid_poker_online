@@ -16,18 +16,8 @@ class MultiDeviceIntegration {
         this.tableState = null;  // Will be updated by Firebase listener
         this.currentTableStateRef = null;  // Firebase reference for cleanup
 
-        // Debug the isMultiDevice setting
-//        console.log('  window.gameConfig exists:', !!window.gameConfig);
-        console.log('  window.gameConfig:', window.gameConfig);
-//        console.log('  gameConfig.config:', window.gameConfig?.config);
-//        console.log('  gameDeviceMode value:', window.gameConfig?.config?.gameDeviceMode);
-//        console.log('  gameDeviceMode type:', typeof window.gameConfig?.config?.gameDeviceMode);
-//        console.log('  comparison result:', window.gameConfig?.config?.gameDeviceMode === 'multi-device');
-
         this.isMultiDevice = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
-//        console.log('  final isMultiDevice:', this.isMultiDevice);
 
-        // ... existing properties
         this.playersData = new Map(); // Track all players
         this.submissionTracker = new Map(); // Track who submitted
         this.reconnectionTimers = new Map(); // 60-second timers
@@ -40,11 +30,6 @@ class MultiDeviceIntegration {
 
     // state listener
     setupTableStateListener(tableId, callback) {
-//        console.log('🔥 Setting up table state listener for table:', tableId);
-
-        console.log('🔴 setupTableStateListener CALLED');
-        console.trace('📍 Call stack:'); // Shows full stack trace
-
 
         // Reference to the table's state
         const tableStateRef = firebase.database().ref(`tables/${tableId}/tableState`);
@@ -70,7 +55,6 @@ class MultiDeviceIntegration {
         const playerCountRef = firebase.database().ref(`tables/${tableId}/state/${TABLE_STATES.NUM_HUMAN_PLAYERS}`);
         this.playerCountListener = playerCountRef.on('value', (snapshot) => {
             const playerCount = snapshot.val() || 0;
-            console.log(`🔍 Shared player count: ${playerCount}`);
             this.updateStartGameButton(playerCount);
         });
 
@@ -183,15 +167,6 @@ class MultiDeviceIntegration {
         // COUNT ARRANGEMENTS, NOT SUBMISSIONS:
         const arrangements = arrangementsData || {};
         const submittedCount = Object.keys(arrangements).length;
-//        console.log('🔍 DEBUG - arrangements keys:', Object.keys(arrangements));
-//        console.log('🔍 DEBUG - arrangementsData type:', typeof arrangementsData);
-//        console.log('🔍 DEBUG - Arrangements count:', submittedCount);
-//        console.log('🔍 DEBUG - Total players needed:', totalPlayers);
-//
-        console.log('🔍 submittedCount >= totalPlayers:', submittedCount >= totalPlayers);
-//        console.log('🔍 this.tableState !== all_submitted:', this.tableState !== 'all_submitted');
-//        console.log('🔍 this.isOwner:', this.isOwner);
-//        console.log('🔍 Full condition result:', (submittedCount >= totalPlayers && this.tableState !== 'all_submitted' && this.isOwner));
 
         // Broadcast submission progress
         if (this.isOwner && submittedCount < totalPlayers) {
@@ -328,17 +303,8 @@ class MultiDeviceIntegration {
     // enhanceContinueButton changes tableState to round_complete, then only owner can click continue to progress
     enhanceContinueButton() {
 
-//        console.log('🔍 enhanceContinueButton - window.isOwner:', window.isOwner);
-        console.log('🔍 enhanceContinueButton CALLED!');
-        console.log('🔍 window.isOwner:', window.isOwner);
-        console.trace();
-
-
         const continueButton = document.querySelector('#scoringPopup .btn.btn-primary');
         const closeButton = document.querySelector('#scoringPopup .close-popup');
-
-        console.log('🔍 continueButton found:', !!continueButton);
-        console.log('🔍 continueButton.disabled before:', continueButton?.disabled);
 
         if (!continueButton && !closeButton) {
             console.warn('No continue/close buttons found in scoring popup');
@@ -348,7 +314,6 @@ class MultiDeviceIntegration {
         const buttons = [continueButton, closeButton].filter(Boolean);
 
         if (window.isOwner) {
-            console.log('🔍 Owner path - wrapping onclick');
             // Owner: Add Firebase update before existing logic
             buttons.forEach(button => {
                 const originalOnClick = button.onclick;
@@ -386,8 +351,6 @@ class MultiDeviceIntegration {
 
             // State change handling is done in handleTableStateChange()
         }
-
-        console.log('🔍 continueButton.disabled after:', continueButton?.disabled);
     }
 
     // Set up listener for submission state changes (call this during initialization)
@@ -396,11 +359,9 @@ class MultiDeviceIntegration {
         const tableRef = this.tableManager.tablesRef.doc(this.currentTableId.toString());
 
         this.submissionListener = tableRef.onSnapshot(async (doc) => {
-            console.log('📡 FIRESTORE LISTENER TRIGGERED!');
 
             // 🔧 SYNC isOwner from window (source of truth)
             this.isOwner = window.isOwner;
-            console.log('📡 this.isOwner:', this.isOwner);
 
             if (this.isOwner) {
                 const stateSnapshot = await firebase.database().ref(`tables/${this.tableId}/tableState`).once('value');
@@ -412,7 +373,6 @@ class MultiDeviceIntegration {
 //                    console.log('📡 Owner checking submissions (PLAYING state)');
                     this.checkAllPlayersSubmitted();
                 } else {
-                    console.log('📡 Skipping check - not in PLAYING state:', currentState);
                 }
 
             }
@@ -524,13 +484,6 @@ class MultiDeviceIntegration {
             };
         });
 
-        // In storeAllHandsToFirebase(), before the Firebase call:
-        console.log('🔍 About to sync hands to Firebase:', handsData);
-        console.log('🔍 Sample hand cards:', handsData[Object.keys(handsData)[0]]?.cards?.slice(0,2));
-
-        console.log('🔍 currentTableId type:', typeof this.currentTableId);
-        console.log('🔍 currentTableId value:', this.currentTableId);
-
         // ✅ Correct - actual object
         await this.tableManager.tablesRef.doc(this.currentTableId.toString()).set({
             'currentGame': {
@@ -587,9 +540,6 @@ class MultiDeviceIntegration {
     }
 
     async RetrieveAllArrangementsFromFirebase() {
-        console.log('📖 Reading from table:', this.currentTableId, 'Tournament:', this.currentTournament, 'Round:', this.currentRound);
-        console.log('☁ log from RetrieveAllArrangements: Loading arrangements from Firestore...');
-        console.log(`  Debug RetrieveAllArrangementsFromFirebase 1 - this.currentTableId: ${this.currentTableId}`)
         const doc = await this.tableManager.tablesRef
             .doc(this.currentTableId.toString())
             .get({ source: 'server' });  // ← ADD THIS to force server read
@@ -600,7 +550,6 @@ class MultiDeviceIntegration {
         window.game.submittedHands.clear();
         Object.entries(firebaseArrangements).forEach(([playerEmail, arrangement]) => {
             window.game.submittedHands.set(playerEmail, arrangement);
-            console.log(`  Debug RetrieveAllArrangements 2 : ${playerEmail} ${arrangement}`)
 
             if (arrangement.playedAutomatic === 'yes') {
                 window.game.automaticHands.set(playerEmail, {
@@ -633,19 +582,12 @@ class MultiDeviceIntegration {
     }
 
     async storePlayerArrangementToFirebase(playerName, isAutomatic = false) {
-        console.log('🔍 DEBUG storePlayerArrangementToFirebase:');
-        console.log('  Looking for playerName:', playerName);
-        console.log('  isAutomatic:', isAutomatic);
-        console.log('  submittedHands keys:', Array.from(window.game.submittedHands.keys()));
-        console.log('  playerHands keys:', Array.from(window.game.playerHands.keys()));
 
         // For automatics, read from submittedHands instead of playerHands
         const playerHand = isAutomatic
 
-            ? window.game.submittedHands.get(playerName)
-            : window.game.playerHands.get(playerName);
-
-        console.log('  Found playerHand:', !!playerHand);
+        ? window.game.submittedHands.get(playerName)
+        : window.game.playerHands.get(playerName);
 
         if (!playerHand) {
             console.error('❌ No hand found for', playerName);
@@ -1043,31 +985,24 @@ class MultiDeviceIntegration {
 
     // Update start button based on player count
     updateStartGameButton(playerCount) {
-    console.log('🔍 updateStartGameButton - isOwner:', window.isOwner, 'playerCount:', playerCount);
+        const startBtn = document.getElementById('startGameBtn');
+        if (!startBtn) {
+            console.log('❌ startGameBtn not found!');
+            return;
+        }
 
-    const startBtn = document.getElementById('startGameBtn');
-    if (!startBtn) {
-        console.log('❌ startGameBtn not found!');
-        return;
-    }
-
-    // ✅ ADD OWNER CHECK
-    if (window.isOwner && playerCount >= 2) {
-        console.log('✅ OWNER PATH - Enabling button');
-        startBtn.disabled = false;
-        startBtn.textContent = `Start Game (${playerCount} Players)`;
-    } else if (!window.isOwner) {
-        console.log('⛔ NON-OWNER PATH - Disabling button');
-        startBtn.disabled = true;
-        startBtn.textContent = 'Waiting for owner...';
-    } else {
-        console.log('⏳ OWNER WAITING - Not enough players');
-        // Owner but not enough players
-        startBtn.disabled = true;
-        startBtn.textContent = 'Need 2+ Players';
-    }
-
-    console.log('🔍 After update - disabled:', startBtn.disabled, 'text:', startBtn.textContent);
+        // ✅ ADD OWNER CHECK
+        if (window.isOwner && playerCount >= 2) {
+            startBtn.disabled = false;
+            startBtn.textContent = `Start Game (${playerCount} Players)`;
+        } else if (!window.isOwner) {
+            startBtn.disabled = true;
+            startBtn.textContent = 'Waiting for owner...';
+        } else {
+            // Owner but not enough players
+            startBtn.disabled = true;
+            startBtn.textContent = 'Need 2+ Players';
+        }
     }
 
     // Update status message

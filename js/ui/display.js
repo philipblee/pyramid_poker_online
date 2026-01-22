@@ -364,7 +364,6 @@ function updateScoring(game) {
 
 // Update button states based on game state
 function updateButtonStates(game) {
-    console.log(`🎛️ updateButtonStates - gameState: ${game.gameState}, tableState: ${game.tableState}`);
     const newGameBtn = document.getElementById('newGame');
     const newRoundBtn = document.getElementById('newRound');
     const autoBtn = document.getElementById('autoArrange');
@@ -389,7 +388,6 @@ function updateButtonStates(game) {
             (game.tableState === 'hands_dealt' ||
              game.tableState === 'dealing' ||
              game.tableState === 'decide_playing')) {
-            console.log('⏭️ Skipping button update - in decision phase');
             return; // Exit early, keep decision buttons
         }
 
@@ -479,18 +477,4 @@ async function showHistoricalRound(game, roundNumber) {
     // For now, just show the scoring popup with historical data
     // We'll enhance this in Phase 3B to have round selector tabs
     await showScoringPopup(game, roundData.detailedResults, roundData.roundScores, new Map(), roundNumber);
-}
-
-// Monitor button visibility changes
-const observer = new MutationObserver((mutations) => {
-    const autoBtn = document.getElementById('autoArrange');
-    console.log('🔍 Mutation detected - style attr:', autoBtn?.getAttribute('style'), 'display:', autoBtn?.style.display);
-    if (autoBtn && autoBtn.style.display !== 'none') {
-        console.log('⚠️ Arrangement buttons shown! Stack:', new Error().stack.split('\n')[2]?.trim());
-    }
-});
-
-const autoBtn = document.getElementById('autoArrange');
-if (autoBtn) {
-    observer.observe(autoBtn, { attributes: true, attributeFilter: ['style'] });
 }

@@ -120,7 +120,6 @@ function delay(ms) {
 async function main() {
 //  console.log("Before delay");
   await delay(1000);
-  console.log("After delay");
 }
 
 // Add to your auto-arrange function (or wherever auto-arrange is triggered)

@@ -106,7 +106,6 @@ function showDecisionButtons() {
     setTimeout(() => {
         const autoBtn = document.getElementById('autoArrange');
         const marker = autoBtn?.getAttribute('data-hidden-by');
-        console.log('🔍 2s later - marker exists:', marker, 'display:', autoBtn?.style.display);
     }, 2000);
 }
 
@@ -267,8 +266,6 @@ function evaluateHandForSurrender(cards) {
 function checkAllDecided() {
     const allPlayers = window.game.playerManager.players;
     const decidedCount = window.game.surrenderDecisions.size;
-
-    console.log(`🔍 DECISION - Checking if all decided. Count: ${decidedCount}, Total: ${allPlayers.length}`);
 
     if (decidedCount === allPlayers.length) {
         handleAllDecided();
