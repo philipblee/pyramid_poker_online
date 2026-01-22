@@ -14,7 +14,7 @@ let tableSettings = {
     wildCardCount: 2,
     deckCount: 2,
     winProbabilityMethod: 'tiered2',  // NEW - added AI method
-    rounds: 10,           // NEW - changed from totalRounds
+    rounds: 5,           // NEW - changed from totalRounds
     // Table/Lobby settings
     maxPlayers: 6,                   // Maximum players allowed at table (2-6)
     minPlayers: 2,                   // Minimum players to start game
