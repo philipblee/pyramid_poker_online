@@ -263,7 +263,7 @@ class PyramidPoker {
             return;
         }
 
-        if (this.currentRound > this.maxRounds) {
+        if (this.currentRound >= this.maxRounds) {
             // Single-player always shows summary directly
             const isSingleHuman = window.gameConfig?.config?.gameMode === 'single-human';
 
@@ -1406,7 +1406,7 @@ class PyramidPoker {
 
         // IN calculateScores() method, after tournament complete logic:
 
-        if (this.currentRound > this.maxRounds) {
+        if (this.currentRound >= this.maxRounds) {
             console.log('🏆 Tournament Complete! Check final standings in sidebar.');
 
             // ☁️ NEW: Clean up Firebase data when tournament completes
