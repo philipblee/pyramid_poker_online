@@ -424,7 +424,7 @@ function setupOwnerDecisionListener() {
 
             const waitingPlayers = allPlayers.filter(p => !decidedEmails.includes(p));
 
-            const statusMessage = `Round ${currentRound} of ${maxRounds}<br>Waiting for decisions: ${decidedCount}/${playerCount} decided (${waitingPlayers.join(', ')})`;
+            const statusMessage = `Round ${currentRound} of ${maxRounds}<br>${decidedCount}/${playerCount} decided. Waiting for ${waitingPlayers.join(', ')}`;
 
             firebase.database().ref(`tables/${tableId}/statusMessage`).set(statusMessage);
             console.log(`📨 Status updated: Waiting for ${waitingPlayers.join(', ')}`);

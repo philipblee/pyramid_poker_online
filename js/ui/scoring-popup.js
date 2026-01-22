@@ -517,7 +517,7 @@ function resetGameUI() {
     // Reset auto button to "Auto"
     const autoArrange = document.getElementById('autoArrange');
     if (autoArrange) {
-        autoArrange.textContent = 'Auto';
+        autoArrange.textContent = 'BEST';
         autoArrange.disabled = false;
     }
 

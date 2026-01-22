@@ -72,7 +72,7 @@ class PyramidPoker {
             // Undo auto-arrange (instant, no spinner needed)
             this.restoreToDealtState();
             this.autoArrangeUsed = false;
-            document.getElementById('autoArrange').textContent = 'Auto';
+            document.getElementById('autoArrange').textContent = 'BEST';
             console.log('Log from handleAutoArrange: 🔄 Undid auto-arrange');
         } else {
             showLoadingSpinner(2);
@@ -85,7 +85,7 @@ class PyramidPoker {
                     // Your existing auto-arrange logic
                     this.autoArrangeManager.autoArrangeHand();
                     this.autoArrangeUsed = true;
-                    document.getElementById('autoArrange').textContent = 'Undo Auto';
+                    document.getElementById('autoArrange').textContent = 'Undo BEST';
 
                     // Hide spinner when done
                     hideLoadingSpinner();
@@ -1154,7 +1154,7 @@ class PyramidPoker {
 
         // Reset auto button for next turn
         this.autoArrangeUsed = false;
-        document.getElementById('autoArrange').textContent = 'Auto';
+        document.getElementById('autoArrange').textContent = 'BEST';
 
         const detectAutomaticsBtn = document.getElementById('detectAutomatics');
         if (detectAutomaticsBtn) {
@@ -1200,7 +1200,7 @@ class PyramidPoker {
 
         // Reset auto button for next turn (always happens after submit)
         this.autoArrangeUsed = false;
-        document.getElementById('autoArrange').textContent = 'Auto';
+        document.getElementById('autoArrange').textContent = 'BEST';
 
         const detectAutomaticsBtn = document.getElementById('detectAutomatics'); // CHANGED - added 's'
         if (detectAutomaticsBtn) {
