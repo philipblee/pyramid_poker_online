@@ -393,13 +393,6 @@ function openLoginModal() {
 
 }
 
-function handleLoginSubmit() {
-    // This gets called by your existing onclick
-    if (window.loginModal) {
-        window.loginModal.handleLogin();
-    }
-}
-
 function startGuestMode() {
     alert('Guest mode is coming soon! For now, please create a free account to play.');
 }

@@ -405,11 +405,6 @@ class RulesUI {
 // Global rules UI instance
 window.rulesUI = new RulesUI();
 
-// Global function to open rules
-function openGameRules() {
-    window.rulesUI.show();
-}
-
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
     // Rules UI initializes automatically

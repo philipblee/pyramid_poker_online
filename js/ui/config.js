@@ -627,11 +627,6 @@ class ConfigUI {
 // Global configuration UI instance
 window.configUI = new ConfigUI();
 
-// Global function to open configuration
-function openGameSettings() {
-    window.configUI.show();
-}
-
 // Initialize the config UI when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     // Wait a moment for all elements to be ready
