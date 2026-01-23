@@ -874,6 +874,12 @@ class PyramidPoker {
                     const automatic = validateAutomaticArrangement(arrangement);
                     const handsNotEmpty = playerData.back.length > 0 && playerData.middle.length > 0 && playerData.front.length > 0;
                     playABtn.disabled = !(automatic && handsNotEmpty);
+                    // Check FIND-AUTO button state
+                    const detectAutoBtn = document.getElementById('detectAutomatics');
+                    if (detectAutoBtn) {
+                        detectAutoBtn.style.display =
+                            (gameConfig.config.findAutoEnabled === 'yes') ? 'inline-block' : 'none';
+                    }
                 }
 
                 const readyCount = this.playerManager.getReadyCount();
