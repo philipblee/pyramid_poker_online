@@ -147,7 +147,7 @@ const defaultTables = [
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'multiple-humans',
                     gameConnectMode: 'online',
-                    gameDeviceMode: 'single-device',
+                    gameDeviceMode: 'multi-device',
                     gameVariant: 'no-surrender',
                     computerPlayers: 0,
                     wildCardCount: 2,
