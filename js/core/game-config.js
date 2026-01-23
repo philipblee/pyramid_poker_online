@@ -12,12 +12,13 @@ class GameConfig {
             wildCardCount: 2,                //6 Number of wild cards (0-4)
             deckCount: 2,                    //7 Number of standard decks (1-3)
             autoArrangeAllowed: 'yes',       //8
-            winProbabilityMethod: 'tiered2', //9 'points', 'empirical', 'tiered', 'tiered2', "netEV"
-            rounds: 3,                       //10 Number of rounds to play
-            currentRound: 0,                 // Track current round
+            findAutoEnabled: 'yes',          //9
+            winProbabilityMethod: 'tiered2', //10 'points', 'empirical', 'tiered', 'tiered2', "netEV"
+            rounds: 3,                       //11 Number of rounds to play
+            currentRound: 0,                 //12 Track current round
 
             // Table/Lobby settings
-            maxPlayers: 6,                   // Maximum players allowed at table (2-6)
+            maxPlayers: 6,                   //  Maximum players allowed at table (2-6)
             minPlayers: 2,                   // Minimum players to start game
             tableId: null,                   // For multiplayer table identification
             tableName: '',                   // Display name for table

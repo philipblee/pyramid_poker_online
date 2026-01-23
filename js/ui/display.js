@@ -371,6 +371,13 @@ function updateButtonStates(game) {
     const suitBtn = document.getElementById('sortBySuit');
     const submitBtn = document.getElementById('submitHand');
     const automaticBtn = document.getElementById('playAutomatic');
+    const findAutoBtn = document.getElementById('detectAutomatics');  // ← Must be declared here
+
+    // Control FIND-AUTO visibility based on config
+    if (findAutoBtn) {
+        findAutoBtn.style.display =
+            (gameConfig.config.findAutoEnabled === 'yes') ? 'inline-block' : 'none';
+    }
 
     if (game.gameState === 'waiting') {
 //        addPlayerBtn.disabled = false;

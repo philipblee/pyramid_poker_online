@@ -116,11 +116,14 @@ function createTableCard(table) {
             AI Players: ${settings.computerPlayers}<br>
             AI Algorithm: ${settings.winProbabilityMethod}<br>
             Automatics Allowed: ${settings.automaticsAllowed || 'yes'}<br>
+            Find Auto Enabled: ${settings.findAutoEnabled || 'yes'}<br>
+
         </div>
         <div class="table-status">Join Table</div>
     `;
 
     return card;
+
 }
 
 // Create "Create Table" card
@@ -431,7 +434,8 @@ function updateTableDisplay() {
         Stakes Ante: ${tableSettings.stakesAnteAmount}<br>
         Stakes SurrenderAmount: ${tableSettings.stakesSurrenderAmount}<br>
         Stakes Multiplier: ${tableSettings.stakesMultiplierAmount}<br>
-        AI Method: ${tableSettings.winProbabilityMethod}
+        AI Method: ${tableSettings.winProbabilityMethod}<br>
+        Find Automatic Enabled: ${tableSettings.findAutoEnabled}
     `;
 
     document.getElementById('settingsDisplay').innerHTML = settingsHtml;
@@ -611,6 +615,14 @@ function createTableSettingsModal() {
                 </select>
             </div>
 
+            <div style="margin-bottom: 20px;">
+                <label style="color: #ffd700; display: block; margin-bottom: 8px;">FIND-AUTO enabled:</label>
+                <select id="findAutoEnabled" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
             <div style="text-align: center; margin-top: 30px;">
                 <button class="btn btn-secondary" onclick="closeTableSettings()" style="margin-right: 15px;">Cancel</button>
                 <button class="btn btn-primary" onclick="saveTableSettings()">Save Settings</button>
@@ -649,6 +661,7 @@ function openTableSettings() {
     document.getElementById('tableComputerPlayers').value = tableSettings.computerPlayers || 1;
     document.getElementById('winProbabilityMethod').value = tableSettings.winProbabilityMethod || 'netEV';
     document.getElementById('automaticsAllowed').value = tableSettings.automaticsAllowed || 'yes';
+    document.getElementById('findAutoEnabled').value = tableSettings.findAutoEnabled || 'yes';
 
     // Show modal
     document.getElementById('tableSettingsModal').style.display = 'block';
@@ -665,6 +678,7 @@ function saveTableSettings() {
     tableSettings.computerPlayers = parseInt(document.getElementById('tableComputerPlayers').value);
     tableSettings.winProbabilityMethod = document.getElementById('winProbabilityMethod').value;
     tableSettings.automaticsAllowed = document.getElementById('automaticsAllowed').value;
+    tableSettings.findAutoEnabled =document.getElementById('findAutoEnabled').value;
 
     // Sync to gameConfig immediately
     if (window.gameConfig) {
@@ -676,14 +690,78 @@ function saveTableSettings() {
         window.gameConfig.config.computerPlayers = tableSettings.computerPlayers;
         window.gameConfig.config.winProbabilityMethod = tableSettings.winProbabilityMethod;
         window.gameConfig.config.automaticsAllowed = tableSettings.automaticsAllowed;
+        window.gameConfig.findAutoEnabled = tableSettings.findAutoEnabled;
         console.log('✅ Synced all settings to gameConfig');
     }
+
+    // After all the gameConfig syncs
+    if (window.game) {
+        updateButtonStates(window.game);
+    }
+
+    // Write to Firebase if in multi-device mode
+    console.log('🔍 Checking Firebase write conditions:');
+    console.log('  currentTableId:', window.game?.currentTableId);
+    console.log('  gameDeviceMode:', tableSettings.gameDeviceMode);
+
+    if (window.game?.currentTableId && tableSettings.gameDeviceMode === 'multi-device') {
+        firebase.database()
+            .ref(`tables/${window.game.currentTableId}/settings`)
+            .set({
+                rounds: tableSettings.rounds,
+                wildCardCount: tableSettings.wildCardCount,
+                stakesAnteAmount: tableSettings.stakesAnteAmount,
+                stakesSurrenderAmount: tableSettings.stakesSurrenderAmount,
+                stakesMultiplierAmount: tableSettings.stakesMultiplierAmount,
+                computerPlayers: tableSettings.computerPlayers,
+                winProbabilityMethod: tableSettings.winProbabilityMethod,
+                automaticsAllowed: tableSettings.automaticsAllowed,
+                findAutoEnabled: tableSettings.findAutoEnabled
+            })
+            .then(() => console.log('✅ Settings saved to Firebase'))
+            .catch(err => console.error('❌ Error saving settings:', err));
+    }
+
+
 
     // Update the display
     updateTableDisplay();
 
     // Close modal
     closeTableSettings();
+}
+
+// Listen for settings changes from owner
+function setupListenForSettingsChanges(tableId) {
+    console.log(`🎧 Setting up settings listener for table ${tableId}`);
+
+    firebase.database()
+        .ref(`tables/${tableId}/settings`)
+        .on('value', (snapshot) => {
+            const settings = snapshot.val();
+            if (settings) {
+                console.log('📨 Settings updated from Firebase:', settings);
+
+                // Update tableSettings
+                Object.assign(tableSettings, settings);
+
+                // Update gameConfig
+                if (window.gameConfig) {
+                    window.gameConfig.config.rounds = settings.rounds;
+                    window.gameConfig.config.wildCardCount = settings.wildCardCount;
+                    window.gameConfig.config.stakesAnteAmount = settings.stakesAnteAmount;
+                    window.gameConfig.config.stakesSurrenderAmount = settings.stakesSurrenderAmount;
+                    window.gameConfig.config.stakesMultiplierAmount = settings.stakesMultiplierAmount;
+                    window.gameConfig.config.computerPlayers = settings.computerPlayers;
+                    window.gameConfig.config.winProbabilityMethod = settings.winProbabilityMethod;
+                    window.gameConfig.config.automaticsAllowed = settings.automaticsAllowed;
+                    window.gameConfig.config.findAutoEnabled = settings.findAutoEnabled;
+                }
+
+                // Update display
+                updateTableDisplay();
+            }
+        });
 }
 
 // Close, save, and update functions

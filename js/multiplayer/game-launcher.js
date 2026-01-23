@@ -65,6 +65,7 @@ async function launchGameInterface() {
     gameConfig.config.winProbabilityMethod = tableSettings.winProbabilityMethod;
     gameConfig.config.rounds = tableSettings.rounds;
     gameConfig.config.gameMode = tableSettings.gameMode;
+    gameConfig.config.findAutoEnabled = tableSettings.findAutoEnabled;
 
     // Use resetPlayers() to clear old players and create new ones with correct config
     // DON'T reset players for multi-human games - we already set them up manually
