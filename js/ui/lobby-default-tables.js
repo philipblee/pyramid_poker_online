@@ -196,6 +196,7 @@ const defaultTables = [
                    ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
                     gameMode: 'multiple-humans',
                     gameConnectMode: 'online',
+                    gameVariant: 'kitty',
                     gameDeviceMode: 'multi-device',
                     computerPlayers: 5,
                     rounds: 3,
