@@ -272,12 +272,12 @@ class WildCardModal {
                 @keyframes wild-pulse {
                     0%, 100% {
                         box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
-                        transform: scale(.9);
+                        transform: scale(.85);
                         border-color: gold;
                     }
                     50% {
                         box-shadow: 0 0 40px rgba(255, 215, 0, 1), 0 0 60px rgba(255, 215, 0, 0.5);
-                        transform: scale(1.1);
+                        transform: scale(1.0);
                         border-color: #ffed4e;
                     }
                 }
