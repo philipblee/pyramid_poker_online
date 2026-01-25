@@ -262,6 +262,26 @@ class WildCardModal {
                         font-size: 16px;
                     }
                 }
+
+                .card.wild.wild-undefined {
+                    animation: wild-pulse 1.5s ease-in-out infinite !important;
+                    box-shadow: 0 0 25px rgba(255, 215, 0, 1) !important;
+                    border: 3px solid gold !important;
+                }
+
+                @keyframes wild-pulse {
+                    0%, 100% {
+                        box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+                        transform: scale(.9);
+                        border-color: gold;
+                    }
+                    50% {
+                        box-shadow: 0 0 40px rgba(255, 215, 0, 1), 0 0 60px rgba(255, 215, 0, 0.5);
+                        transform: scale(1.1);
+                        border-color: #ffed4e;
+                    }
+                }
+                }
             </style>
         `;
 
@@ -375,9 +395,11 @@ class WildCardModal {
         // Find and update the card's DOM element
         const cardElement = document.querySelector(`[data-card-id="${this.currentCard.id}"]`);
         if (cardElement) {
-            cardElement.innerHTML = `${this.currentCard.rank}${this.currentCard.suit}`;
+            cardElement.innerHTML = `<div style="font-size: 20px;">${this.currentCard.rank}</div><div style="font-size: 28px;">${this.currentCard.suit}</div>`;
             cardElement.classList.add('wild-assigned'); // Keep yellow background
         }
+
+        cardElement.classList.remove('wild-undefined');
 
         // Re-run validation to update hand strengths
         if (window.game) {
