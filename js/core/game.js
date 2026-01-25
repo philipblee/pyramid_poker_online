@@ -107,8 +107,8 @@ class PyramidPoker {
 
         if (!playerData || !playerData.originalCards) return;
 
-        // Restore from original dealt cards (not current modified ones)
-        playerData.cards = [...playerData.originalCards];  // Copy of originals
+        // Deep copy to restore original state including wild cards
+        playerData.cards = playerData.originalCards.map(card => ({...card}));
         playerData.back = [];
         playerData.middle = [];
         playerData.front = [];
@@ -351,7 +351,7 @@ class PyramidPoker {
                 const hand = this.deckManager.dealCards(17);
                 this.playerHands.set(player.name, {
                     cards: hand,
-                    originalCards: [...hand],
+                    originalCards: hand.map(card => ({...card})),
                     back: [],
                     middle: [],
                     front: []
@@ -576,7 +576,7 @@ class PyramidPoker {
             // Update local playerHands Map
             this.playerHands.set(currentPlayer.name, {
                 cards: handData.cards,
-                originalCards: [...handData.cards],
+                originalCards: hand.map(card => ({...card})),
                 back: [],
                 middle: [],
                 front: []

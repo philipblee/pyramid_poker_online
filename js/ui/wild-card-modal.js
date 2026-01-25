@@ -304,7 +304,7 @@ class WildCardModal {
     }
 
     show(cardObject) {
-        if (!cardObject || !cardObject.isWild) {
+        if (!cardObject || (!cardObject.isWild && !cardObject.wasWild)) {
             console.error('Can only assign wild cards');
             return;
         }
