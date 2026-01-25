@@ -14,7 +14,7 @@ function createCardElement(card) {
 
     if (card.isWild) {
         cardEl.className = 'card wild wild-undefined';
-        cardEl.innerHTML = `<div style="font-size: 16px;">WILD</div><div style="font-size: 28px;">🃏</div>`;
+        cardEl.innerHTML = `<div style="font-size: 13px; text-align: center;">Click to Set</div><div style="font-size: 28px;">🃏</div>`;
     } else {
         const wasWildClass = card.wasWild ? ' was-wild' : '';
         cardEl.className = `card ${['♥', '♦'].includes(card.suit) ? 'red' : 'black'}${wasWildClass}`;
