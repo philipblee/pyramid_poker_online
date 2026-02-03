@@ -10,7 +10,7 @@ let tableSettings = {
     gameMode: 'single-human',
     gameVariant: 'no-surrender',
     computerPlayers: 4,
-    rounds: 5,
+    rounds:10,
     wildCardCount: 2,
     deckCount: 2,
     winProbabilityMethod: 'tiered2',  // NEW - added AI method
