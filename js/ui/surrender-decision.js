@@ -27,7 +27,7 @@ function initializeSurrenderDecision() {
 
     // Submit decision
     submitBtn.addEventListener('click', () => {
-        submitSurrenderDecision(currentDecision);
+        declareDecision(currentDecision);
     });
 }
 
@@ -143,7 +143,7 @@ function hideDecisionButtons() {
 
 }
 
-function submitSurrenderDecision(decision) {
+function declareDecision(decision) {
 
     // Multi-device: Submit for THIS device's player, not current turn player
     const playerName = window.game.multiDeviceMode
@@ -157,6 +157,12 @@ function submitSurrenderDecision(decision) {
 
     // Store in Firebase for multi-device sync
     if (window.game.multiDeviceMode) {
+
+        // If surrendering, hide the game area immediately
+        if (decision === 'surrender') {
+            hideGameAreaForSurrenderedPlayer();
+        }
+
         const tableId = window.game.currentTableId;
         console.log('🔍 About to write to Firebase - tableId:', tableId);
 
@@ -294,13 +300,61 @@ async function handleAllDecided() {
     // Then transition
     if (window.game.multiDeviceMode) {
         setTableState(TABLE_STATES.PLAYING);
+
+        // Check if LOCAL player surrendered
+        const localDecision = window.game.surrenderDecisions.get(window.uniquePlayerName);
+        if (localDecision === 'surrender') {
+            console.log(`🏳️ ${window.uniquePlayerName} surrendered - hiding game area`);
+            hideGameAreaForSurrenderedPlayer();
+        }
     } else {
-        // Single-player: directly set state and reload hand
-        window.game.tableState = TABLE_STATES.PLAYING;
-        window.game.loadCurrentPlayerHand(); // This triggers hideDecisionButtons() and shows 17 cards
+        // Single-player: Check current player
+        const currentPlayer = window.game.playerManager.getCurrentPlayer();
+        const decision = window.game.surrenderDecisions.get(currentPlayer.name);
+
+        if (decision === 'surrender') {
+            console.log(`🏳️ ${currentPlayer.name} surrendered - skipping`);
+            window.game.skipSurrenderedPlayer();
+        } else {
+            window.game.tableState = TABLE_STATES.PLAYING;
+            window.game.loadCurrentPlayerHand();
+        }
     }
+
 // At the very end of handleAllDecided()
 updateDisplay(window.game);
+}
+
+function hideGameAreaForSurrenderedPlayer() {
+    console.log('🏳️ Hiding game area for surrendered player');
+
+    // Clear cards from all areas but KEEP the frames visible
+    const handArea = document.getElementById('playerHand');
+    const backHand = document.getElementById('backHand');
+    const middleHand = document.getElementById('middleHand');
+    const frontHand = document.getElementById('frontHand');
+
+    if (handArea) handArea.innerHTML = '';
+    if (backHand) backHand.innerHTML = '';
+    if (middleHand) middleHand.innerHTML = '';
+    if (frontHand) frontHand.innerHTML = '';
+
+    // Disable ALL buttons
+    window.game.disableAllGameButtons();
+
+    // Show prominent surrender message
+    const status = document.getElementById('status');
+    if (status) {
+        status.innerHTML = `
+            <span style="color: #ff6b6b; font-size: 20px; font-weight: bold;">
+                🏳️ You SURRENDERED (-10 chips penalty paid)
+            </span>
+            <br>
+            <span style="color: #ffd700; font-size: 16px;">
+                Waiting for other players to submit their hands...
+            </span>
+        `;
+    }
 }
 
 async function collectSurrenderPenalties() {

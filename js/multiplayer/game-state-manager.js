@@ -137,8 +137,7 @@ async function handleTableStateChange(tableState) {
 
                 if (localDecision === 'surrender') {
                     console.log(`🏳️ ${window.uniquePlayerName} surrendered - hiding cards`);
-                    const handArea = document.getElementById('hand-area');
-                    if (handArea) handArea.style.display = 'none';
+                    hideGameAreaForSurrenderedPlayer();
                 } else {
                     console.log(`🎴 ${window.uniquePlayerName} playing - loading their hand`);
                     // Find local player's index and set as current player
