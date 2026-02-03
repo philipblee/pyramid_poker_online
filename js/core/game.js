@@ -1073,6 +1073,29 @@ class PyramidPoker {
         this.loadCurrentPlayerHand();
     }
 
+    disableAllGameButtons() {
+        console.log('🔒 disableAllGameButtons() CALLED');
+
+        // Only disable card-arrangement buttons, not game-flow buttons
+        const buttonsToDisable = [
+            'autoArrange',
+            'sortByRank',
+            'sortBySuit',
+            'reorderRank',
+            'reorderSuit',
+            'submitHand',
+            'detectAutomatics',
+            'playAutomatic'
+        ];
+
+        buttonsToDisable.forEach(buttonId => {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                button.disabled = true;
+            }
+        });
+    }
+
     async playAutomatic() {
         // Check if automatics are allowed
         if (gameConfig.config.automaticsAllowed !== 'yes') {
@@ -1116,11 +1139,17 @@ class PyramidPoker {
         });
         this.automaticHands.set(playerName, automatic);
 
+        // 🆕 ADD THIS LINE
+        this.disableAllGameButtons();
+
         this.playerManager.setPlayerReady(localPlayerName, true);
 
         // NEW: For multiplayer, use Firebase coordination
         if (gameConfig.config.gameConnectMode === 'online') {
             await window.multiDeviceIntegration.storePlayerArrangementToFirebase(playerName, true);
+
+            // 🆕 ADD THIS LINE HERE TOO
+            this.disableAllGameButtons();
 
             const autoBtn = document.getElementById('detectAutomatics');
             if (autoBtn) {
@@ -1159,12 +1188,15 @@ class PyramidPoker {
         updateDisplay(this);
     }
 
-   submitCurrentHand() {
-
+    submitCurrentHand() {
+        console.log('🎯 submitCurrentHand() CALLED'); // ADD THIS
         // Replace validation with the good function
         if (!this.validateHands()) {
             return; // Don't submit if validation failed
         }
+
+        // 🆕 ADD THIS LINE
+        this.disableAllGameButtons();
 
         const currentPlayer = this.playerManager.getCurrentPlayer();
         const playerData = this.playerHands.get(currentPlayer.name);

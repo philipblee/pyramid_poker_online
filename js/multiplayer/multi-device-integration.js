@@ -280,6 +280,9 @@ class MultiDeviceIntegration {
             try {
                 await this.storePlayerArrangementToFirebase(playerName);
 
+                // 🆕 ADD THIS LINE
+                window.game.disableAllGameButtons();
+
                 const submitBtn = document.getElementById('submitHand');
                 if (submitBtn) {
                     submitBtn.disabled = true;
