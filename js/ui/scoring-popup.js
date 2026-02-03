@@ -842,17 +842,23 @@ function showRoundRobinScoring(detailedResults, game, containerElement, roundSco
         automaticInfo.forEach((automatic, playerName) => {
             const automaticType = automatic.type.replace(/-/g, ' ').toUpperCase();
 
-            // Check if this player won or lost
+            // Check if this player won, lost, or tied
             const playerScore = roundScores.get(playerName) || 0;
-            const wonAutomatic = playerScore > 0;
 
-            if (wonAutomatic) {
+            if (playerScore > 0) {
+                // Won
                 automaticHTML += `<p style="color: #4ecdc4; margin: 8px 0; font-weight: bold;">
                     ${playerName} played <span style="color: #ffd700;">${automaticType}</span> and won +${playerScore} points
                 </p>`;
-            } else {
+            } else if (playerScore < 0) {
+                // Lost
                 automaticHTML += `<p style="color: #ff6b6b; margin: 8px 0; font-weight: bold;">
                     ${playerName} played <span style="color: #ffd700;">${automaticType}</span> but lost ${playerScore} points (opponent had better automatic)
+                </p>`;
+            } else {
+                // Tied (playerScore === 0)
+                automaticHTML += `<p style="color: #95a5a6; margin: 8px 0; font-weight: bold;">
+                    ${playerName} played <span style="color: #ffd700;">${automaticType}</span> and tied (0 points - identical automatics)
                 </p>`;
             }
         });

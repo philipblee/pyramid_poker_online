@@ -1424,6 +1424,31 @@ class PyramidPoker {
 
     }
 
+    comparePlayerHands(player1Name, player2Name) {
+        // Get hands from submittedHands
+        const hand1 = this.submittedHands.get(player1Name);
+        const hand2 = this.submittedHands.get(player2Name);
+
+        if (!hand1 || !hand2) {
+            console.error('❌ Missing hands for comparison:', player1Name, player2Name);
+            return { p1Score: 0, p2Score: 0, details: [] };
+        }
+
+        // Use the existing compareHands function
+        const result = compareHands(hand1, hand2);
+
+        // Return in the format expected by handleMultiAutomatics
+        return {
+            p1Score: result.player1Score,
+            p2Score: result.player2Score,
+            player1Score: result.player1Score,  // ADD THIS
+            player2Score: result.player2Score,  // ADD THIS
+            player1: player1Name,
+            player2: player2Name,
+            details: result.details
+        };
+    }
+
     handleMultiAutomatics(automaticPlayers, roundScores, detailedResults) {
         console.log('🎯 Multiple automatics detected:', automaticPlayers);
 
