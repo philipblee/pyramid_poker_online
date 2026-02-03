@@ -462,7 +462,9 @@ function compareAutomatics(auto1, auto2) {
  * @param {Array} allCards - All 17 cards
  * @returns {Object} - {type, arrangement} or null
  */
+
 function findAndArrangeBestAutomatic(allCards) {
+    console.log('🔥🔥🔥 USING: validate-automatic-arrangement.js 🔥🔥🔥');  // ADD THIS LINE
     const possibleAutomatics = detectPossibleAutomatics(allCards);
 
     if (possibleAutomatics.length === 0) {
@@ -656,12 +658,38 @@ function arrangeThreeFullHouses(allCards) {
 
 // Dragon - should already work, but here's a cleaner version
 function arrangeDragon(allCards) {
-    // Dragon just needs all 13 unique ranks visible
-    // Simple distribution works fine
+    console.log('🎨 arrangeDragon - arranging 13 cards');
+
+    // Dragon needs all 13 cards placed - distribute into 5-5-3
+    const hands = [
+        allCards.slice(0, 5),   // Potential back
+        allCards.slice(5, 10),  // Potential middle
+        allCards.slice(10, 13)  // Potential front
+    ];
+
+    // Evaluate each hand
+    const evaluatedHands = hands.map((hand, index) => {
+        const strength = hand.length === 3 ? evaluateThreeCardHand(hand) : evaluateHand(hand);
+        console.log(`🔍 Hand ${index} evaluation:`, strength); // ADD THIS LINE
+        console.log(`🔍 hand_rank:`, strength?.hand_rank); // ADD THIS LINE
+        return { cards: hand, strength: strength };
+    });
+
+    // Sort by strength (strongest first)
+    evaluatedHands.sort((a, b) => {
+        return compareTuples(b.strength.handStrength, a.strength.handStrength);
+    });
+
+    console.log('🏁 Dragon arrangement complete (sorted by strength)');
+    console.log(`   Back: ${evaluatedHands[0].cards.length} cards`);
+    console.log(`   Middle: ${evaluatedHands[1].cards.length} cards`);
+    console.log(`   Front: ${evaluatedHands[2].cards.length} cards`);
+
+    // Assign strongest to back, middle strength to middle, weakest to front
     return {
-        back: allCards.slice(0, 5),
-        middle: allCards.slice(5, 10),
-        front: allCards.slice(10, 13)
+        back: evaluatedHands[0].cards,
+        middle: evaluatedHands[1].cards,
+        front: evaluatedHands[2].cards
     };
 }
 
