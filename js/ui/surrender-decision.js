@@ -326,7 +326,7 @@ updateDisplay(window.game);
 }
 
 function hideGameAreaForSurrenderedPlayer() {
-    console.log('🏳️ Hiding game area for surrendered player');
+    console.log('🏳️ hideGameAreaForSurrenderedPlayer() CALLED');
 
     // Clear cards from all areas but KEEP the frames visible
     const handArea = document.getElementById('playerHand');
@@ -339,8 +339,17 @@ function hideGameAreaForSurrenderedPlayer() {
     if (middleHand) middleHand.innerHTML = '';
     if (frontHand) frontHand.innerHTML = '';
 
-    // Disable ALL buttons
+    // Disable AND HIDE all game buttons
     window.game.disableAllGameButtons();
+
+    // Also hide the 13-card reorder buttons specifically
+    const reorderRankBtn = document.getElementById('reorderRank');
+    const reorderSuitBtn = document.getElementById('reorderSuit');
+    const autoArrangeBtn = document.getElementById('autoArrange');
+
+    if (reorderRankBtn) reorderRankBtn.style.display = 'none';
+    if (reorderSuitBtn) reorderSuitBtn.style.display = 'none';
+    if (autoArrangeBtn) autoArrangeBtn.style.display = 'none';
 
     // Show prominent surrender message
     const status = document.getElementById('status');

@@ -1092,6 +1092,7 @@ class PyramidPoker {
             const button = document.getElementById(buttonId);
             if (button) {
                 button.disabled = true;
+//                button.style.display = 'none';  // ✅ ADD THIS - HIDE COMPLETELY
             }
         });
     }

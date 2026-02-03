@@ -137,7 +137,7 @@ async function handleTableStateChange(tableState) {
 
                 if (localDecision === 'surrender') {
                     console.log(`🏳️ ${window.uniquePlayerName} surrendered - hiding cards`);
-                    hideGameAreaForSurrenderedPlayer();
+                    hideGameAreaForSurrenderedPlayer(); 
                 } else {
                     console.log(`🎴 ${window.uniquePlayerName} playing - loading their hand`);
                     // Find local player's index and set as current player
@@ -358,14 +358,21 @@ function listenForStatusUpdates(tableId) {
     firebase.database()
         .ref(`tables/${tableId}/statusMessage`)
         .on('value', (snapshot) => {
-            const statusMessage = snapshot.val();
-            console.log(`📨 Status message received: ${statusMessage}`);
+            const message = snapshot.val();
+            if (message) {
+                console.log('📨 Status message received:', message);
 
-            if (statusMessage) {
+                // Don't overwrite if local player surrendered
+                const localDecision = window.game?.surrenderDecisions?.get(window.uniquePlayerName);
+                if (localDecision === 'surrender') {
+                    console.log('⏭️ Skipping status update - player surrendered');
+                    return;
+                }
+
                 const statusDiv = document.getElementById('status');
                 if (statusDiv) {
-                    statusDiv.innerHTML = statusMessage;
-                    console.log(`✅ Updated status div`);
+                    statusDiv.innerHTML = message;
+                    console.log('✅ Updated status div');
                 }
             }
         });
