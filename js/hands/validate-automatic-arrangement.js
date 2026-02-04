@@ -405,7 +405,7 @@ function canFormThreeStraight(naturalCards, wildCount) {
         }
 
         // Try wheel (A-2-3-4-5)
-        const wheelRanks = [14, 2, 3, 4, 5];
+        const wheelRanks = [14, 5, 4, 3, 2];  // ✅ Correct - builds A-5-4-3-2 rank order
         let wildsNeeded = 0;
         let canBuild = true;
 
@@ -853,7 +853,7 @@ function arrangeThreeStraight(allCards) {
         }
 
         // Try wheel (A-2-3-4-5)
-        const wheelRanks = [14, 2, 3, 4, 5];
+        const wheelRanks = [14, 5, 4, 3, 2];  // ✅ Correct - builds A-5-4-3-2 rank order
         let wildsNeeded = 0;
         const cardsForStraight = [];
         let canBuild = true;

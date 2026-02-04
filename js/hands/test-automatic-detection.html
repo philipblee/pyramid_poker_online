@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Automatic Detection Tests (Detection Only)</title>
+    <title>validate-automatic-arrangement (Detection Only)</title>
     <style>
         body {
             font-family: 'Courier New', monospace;
@@ -71,7 +71,7 @@
     </style>
 </head>
 <body>
-    <h1>🧪 Automatic Detection Tests (Detection Only)</h1>
+    <h1>🧪 Validate Automatic Arrangement (Detection Only) v1</h1>
 
     <div class="instructions">
         <strong>⚠️ Instructions:</strong><br>
@@ -89,7 +89,7 @@
     <div id="results"></div>
 
     <!-- Load the ACTUAL validate-automatic-arrangement.js file -->
-    <script src="automatic-detector.js"></script>
+    <script src="validate-automatic-arrangement.js"></script>
 
     <script>
         // Test framework
@@ -469,8 +469,8 @@
             if (typeof detectPossibleAutomatics === 'undefined') {
                 document.getElementById('results').innerHTML = `
                     <div class="test-case fail">
-                        <h2 class="fail">❌ ERROR: automatic-detector.js not loaded!</h2>
-                        <p>Make sure this HTML file is in the same directory as <code>automatic-detector.js</code></p>
+                        <h2 class="fail">❌ ERROR: validate-automatic-arrangement.js not loaded!</h2>
+                        <p>Make sure this HTML file is in the same directory as <code>validate-automatic-arrangement.js</code></p>
                         <p>Current location: ${window.location.href}</p>
                     </div>
                 `;

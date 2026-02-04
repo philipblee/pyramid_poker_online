@@ -1,6 +1,15 @@
 // js/ui/scoring-popup.js
 // COMPLETE VERSION: Uses ScoringUtilities for all scoring calculations
 
+// Add this helper function at the top of scoring-popup.js
+function sortCardsForDisplay(cards, handStrength) {
+    const suitRank = { '♠': 4, '♥': 3, '♦': 2, '♣': 1 };
+    return [...cards].sort((a, b) => {
+        if (a.value !== b.value) return b.value - a.value;
+        return suitRank[b.suit] - suitRank[a.suit];
+    });
+}
+
 // Show mini cards for scoring popup
 function showMiniCards(cards) {
     return cards.map(card => {
@@ -803,21 +812,31 @@ async function showPlayerHands(game, handsToDisplay, containerElement) {
             const middleCardCount = hand.middle ? hand.middle.length : 5;
             const frontCardCount = hand.front ? hand.front.length : 3;
 
+            // Sort all three hands before displaying
+            const sortedBack = sortCardsForDisplay(hand.back, evaluateHand(hand.back));
+            const sortedMiddle = sortCardsForDisplay(hand.middle, evaluateHand(hand.middle));
+            const sortedFront = sortCardsForDisplay(hand.front, evaluateThreeCardHand(hand.front));
+
+            // Then use sorted versions
+            showMiniCards(sortedBack)
+            showMiniCards(sortedMiddle)
+            showMiniCards(sortedFront)
+
             playerDiv.innerHTML = `
                 <div class="player-hand-title">${player.name}</div>
                 <div class="hand-row">
                     <div class="hand-label-popup">Back (${backCardCount}):</div>
-                    <div class="hand-cards">${showMiniCards(hand.back)}</div>
+                    <div class="hand-cards">${showMiniCards(sortedBack)}</div>
                     <div class="hand-strength-popup">${getHandName(evaluateHand(hand.back))} (${evaluateHand(hand.back).handStrength.join(', ')})</div>
                 </div>
                 <div class="hand-row">
                     <div class="hand-label-popup">Middle (${middleCardCount}):</div>
-                    <div class="hand-cards">${showMiniCards(hand.middle)}</div>
+                    <div class="hand-cards">${showMiniCards(sortedMiddle)}</div>
                     <div class="hand-strength-popup">${getHandName(evaluateHand(hand.middle))} (${evaluateHand(hand.middle).handStrength.join(', ')})</div>
                 </div>
                 <div class="hand-row">
                     <div class="hand-label-popup">Front (${frontCardCount}):</div>
-                    <div class="hand-cards">${showMiniCards(hand.front)}</div>
+                    <div class="hand-cards">${showMiniCards(sortedFront)}</div>
                     <div class="hand-strength-popup">${getThreeCardHandName(evaluateThreeCardHand(hand.front))} (${evaluateThreeCardHand(hand.front).handStrength.join(', ')})</div>
                 </div>
             `;

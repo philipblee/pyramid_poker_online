@@ -321,13 +321,13 @@ function testEdgeCases() {
 // Helper function to validate hand results
 function validateHandResult(result, expectedType, expectedRank, handName) {
     try {
-        if (!result || !result.hand_rank || result.hand_rank.length < 2) {
+        if (!result || !result.handStrength || result.handStrength.length < 2) {
             console.log(`❌ ${handName}: Invalid result structure`);
             return false;
         }
 
-        const actualType = result.hand_rank[0];
-        const actualRank = result.hand_rank[1];
+        const actualType = result.handStrength[0];
+        const actualRank = result.handStrength[1];
 
         if (actualType === expectedType && actualRank === expectedRank) {
             console.log(`✅ ${handName}: PASS [${actualType}, ${actualRank}]`);
@@ -357,6 +357,29 @@ function createCards(cardStrings) {
             isWild: false
         };
     });
+}
+
+// ADD THIS TEST to check suit tiebreaker order
+function testStraightSuitTiebreaker() {
+    console.log('\n🃏 Testing Straight Suit Tiebreaker Order...');
+
+    // Cards intentionally out of order: S3-S4-H5-H7-C6
+    const outOfOrder = [
+        {rank: '3', suit: '♠', value: 3, id: '3♠', isWild: false},
+        {rank: '4', suit: '♠', value: 4, id: '4♠', isWild: false},
+        {rank: '5', suit: '♥', value: 5, id: '5♥', isWild: false},
+        {rank: '7', suit: '♥', value: 7, id: '7♥', isWild: false},
+        {rank: '6', suit: '♣', value: 6, id: '6♣', isWild: false}
+    ];
+
+    const result = evaluateHand(outOfOrder);
+    console.log('Result:', result);
+    console.log('Full handStrength:', result.handStrength);
+
+    // Correct order should be: 7,6,5,4,3 ranks with suits H,C,H,S,S
+    // handStrength should be: [5, 7, 6, 3(H), 2(C), 3(H), 4(S), 4(S)]
+    console.log('Expected suit order: H(7), C(6), H(5), S(4), S(3)');
+    console.log('Actual suits in handStrength[3-7]:', result.handStrength.slice(3));
 }
 
 // Quick runner for specific hand types
