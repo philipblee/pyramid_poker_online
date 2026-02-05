@@ -53,7 +53,7 @@ function setupDragAndDrop(game) {
     document.addEventListener('dragstart', (e) => {
         if (e.target.classList.contains('card')) {
             e.target.classList.add('dragging');
-            e.dataTransfer.setData('text/plain', e.target.dataset.card);
+            e.dataTransfer.setData('cardId', e.target.dataset.cardId);  // ← Just ID
             e.dataTransfer.setData('source', e.target.parentElement.id);
         }
     });
@@ -136,11 +136,12 @@ function setupDragAndDrop(game) {
             e.preventDefault();
             area.classList.remove('drop-target');
 
-            const cardData = e.dataTransfer.getData('text/plain');
+            const cardId = e.dataTransfer.getData('cardId');  // ← Get ID directly
             const sourceId = e.dataTransfer.getData('source');
             const targetHand = area.dataset.hand;
 
-            game.moveCard(cardData, sourceId, targetHand);
+            // Pass just the card ID, not the full stale JSON
+            game.moveCard(cardId, sourceId, targetHand);
         });
     });
 }

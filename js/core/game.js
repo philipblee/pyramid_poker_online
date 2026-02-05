@@ -695,22 +695,18 @@ class PyramidPoker {
         }, 150); // Small delay for DOM updates
     }
 
-    moveCard(cardData, sourceId, targetHand) {
-        const card = JSON.parse(cardData);
+    moveCard(cardId, sourceId, targetHand) {
         const currentPlayer = this.playerManager.getCurrentPlayer();
         const playerData = this.playerHands.get(currentPlayer.name);
-
         if (!playerData) return;
 
         const sourceKey = getHandKey(sourceId);
         const sourceArray = sourceKey === 'cards' ? playerData.cards : playerData[sourceKey];
-        const cardIndex = sourceArray.findIndex(c => c.id === card.id);
-
+        const cardIndex = sourceArray.findIndex(c => c.id === cardId);
         if (cardIndex === -1) return;
 
         const targetKey = getHandKey(targetHand);
         const targetArray = targetKey === 'cards' ? playerData.cards : playerData[targetKey];
-
 
         if (targetKey === 'front' && targetArray.length >= 5) {
             alert('Front hand can only have up to 5 cards!');
@@ -727,8 +723,9 @@ class PyramidPoker {
             return;
         }
 
-        sourceArray.splice(cardIndex, 1);
-        targetArray.push(card);
+        // Move the ACTUAL card object, not stale JSON
+        const actualCard = sourceArray.splice(cardIndex, 1)[0];
+        targetArray.push(actualCard);
 
         this.loadCurrentPlayerHand();
     }
