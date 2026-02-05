@@ -1518,6 +1518,23 @@ class PyramidPoker {
                 });
             }
         }
+        // Apply ALL automatics against non-automatic players
+        const allPlayers = Array.from(roundScores.keys());
+        const nonAutomaticPlayers = allPlayers.filter(p => !automaticPlayers.includes(p));
+
+        if (nonAutomaticPlayers.length > 0) {
+            console.log(`⚔️ Applying ${automaticPlayers.length} automatics against ${nonAutomaticPlayers.length} normal players`);
+
+            automaticPlayers.forEach(autoPlayer => {
+                nonAutomaticPlayers.forEach(normalPlayer => {
+                    // Automatic hands (both wins AND losses) beat normal hands
+                    roundScores.set(autoPlayer, roundScores.get(autoPlayer) + 3);
+                    roundScores.set(normalPlayer, roundScores.get(normalPlayer) - 3);
+
+                    console.log(`  ${autoPlayer} (automatic) beats ${normalPlayer} (normal): +3/-3`);
+                });
+            });
+        }
     }
 
     showTournamentSummary() {
