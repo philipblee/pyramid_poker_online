@@ -727,7 +727,59 @@ class PyramidPoker {
         const actualCard = sourceArray.splice(cardIndex, 1)[0];
         targetArray.push(actualCard);
 
+        // Clear sorted flag for both source and target hands
+        if (sourceKey === 'back') playerData.backSorted = false;
+        if (sourceKey === 'middle') playerData.middleSorted = false;
+        if (sourceKey === 'front') playerData.frontSorted = false;
+        if (targetKey === 'back') playerData.backSorted = false;
+        if (targetKey === 'middle') playerData.middleSorted = false;
+        if (targetKey === 'front') playerData.frontSorted = false;
+
         this.loadCurrentPlayerHand();
+    }
+
+    sortHandByStrength(cards, handStrength) {
+        const sorted = [...cards];
+        const handType = handStrength.handType;
+
+        // Helper to get card value
+        const getCardValue = (card) => {
+            const values = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
+            return values[card.rank] || card.value || 0;
+        };
+
+        if (handType >= 9) {
+            // Straight Flush / Royal Flush
+            return sorted.sort((a, b) => getCardValue(b) - getCardValue(a));
+        } else if (handType === 8 || handType === 7 || handType === 4 ||
+                   handType === 3 || handType === 2) {
+            // Four of a Kind / Full House
+            const rankGroups = {};
+            sorted.forEach(card => {
+                const rank = card.rank;
+                if (!rankGroups[rank]) rankGroups[rank] = [];
+                rankGroups[rank].push(card);
+            });
+
+            const groups = Object.entries(rankGroups)
+                .sort((a, b) => {
+                    if (b[1].length !== a[1].length) return b[1].length - a[1].length;
+                    return getCardValue(b[1][0]) - getCardValue(a[1][0]);
+                });
+
+            return groups.flatMap(([rank, cardGroup]) =>
+                cardGroup.sort((a, b) => getCardValue(b) - getCardValue(a))
+            );
+        } else {
+            console.log('Input cards:', sorted.map(c => ({rank: c.rank, value: c.value, computed: getCardValue(c)})));
+            return sorted.sort((a, b) => {
+                const valA = getCardValue(a);
+                const valB = getCardValue(b);
+                const result = valB - valA;
+                console.log(`Comparing ${a.rank}(${valA}) vs ${b.rank}(${valB}) = ${result}`);
+                return result;
+            });
+        }
     }
 
     validateHands() {
@@ -830,14 +882,34 @@ class PyramidPoker {
             const middlePoints = handUtils.getPointValue(middleStrength.handType, 'middle');
             const frontPoints = handUtils.getPointValue(frontStrength.handType, 'front');
 
+            // Sort complete hands by strength
+            playerData.back = this.sortHandByStrength(playerData.back, backStrength);
+            playerData.middle = this.sortHandByStrength(playerData.middle, middleStrength);
+            playerData.front = this.sortHandByStrength(playerData.front, frontStrength);
+
+            // Re-render the sorted cards
+            const backHand = document.getElementById('backHand');
+            const middleHand = document.getElementById('middleHand');
+            const frontHand = document.getElementById('frontHand');
+
+            backHand.innerHTML = '';
+            middleHand.innerHTML = '';
+            frontHand.innerHTML = '';
+
+            playerData.back.forEach(card => backHand.appendChild(createCardElement(card, 'back')));
+            playerData.middle.forEach(card => middleHand.appendChild(createCardElement(card, 'middle')));
+            playerData.front.forEach(card => frontHand.appendChild(createCardElement(card, 'front')));
+
+            // Mark as sorted
+            playerData.backSorted = true;
+            playerData.middleSorted = true;
+            playerData.frontSorted = true;
+
+
             // Validate hand order (Back >= Middle >= Front)
             const backTuple = backStrength.handStrength;
             const middleTuple = middleStrength.handStrength;
             const frontTuple = frontStrength.handStrength;
-
-//            console.log('🔍 backStrength:', backStrength);
-//            console.log('🔍 middleStrength:', middleStrength);
-//            console.log('🔍 frontStrength:', frontStrength);
 
             const backVsMiddle = compareTuples(backTuple, middleTuple);
             const middleVsFront = compareTuples(middleTuple, frontTuple);
@@ -855,17 +927,17 @@ class PyramidPoker {
             const frontStrengthEl = document.getElementById('frontStrength');
 
             // Set content and styling
-            backStrengthEl.textContent = `${backStrength.name}   -   ${backPoints} Points`;
+            backStrengthEl.textContent = `${backStrength.name} (sorted)  -   ${backPoints} Points`;
             backStrengthEl.style.color = '#FFFF00';
             backStrengthEl.style.fontWeight = 'bold';
             backStrengthEl.style.fontSize = '16px';
 
-            middleStrengthEl.textContent = `${middleStrength.name}  -  ${middlePoints} Points`;
+            middleStrengthEl.textContent = `${middleStrength.name} (sorted) -  ${middlePoints} Points`;
             middleStrengthEl.style.color = '#FFFF00';
             middleStrengthEl.style.fontWeight = 'bold';
             middleStrengthEl.style.fontSize = '16px';
 
-            frontStrengthEl.textContent = `${frontStrength.name}  -  ${frontPoints} Points`;
+            frontStrengthEl.textContent = `${frontStrength.name} (sorted) -  ${frontPoints} Points`;
             frontStrengthEl.style.color = '#FFFF00';
             frontStrengthEl.style.fontWeight = 'bold';
             frontStrengthEl.style.fontSize = '16px';
