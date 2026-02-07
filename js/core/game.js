@@ -771,12 +771,12 @@ class PyramidPoker {
                 cardGroup.sort((a, b) => getCardValue(b) - getCardValue(a))
             );
         } else {
-            console.log('Input cards:', sorted.map(c => ({rank: c.rank, value: c.value, computed: getCardValue(c)})));
+//            console.log('Input cards:', sorted.map(c => ({rank: c.rank, value: c.value, computed: getCardValue(c)})));
             return sorted.sort((a, b) => {
                 const valA = getCardValue(a);
                 const valB = getCardValue(b);
                 const result = valB - valA;
-                console.log(`Comparing ${a.rank}(${valA}) vs ${b.rank}(${valB}) = ${result}`);
+//                console.log(`Comparing ${a.rank}(${valA}) vs ${b.rank}(${valB}) = ${result}`);
                 return result;
             });
         }
