@@ -400,6 +400,12 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
 let isClosingPopup = false; // Guard against double calls
 
 async function closeScoringPopup() {
+    console.log('═══════════════════════════════════════');
+    console.log('🚪 closeScoringPopup CALLED');
+    console.log('  - isOwner:', window.isOwner);
+    console.log('  - gameDeviceMode:', window.gameConfig?.config?.gameDeviceMode);
+    console.log('  - current round:', window.game?.currentRound);
+    console.log('═══════════════════════════════════════');
     // Prevent double calls - if already closing, return early
     if (isClosingPopup) {
         return;
@@ -1025,4 +1031,44 @@ function showRoundSummaryForChips(game, surrenderDecisions, pot, winners, potSha
     }
 
     return '';
+}
+
+// Add this at the end of scoring-popup.js
+
+async function forceAdvanceRound() {
+    console.log('═══════════════════════════════════════');
+    console.log('👑 FORCE ADVANCE STARTED');
+    console.log('  - isOwner:', window.isOwner);
+    console.log('  - current tableState:', window.multiDeviceIntegration?.tableState);
+    console.log('  - current round:', window.game?.currentRound);
+    console.log('═══════════════════════════════════════');
+
+    if (window.gameConfig?.config?.gameDeviceMode === 'multi-device' && window.isOwner) {
+        const tableId = window.multiDeviceIntegration.tableId;
+
+        console.log('🗑️ Deleting Firestore currentGame...');
+        await firebase.firestore().collection('tables').doc(tableId.toString()).update({
+            'currentGame': firebase.firestore.FieldValue.delete()
+        });
+        console.log('✅ Firestore delete complete');
+
+        console.log('📡 Setting tableState to round_complete...');
+        await setTableState('round_complete');
+        console.log('✅ tableState set complete');
+    }
+
+    console.log('🚪 Closing popup locally...');
+    const popup = document.getElementById('scoringPopup');
+    popup.style.display = 'none';
+
+    console.log('🧹 Running resetGameUI and clearAllHandAreas...');
+    resetGameUI();
+    clearAllHandAreas();
+
+    console.log('🎮 Calling game.startNewRound()...');
+    game.startNewRound();
+
+    console.log('═══════════════════════════════════════');
+    console.log('👑 FORCE ADVANCE COMPLETE (local)');
+    console.log('═══════════════════════════════════════');
 }

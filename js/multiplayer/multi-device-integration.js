@@ -308,6 +308,13 @@ class MultiDeviceIntegration {
 
         const continueButton = document.querySelector('#scoringPopup .btn.btn-primary');
         const closeButton = document.querySelector('#scoringPopup .close-popup');
+        const ownerOverrideBtn = document.getElementById('ownerOverrideBtn');
+
+        // Show override button for owner
+        if (ownerOverrideBtn && window.isOwner) {
+            ownerOverrideBtn.style.display = 'inline-block';
+        }
+
 
         if (!continueButton && !closeButton) {
             console.warn('No continue/close buttons found in scoring popup');

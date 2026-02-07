@@ -549,8 +549,16 @@
                 <div id="roundRobinResults"></div>
             </div>
 
+            <!-- In the scoring popup section, replace the existing button div with: -->
             <div style="text-align: center; margin-top: 30px;">
                 <button class="btn btn-primary" onclick="game.closeScoringPopup()">Continue</button>
+
+                <!-- Owner Override Button -->
+                <button id="ownerOverrideBtn" class="btn"
+                        style="display: none; margin-left: 10px; background: #ff6b6b; border: 2px solid #ff0000;"
+                        onclick="forceAdvanceRound()">
+                    👑 Owner: Force Next Round
+                </button>
             </div>
         </div>
 
