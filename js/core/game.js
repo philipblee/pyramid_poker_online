@@ -1329,7 +1329,7 @@ class PyramidPoker {
     }
 
     async calculateScores() {
-
+        console.log(`📊 calculateScores - currentRound: ${this.currentRound}, roundHistory length: ${this.roundHistory.length}`);
         const allPlayerNames = this.playerManager.getPlayerNames();
 
        // Filter out surrendered players from scoring
@@ -1436,7 +1436,7 @@ class PyramidPoker {
                 const hand1 = this.submittedHands.get(player1);
                 const hand2 = this.submittedHands.get(player2);
 
-                const result = compareHands(hand1, hand2);
+                const result = compareHands(hand1, hand2, true);
 
                 roundScores.set(player1, roundScores.get(player1) + result.player1Score);
                 roundScores.set(player2, roundScores.get(player2) + result.player2Score);
@@ -1528,7 +1528,7 @@ class PyramidPoker {
         }
 
         // Use the existing compareHands function
-        const result = compareHands(hand1, hand2);
+        const result = compareHands(hand1, hand2, true);
 
         // Return in the format expected by handleMultiAutomatics
         return {
