@@ -1,7 +1,15 @@
 //game-state-manager.js handles game transitions for multi-human, multi-device coordination
 
 async function handleTableStateChange(tableState) {
-    // ⭐ ADD THIS LINE:
+
+    console.log('═══════════════════════════════════════');
+    console.log('📡 TABLE STATE CHANGE DETECTED');
+    console.log('  - isOwner:', this.isOwner);
+    console.log('  - old state:', this.tableState);
+    console.log('  - new state:', tableState);
+    console.log('  - current round:', window.game?.currentRound);
+    console.log('═══════════════════════════════════════');
+
     window.game.tableState = tableState;
 
     console.log('🎮 Handling table state change:', tableState);
