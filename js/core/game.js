@@ -1631,6 +1631,14 @@ class PyramidPoker {
 
     showTournamentSummary() {
         console.log('🏆 Showing tournament summary...');
+        console.log('📊 roundHistory.length:', this.roundHistory.length);
+        console.log('📊 Full roundHistory:', JSON.stringify(this.roundHistory, null, 2));
+
+        console.log('📊 TOURNAMENT SUMMARY DATA:');
+        console.log('  - roundHistory.length:', this.roundHistory.length);
+        this.roundHistory.forEach((round, idx) => {
+            console.log(`  - Round ${idx + 1}: roundNumber=${round.roundNumber}, hasChipChanges=${!!round.chipChanges}`);
+        });
 
         // Calculate cumulative chip changes from all completed rounds
         const chipTotals = new Map();
