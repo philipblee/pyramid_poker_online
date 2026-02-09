@@ -1,9 +1,32 @@
 // js/ui/scoring-popup.js
 // COMPLETE VERSION: Uses ScoringUtilities for all scoring calculations
 
-// Add this helper function at the top of scoring-popup.js
+// Fixed version - actually uses handStrength to determine sort strategy
 function sortCardsForDisplay(cards, handStrength) {
     const suitRank = { '♠': 4, '♥': 3, '♦': 2, '♣': 1 };
+    const handType = handStrength?.handType || handStrength?.rank || 1;
+
+    // For straights (types 5, 9): Keep sequential order
+    if (handType === 5 || handType === 9) {
+        // Already in correct order from evaluation, just return
+        return [...cards];
+    }
+
+    // For pairs/trips/quads (types 2, 3, 4, 7, 8, 10): Group by rank
+    if ([2, 3, 4, 7, 8].includes(handType)) {
+        return [...cards].sort((a, b) => {
+            // Count occurrences of each rank
+            const aCount = cards.filter(c => c.value === a.value).length;
+            const bCount = cards.filter(c => c.value === b.value).length;
+
+            // Sort by frequency first, then by value
+            if (aCount !== bCount) return bCount - aCount;
+            if (a.value !== b.value) return b.value - a.value;
+            return suitRank[b.suit] - suitRank[a.suit];
+        });
+    }
+
+    // For high card, flush: High-to-low by value
     return [...cards].sort((a, b) => {
         if (a.value !== b.value) return b.value - a.value;
         return suitRank[b.suit] - suitRank[a.suit];
