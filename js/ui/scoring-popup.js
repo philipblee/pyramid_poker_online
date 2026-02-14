@@ -393,7 +393,7 @@ async function showScoringPopup(game, detailedResults, roundScores, specialPoint
     if (closeButton) {
         closeButton.disabled = false;
         console.log('✅ Continue button enabled after chip distribution');
-        console.log('🔍 Button actual state - disabled:', continueButton.disabled, 'display:', continueButton.style.display);
+        console.log('🔍 Button actual state - disabled:', closeButton.disabled, 'display:', closeButton.style.display);
     }
 
     // Return Promise that waits for close button
