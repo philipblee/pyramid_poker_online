@@ -115,7 +115,7 @@ function twoWildStrategyTwo(cards) {
     });
 
     return {
-        combinations: dedupedCombinations,
+        combinations: sortedCombinations,  // was dedupedCombinations
         firstLayerCount: firstLayerCount
     };
 }

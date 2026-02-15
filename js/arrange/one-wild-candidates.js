@@ -6,6 +6,20 @@
 * @param {Array} cardObjects - Array of 16 non-wild cards
 * @returns {Array} Array of wild card strings that improve hand counts
 */
+// Add rank lookup near top of function
+const handTypeRank = {
+    'eightOfAKind': 18,
+    'eightCardStraightFlush': 15,
+    'sevenOfAKind': 14,
+    'sevenCardStraightFlush': 11,
+    'sixOfAKind': 10,
+    'sixCardStraightFlush': 8,
+    'fiveOfAKind': 6,
+    'straightFlush': 5,
+    'natural4K': 4,
+    'flush': 1,
+    'straight': 1
+};
 
 function oneWildCandidates(cardObjects) {
 //   console.log('\n🎯 ======== ONE WILD CANDIDATES ========');
@@ -28,54 +42,43 @@ function oneWildCandidates(cardObjects) {
    const wildCandidates = [];
    const rejectedCards = [];
 
-   allCards.forEach((cardString, index) => {
-       // Convert card string to card object
-       const wildCard = Analysis.createCardFromString(cardString);
+    allCards.forEach((cardString, index) => {
+        const wildCard = Analysis.createCardFromString(cardString);
+        const testCards = [...cardObjects, wildCard];
+        const testCounts = countValidHandsFromCards(testCards);
 
-       // Create test hand (16 + 1 wild = 17 cards)
-       const testCards = [...cardObjects, wildCard];
+        let improved = false;
+        let bestRank = 0;
 
-       // Get hand counts for test case
-       const testCounts = countValidHandsFromCards(testCards);
+        handTypes.forEach(handType => {
+            const baselineCount = baselineCounts[handType] || 0;
+            const testCount = testCounts[handType] || 0;
 
-       // Check if ANY relevant hand type improved
-       let improved = false;
-       let improvementDetails = [];
+            if (testCount > baselineCount) {
+                improved = true;
+                const rank = handTypeRank[handType] || 0;
+                if (rank > bestRank) bestRank = rank;
+            }
+        });
 
-       handTypes.forEach(handType => {
-           const baselineCount = baselineCounts[handType] || 0;
-           const testCount = testCounts[handType] || 0;
+        if (improved) {
+            wildCandidates.push({ card: cardString, rank: bestRank });
+        } else {
+            rejectedCards.push(cardString);
+        }
+    });
 
-           if (testCount > baselineCount) {
-               improved = true;
-               improvementDetails.push(`${handType}: ${baselineCount} → ${testCount} (+${testCount - baselineCount})`);
-           }
-       });
-
-       // Accept if ANY relevant hand type improved
-       if (improved) {
-//           console.log(`   ✅Card Accepted: ${cardString}`);
-           wildCandidates.push(cardString);
-
-       } else {
-           rejectedCards.push(cardString);
-//           console.log(`   ✅ Rejected Card: ${cardString}`);
-       }
-
-   });
-
-//   console.log(`\n📋 ======== RESULTS ========`);
-//   console.log(`✅ Wild candidates: ${wildCandidates.length}/52 (${((wildCandidates.length/52)*100).toFixed(1)}%)`);
-//   console.log(`❌ Rejected cards: ${rejectedCards.length}/52 (${((rejectedCards.length/52)*100).toFixed(1)}%)`);
-//   console.log(`🎯 Efficiency: ${(((52 - wildCandidates.length) / 52) * 100).toFixed(1)}% search space reduction`);
-//   console.log(`📝 Wild candidates: ${wildCandidates.join(', ')}`);
+    // Sort by rank descending, extract strings
+    const sortedRanked = [...wildCandidates].sort((a, b) => b.rank - a.rank);
+    const sortedCandidates = sortedRanked.map(c => c.card);
 
     const results = {
         baseline: cardObjects,
         baselineCounts: baselineCounts,
         relevantHandTypes: handTypes,
-        wildCandidates: wildCandidates,
-        wildCandidatesCount: wildCandidates.length,
+        wildCandidates: sortedCandidates,
+        wildCandidatesRanked: sortedRanked,   // explicitly sorted, no ambiguity
+        wildCandidatesCount: sortedCandidates.length,
         rejectedCards: rejectedCards,
         rejectedCount: rejectedCards.length,
         efficiency: (((52 - wildCandidates.length) / 52) * 100).toFixed(1) + "%"
