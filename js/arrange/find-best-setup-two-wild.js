@@ -89,10 +89,15 @@ function FindBestSetupTwoWild(cardObjects) {
 
             // ✅ Should read from game-config:
             const flag = window.gameConfig?.config?.winProbabilityMethod || 'tiered';
-            const finder = createFindBestSetupNoWild(flag);
-            const result = finder.findBestSetupNoWild(cards);
 
-            finder.bestScore = globalBestScore; // 🔥 SEED with global best
+            const finder = createFindBestSetupNoWild(flag);
+            finder.bestScore = globalBestScore;  // ← MOVE THIS UP
+            const result = finder.findBestSetupNoWild(cards);  // ← runs seeded
+
+//            const finder = createFindBestSetupNoWild(flag);
+//            const result = finder.findBestSetupNoWild(cards);
+//
+//            finder.bestScore = globalBestScore; // 🔥 SEED with global best
 //            const result = finder.findBestSetupNoWild(cards);
 
             if (result.success && result.score > globalBestScore) {
@@ -108,6 +113,9 @@ function FindBestSetupTwoWild(cardObjects) {
                     statistics: result.statistics,
                     handCount: handResults.total
                 });
+
+            } else if (result.arrangement === null && globalBestScore > -Infinity) {
+                // Correctly pruned - skip silently
 
             } else {
                 console.log(`  Failed: ${result.error || 'Unknown error'}`);

@@ -79,10 +79,7 @@ function FindBestSetupOneWild(cardObjects) {
             // Updated calling pr ogram
             const flag = window.gameConfig?.config?.winProbabilityMethod || 'tiered';
             const finder = createFindBestSetupNoWild(flag);
-            const result = finder.findBestSetupNoWild(cards);
-
             finder.bestScore = globalBestScore; // 🔥 SEED with global best
-
             const arrangementResult = finder.findBestSetupNoWild(cards);
 
             if (arrangementResult.success && arrangementResult.score > globalBestScore)
