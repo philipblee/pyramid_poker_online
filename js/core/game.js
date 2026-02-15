@@ -1590,8 +1590,33 @@ class PyramidPoker {
 
                     const comparison = this.comparePlayerHands(p1, p2);
 
-                    roundScores.set(p1, roundScores.get(p1) + comparison.p1Score);
-                    roundScores.set(p2, roundScores.get(p2) + comparison.p2Score);
+                    // Automatics use flat 1 point per hand, not position-weighted
+                    let p1FlatScore = 0;
+                    let p2FlatScore = 0;
+
+                    comparison.details.forEach(detail => {
+                        if (detail.winner === 'player1') {
+                            p1FlatScore++; p2FlatScore--;
+                            detail.player1Points = 1;
+                            detail.player2Points = -1;
+                        } else if (detail.winner === 'player2') {
+                            p2FlatScore++; p1FlatScore--;
+                            detail.player1Points = -1;
+                            detail.player2Points = 1;
+                        } else {
+                            detail.player1Points = 0;
+                            detail.player2Points = 0;
+                        }
+                    });
+
+                    roundScores.set(p1, roundScores.get(p1) + p1FlatScore);
+                    roundScores.set(p2, roundScores.get(p2) + p2FlatScore);
+
+                    // Update scores for display consistency
+                    comparison.p1Score = p1FlatScore;
+                    comparison.p2Score = p2FlatScore;
+                    comparison.player1Score = p1FlatScore;
+                    comparison.player2Score = p2FlatScore;
 
                     if (detailedResults) {
                         detailedResults.push(comparison);
@@ -1610,6 +1635,7 @@ class PyramidPoker {
                 });
             }
         }
+
         // Apply ALL automatics against non-automatic players
         const allPlayers = Array.from(roundScores.keys());
         const nonAutomaticPlayers = allPlayers.filter(p => !automaticPlayers.includes(p));

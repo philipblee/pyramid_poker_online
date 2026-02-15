@@ -932,6 +932,12 @@ function showRoundRobinScoring(detailedResults, game, containerElement, roundSco
             const getPointsDisplay = (playerHand, position, playerName, isPlayer1) => {
                 if (detail.winner === 'tie') return '(0)';
 
+                // Use pre-calculated flat points if available (automatic comparisons)
+                if (detail.player1Points !== undefined) {
+                    const points = isPlayer1 ? detail.player1Points : detail.player2Points;
+                    return points > 0 ? `(+${points})` : `(${points})`;
+                }
+
                 // Get actual card count from submitted hands (for royalty calculation)
                 const cardCount = getCardCountFromSubmittedHands(game, playerName, position);
 
