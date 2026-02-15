@@ -233,7 +233,12 @@ function combineAndDeduplicate(strategy1Results, strategy2Results) {
     const seenCombinations = new Set();
 
     combinedResults.forEach(combo => {
-        // Create a normalized key for this combination (sorted by card ID)
+       if (!Array.isArray(combo)) {
+            console.log('❌ Non-array combo:', combo);
+            return;
+        }
+
+       // Create a normalized key for this combination (sorted by card ID)
         const sortedCombo = [...combo].sort((a, b) => a.id.localeCompare(b.id));
         const comboKey = sortedCombo.map(c => `${c.rank}${c.suit}`).join(',');
 
