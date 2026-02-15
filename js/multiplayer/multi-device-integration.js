@@ -170,12 +170,18 @@ class MultiDeviceIntegration {
 
         // Broadcast submission progress
         if (this.isOwner && submittedCount < totalPlayers) {
-            const message = `Round ${window.game.currentRound} of ${window.game.maxRounds}<br>Waiting for submissions: ${submittedCount}/${totalPlayers} players submitted`;
+            const allEmails = window.game.players.map(p => p.name);
+            const submittedEmails = Object.keys(arrangements);
+            const waitingNames = allEmails.filter(email => !submittedEmails.includes(email));
+
+            const message = `Round ${window.game.currentRound} of ${window.game.maxRounds}<br>` +
+                `Waiting for submissions: ${submittedCount}/${totalPlayers} players submitted<br>` +
+                `Still waiting: ${waitingNames.join(', ')}`;
+
             firebase.database()
                 .ref(`tables/${this.tableId}/statusMessage`)
                 .set(message);
         }
-
 
         if (submittedCount >= totalPlayers && this.tableState !== 'all_submitted' && this.isOwner) {
 //            console.log('🎉 All players have submitted! Transitioning...');
