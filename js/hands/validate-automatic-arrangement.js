@@ -1174,6 +1174,19 @@ window.dealAutomatic = function(type) {
         stagingArea.appendChild(cardEl);
     });
 
+    // Sync playerData with dealt cards
+    if (window.game) {
+        const currentPlayer = window.game.playerManager.getCurrentPlayer();
+        const playerData = window.game.playerHands.get(currentPlayer.name);
+        if (playerData) {
+            playerData.cards = automaticHands[type].map(card => ({...card}));
+            playerData.back = [];
+            playerData.middle = [];
+            playerData.front = [];
+            console.log(`✅ playerData synced with ${automaticHands[type].length} cards`);
+        }
+    }
+
     console.log(`✅ Dealt ${type} automatic`);
 };
 
