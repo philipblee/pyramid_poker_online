@@ -732,7 +732,7 @@ function arrangeThreeFlush(allCards) {
                 if (card.isWild) {
                     const replacement = {
                         ...card,
-                        id: `A${hand.suit}_wild`,
+//                        id: `A${hand.suit}_wild`,
                         rank: "A",
                         suit: hand.suit,
                         value: 14,
