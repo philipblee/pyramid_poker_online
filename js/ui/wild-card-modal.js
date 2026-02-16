@@ -371,43 +371,14 @@ class WildCardModal {
     }
 
     handleOk() {
-        if (!this.selectedSuit || !this.selectedRank || !this.currentCard) {
-            return;
-        }
+    if (!this.selectedSuit || !this.selectedRank || !this.currentCard) return;
 
-        // Modify the card object
-        this.currentCard.rank = this.selectedRank;
-        this.currentCard.suit = this.selectedSuit;
-        this.currentCard.isWild = false;
-        this.currentCard.wasWild = true;
+    assignWildCard(this.currentCard, this.selectedRank, this.selectedSuit);
 
-        // Calculate numeric value for the rank
-        const rankValues = {
-            'A': 14, 'K': 13, 'Q': 12, 'J': 11, '10': 10,
-            '9': 9, '8': 8, '7': 7, '6': 6, '5': 5,
-            '4': 4, '3': 3, '2': 2
-        };
-        this.currentCard.number = rankValues[this.selectedRank];
-        this.currentCard.value = rankValues[this.selectedRank];
+    if (window.game) window.game.validateHands();
 
-        console.log(`✅ Wild card assigned to ${this.selectedRank}${this.selectedSuit}`);
-
-        // Find and update the card's DOM element
-        const cardElement = document.querySelector(`[data-card-id="${this.currentCard.id}"]`);
-        if (cardElement) {
-            cardElement.innerHTML = `<div style="font-size: 20px;">${this.currentCard.rank}</div><div style="font-size: 28px;">${this.currentCard.suit}</div>`;
-            cardElement.classList.add('wild-assigned'); // Keep yellow background
-        }
-
-        cardElement.classList.remove('wild-undefined');
-
-        // Re-run validation to update hand strengths
-        if (window.game) {
-            window.game.validateHands();
-        }
-
-        this.close();
-    }
+    this.close();
+}
 
     close() {
         this.isOpen = false;
