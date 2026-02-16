@@ -855,7 +855,7 @@ class PyramidPoker {
             ...playerData.front
         ];
 
-        const hasUnassignedWilds = allPlayerCards.some(card => card.isWild);
+        const hasUnassignedWilds = allPlayerCards.some(card => card.isWild && !card.wasWild);
 
         if (hasUnassignedWilds) {
             submitBtn.disabled = true;

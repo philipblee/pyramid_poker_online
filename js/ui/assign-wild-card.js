@@ -52,6 +52,12 @@ function assignWildCard(cardObject, rank, suit) {
     return cardObject;
 }
 
+function numericRankToString(value) {
+    const map = { 14: 'A', 13: 'K', 12: 'Q', 11: 'J' };
+    return map[value] || String(value);
+}
+window.numericRankToString = numericRankToString;
+
 // Expose globally
 window.assignWildCard = assignWildCard;
 window.RANK_VALUES = RANK_VALUES;

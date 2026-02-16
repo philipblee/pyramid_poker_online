@@ -269,6 +269,11 @@ class WildCardModal {
                     border: 3px solid gold !important;
                 }
 
+                .card.wild.wild-assigned {
+                    background: #ffd700 !important;
+                    border: 2px solid #ffa500 !important;
+                }
+
                 @keyframes wild-pulse {
                     0%, 100% {
                         box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);

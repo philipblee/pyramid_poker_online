@@ -728,29 +728,16 @@ function arrangeThreeFlush(allCards) {
         .map(hand => {
             console.log(`  📋 Hand suit ${hand.suit}, cards:`, hand.cards.map(c => `${c.rank||'WILD'}${c.suit} (isWild:${c.isWild})`).join(', '));
 
-            const evalCards = hand.cards.map(card => {
+            // Assign any wilds to the flush suit
+            hand.cards.forEach(card => {
                 if (card.isWild) {
-                    const replacement = {
-                        ...card,
-//                        id: `A${hand.suit}_wild`,
-                        rank: "A",
-                        suit: hand.suit,
-                        value: 14,
-                        isWild: false,
-                        wasWild: true
-                    };
-                    console.log('  🔄 WILD REPLACEMENT:', replacement);
-                    return replacement;
+                    assignWildCard(card, 'A', hand.suit);
                 }
-                return card;
             });
 
-            console.log('🔄 Before evaluateHand:');
-            console.log('  evalCards:', evalCards.map(c => `${c.rank}${c.suit} (isWild:${c.isWild})`).join(', '));
-
             return {
-                cards: evalCards,  // ✅ Return replaced cards, not originals
-                handRank: evaluateHand(evalCards)
+                cards: hand.cards,
+                handRank: evaluateHand(hand.cards)
             };
         })
         .filter(hand => hand.cards.length === 5)
@@ -842,7 +829,9 @@ function arrangeThreeStraight(allCards) {
                             delete rankInventory[rank];
                         }
                     } else {
-                        targetHand.push(availableWilds.shift());
+                        const wildCard = availableWilds.shift();
+                        assignWildCard(wildCard, numericRankToString(needed[i]), '♠');
+                        targetHand.push(wildCard);
                     }
                 }
 
@@ -882,7 +871,9 @@ function arrangeThreeStraight(allCards) {
                         delete rankInventory[rank];
                     }
                 } else {
-                    targetHand.push(availableWilds.shift());
+                    const wildCard = availableWilds.shift();
+                    assignWildCard(wildCard, numericRankToString(wheelRanks[i]), '♠');
+                    targetHand.push(wildCard);
                 }
             }
 
@@ -1070,6 +1061,31 @@ window.dealAutomatic = function(type) {
             {id: 'WILD_15', rank: '', suit: '', value: 0, isWild: true},
             {id: '6♣_16', rank: '6', suit: '♣', value: 6, isWild: false},
             {id: '5♣_17', rank: '5', suit: '♣', value: 5, isWild: false}
+        ],
+
+        // THREE-STRAIGHT with ONE wild
+        // Straight 1: A-K-Q-J-10 (spades)
+        // Straight 2: 9-8-7-6-5 (hearts)
+        // Straight 3: 6-4-3-2-WILD (wild becomes 5)
+        // Extras: K♣ Q♣
+        'three-straight-one-wild': [
+            {id: 'A♠_1',    rank: 'A',  suit: '♠', value: 14, isWild: false},
+            {id: 'K♠_2',    rank: 'K',  suit: '♠', value: 13, isWild: false},
+            {id: 'Q♠_3',    rank: 'Q',  suit: '♠', value: 12, isWild: false},
+            {id: 'J♠_4',    rank: 'J',  suit: '♠', value: 11, isWild: false},
+            {id: '10♠_5',   rank: '10', suit: '♠', value: 10, isWild: false},
+            {id: 'K♥_6',    rank: 'K',  suit: '♥', value: 13, isWild: false},
+            {id: 'Q♥_7',    rank: 'Q',  suit: '♥', value: 12, isWild: false},
+            {id: 'J♥_8',    rank: 'J',  suit: '♥', value: 11, isWild: false},
+            {id: '10♥_9',   rank: '10', suit: '♥', value: 10, isWild: false},
+            {id: '9♥_10',   rank: '9',  suit: '♥', value: 9,  isWild: false},
+            {id: 'Q♣_11',   rank: 'Q',  suit: '♣', value: 12, isWild: false},
+            {id: 'J♣_12',   rank: 'J',  suit: '♣', value: 11, isWild: false},
+            {id: '10♣_13',  rank: '10', suit: '♣', value: 10, isWild: false},
+            {id: '8♣_14',   rank: '8',  suit: '♣', value: 8,  isWild: false},
+            {id: 'WILD_15',  rank: '',   suit: '',  value: 0,  isWild: true},
+            {id: '8♦_16',   rank: '8',  suit: '♦', value: 8,  isWild: false},
+            {id: '7♦_17',   rank: '7',  suit: '♦', value: 7,  isWild: false}
         ]
 
     };
