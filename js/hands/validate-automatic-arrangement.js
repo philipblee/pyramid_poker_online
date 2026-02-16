@@ -662,34 +662,59 @@ function arrangeThreeFullHouses(allCards) {
 
 // Dragon - should already work, but here's a cleaner version
 function arrangeDragon(allCards) {
-    console.log('🎨 arrangeDragon - arranging 13 cards');
+    console.log('🎨 arrangeDragon - arranging cards');
 
-    // Dragon needs all 13 cards placed - distribute into 5-5-3
+    const wilds = allCards.filter(c => c.isWild);
+    const naturals = allCards.filter(c => !c.isWild);
+
+    const allRanks = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
+
+    // Build rank inventory - one card per rank (best available)
+    const rankInventory = {};
+    naturals.forEach(c => {
+        if (!rankInventory[c.rank]) {
+            rankInventory[c.rank] = c;
+        }
+    });
+
+    // Assign wild to missing rank
+    if (wilds.length > 0) {
+        const missingRank = allRanks.find(r => !rankInventory[r]);
+        if (missingRank) {
+            const wildCard = wilds[0];
+            assignWildCard(wildCard, missingRank, '♠');
+            rankInventory[missingRank] = wildCard;
+            console.log(`🃏 Wild assigned to missing rank: ${missingRank}♠`);
+        }
+    }
+
+    // Build ordered 13-card dragon (A down to 2)
+    const dragonCards = allRanks.map(r => rankInventory[r]).filter(Boolean);
+
+    console.log(`🐉 Dragon cards (${dragonCards.length}):`, dragonCards.map(c => `${c.rank}${c.suit}`).join(' '));
+
+    // Distribute into 5-5-3 and evaluate
     const hands = [
-        allCards.slice(0, 5),   // Potential back
-        allCards.slice(5, 10),  // Potential middle
-        allCards.slice(10, 13)  // Potential front
+        { cards: dragonCards.slice(0, 5) },
+        { cards: dragonCards.slice(5, 10) },
+        { cards: dragonCards.slice(10, 13) }
     ];
 
-    // Evaluate each hand
-    const evaluatedHands = hands.map((hand, index) => {
-        const strength = hand.length === 3 ? evaluateThreeCardHand(hand) : evaluateHand(hand);
-        console.log(`🔍 Hand ${index} evaluation:`, strength); // ADD THIS LINE
-        console.log(`🔍 hand_rank:`, strength?.hand_rank); // ADD THIS LINE
-        return { cards: hand, strength: strength };
-    });
+    const evaluatedHands = hands.map(hand => ({
+        cards: hand.cards,
+        strength: hand.cards.length === 3
+            ? evaluateThreeCardHand(hand.cards)
+            : evaluateHand(hand.cards)
+    }));
 
-    // Sort by strength (strongest first)
-    evaluatedHands.sort((a, b) => {
-        return compareTuples(b.strength.handStrength, a.strength.handStrength);
-    });
+    // Sort strongest to weakest
+    evaluatedHands.sort((a, b) => compareTuples(b.strength.handStrength, a.strength.handStrength));
 
-    console.log('🏁 Dragon arrangement complete (sorted by strength)');
-    console.log(`   Back: ${evaluatedHands[0].cards.length} cards`);
-    console.log(`   Middle: ${evaluatedHands[1].cards.length} cards`);
-    console.log(`   Front: ${evaluatedHands[2].cards.length} cards`);
+    console.log('🏁 Dragon arrangement complete');
+    console.log(`   Back: ${evaluatedHands[0].cards.map(c => `${c.rank}${c.suit}`).join(' ')}`);
+    console.log(`   Middle: ${evaluatedHands[1].cards.map(c => `${c.rank}${c.suit}`).join(' ')}`);
+    console.log(`   Front: ${evaluatedHands[2].cards.map(c => `${c.rank}${c.suit}`).join(' ')}`);
 
-    // Assign strongest to back, middle strength to middle, weakest to front
     return {
         back: evaluatedHands[0].cards,
         middle: evaluatedHands[1].cards,
@@ -1085,6 +1110,29 @@ window.dealAutomatic = function(type) {
             {id: 'WILD_15', rank: '',  suit: '',   value: 0,  isWild: true},
             {id: '3♥_16',  rank: '3',  suit: '♥', value: 3,  isWild: false},
             {id: '4♣_17',  rank: '4',  suit: '♣', value: 4,  isWild: false}
+        ],
+
+        // DRAGON with ONE wild
+        // Natural ranks: A,K,Q,J,10,9,8,6,5,4,3,2 (missing 7 - wild fills it)
+        // Extras: A♥, K♦, Q♣, J♥
+        'dragon-one-wild': [
+            {id: 'A♠_1',   rank: 'A',  suit: '♠', value: 14, isWild: false},
+            {id: 'K♠_2',   rank: 'K',  suit: '♠', value: 13, isWild: false},
+            {id: 'Q♠_3',   rank: 'Q',  suit: '♠', value: 12, isWild: false},
+            {id: 'J♠_4',   rank: 'J',  suit: '♠', value: 11, isWild: false},
+            {id: '10♥_5',  rank: '10', suit: '♥', value: 10, isWild: false},
+            {id: '9♥_6',   rank: '9',  suit: '♥', value: 9,  isWild: false},
+            {id: '8♥_7',   rank: '8',  suit: '♥', value: 8,  isWild: false},
+            {id: '6♦_8',   rank: '6',  suit: '♦', value: 6,  isWild: false},
+            {id: '5♦_9',   rank: '5',  suit: '♦', value: 5,  isWild: false},
+            {id: '4♦_10',  rank: '4',  suit: '♦', value: 4,  isWild: false},
+            {id: '3♣_11',  rank: '3',  suit: '♣', value: 3,  isWild: false},
+            {id: '2♣_12',  rank: '2',  suit: '♣', value: 2,  isWild: false},
+            {id: 'WILD_13', rank: '',  suit: '',   value: 0,  isWild: true},
+            {id: 'A♥_14',  rank: 'A',  suit: '♥', value: 14, isWild: false},
+            {id: 'K♦_15',  rank: 'K',  suit: '♦', value: 13, isWild: false},
+            {id: 'Q♣_16',  rank: 'Q',  suit: '♣', value: 12, isWild: false},
+            {id: 'J♥_17',  rank: 'J',  suit: '♥', value: 11, isWild: false}
         ],
 
         // THREE-FULL-HOUSES with ONE wild
