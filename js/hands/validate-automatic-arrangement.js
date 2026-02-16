@@ -595,12 +595,9 @@ function arrangeThreeFullHouses(allCards) {
             targetHand.push(rankInventory[tripsRank].shift());
         }
         for (let i = 0; i < wildsForTrips; i++) {
-            targetHand.push(availableWilds.shift());
-        }
-
-        // Clean up empty rank
-        if (rankInventory[tripsRank].length === 0) {
-            delete rankInventory[tripsRank];
+            const wildCard = availableWilds.shift();
+            assignWildCard(wildCard, tripsRank, '♠');
+            targetHand.push(wildCard);
         }
 
         // Add pair to hand
@@ -609,7 +606,14 @@ function arrangeThreeFullHouses(allCards) {
             targetHand.push(rankInventory[pairRank].shift());
         }
         for (let i = 0; i < wildsForPair; i++) {
-            targetHand.push(availableWilds.shift());
+            const wildCard = availableWilds.shift();
+            assignWildCard(wildCard, pairRank, '♠');
+            targetHand.push(wildCard);
+        }
+
+        // Clean up empty rank
+        if (rankInventory[tripsRank].length === 0) {
+            delete rankInventory[tripsRank];
         }
 
         // Clean up empty rank
@@ -1086,6 +1090,29 @@ window.dealAutomatic = function(type) {
             {id: 'WILD_15',  rank: '',   suit: '',  value: 0,  isWild: true},
             {id: '8♦_16',   rank: '8',  suit: '♦', value: 8,  isWild: false},
             {id: '7♦_17',   rank: '7',  suit: '♦', value: 7,  isWild: false}
+        ],
+
+        // THREE-FULL-HOUSES with ONE wild
+        // FH1: AAA-KK, FH2: QQQ-JJ, FH3: 99-WILD-88 (wild becomes 9)
+        // Extras: 3♣ 4♣
+        'three-full-houses-one-wild': [
+            {id: 'A♠_1',  rank: 'A', suit: '♠', value: 14, isWild: false},
+            {id: 'A♥_2',  rank: 'A', suit: '♥', value: 14, isWild: false},
+            {id: 'A♦_3',  rank: 'A', suit: '♦', value: 14, isWild: false},
+            {id: 'K♠_4',  rank: 'K', suit: '♠', value: 13, isWild: false},
+            {id: 'K♥_5',  rank: 'K', suit: '♥', value: 13, isWild: false},
+            {id: 'Q♠_6',  rank: 'Q', suit: '♠', value: 12, isWild: false},
+            {id: 'Q♥_7',  rank: 'Q', suit: '♥', value: 12, isWild: false},
+            {id: 'Q♦_8',  rank: 'Q', suit: '♦', value: 12, isWild: false},
+            {id: 'J♠_9',  rank: 'J', suit: '♠', value: 11, isWild: false},
+            {id: 'J♥_10', rank: 'J', suit: '♥', value: 11, isWild: false},
+            {id: '9♠_11', rank: '9', suit: '♠', value: 9,  isWild: false},
+            {id: '9♥_12', rank: '9', suit: '♥', value: 9,  isWild: false},
+            {id: '8♠_13', rank: '8', suit: '♠', value: 8,  isWild: false},
+            {id: '8♥_14', rank: '8', suit: '♥', value: 8,  isWild: false},
+            {id: 'WILD_15', rank: '', suit: '', value: 0,   isWild: true},
+            {id: '3♣_16', rank: '3', suit: '♣', value: 3,  isWild: false},
+            {id: '4♣_17', rank: '4', suit: '♣', value: 4,  isWild: false}
         ]
 
     };
