@@ -58,6 +58,8 @@ function numericRankToString(value) {
 }
 window.numericRankToString = numericRankToString;
 
+
+
 // Expose globally
 window.assignWildCard = assignWildCard;
 window.RANK_VALUES = RANK_VALUES;

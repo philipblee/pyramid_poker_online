@@ -110,12 +110,8 @@
         if (messageDiv) {
             messageDiv.textContent = message;
             messageDiv.style.display = 'block';
-
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 10000);
         } else {
-            console.log(message); // Fallback
+            console.log(message);
         }
     }
 

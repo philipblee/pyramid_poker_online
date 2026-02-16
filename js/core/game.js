@@ -855,22 +855,27 @@ class PyramidPoker {
             ...playerData.front
         ];
 
-        const hasUnassignedWilds = allPlayerCards.some(card => card.isWild && !card.wasWild);
-
-        if (hasUnassignedWilds) {
-            submitBtn.disabled = true;
-            const automaticBtn = document.getElementById('playAutomatic');
-            if (automaticBtn) automaticBtn.disabled = true;
-
-            // Show warning message
-            if (statusDiv) {
-                statusDiv.innerHTML = `<span style="color: #ff6b6b;">⚠️ Please assign all wild cards before submitting!</span>`;
-            }
-            return; // Exit early
-        }
-
-
         if (isComplete) {
+            // Auto-resolve any unset wilds in placed hands
+            const placedCards = [...playerData.back, ...playerData.middle, ...playerData.front];
+            const hasUnassignedWilds = placedCards.some(card => card.isWild && !card.wasWild);
+            if (hasUnassignedWilds) {
+                let wildResolved = false;
+                [playerData.back, playerData.middle, playerData.front].forEach(cards => {
+                    cards.forEach(card => {
+                        if (card.isWild && !card.wasWild) {
+                            resolveWildInHand(card, cards);
+                            wildResolved = true;
+                        }
+                    });
+                });
+                if (wildResolved) {
+                    showAutomaticMessage('🃏 Wild card auto-assigned based on hand context, click to chnage it');
+                }
+                window.game.validateHands();
+                return;
+            }
+
             // Evaluate hand strengths
             const backStrength = evaluateHand(playerData.back);
             const middleStrength = evaluateHand(playerData.middle);
