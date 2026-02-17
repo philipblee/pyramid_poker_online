@@ -260,7 +260,7 @@
     <!-- Scoring Popup -->
     <div class="scoring-popup" id="scoringPopup">
         <div class="scoring-content">
-            <button class="close-popup" onclick="game.closeScoringPopup()">×</button>
+            <button class="close-popup" onclick="closeScoringPopup()">×</button>
             <h2 style="text-align: center; margin-bottom: 30px; color: #ffd700;">🏆 Round Results</h2>
 
             <div class="player-hands-section">
@@ -275,7 +275,7 @@
 
             <!-- In the scoring popup section, replace the existing button div with: -->
             <div style="text-align: center; margin-top: 30px;">
-                <button class="btn btn-primary" onclick="game.closeScoringPopup()">Continue</button>
+                <button class="btn btn-primary" onclick="closeScoringPopup()">Continue</button>
 
                 <!-- Owner Override Button -->
                 <button id="ownerOverrideBtn" class="btn"
@@ -454,6 +454,8 @@
     <script src="js/utils/card-sorter.js"></script>
     <script src="js/scoring/compare-hands.js"></script>
     <script src="js/core/game.js"></script>
+    <script src="js/core/round-manager.js"></script>
+    <script src="js/core/tournament-summary.js"></script>
     <script src="js/utilities/analysis.js"></script>
     <script src="js/utilities/card-parser.js"></script>
 

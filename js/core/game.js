@@ -117,287 +117,10 @@ class PyramidPoker {
         console.log('🔄 Restored to original dealt state');
     }
 
-    async startNewGame() {
-        // Add this when a new game starts
-        resetGameTimer();
 
 
-        // 🔧 FIX: Refresh ALL settings from current config (not stale constructor values)
-        this.maxRounds = gameConfig.config.rounds;
-        // Add any other cached settings here if we find them
-
-        // Clear surrender decisions from previous round
-        if (this.surrenderDecisions) {
-            this.surrenderDecisions.clear();
-        }
-
-        // Clear automatic hands from previous game
-        if (this.automaticHands) {
-            this.automaticHands.clear();
-        }
-
-        hideDecisionButtons();
-
-        // Set multiDeviceMode based on gameConfig
-        this.multiDeviceMode = window.gameConfig?.config?.gameDeviceMode === 'multi-device';
-
-        // Add this when a new game starts
-        resetGameTimer();
-
-        // Ensure we have players
-        const playersAdded = this.playerManager.ensurePlayersExist();
-        if (playersAdded) {
-            updateDisplay(this);
-        }
-
-        try {
-            this.playerManager.validateMinimumPlayers();
-        } catch (error) {
-            alert(error.message);
-            return;
-        }
-
-        // NEW: Collect antes
-        await this.collectAntes();
-
-        // Add countdown
-        const isSingleHuman = window.gameConfig?.config?.gameMode === 'single-human';
-
-        if (isSingleHuman) {
-            await this.handleCountdown();  // ADD THIS
-        }
 
 
-        // Configure players based on GameConfig
-        if (window.gameConfig) {
-            // Check if we're in multi-device mode
-            const isMultiDevice = window.gameConfig.config.gameDeviceMode === 'multi-device';
-
-            if (isMultiDevice) {
-                // For multi-device, get actual player count from the game
-                const humanPlayers = this.players.filter(p => !p.isAI).length;
-                const aiPlayers = this.players.filter(p => p.isAI).length;
-                const totalPlayers = this.players.length;
-
-                console.log(`🎮 Multi-device configured for ${totalPlayers} players (${humanPlayers} human + ${aiPlayers} AI)`);
-            } else {
-                // For single-device, use the original logic
-                const targetPlayerCount = 1 + window.gameConfig.config.computerPlayers; // 1 human + N AI
-//                console.log(`🎮 Single-device configured for ${targetPlayerCount} players (1 human + ${window.gameConfig.config.computerPlayers} AI)`);
-            }
-        }
-
-        // NEW: Initialize tournament
-        this.currentRound = 1;
-        this.roundHistory = [];
-        this.tournamentScores.clear();
-        console.log(`Round ${this.currentRound} of ${this.maxRounds}`);
-
-        // Initialize tournament scores for all players
-        for (let player of this.playerManager.players) {
-            this.tournamentScores.set(player.name, 0);
-        }
-
-        // This block is essential for single-player.  Without it, single-player breaks
-        // Setup first round
-        this.deckManager.createNewDeck();
-        this.gameState = 'playing';
-        this.tableState = TABLE_STATES.DEALING; // Add this - parallel tracking
-        window.resetAutomaticButton()
-        this.playerManager.currentPlayerIndex = 0;
-        this.submittedHands.clear();
-
-        await this.dealCardsToAllPlayers();
-
-        // Only load hand immediately for owner/single-player
-        // Non-owners will load after Firebase retrieval completes
-        if (!this.multiDeviceMode || window.isOwner) {
-            this.loadCurrentPlayerHand();
-            updateDisplay(this);
-        }
-
-    }
-
-
-    async startNewRound() {
-
-        // Show appropriate buttons based on state
-        if (this.tableState === TABLE_STATES.DECIDE_PLAYING) {
-            showDecisionButtons();
-        } else {
-            hideDecisionButtons();
-        }
-
-        // Must have existing players to start a new round
-        if (this.playerManager.players.length < 2) {
-            alert('Need at least 2 players to start a round. Click "New Game" to configure players.');
-            return;
-        }
-
-        if (this.currentRound >= this.maxRounds) {
-            // Single-player always shows summary directly
-            const isSingleHuman = window.gameConfig?.config?.gameMode === 'single-human';
-
-            if (isSingleHuman) {
-                this.showTournamentSummary();  // Direct call for all single-player
-            } else if (window.isOwner) {
-                setTableState(TABLE_STATES.TOURNAMENT_COMPLETE);  // Multi-player uses state machine
-            }
-            return;
-        }
-
-        // Continue with new round
-        if (window.isOwner) {
-            setTableState(TABLE_STATES.DEALING);
-        }
-
-        // Advance to next round
-        this.currentRound++;
-        console.log(`🔄 Starting Round ${this.currentRound} of ${this.maxRounds}...`);
-
-
-        // Clear surrender decisions from previous round
-        if (this.surrenderDecisions) {
-            this.surrenderDecisions.clear();
-            console.log('🧹 Cleared local surrender decisions for new round');
-        }
-
-        // Clear Firebase decisions (for multi-player)
-        if (window.isOwner && window.multiDeviceIntegration) {
-            const tableId = window.multiDeviceIntegration.tableId;  // ← ADD THIS
-            await firebase.database()
-                .ref(`tables/${tableId}/surrenderDecisions`)
-                .remove();
-
-            console.log('🧹 Cleared Firebase surrender decisions for new round');
-
-            // After clearing Firebase surrender decisions
-            if (typeof window.cleanupDecisionListener === 'function') {
-                window.cleanupDecisionListener();
-            }
-        }
-
-        hideDecisionButtons();
-
-        // NEW: Collect antes
-        await this.collectAntes();
-
-        // 🆕 ADD COUNTDOWN HERE (before dealing cards)
-        const config = window.gameConfig?.config;
-        const isSingleHuman = config?.gameMode === 'single-human';
-
-        if (isSingleHuman) {
-            await this.handleCountdown();
-        }
-
-        // Setup new round (same as before but with round tracking)
-        this.gameState = 'playing';
-        this.playerManager.currentPlayerIndex = 0;
-        this.submittedHands.clear();
-        if (this.automaticHands) {
-            this.automaticHands.clear();
-        }
-
-        // IN startNewRound() method, ADD this block after the card dealing loop:
-
-        await this.dealCardsToAllPlayers();
-        resetAutomaticButton();
-        hideAutomaticMessage();
-
-        // Only load hand immediately for owner/single-player AND not kitty variant
-        // Multi-device kitty uses state machine, everything else loads immediately
-        const skipLoad = this.multiDeviceMode && gameConfig.config.gameVariant === 'kitty';
-
-        if (!skipLoad && (!this.multiDeviceMode || window.isOwner)) {
-            this.loadCurrentPlayerHand();
-        }
-
-        updateDisplay(this);
-
-        // Add at end of startNewRound()
-        this.playerHands.forEach((hand, name) => {
-//            console.log(`- ${name}: ${hand.cards.length} cards`);
-        });
-
-    }
-
-    async dealCardsToAllPlayers() {
-
-        if (!this.multiDeviceMode || window.isOwner) {
-            this.deckManager.createNewDeck();
-
-            for (let player of this.playerManager.players) {
-                const hand = this.deckManager.dealCards(17);
-                this.playerHands.set(player.name, {
-                    cards: hand,
-                    originalCards: hand.map(card => ({...card})),
-                    back: [],
-                    middle: [],
-                    front: []
-                });
-                player.ready = false;
-            }
-
-            // After dealing completes, set appropriate state
-            if (!this.multiDeviceMode) {
-                if (gameConfig.config.gameVariant === 'kitty') {
-                    this.tableState = TABLE_STATES.DECIDE_PLAYING;
-                } else {
-                    this.tableState = TABLE_STATES.PLAYING;
-                }
-            }
-            // Multi-device already handles tableState via Firebase
-
-        if (this.multiDeviceMode && window.multiDeviceIntegration) {
-            if (window.isOwner) {
-                // Owner: Sync hands immediately, then signal ready
-                await window.multiDeviceIntegration.storeAllHandsToFirebase();
-                console.log('✅ Owner synced all hands to Firebase');
-                await setTableState(TABLE_STATES.HANDS_DEALT);
-            }
-            // Non-owner: Do nothing - will wait for HANDS_DEALT state
-        }
-
-        // Table 6 Firebase sync
-        if (window.table6FirebaseSync && gameConfig.config.gameConnectMode === 'online') {
-            try {
-                await window.table6FirebaseSync.storeAllHandsToFirebase();
-                console.log('✅ Hands synced to Firebase for persistence');
-            } catch (error) {
-                console.error('❌ Firebase sync failed:', error);
-            }
-        }
-        }
-    }
-
-    async startNewTournament() {
-        console.log('🏆 Starting completely new tournament...');
-
-        if (gameConfig.config.gameDeviceMode === 'multi-device'){
-            setTableState(TABLE_STATES.NEW_TOURNAMENT)
-            return;
-        }
-
-        // Clear all tournament-level data - not needed after
-        this.currentRound = 0;  // or 1, depending on your preference
-        this.roundHistory = [];
-        this.roundRobinResults = [];  // <-- This is the key line for your bug
-        this.tournamentScores.clear();
-
-        // Reset game state
-        this.gameState = 'waiting';
-
-        // 🆕 ADD COUNTDOWN HERE (before dealing cards)
-        const config = window.gameConfig?.config;
-        const isSingleHuman = config?.gameMode === 'single-human';
-
-        if (isSingleHuman) {
-            await this.handleCountdown();
-        }
-
-        // Call the regular game start logic
-        this.startNewGame();
-    }
 
     // if player surrenders, skip his turn
     skipSurrenderedPlayer() {
@@ -1592,243 +1315,15 @@ class PyramidPoker {
         }
     }
 
-    showTournamentSummary() {
-        console.log('🏆 Showing tournament summary...');
-        console.log('📊 roundHistory.length:', this.roundHistory.length);
-        console.log('📊 Full roundHistory:', JSON.stringify(this.roundHistory, null, 2));
-
-        console.log('📊 TOURNAMENT SUMMARY DATA:');
-        console.log('  - roundHistory.length:', this.roundHistory.length);
-        this.roundHistory.forEach((round, idx) => {
-            console.log(`  - Round ${idx + 1}: roundNumber=${round.roundNumber}, hasChipChanges=${!!round.chipChanges}`);
-        });
-
-        // Calculate cumulative chip changes from all completed rounds
-        const chipTotals = new Map();
-        this.playerManager.players.forEach(player => {
-            chipTotals.set(player.name, 0);
-        });
-
-        this.roundHistory.forEach(roundData => {
-            if (roundData.chipChanges) {
-                roundData.chipChanges.forEach((chipChange, playerName) => {
-                    const current = chipTotals.get(playerName) || 0;
-                    chipTotals.set(playerName, current + chipChange);
-                });
-            }
-        });
-
-        // Create sorted tournament standings by chip changes
-        const standings = [...chipTotals.entries()]
-            .sort((a, b) => b[1] - a[1])
-            .map((entry, index) => ({
-                position: index + 1,
-                playerName: entry[0],
-                totalChipChange: entry[1]
-            }));
-
-        // Create tournament summary modal
-        const modal = document.createElement('div');
-        modal.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8); z-index: 1001;
-            display: flex; align-items: center; justify-content: center;
-        `;
-
-        const content = document.createElement('div');
-        content.style.cssText = `
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            border-radius: 15px; border: 2px solid #ffd700;
-            max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;
-            color: white; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            padding: 30px; text-align: center;
-        `;
-
-        // Build HTML content
-        let html = `
-            <h1 style="color: #ffd700; margin-bottom: 24px; font-size: 20px;">
-                🏆 TOURNAMENT COMPLETE! 🏆
-            </h1>
-            <div style="background: rgba(255, 215, 0, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 30px;">
-                <h2 style="color: #4ecdc4; margin-bottom: 20px;">Final Standings</h2>
-        `;
-
-        standings.forEach(standing => {
-            const medal = standing.position === 1 ? '🥇' :
-                         standing.position === 2 ? '🥈' :
-                         standing.position === 3 ? '🥉' : '🏅';
-            const bgColor = standing.position === 1 ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255, 255, 255, 0.1)';
-            const color = standing.totalChipChange >= 0 ? '#4ecdc4' : '#ff6b6b';
-            html += `
-                <div style="background: ${bgColor}; padding: 15px; margin: 10px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 16px;">${medal} ${standing.position}. ${standing.playerName}</span>
-                    <span style="font-size: 14px; font-weight: bold; color: ${color};">${standing.totalChipChange > 0 ? '+' : ''}${standing.totalChipChange}</span>
-                </div>
-            `;
-        });
-
-        html += `</div><div style="background: rgba(52, 73, 94, 0.5); padding: 20px; border-radius: 10px; margin-bottom: 24px;">
-            <h3 style="color: #4ecdc4; margin-bottom: 15px;">Round-by-Round Breakdown</h3>
-        `;
-
-        for (let round = 1; round <= this.roundHistory.length; round++) {
-            const roundData = this.roundHistory[round - 1];
-            html += `<div style="margin-bottom: 15px;"><h4 style="color: #ffd700;">Round ${round}</h4>`;
-
-            if (roundData.chipChanges) {
-                roundData.chipChanges.forEach((chipChange, playerName) => {
-                    const sign = chipChange > 0 ? '+' : '';
-                    const color = chipChange > 0 ? '#4ecdc4' : chipChange < 0 ? '#ff6b6b' : '#95a5a6';
-                    html += `<div style="color: ${color};">${playerName}: ${sign}${chipChange}</div>`;
-                });
-            }
-            html += `</div>`;
-        }
-
-        html += `</div>`;
-
-        const canReturn = gameConfig.config.gameDeviceMode !== 'multi-device' || window.isOwner;
-
-        if (canReturn) {
-            html += `
-                <button onclick="game.returnToTable();"
-                        style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px;">
-                    Return to Table
-                </button>
-            `;
-        } else {
-            html += `
-                <p style="color: #ffd700; margin-top: 20px; font-size: 16px;">
-                    Waiting for table owner to continue...
-                </p>
-            `;
-        }
-
-        content.innerHTML = html;
-        modal.appendChild(content);
-        document.body.appendChild(modal);
-    }
-
-    returnToTable() {
-        console.log('🔙 Returning to table/lobby...');
-
-        // Close the tournament summary modal
-        const modals = document.querySelectorAll('div[style*="position: fixed"]');
-        modals.forEach(modal => {
-            if (modal.textContent.includes('TOURNAMENT COMPLETE')) {
-                modal.remove();
-            }
-        });
-
-        if (gameConfig.config.gameDeviceMode === 'multi-device') {
-            // MULTIPLAYER: Only owner sets state, non-owners just do cleanup
-            if (window.isOwner) {
-                setTableState(TABLE_STATES.LOBBY);
-                console.log('✅ Owner set tableState back to LOBBY');
-            } else {
-                // Non-owner just does local cleanup
-                console.log('✅ Non-owner cleaned up locally');
-            }
-        } else {
-            // SINGLE PLAYER: Reset to waiting state
-            this.gameState = 'waiting';
-            this.currentRound = 0;
-            updateDisplay(this);
-            console.log('✅ Single-player returned to waiting');
-        }
-
-        // Show table screen for everyone
-        showTableScreen();
-    }
-
-    closeScoringPopup() {
-        closeScoringPopup();
-    }
 
 
 
 
 
-    initializeTournament() {
-        console.log('🏆 from window.game.initializeTournament: Starting new tournament...');
-        // Clear decisions from previous tournament
-        if (this.surrenderDecisions) {
-            this.surrenderDecisions.clear();
-        }
 
-        // Clear Firebase decisions (owner only)
-        if (this.multiDeviceMode && window.isOwner && this.currentTableId) {
-            firebase.database().ref(`tables/${this.currentTableId}/surrenderDecisions`).remove();
-        }
 
-        this.currentRound = 1;
-        this.roundHistory = [];
-        this.tournamentScores.clear();
 
-        // Initialize tournament scores for all players
-        for (let player of this.playerManager.players) {
-            this.tournamentScores.set(player.name, 0);
-        }
-    }
 
-    async collectAntes() {
-        const anteAmount = window.gameConfig?.config?.stakesAnteAmount || 0;
-
-        if (anteAmount === 0) return;
-
-        const tableId = window.game?.currentTableId;
-
-        if (!tableId) {
-            console.warn('No tableId for ante collection');
-            return;
-        }
-
-        // Only owner collects all antes
-        if (this.multiDeviceMode && !window.isOwner) return;
-
-        const players = this.playerManager.players;
-        const totalPot = players.length * anteAmount;
-
-        // Deduct from each player
-        for (const player of players) {
-            let playerKey;
-            if (player.type === 'ai') {
-                playerKey = player.name;
-            } else {
-                // Human - encode email
-                playerKey = player.name.replace(/\./g, ',').replace(/@/g, '_at_');
-            }
-
-            const result = await firebase.database().ref(`players/${playerKey}/chips`)
-                .transaction(currentChips => (currentChips || 0) - anteAmount);
-
-            // Also update lastKnownChips
-            await firebase.database().ref(`players/${playerKey}/lastKnownChips`).set(result.snapshot.val());
-
-        }
-
-        // Set pot (not transaction - owner controls it)
-        await firebase.database().ref(`tables/${tableId}/pot`).set(totalPot);
-
-        console.log(`✅ Collected ${anteAmount} ante from ${players.length} players. Pot: ${totalPot}`);
-    }
-
-    async handleCountdown() {
-        const config = window.gameConfig?.config;
-
-        const countdownTime = config.countdownTime || 0;
-
-        if (countdownTime > 0) {
-            showCountdownModal(countdownTime);
-
-            for (let i = countdownTime; i > 0; i--) {
-                updateCountdownNumber(i);
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-
-            hideCountdownModal();
-        }
-    }
 }
 
 
@@ -1931,3 +1426,60 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('loadVersionInfo function not available');
     }
 });
+
+// Restored - called from game-state-manager.js for non-owner multiplayer card retrieval
+PyramidPoker.prototype.handleNonOwnerCardRetrieval = async function() {
+    console.log('📱 Non-owner retrieving cards from Firebase');
+    await window.multiDeviceIntegration.retrieveAllHandsFromFirebase();
+    console.log('✅ Non-owner retrieved hands from Firebase');
+
+    const myPlayerName = window.uniquePlayerName;
+    const myActualHand = this.playerHands.get(myPlayerName);
+    const localPlayer0Name = this.playerManager.players[0].name;
+
+    console.log('🔄 Loading my cards into local Player 0 slot');
+    console.log('  - My name:', myPlayerName);
+    console.log('  - Local Player 0 name:', localPlayer0Name);
+
+    this.playerHands.set(localPlayer0Name, myActualHand);
+
+    this.loadCurrentPlayerHand();
+    updateDisplay(this);
+    console.log('✅ Non-owner loaded correct hand into UI (as Player 0)');
+};
+
+// Restored - called from multi-device-integration.js
+PyramidPoker.prototype.loadCurrentPlayerHandFromFirebase = async function() {
+    if (!window.multiDevice?.isMultiDevice || !window.multiDevice.currentTableId) return;
+
+    try {
+        const currentPlayer = this.playerManager.getCurrentPlayer();
+        if (!currentPlayer) return;
+
+        console.log(`☁️ Loading ${currentPlayer.name}'s hand from Firebase...`);
+
+        const snapshot = await firebase.database()
+            .ref(`tables/${window.multiDevice.currentTableId}/currentGame/dealtHands/${currentPlayer.name}`)
+            .once('value');
+
+        const handData = snapshot.val();
+
+        if (!handData) {
+            console.log(`⚠️ No hand found for ${currentPlayer.name} in Firebase`);
+            return;
+        }
+
+        this.playerHands.set(currentPlayer.name, {
+            cards: handData.cards,
+            originalCards: handData.cards.map(card => ({...card})),
+            back: [],
+            middle: [],
+            front: []
+        });
+
+        console.log(`✅ Loaded ${currentPlayer.name}'s hand from Firebase`);
+
+    } catch (error) {
+        console.error('❌ Error loading hand from Firebase:', error);
+    }
+};
