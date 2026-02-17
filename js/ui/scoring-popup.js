@@ -448,6 +448,7 @@ async function closeScoringPopup() {
         saveGameStats();
 
         popup.style.display = 'none';
+        hideAutomaticMessage();  // ← add this
 
         resetGameUI();
 

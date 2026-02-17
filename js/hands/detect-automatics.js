@@ -115,6 +115,15 @@
         }
     }
 
+    function hideAutomaticMessage() {
+        const messageDiv = document.getElementById('automaticMessage');
+        if (messageDiv) {
+            messageDiv.style.display = 'none';
+            messageDiv.textContent = '';
+        }
+    }
+    window.hideAutomaticMessage = hideAutomaticMessage;
+
     function playAutomatic() {
         if (!window.currentAutomatic) return;
 

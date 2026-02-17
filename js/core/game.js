@@ -324,6 +324,7 @@ class PyramidPoker {
 
         await this.dealCardsToAllPlayers();
         resetAutomaticButton();
+        hideAutomaticMessage();
 
         // Only load hand immediately for owner/single-player AND not kitty variant
         // Multi-device kitty uses state machine, everything else loads immediately
