@@ -1,0 +1,72 @@
+/* css/welcome.css */
+/* Welcome Screen Styles */
+
+.welcome-screen {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a252f 0%, #2c3e50 50%, #34495e 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.welcome-container {
+    max-width: 1000px;
+    width: 100%;
+    text-align: center;
+    color: white;
+}
+
+.welcome-hero h1 {
+    font-size: 48px;
+    color: #ffd700;
+    margin: 20px 0;
+}
+
+.logo-symbol {
+    font-size: 80px;
+    color: #4ecdc4;
+    margin-bottom: 20px;
+}
+
+.tagline {
+    font-size: 20px;
+    color: #bdc3c7;
+}
+
+.login-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin: 40px 0;
+}
+
+.login-option {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid #4ecdc4;
+    border-radius: 20px;
+    padding: 30px;
+    text-align: left;
+}
+
+.welcome-btn {
+    background: #4ecdc4;
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.welcome-btn:hover {
+    background: #44a08d;
+}
+
+@media (max-width: 768px) {
+    .login-options {
+        grid-template-columns: 1fr;
+    }
+}

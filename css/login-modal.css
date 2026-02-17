@@ -1,0 +1,199 @@
+/* css/login-modal.css */
+/* Login Modal Styles - matching config modal */
+
+.login-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-content {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    border-radius: 15px;
+    border: 2px solid #4ecdc4;
+    max-width: 400px;
+    width: 90%;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.login-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.login-header h2 {
+    margin: 0;
+    color: #ffd700;
+}
+
+.login-close {
+    background: none;
+    border: none;
+    color: #ff6b6b;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-close:hover {
+    background: rgba(255, 107, 107, 0.2);
+}
+
+.login-body {
+    padding: 20px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: bold;
+    color: #ecf0f1;
+}
+
+.form-group input {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #4ecdc4;
+    background: rgba(52, 73, 94, 0.8);
+    color: white;
+    font-size: 14px;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #ffd700;
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+.form-group input::placeholder {
+    color: #95a5a6;
+}
+
+.passcode-input {
+    text-align: center;
+    letter-spacing: 8px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.login-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.login-btn-modal {
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    background: #4ecdc4;
+    color: white;
+    font-size: 16px;
+}
+
+.login-btn-modal:hover {
+    background: #45b7aa;
+}
+
+.login-btn-modal:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+}
+
+.mode-switch {
+    text-align: center;
+    color: #95a5a6;
+    font-size: 14px;
+}
+
+.mode-switch a {
+    color: #4ecdc4;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.mode-switch a:hover {
+    color: #ffd700;
+    text-decoration: underline;
+}
+
+/* Modal internal status area */
+.modal-status {
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 15px;
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid transparent;
+}
+
+.modal-status.success {
+    background: rgba(46, 204, 113, 0.2);
+    border-color: #2ecc71;
+    color: #2ecc71;
+}
+
+.modal-status.error {
+    background: rgba(231, 76, 60, 0.2);
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+
+.modal-status.info {
+    background: rgba(52, 152, 219, 0.2);
+    border-color: #3498db;
+    color: #3498db;
+}
+
+/* Custom checkbox styling */
+.checkbox-label {
+    display: flex !important;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #ecf0f1 !important;
+    font-weight: normal !important;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-right: 8px;
+    width: 16px;
+    height: 16px;
+    accent-color: #4ecdc4;
+}
+
+.checkbox-label:hover {
+    color: #4ecdc4 !important;
+}
