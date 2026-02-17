@@ -218,28 +218,6 @@ class PyramidPoker {
 
     }
 
-    async handleNonOwnerCardRetrieval() {
-        console.log('📱 Non-owner retrieving cards from Firebase');
-        await window.multiDeviceIntegration.retrieveAllHandsFromFirebase();
-        console.log('✅ Non-owner retrieved hands from Firebase');
-
-        // 🎯 SIMPLE FIX: Load MY cards into the local Player 0 slot
-        const myPlayerName = window.uniquePlayerName;
-        const myActualHand = this.playerHands.get(myPlayerName);
-        const localPlayer0Name = this.playerManager.players[0].name;
-
-        console.log('🔄 Loading my cards into local Player 0 slot');
-        console.log('  - My name:', myPlayerName);
-        console.log('  - Local Player 0 name:', localPlayer0Name);
-
-        // Overwrite local Player 0 with my actual cards from Firebase
-        this.playerHands.set(localPlayer0Name, myActualHand);
-
-        // Now everything works exactly like single-player!
-        this.loadCurrentPlayerHand();
-        updateDisplay(this);
-        console.log('✅ Non-owner loaded correct hand into UI (as Player 0)');
-    }
 
     async startNewRound() {
 
@@ -542,53 +520,6 @@ class PyramidPoker {
     }
 
     // Load current player's hand from Firebase into local playerHands Map
-    async loadCurrentPlayerHandFromFirebase() {
-            console.log('🔧 DEBUG: Firebase loading function called');
-
-        if (!window.multiDevice?.isMultiDevice || !window.multiDevice.currentTableId) {
-            console.log('🔧 DEBUG: Exiting early - multiDevice check failed');
-            console.log('isMultiDevice:', window.multiDevice?.isMultiDevice);
-            console.log('currentTableId:', window.multiDevice.currentTableId);
-            return;
-        }
-
-
-
-        if (!window.multiDevice?.isMultiDevice || !window.multiDevice.currentTableId) return;
-
-        try {
-            const currentPlayer = this.playerManager.getCurrentPlayer();
-            if (!currentPlayer) return;
-
-            console.log(`☁️ Loading ${currentPlayer.name}'s hand from Firebase...`);
-
-            // Get from Realtime Database instead of Firestore
-            const snapshot = await firebase.database()
-                .ref(`tables/${window.multiDevice.currentTableId}/currentGame/dealtHands/${currentPlayer.name}`)
-                .once('value');
-
-            const handData = snapshot.val();
-
-            if (!handData) {
-                console.log(`⚠️ No hand found for ${currentPlayer.name} in Firebase`);
-                return;
-            }
-
-            // Update local playerHands Map
-            this.playerHands.set(currentPlayer.name, {
-                cards: handData.cards,
-                originalCards: hand.map(card => ({...card})),
-                back: [],
-                middle: [],
-                front: []
-            });
-
-            console.log(`✅ Loaded ${currentPlayer.name}'s hand from Firebase`);
-
-        } catch (error) {
-            console.error('❌ Error loading hand from Firebase:', error);
-        }
-    }
 
 
     // Replace enablePlayerButtons() with these:
@@ -1070,7 +1001,7 @@ class PyramidPoker {
 
     canMakeStraightFlush(values, wildCount, targetLength) {
         if (values.length === 0) return wildCount >= targetLength;
-        
+
         const minValue = Math.min(...values);
         const maxValue = Math.max(...values);
 
@@ -1814,90 +1745,9 @@ class PyramidPoker {
         closeScoringPopup();
     }
 
-    // Enhance existing game completion
-    // In js/core/game.js (modify existing endRound method)
-    async endRound() {
-        // ... existing game logic ...
 
-        // NEW: Save game results to Firebase
-        if (this.authManager.currentUser) {
-            await this.saveGameToFirebase(finalScores);
-            await this.updateUserStats(this.authManager.currentUser.uid, myScore);
-        } else {
-            // Fallback: save to localStorage
-            this.saveGameToLocalStorage(finalScores);
-        }
-    }
 
-    saveGameToLocalStorage(finalScores) {
-        try {
-            // Get existing stats or create new
-            const existingStats = JSON.parse(localStorage.getItem('userStats') || '{}');
 
-            // Convert finalScores to Firebase-compatible format
-            const myScore = finalScores.find(player => player.name === 'You')?.score || 0;
-            const won = myScore > 0; // Simple win logic
-
-            // Update stats using same structure as Firebase
-            const updatedStats = {
-                email: existingStats.email || 'local@player.com',
-                gamesPlayed: (existingStats.gamesPlayed || 0) + 1,
-                totalScore: (existingStats.totalScore || 0) + myScore,
-                highScore: Math.max(existingStats.highScore || 0, myScore),
-                wins: (existingStats.wins || 0) + (won ? 1 : 0),
-                winRate: 0, // Will calculate below
-                currentStreak: won ? (existingStats.currentStreak || 0) + 1 : 0,
-                bestStreak: 0, // Will calculate below
-                lastGameAt: new Date().toISOString(),
-                createdAt: existingStats.createdAt || new Date().toISOString(),
-                // Add other Firebase fields as needed
-                averageScore: 0, // Will calculate below
-                lowScore: existingStats.lowScore === undefined ? myScore : Math.min(existingStats.lowScore, myScore)
-            };
-
-            // Calculate derived fields
-            updatedStats.averageScore = Math.round(updatedStats.totalScore / updatedStats.gamesPlayed);
-            updatedStats.winRate = Math.round((updatedStats.wins / updatedStats.gamesPlayed) * 100);
-            updatedStats.bestStreak = Math.max(updatedStats.bestStreak || 0, updatedStats.currentStreak);
-
-            // Save to localStorage
-            localStorage.setItem('userStats', JSON.stringify(updatedStats));
-
-            console.log('💾 Game saved to localStorage:', updatedStats);
-
-        } catch (error) {
-            console.error('❌ Failed to save game to localStorage:', error);
-        }
-    }
-
-    async saveGameToFirebase(scores) {
-        const gameDoc = doc(collection(db, 'gameHistory'));
-        await setDoc(gameDoc, {
-            userId: this.authManager.currentUser.uid,
-            gameConnectMode: this.config.gameConnectMode,
-            gameMode: this.config.gameDeviceMode,
-            finalScore: scores.humanPlayer,
-            wildCardCount: this.config.wildCardCount,
-            opponents: scores.aiPlayers,
-            playedAt: new Date()
-        });
-    }
-
-    async updateUserStats(userId, gameScore) {
-        const userStatsRef = doc(db, 'userStats', userId);
-        const userStats = await getDoc(userStatsRef);
-
-        if (userStats.exists()) {
-            const current = userStats.data();
-            await updateDoc(userStatsRef, {
-                gamesPlayed: current.gamesPlayed + 1,
-                totalScore: current.totalScore + gameScore,
-                averageScore: (current.totalScore + gameScore) / (current.gamesPlayed + 1),
-                highScore: Math.max(current.highScore, gameScore),
-                updatedAt: new Date()
-            });
-        }
-    }
 
     initializeTournament() {
         console.log('🏆 from window.game.initializeTournament: Starting new tournament...');
