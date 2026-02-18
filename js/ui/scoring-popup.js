@@ -470,7 +470,15 @@ async function closeScoringPopup() {
     }
 
     // UPDATE CHIP CHANGES IN ROUND HISTORY - ADD THIS HERE
+
+    console.log('🔍 lastRoundChipChanges:', window.game.lastRoundChipChanges);
+
     if (window.game.lastRoundChipChanges) {
+
+        console.log('🔍 roundHistory length:', window.game.roundHistory.length);
+        console.log('🔍 looking for round:', window.game.currentRound);
+        console.log('🔍 rounds stored:', window.game.roundHistory.map(r => r.roundNumber));
+
         const currentRoundData = window.game.roundHistory.find(r => r.roundNumber === window.game.currentRound);
         if (currentRoundData) {
             currentRoundData.chipChanges = new Map(window.game.lastRoundChipChanges);
@@ -1097,6 +1105,19 @@ async function forceAdvanceRound() {
     clearAllHandAreas();
 
     console.log('🎮 Calling game.startNewRound()...');
+
+    // UPDATE CHIP CHANGES IN ROUND HISTORY
+    const completedRound = window.game.currentRound;
+    console.log('🔍 lastRoundChipChanges:', window.game.lastRoundChipChanges);
+    if (window.game.lastRoundChipChanges) {
+        const currentRoundData = window.game.roundHistory.find(r => r.roundNumber === completedRound);
+        if (currentRoundData) {
+            currentRoundData.chipChanges = new Map(window.game.lastRoundChipChanges);
+        } else {
+            console.log('🔍 Could not find roundData for round:', completedRound);
+        }
+    }
+
     game.startNewRound();
 
     console.log('═══════════════════════════════════════');

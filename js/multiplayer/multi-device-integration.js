@@ -312,6 +312,8 @@ class MultiDeviceIntegration {
     // enhanceContinueButton changes tableState to round_complete, then only owner can click continue to progress
     enhanceContinueButton() {
 
+        console.log('🔍 enhanceContinueButton - isOwner:', window.isOwner);
+
         const continueButton = document.querySelector('#scoringPopup .btn.btn-primary');
         const closeButton = document.querySelector('#scoringPopup .close-popup');
         const ownerOverrideBtn = document.getElementById('ownerOverrideBtn');
@@ -332,6 +334,15 @@ class MultiDeviceIntegration {
         if (window.isOwner) {
             // Owner: Add Firebase update before existing logic
             buttons.forEach(button => {
+
+                // Reset any previous non-owner styling
+                button.disabled = false;
+                button.textContent = 'Continue';
+                button.style.opacity = '';
+                button.style.cursor = '';
+                button.style.pointerEvents = '';
+                button.title = '';
+
                 const originalOnClick = button.onclick;
 
                 button.onclick = async () => {
