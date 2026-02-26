@@ -894,20 +894,42 @@ async function clearTable(tableId) {
     console.log(`🗑️ Clearing table ${tableId}...`);
 
     try {
-        // Remove from Realtime Database
+        // Step 1: Remove from Realtime Database
         await firebase.database().ref(`tables/${tableId}`).remove();
         console.log(`✅ Realtime DB table ${tableId} cleared`);
 
-        // Remove from Firestore (if exists)
+        // Step 2: Remove from Firestore (if exists)
         try {
             await firebase.firestore().collection('tables').doc(String(tableId)).delete();
             console.log(`✅ Firestore table ${tableId} cleared`);
         } catch (firestoreError) {
-            // Table might not exist in Firestore, that's okay
             console.log(`ℹ️ Firestore table ${tableId} not found (okay)`);
         }
 
-//        alert(`✅ Table ${tableId} cleared successfully`);
+        // Step 3: Write back default settings so table is ready for next join
+        const defaultTable = window.PyramidPokerDefaults.defaultTables.find(t => t.id === tableId);
+        if (defaultTable) {
+            const s = defaultTable.settings;
+            await firebase.database().ref(`tables/${tableId}/settings`).set({
+                rounds: s.rounds,
+                wildCardCount: s.wildCardCount,
+                stakesAnteAmount: s.stakesAnteAmount,
+                stakesSurrenderAmount: s.stakesSurrenderAmount,
+                stakesMultiplierAmount: s.stakesMultiplierAmount,
+                computerPlayers: s.computerPlayers,
+                winProbabilityMethod: s.winProbabilityMethod,
+                automaticsAllowed: s.automaticsAllowed,
+                findAutoEnabled: s.findAutoEnabled,
+                gameMode: s.gameMode,
+                gameConnectMode: s.gameConnectMode,
+                gameDeviceMode: s.gameDeviceMode,
+                gameVariant: s.gameVariant,
+                humanPlayers: 0
+            });
+            console.log(`✅ Table ${tableId} reset to default settings`);
+        } else {
+            console.warn(`⚠️ No default config found for table ${tableId} - left empty`);
+        }
 
     } catch (error) {
         console.error(`❌ Error clearing table ${tableId}:`, error);
