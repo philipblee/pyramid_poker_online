@@ -32,12 +32,45 @@ class PyramidPoker {
     get scores() { return this.playerManager.getAllScores(); }
     get deck() { return this.deckManager.deck; }
 
+    // Initialze Event Listeners
     initializeEventListeners() {
 
         document.getElementById('autoArrange').addEventListener('click', () => this.handleAutoArrangeToggle());
         document.getElementById('sortByRank').addEventListener('click', () => resetAndSortByRank(this));
         document.getElementById('sortBySuit').addEventListener('click', () => resetAndSortBySuit(this));
         document.getElementById('submitHand').addEventListener('click', () => this.submitCurrentHand());
+
+        // Best algo selector
+        const BEST_ALGO_OPTIONS = ['netEV', 'tiered2', 'tiered', 'points'];  // add new algos here
+
+        const bestAlgoSelect = document.getElementById('bestAlgoSelect');
+        if (bestAlgoSelect) {
+            // Populate options
+            BEST_ALGO_OPTIONS.forEach(algo => {
+                const option = document.createElement('option');
+                option.value = algo;
+                option.textContent = algo;
+                bestAlgoSelect.appendChild(option);
+            });
+
+            // Restore persisted selection
+            const savedAlgo = localStorage.getItem('bestAlgo');
+            if (savedAlgo) {
+                bestAlgoSelect.value = savedAlgo;
+                bestAlgoSelect.style.background = '#27ae60';  // green — user has previously chosen
+                gameConfig.config.winProbabilityMethod = savedAlgo;
+            } else {
+                bestAlgoSelect.value = gameConfig.config.winProbabilityMethod;
+                // stays blue — no user choice yet
+            }
+
+            // On change
+            bestAlgoSelect.addEventListener('change', () => {
+                gameConfig.config.winProbabilityMethod = bestAlgoSelect.value;
+                localStorage.setItem('bestAlgo', bestAlgoSelect.value);
+                bestAlgoSelect.style.background = '#27ae60';  // green once user picks
+            });
+        }
 
         // Find Automatics button (may not exist on all pages)
         const detectAutomaticsBtn = document.getElementById('detectAutomatics');
