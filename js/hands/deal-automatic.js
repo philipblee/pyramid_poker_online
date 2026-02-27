@@ -1,6 +1,55 @@
 // js/hands/deal-automatic.js
 // Debug/test utility for dealing preset automatic hands
 
+function dealTwoWilds() {
+    document.getElementById('playerHand').innerHTML = '';
+    document.getElementById('backHand').innerHTML = '';
+    document.getElementById('middleHand').innerHTML = '';
+    document.getElementById('frontHand').innerHTML = '';
+
+    const hand = [
+        {id: 'A♠_1',   rank: 'A',  suit: '♠', value: 14, isWild: false},
+        {id: 'A♥_2',   rank: 'A',  suit: '♥', value: 14, isWild: false},
+        {id: 'K♠_3',   rank: 'K',  suit: '♠', value: 13, isWild: false},
+        {id: 'K♥_4',   rank: 'K',  suit: '♥', value: 13, isWild: false},
+        {id: 'Q♠_5',   rank: 'Q',  suit: '♠', value: 12, isWild: false},
+        {id: 'Q♥_6',   rank: 'Q',  suit: '♥', value: 12, isWild: false},
+        {id: 'J♠_7',   rank: 'J',  suit: '♠', value: 11, isWild: false},
+        {id: 'J♥_8',   rank: 'J',  suit: '♥', value: 11, isWild: false},
+        {id: '10♠_9',  rank: '10', suit: '♠', value: 10, isWild: false},
+        {id: '9♠_10',  rank: '9',  suit: '♠', value: 9,  isWild: false},
+        {id: '8♥_11',  rank: '8',  suit: '♥', value: 8,  isWild: false},
+        {id: '7♦_12',  rank: '7',  suit: '♦', value: 7,  isWild: false},
+        {id: '5♣_13',  rank: '5',  suit: '♣', value: 5,  isWild: false},
+        {id: '3♦_14',  rank: '3',  suit: '♦', value: 3,  isWild: false},
+        {id: '2♣_15',  rank: '2',  suit: '♣', value: 2,  isWild: false},
+        {id: 'WILD_16', rank: '', suit: '', value: 0, isWild: true},
+        {id: 'WILD_17', rank: '', suit: '', value: 0, isWild: true}
+    ];
+
+    const stagingArea = document.getElementById('playerHand');
+    hand.forEach(card => {
+        const cardEl = createCardElement(card);
+        stagingArea.appendChild(cardEl);
+    });
+
+    if (window.game) {
+        const currentPlayer = window.game.playerManager.getCurrentPlayer();
+        const playerData = window.game.playerHands.get(currentPlayer.name);
+        if (playerData) {
+            playerData.cards = hand.map(card => ({...card}));
+            playerData.originalCards = hand.map(card => ({...card}));
+            playerData.back = [];
+            playerData.middle = [];
+            playerData.front = [];
+        }
+    }
+
+    console.log('✅ Dealt two-wild test hand');
+}
+
+window.dealTwoWilds = dealTwoWilds;
+
 function dealAutomatic(type) {
     // Clear everything first
     document.getElementById('playerHand').innerHTML = '';

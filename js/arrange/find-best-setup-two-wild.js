@@ -181,12 +181,17 @@ function FindBestSetupTwoWild(cardObjects) {
 
         // Return same format as one-wild version
         // console.log(`🔍 DEBUG: Returning best result from smart success block`);
+
         return {
             arrangement: best.arrangement,
             score: best.score,
             wildCards: best.wildCards,
             success: true,
-            statistics: best.statistics
+            statistics: best.statistics,
+            topArrangements: successful.slice(0, 5).map(r => ({
+                arrangement: r.arrangement,
+                score: r.score
+            }))
         };
 
     } else {
