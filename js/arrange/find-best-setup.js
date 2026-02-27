@@ -89,7 +89,8 @@ class FindBestSetup {
      * @returns {Object} Arrangement result
      */
     noWild(allCards) {
-        const finder = new FindBestSetupNoWild();
+        const flag = window.gameConfig?.config?.winProbabilityMethod || 'tiered';
+        const finder = createFindBestSetupNoWild(flag);
         return finder.findBestSetupNoWild(allCards);
     }
 

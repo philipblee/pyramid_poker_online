@@ -551,3 +551,39 @@ class FindBestSetupNoWildPoints extends FindBestSetupNoWildBase {
         return ScoringUtilities.getExpectedPoints(hand, hand.cards, position, method);
     }
 }
+
+
+class FindBestSetupNoWildBestBack extends FindBestSetupNoWildBase {
+    getHandScore(hand, position) {
+        const score = ScoringUtilities.getExpectedPoints(hand, hand.cards, position, 'points');
+        if (position === 'back') {
+            const handTypeBonus = (hand.hand_rank[0] || 0) * 0.1;
+            return score * 2 + handTypeBonus;
+        }
+        return score;
+    }
+}
+
+
+class FindBestSetupNoWildBestMiddle extends FindBestSetupNoWildBase {
+    getHandScore(hand, position) {
+        const score = ScoringUtilities.getExpectedPoints(hand, hand.cards, position, 'points');
+        if (position === 'middle') {
+            const handTypeBonus = (hand.hand_rank[0] || 0) * 0.1;
+            return score * 2 + handTypeBonus;
+        }
+        return score;
+    }
+}
+
+
+class FindBestSetupNoWildBestFront extends FindBestSetupNoWildBase {
+    getHandScore(hand, position) {
+        const score = ScoringUtilities.getExpectedPoints(hand, hand.cards, position, 'points');
+        if (position === 'front') {
+            const handTypeBonus = (hand.hand_rank[0] || 0) * 0.1;
+            return score * 2 + handTypeBonus;
+        }
+        return score;
+    }
+}

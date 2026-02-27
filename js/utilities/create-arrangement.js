@@ -41,6 +41,12 @@ function createFindBestSetupNoWild(flag) {
             return new FindBestSetupNoWildTiered();
         case 'tiered2':
             return new FindBestSetupNoWildTiered2();
+        case 'best-back':
+            return new FindBestSetupNoWildBestBack();
+        case 'best-middle':
+            return new FindBestSetupNoWildBestMiddle();
+        case 'best-front':
+            return new FindBestSetupNoWildBestFront();
         case 'empirical':
         default:
             return new FindBestSetupNoWildEmpirical();  // ← Fix this line
