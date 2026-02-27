@@ -39,6 +39,8 @@ class PyramidPoker {
         document.getElementById('sortByRank').addEventListener('click', () => resetAndSortByRank(this));
         document.getElementById('sortBySuit').addEventListener('click', () => resetAndSortBySuit(this));
         document.getElementById('submitHand').addEventListener('click', () => this.submitCurrentHand());
+        document.getElementById('prevArrangement').addEventListener('click', () => this.browseArrangement(-1));
+        document.getElementById('nextArrangement').addEventListener('click', () => this.browseArrangement(1));
 
         // Best algo selector
         const BEST_ALGO_OPTIONS = ['netEV', 'tiered2', 'tiered', 'points'];  // add new algos here
@@ -94,6 +96,29 @@ class PyramidPoker {
         setupDragAndDrop(this);
     }
 
+    browseArrangement(direction) {
+        if (!window.topArrangements?.length) return;
+
+        window.topArrangementIndex = Math.max(0,
+            Math.min(window.topArrangements.length - 1,
+            window.topArrangementIndex + direction));
+
+        const item = window.topArrangements[window.topArrangementIndex];
+        const playerData = this.playerHands.get(this.playerManager.getCurrentPlayer().name);
+        if (!playerData) return;
+
+        playerData.back = item.arrangement.back.cards;
+        playerData.middle = item.arrangement.middle.cards;
+        playerData.front = item.arrangement.front.cards;
+        playerData.cards = item.arrangement.stagingCards || [];
+
+        this.loadCurrentPlayerHand();
+
+        const total = window.topArrangements.length;
+        const current = window.topArrangementIndex + 1;
+        document.getElementById('arrangementCounter').textContent = `${current}/${total}`;
+    }
+
     addPlayer() {
         const playerName = this.playerManager.addPlayer();
         updateDisplay(this);
@@ -117,8 +142,21 @@ class PyramidPoker {
 
                     // Your existing auto-arrange logic
                     this.autoArrangeManager.autoArrangeHand();
+                    console.log('🔍 After autoArrangeHand - topArrangements:', window.topArrangements);
+                    const total_arr = window.topArrangements?.length || 0;
+                    console.log('🔍 total:', total_arr);
+
                     this.autoArrangeUsed = true;
                     document.getElementById('autoArrange').textContent = 'Undo BEST';
+
+                    // Show arrangement browser
+                    const total = window.topArrangements?.length || 0;
+                    if (total > 1) {
+                        document.getElementById('prevArrangement').style.display = 'inline-block';
+                        document.getElementById('nextArrangement').style.display = 'inline-block';
+                        document.getElementById('arrangementCounter').style.display = 'inline-block';
+                        document.getElementById('arrangementCounter').textContent = `1/${total}`;
+                    }
 
                     // Hide spinner when done
                     hideLoadingSpinner();
@@ -146,14 +184,13 @@ class PyramidPoker {
         playerData.middle = [];
         playerData.front = [];
 
+        document.getElementById('prevArrangement').style.display = 'none';
+        document.getElementById('nextArrangement').style.display = 'none';
+        document.getElementById('arrangementCounter').style.display = 'none';
+
         this.loadCurrentPlayerHand();
         console.log('🔄 Restored to original dealt state');
     }
-
-
-
-
-
 
     // if player surrenders, skip his turn
     skipSurrenderedPlayer() {

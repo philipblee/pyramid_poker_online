@@ -12,8 +12,8 @@ class FindBestSetupNoWildBase {
         // ADD THESE: The higher the maxTopN and pruningBuffer, the longer it takes
         // Use these parameters to analyze multiple arrangements per hand
         this.topArrangements = [];  // Array to track top N arrangements
-        this.maxTopN = 1;          // Keep top n arrangememts
-        this.pruningBuffer = 0;    // Allow arrangements within n points of best
+        this.maxTopN = 5;          // Keep top n arrangememts
+        this.pruningBuffer = 2;    // Allow arrangements within n points of best
 
     }
 
@@ -65,9 +65,10 @@ class FindBestSetupNoWildBase {
 //            console.log ("findBestNoWild", backHandScore, middleHandScore, frontHandScore, totalHandScore)
         }
 
-        // Before your return statement, add:
+        // Before your return statement (it's already sorting, just add the filter):
         if (this.topArrangements && this.topArrangements.length > 0) {
-            this.topArrangements.sort((a, b) => b.score - a.score); // Sort by score descending (highest EV first)
+            this.topArrangements = this.getStrategicallyDifferentArrangements(this.topArrangements);
+            this.topArrangements.sort((a, b) => b.score - a.score);
         }
 
         return {

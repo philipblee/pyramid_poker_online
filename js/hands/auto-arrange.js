@@ -20,16 +20,23 @@ class AutoArrange {
         console.log('🧠 Auto-Arrange using find-best-setup...');
         const result = findBestSetup(allCards);
 
+        console.log('🎯 topArrangements:', result.topArrangements)
+
         delay()
 
         if (result?.success && result.arrangement) {
             console.log(`✨ Setup found! Score: ${result.score}`);
             console.log(`✨ Setup found! aiMethod: ${gameConfig.config.winProbabilityMethod}`);
+
+            // Store top arrangements for scroller
+            window.topArrangements = result.topArrangements || [];
+            window.topArrangementIndex = 0;
+
             const arrangement = {
                 back: result.arrangement.back.cards,
                 middle: result.arrangement.middle.cards,
                 front: result.arrangement.front.cards,
-                staging: result.arrangement.stagingCards  // ✅ Use built-in stagingCards
+                staging: result.arrangement.stagingCards
             };
             return this.applyArrangement(playerData, arrangement);
         }
