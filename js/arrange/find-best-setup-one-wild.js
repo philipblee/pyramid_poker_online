@@ -174,7 +174,11 @@ function FindBestSetupOneWild(cardObjects) {
             score: best.score,
             wildCard: best.wildCard,
             success: true,
-            statistics: best.statistics
+            statistics: best.statistics,
+            topArrangements: successful.slice(0, 5).map(r => ({
+                arrangement: r.arrangement,
+                score: r.score
+            }))
         };
 
     } else {
