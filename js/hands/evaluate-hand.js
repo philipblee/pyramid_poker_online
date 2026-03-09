@@ -174,7 +174,7 @@ function getSixCardStraightFlushHand(analysis) {
     const straightInfo = analysis.getStraightInfo();
     const name = straightInfo.high === 14 && straightInfo.secondHigh === 13 ? 'Six-Card Royal Flush' : '6-Card Straight Flush';
     const sortedCards = getStandardSortedCards(analysis.cards);  // ← ADD
-    const allSuitValues = getSuitValues(sortedCards);  // ← CHANGE
+    const allSuitValues = getSuitValues([sortedCards[0]]);
     const handRankArray = [11, straightInfo.high, straightInfo.secondHigh, ...allSuitValues];
     return {
         name: name,
@@ -188,7 +188,7 @@ function getSevenCardStraightFlushHand(analysis) {
     const straightInfo = analysis.getStraightInfo();
     const name = straightInfo.high === 14 && straightInfo.secondHigh === 13 ? 'Seven-Card Royal Flush' : '7-Card Straight Flush';
     const sortedCards = getStandardSortedCards(analysis.cards);  // ← ADD
-    const allSuitValues = getSuitValues(sortedCards);  // ← CHANGE
+    const allSuitValues = getSuitValues([sortedCards[0]]);
     const handRankArray = [13, straightInfo.high, straightInfo.secondHigh, ...allSuitValues];
     return {
         name: name,
@@ -202,7 +202,7 @@ function getEightCardStraightFlushHand(analysis) {
     const straightInfo = analysis.getStraightInfo();
     const name = straightInfo.high === 14 && straightInfo.secondHigh === 13 ? 'Eight-Card Royal Flush' : '8-Card Straight Flush';
     const sortedCards = getStandardSortedCards(analysis.cards);  // ← ADD
-    const allSuitValues = getSuitValues(sortedCards);  // ← CHANGE
+    const allSuitValues = getSuitValues([sortedCards[0]]);
     const handRankArray = [15, straightInfo.high, straightInfo.secondHigh, ...allSuitValues];
     return {
         name: name,
