@@ -14,8 +14,36 @@
             return;
         }
 
+        // Pool all cards back to staging regardless of current arrangement
+        const currentPlayer = window.game.playerManager.getCurrentPlayer();
+        const playerData = window.game.playerHands.get(currentPlayer.name);
+        if (playerData) {
+        playerData.cards = [
+            ...playerData.cards,
+            ...playerData.back,
+            ...playerData.middle,
+            ...playerData.front
+        ].map(c => (c.isWild || c.wasWild) ?
+            { ...c, rank: '', suit: '', value: 0, isWild: true, wasWild: false } : c);
+            playerData.back = [];
+            playerData.middle = [];
+            playerData.front = [];
+            window.game.loadCurrentPlayerHand();
+
+            const wildCheck = playerData.cards.find(c => c.isWild);
+            console.log('🃏 Wild after reset:', JSON.stringify(wildCheck));
+        }
+
+        window.game.autoArrangeUsed = false;
+        document.getElementById('autoArrange').textContent = 'BEST';
+        document.getElementById('prevArrangement').style.display = 'none';
+        document.getElementById('nextArrangement').style.display = 'none';
+        document.getElementById('arrangementCounter').style.display = 'none';
+        window.topArrangements = [];
+        window.topArrangementIndex = 0;
 
         const stagingArea = document.getElementById('playerHand');
+
         if (!stagingArea) {
             console.error('❌ playerHand element not found');
             showAutomaticMessage('❌ Error: Staging area not found');
@@ -33,6 +61,7 @@
             card.element = cardEl;
             return card;
         });
+        console.log('🃏 Wild in allCards:', JSON.stringify(allCards.find(c => c.isWild)));
 
         console.log('🔍 Searching for automatics with', allCards.length, 'cards...');
         const result = findAndArrangeBestAutomatic(allCards);
