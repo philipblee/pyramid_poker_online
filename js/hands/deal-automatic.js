@@ -333,7 +333,29 @@ function dealAutomatic(type) {
             {id: 'WILD_15', rank: '', suit: '', value: 0,   isWild: true},
             {id: '3♣_16', rank: '3', suit: '♣', value: 3,  isWild: false},
             {id: '4♣_17', rank: '4', suit: '♣', value: 4,  isWild: false}
-        ]
+        ],
+
+        // 6-card wheel SF: A♠-2♠-3♠-4♠-5♠-6♠ + tempting full house material
+        // Tests that BEST picks 6-card SF over full house
+        'six-card-wheel': [
+            {id: 'A♠_1',  rank: 'A',  suit: '♠', value: 14, isWild: false},
+            {id: '2♠_2',  rank: '2',  suit: '♠', value: 2,  isWild: false},
+            {id: '3♠_3',  rank: '3',  suit: '♠', value: 3,  isWild: false},
+            {id: '4♠_4',  rank: '4',  suit: '♠', value: 4,  isWild: false},
+            {id: '5♠_5',  rank: '5',  suit: '♠', value: 5,  isWild: false},
+            {id: '6♠_6',  rank: '6',  suit: '♠', value: 6,  isWild: false},
+            {id: 'K♥_7',  rank: 'K',  suit: '♥', value: 13, isWild: false},
+            {id: 'K♦_8',  rank: 'K',  suit: '♦', value: 13, isWild: false},
+            {id: 'K♣_9',  rank: 'K',  suit: '♣', value: 13, isWild: false},
+            {id: 'Q♥_10', rank: 'Q',  suit: '♥', value: 12, isWild: false},
+            {id: 'Q♦_11', rank: 'Q',  suit: '♦', value: 12, isWild: false},
+            {id: 'J♥_12', rank: 'J',  suit: '♥', value: 11, isWild: false},
+            {id: 'J♦_13', rank: 'J',  suit: '♦', value: 11, isWild: false},
+            {id: 'J♣_14', rank: 'J',  suit: '♣', value: 11, isWild: false},
+            {id: '10♥_15',rank: '10', suit: '♥', value: 10, isWild: false},
+            {id: '10♦_16',rank: '10', suit: '♦', value: 10, isWild: false},
+            {id: '9♥_17', rank: '9',  suit: '♥', value: 9,  isWild: false}
+        ],
 
     };
 
@@ -368,3 +390,4 @@ function dealAutomatic(type) {
 }
 
 window.dealAutomatic = dealAutomatic;
+window.dealSixCardWheel = () => dealAutomatic('six-card-wheel');

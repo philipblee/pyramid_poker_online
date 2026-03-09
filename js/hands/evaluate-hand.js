@@ -37,7 +37,14 @@ function getHandType(analysis) {
     const numberOfCards = cards.length
     const counts = Object.keys(valueCounts).map(Number).sort((a, b) => b - a);
     const isFlush = analysis.isAllSameSuit(suits);
-    const isStraight = analysis.isSequentialValues(values) || analysis.isWheelStraight();
+
+    // fix bug where A-6, A-7 and A-8 (extended wheels) were not found
+    const isExtendedWheel = numberOfCards >= 6 && numberOfCards <= 8 &&
+    values.includes(14) && values.includes(2) &&
+    [...values].filter(v => v !== 14).sort((a, b) => a - b)
+              .every((v, i) => v === i + 2);
+
+    const isStraight = analysis.isSequentialValues(values) || analysis.isWheelStraight() || isExtendedWheel;
 
     if (isFlush && isStraight && numberOfCards === 5) {
 //        console.log('🔍 Detected 5-card straight flush with cards:',

@@ -286,11 +286,11 @@ class Analysis {
         const values = this.getSortedValues();
         const highCard = Math.max(...values);
 
-        // Check for wheel straight (A-2-3-4-5)
+        // Check for wheel and extended wheel straights
         if (values.includes(14) && values.includes(2) && values.includes(3) && values.includes(4) && values.includes(5)) {
-          return { high: 14, secondHigh: 5 };  // Clear naming
+            const nonAceMax = Math.max(...values.filter(v => v !== 14));
+            return { high: 14, secondHigh: nonAceMax };
         }
-
         const secondHighCard = values[1];
         return { high: highCard, secondHigh: secondHighCard };  // Much clearer!
     }
