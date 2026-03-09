@@ -335,6 +335,29 @@ function dealAutomatic(type) {
             {id: '4♣_17', rank: '4', suit: '♣', value: 4,  isWild: false}
         ],
 
+            // THREE-FLUSH with ONE unused wild
+            // All 3 suits have 5 natural cards - wild goes unused, triggers scroller
+            // Each suit has SF gap at 10 - wild upgrades chosen hand to royal SF
+            'three-flush-one-wild': [
+                {id: 'A♠_1',   rank: 'A',  suit: '♠', value: 14, isWild: false},
+                {id: 'K♠_2',   rank: 'K',  suit: '♠', value: 13, isWild: false},
+                {id: 'Q♠_3',   rank: 'Q',  suit: '♠', value: 12, isWild: false},
+                {id: 'J♠_4',   rank: 'J',  suit: '♠', value: 11, isWild: false},
+                {id: '9♠_5',   rank: '9',  suit: '♠', value: 9,  isWild: false},
+                {id: 'A♥_6',   rank: 'A',  suit: '♥', value: 14, isWild: false},
+                {id: 'K♥_7',   rank: 'K',  suit: '♥', value: 13, isWild: false},
+                {id: 'Q♥_8',   rank: 'Q',  suit: '♥', value: 12, isWild: false},
+                {id: 'J♥_9',   rank: 'J',  suit: '♥', value: 11, isWild: false},
+                {id: '9♥_10',  rank: '9',  suit: '♥', value: 9,  isWild: false},
+                {id: 'A♦_11',  rank: 'A',  suit: '♦', value: 14, isWild: false},
+                {id: 'K♦_12',  rank: 'K',  suit: '♦', value: 13, isWild: false},
+                {id: 'Q♦_13',  rank: 'Q',  suit: '♦', value: 12, isWild: false},
+                {id: 'J♦_14',  rank: 'J',  suit: '♦', value: 11, isWild: false},
+                {id: '9♦_15',  rank: '9',  suit: '♦', value: 9,  isWild: false},
+                {id: 'WILD_16', rank: '',  suit: '',   value: 0,  isWild: true},
+                {id: '2♣_17',  rank: '2',  suit: '♣', value: 2,  isWild: false}
+            ],
+
         // 6-card wheel SF: A♠-2♠-3♠-4♠-5♠-6♠ + tempting full house material
         // Tests that BEST picks 6-card SF over full house
         'six-card-wheel': [
@@ -390,4 +413,5 @@ function dealAutomatic(type) {
 }
 
 window.dealAutomatic = dealAutomatic;
+window.dealThreeFlushOneWild = () => dealAutomatic('three-flush-one-wild');
 window.dealSixCardWheel = () => dealAutomatic('six-card-wheel');

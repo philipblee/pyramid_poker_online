@@ -41,54 +41,72 @@
             const automaticName = result.type.replace(/-/g, ' ').toUpperCase();
             showAutomaticMessage(`✨ Automatic Found: ${automaticName}`);
 
-            // Update DOM (visual)
-            result.arrangement.back.forEach(card => {
-                document.getElementById('backHand').appendChild(card.element);
-            });
-            result.arrangement.middle.forEach(card => {
-                document.getElementById('middleHand').appendChild(card.element);
-            });
-            result.arrangement.front.forEach(card => {
-                document.getElementById('frontHand').appendChild(card.element);
-            });
+            if (result.variants) {
+                // Three-flush with unused wild — populate scroller
+                const currentPlayer = window.game.playerManager.getCurrentPlayer();
+                const playerData = window.game.playerHands.get(currentPlayer.name);
 
-            // Update this.playerHands (data store)
-            const currentPlayer = window.game.playerManager.getCurrentPlayer();
-            const playerData = window.game.playerHands.get(currentPlayer.name);
+                const stripElement = cards => cards.map(({element, ...cardData}) => cardData);
 
-            if (playerData) {
-                // Get IDs of moved cards
-                const movedCards = [...result.arrangement.back, ...result.arrangement.middle, ...result.arrangement.front];
-                const movedCardIds = new Set(movedCards.map(c => c.id));
+                window.topArrangements = result.variants.map(v => ({
+                    arrangement: {
+                        back:        { cards: stripElement(v.arrangement.back.cards) },
+                        middle:      { cards: stripElement(v.arrangement.middle.cards) },
+                        front:       { cards: stripElement(v.arrangement.front.cards) },
+                        stagingCards: stripElement(v.arrangement.stagingCards)
+                    },
+                    score: v.score
+                }));
+                window.topArrangementIndex = 0;
 
-                // Remove moved cards from staging
-                playerData.cards = playerData.cards.filter(c => !movedCardIds.has(c.id));
+                const first = window.topArrangements[0].arrangement;
+                if (playerData) {
+                    playerData.back   = first.back.cards;
+                    playerData.middle = first.middle.cards;
+                    playerData.front  = first.front.cards;
+                    playerData.cards  = first.stagingCards;
+                }
 
-                // Store card data WITHOUT .element property
-                playerData.back = result.arrangement.back.map(c => {
-                    const {element, ...cardData} = c;
-                    return cardData;
+                window.game.loadCurrentPlayerHand();
+
+                document.getElementById('prevArrangement').style.display = 'inline-block';
+                document.getElementById('nextArrangement').style.display = 'inline-block';
+                document.getElementById('arrangementCounter').style.display = 'inline-block';
+                document.getElementById('arrangementCounter').textContent = `1/${result.variants.length}`;
+
+                window.currentAutomatic = result.type;
+                window.game.validateHands();
+                console.log(`✅ Arranged ${result.type} with ${result.variants.length} wild variants`);
+
+            } else {
+                // Standard automatic — move DOM elements directly
+                result.arrangement.back.forEach(card => {
+                    document.getElementById('backHand').appendChild(card.element);
                 });
-                playerData.middle = result.arrangement.middle.map(c => {
-                    const {element, ...cardData} = c;
-                    return cardData;
+                result.arrangement.middle.forEach(card => {
+                    document.getElementById('middleHand').appendChild(card.element);
                 });
-                playerData.front = result.arrangement.front.map(c => {
-                    const {element, ...cardData} = c;
-                    return cardData;
+                result.arrangement.front.forEach(card => {
+                    document.getElementById('frontHand').appendChild(card.element);
                 });
+
+                const currentPlayer = window.game.playerManager.getCurrentPlayer();
+                const playerData = window.game.playerHands.get(currentPlayer.name);
+
+                if (playerData) {
+                    const movedCards = [...result.arrangement.back, ...result.arrangement.middle, ...result.arrangement.front];
+                    const movedCardIds = new Set(movedCards.map(c => c.id));
+                    playerData.cards = playerData.cards.filter(c => !movedCardIds.has(c.id));
+
+                    playerData.back   = result.arrangement.back.map(c =>   { const {element, ...d} = c; return d; });
+                    playerData.middle = result.arrangement.middle.map(c => { const {element, ...d} = c; return d; });
+                    playerData.front  = result.arrangement.front.map(c =>  { const {element, ...d} = c; return d; });
+                }
+
+                window.currentAutomatic = result.type;
+                window.game.validateHands();
+                console.log(`✅ Arranged ${result.type}`);
             }
-
-            // Store automatic type
-            window.currentAutomatic = result.type;
-
-            console.log('🔍 About to call validateHands, window.game:', window.game);
-            console.log('🔍 validateHands function exists?', typeof window.game.validateHands);
-
-            // Trigger validation to update displays and PLAY-A button
-            window.game.validateHands();
-
-            console.log(`✅ Arranged ${result.type}`);
 
         } else {
             showAutomaticMessage('❌ No automatic possible with these cards');

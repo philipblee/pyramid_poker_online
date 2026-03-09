@@ -492,7 +492,13 @@ function findAndArrangeBestAutomatic(allCards) {
             break;
     }
 
+    // Three-flush may return an array of variants for the scroller
+    if (bestAutomatic === 'three-flush' && Array.isArray(arrangement)) {
+        return { type: bestAutomatic, variants: arrangement };
+    }
+
     return { type: bestAutomatic, arrangement };
+
 }
 
 // Three-full-houses - build trips+pairs
@@ -746,7 +752,7 @@ function arrangeThreeFlush(allCards) {
 
     // Fill each hand to 5 cards with wilds
     let wildIndex = 0;
-    flushHands.forEach(hand => {
+    flushHands.slice(0, 3).forEach(hand => {
         while (hand.cards.length < 5 && wildIndex < wilds.length) {
             hand.cards.push(wilds[wildIndex++]);
         }
@@ -794,11 +800,124 @@ function arrangeThreeFlush(allCards) {
         console.log(`    Type: ${hand.handRank.handType}, Strength: [${hand.handRank.handStrength.join(', ')}]`);
     });
 
+    // If a wild went unused, generate 3 scroller variants (wild upgrades each position)
+    if (wildIndex < wilds.length) {
+        const unusedWild = wilds[wildIndex];
+        const usedIds = new Set([
+            ...evaluatedHands[0].cards.map(c => c.id),
+            ...evaluatedHands[1].cards.map(c => c.id),
+            ...evaluatedHands[2].cards.map(c => c.id)
+        ]);
+        const stagingCards = allCards.filter(c => !usedIds.has(c.id) && c.id !== unusedWild.id);
+
+        const improvableTargets = [0, 1, 2].filter(idx =>
+            evaluatedHands[idx].handRank.handType < 9  // skip hands already SF or better
+        );
+
+        if (improvableTargets.length === 0) {
+            // all three hands already SF — no wild improvement possible, return base
+            const back = evaluatedHands[0].cards;
+            const middle = evaluatedHands[1].cards;
+            const front = evaluatedHands[2].cards;
+            return { back, middle, front };
+        }
+
+        return improvableTargets.map(targetIdx =>
+            buildThreeFlushVariant(evaluatedHands, targetIdx, unusedWild, stagingCards)
+        );
+    }
+
     const back = evaluatedHands[0]?.cards || [];
     const middle = evaluatedHands[1]?.cards || [];
     const front = evaluatedHands[2]?.cards || [];
 
     return { back, middle, front };
+}
+
+// Helper: Find SF gap in a 5-card same-suit hand (4 naturals fit a SF window)
+// Returns {gapValue, deprecatedCard, sfValues} or null
+function findSFGap(naturalCards) {
+    const values = naturalCards.map(c => c.value);
+
+    const windows = [];
+    for (let high = 14; high >= 5; high--) {
+        windows.push([high, high-1, high-2, high-3, high-4]);
+    }
+    windows.push([14, 5, 4, 3, 2]); // wheel
+
+    for (const window of windows) {
+        const matching = values.filter(v => window.includes(v));
+        if (matching.length === 4) {
+            const gapValue = window.find(v => !values.includes(v));
+            const deprecatedCard = naturalCards.find(c => !window.includes(c.value));
+            return { gapValue, deprecatedCard, sfValues: window };
+        }
+    }
+    return null;
+}
+
+// Helper: Determine best wild placement in a flush hand
+// Returns {upgradedCards, deprecatedCard}
+function bestWildUpgradeForFlush(handCards, wildCard, suit) {
+    const naturalCards = handCards.filter(c => !c.isWild).sort((a, b) => b.value - a.value);
+    const values = naturalCards.map(c => c.value);
+
+    const sfGap = findSFGap(naturalCards);
+
+    const wildClone = Object.assign({}, wildCard);
+
+    if (sfGap) {
+        assignWildCard(wildClone, numericRankToString(sfGap.gapValue), suit);
+        const upgradedCards = [...naturalCards.filter(c => c !== sfGap.deprecatedCard), wildClone];
+        return { upgradedCards, deprecatedCard: sfGap.deprecatedCard };
+    } else {
+        let targetValue = 14;
+        while (values.includes(targetValue) && targetValue >= 2) targetValue--;
+        assignWildCard(wildClone, numericRankToString(targetValue), suit);
+        const deprecatedCard = naturalCards[naturalCards.length - 1]; // lowest
+        const upgradedCards = [...naturalCards.filter(c => c !== deprecatedCard), wildClone];
+        return { upgradedCards, deprecatedCard };
+    }
+}
+
+// Helper: Build one scroller variant with wild upgrading targetIdx hand
+// Returns {arrangement: {back:{cards}, middle:{cards}, front:{cards}, stagingCards}, score}
+function buildThreeFlushVariant(evaluatedHands, targetIdx, unusedWild, stagingCards) {
+    const targetHand = evaluatedHands[targetIdx];
+    const suit = targetHand.cards.find(c => !c.isWild)?.suit || targetHand.cards[0].suit;
+
+    const { upgradedCards, deprecatedCard } = bestWildUpgradeForFlush(
+        targetHand.cards, unusedWild, suit
+    );
+
+    const variantHands = evaluatedHands.map((hand, idx) => {
+        if (idx === targetIdx) {
+            return { cards: upgradedCards, handRank: evaluateHand(upgradedCards) };
+        }
+        return { cards: [...hand.cards], handRank: hand.handRank };
+    });
+
+    variantHands.sort((a, b) => {
+        if (b.handRank.handType !== a.handRank.handType)
+            return b.handRank.handType - a.handRank.handType;
+        for (let i = 0; i < a.handRank.handStrength.length; i++) {
+            if (b.handRank.handStrength[i] !== a.handRank.handStrength[i])
+                return b.handRank.handStrength[i] - a.handRank.handStrength[i];
+        }
+        return 0;
+    });
+
+    return {
+        arrangement: {
+            back:   { cards: variantHands[0].cards },
+            middle: { cards: variantHands[1].cards },
+            front:  { cards: variantHands[2].cards },
+            stagingCards: [...stagingCards, deprecatedCard]
+        },
+        score: variantHands[0].handRank.handType +
+               variantHands[1].handRank.handType +
+               variantHands[2].handRank.handType
+    };
 }
 
 function arrangeThreeStraight(allCards) {
