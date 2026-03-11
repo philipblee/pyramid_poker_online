@@ -329,6 +329,8 @@ class WildCardModal {
     }
 
     show(cardObject) {
+        this.openedAt = Date.now();  // ← add this
+        console.log('🟢 wildCardModal.show() called');
         if (!cardObject || (!cardObject.isWild && !cardObject.wasWild)) {
             console.error('Can only assign wild cards');
             return;
@@ -386,6 +388,8 @@ class WildCardModal {
 }
 
     close() {
+        if (Date.now() - (this.openedAt || 0) < 300) return;  // ← add this
+        console.log('🔴 wildCardModal.close() called');
         this.isOpen = false;
         this.currentCard = null;
         this.selectedSuit = null;

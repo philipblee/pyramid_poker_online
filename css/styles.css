@@ -526,6 +526,12 @@ body {
     border: 1px solid #ff6b6b;
 }
 
+.card.tap-selected {
+    outline: 3px solid gold;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+    transform: scale(1.08);
+}
+
 .hand-strength-popup {
     margin-left: 15px;
     color: #ccc;

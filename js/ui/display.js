@@ -1,6 +1,9 @@
 // js/ui/display.js
 // UI display and update functions extracted from ui.js
 
+const isTouchDevice = 'ontouchstart' in window;
+let selectedCardEl = null;
+
 // Create a visual card element
 function createCardElement(card) {
     const cardEl = document.createElement('div');
@@ -58,31 +61,6 @@ function setupDragAndDrop(game) {
         }
     });
 
-    // Add click handler for wild cards
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('card')) {
-            const cardData = JSON.parse(e.target.dataset.card);
-            if (cardData.isWild) {
-                // Find the actual card object in game data (not the JSON copy)
-                const currentPlayer = game.playerManager.getCurrentPlayer();
-                const playerData = game.playerHands.get(currentPlayer.name);
-
-                // Search all hands for the card with matching id
-                const allCards = [
-                    ...playerData.cards,
-                    ...playerData.back,
-                    ...playerData.middle,
-                    ...playerData.front
-                ];
-
-                const actualCard = allCards.find(c => c.id === cardData.id);
-                if (actualCard) {
-                    window.wildCardModal.show(actualCard);
-                }
-            }
-        }
-    });
-
     document.addEventListener('dragend', (e) => {
         if (e.target.classList.contains('card')) {
             e.target.classList.remove('dragging');
@@ -91,6 +69,7 @@ function setupDragAndDrop(game) {
 
     // Click handler for wild cards
     document.addEventListener('click', (e) => {
+        if (isTouchDevice) return;
         const cardElement = e.target.closest('.card');
         if (cardElement) {
             const cardData = JSON.parse(cardElement.dataset.card);
@@ -143,6 +122,83 @@ function setupDragAndDrop(game) {
             // Pass just the card ID, not the full stale JSON
             game.moveCard(cardId, sourceId, targetHand);
         });
+    });
+    if (isTouchDevice) setupTapToSelect(game);
+}
+
+function setupTapToSelect(game) {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let longPressTimer = null;
+    let longPressTriggered = false;
+
+    document.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        longPressTriggered = false;
+
+        const cardEl = e.target.closest('.card');
+        if (!cardEl) return;
+
+        const cardData = JSON.parse(cardEl.dataset.card);
+        if (!cardData.isWild && !cardData.wasWild) return;
+
+        // Start long press timer for wild cards
+        longPressTimer = setTimeout(() => {
+            longPressTriggered = true;
+            if (selectedCardEl) selectedCardEl.classList.remove('tap-selected');
+            selectedCardEl = null;
+
+            const cardId = cardEl.dataset.cardId;
+            const currentPlayer = game.playerManager.getCurrentPlayer();
+            const playerData = game.playerHands.get(currentPlayer.name);
+            if (!playerData) return;
+
+            const allCards = [...playerData.cards, ...playerData.back,
+                              ...playerData.middle, ...playerData.front];
+            const actualCard = allCards.find(c => c.id === cardId);
+            if (actualCard && window.wildCardModal) {
+                window.wildCardModal.show(actualCard);
+            }
+        }, 600);
+    });
+
+    document.addEventListener('touchend', (e) => {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+
+        if (longPressTriggered) {
+            longPressTriggered = false;
+            return;
+        }
+
+        const dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
+        const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+        if (dx > 10 || dy > 10) return;
+
+        const touch = e.changedTouches[0];
+        const target = document.elementFromPoint(touch.clientX, touch.clientY);
+        const cardEl = e.target.closest('.card');
+        const zoneEl = target ? target.closest('.hand-area') : null;
+
+        if (zoneEl && selectedCardEl) {
+            const cardId = selectedCardEl.dataset.cardId;
+            const sourceId = selectedCardEl.parentElement.id;
+            const targetHand = zoneEl.dataset.hand;
+            selectedCardEl.classList.remove('tap-selected');
+            selectedCardEl = null;
+            game.moveCard(cardId, sourceId, targetHand);
+
+        } else if (cardEl) {
+            if (selectedCardEl === cardEl) {
+                cardEl.classList.remove('tap-selected');
+                selectedCardEl = null;
+            } else {
+                if (selectedCardEl) selectedCardEl.classList.remove('tap-selected');
+                selectedCardEl = cardEl;
+                cardEl.classList.add('tap-selected');
+            }
+        }
     });
 }
 
