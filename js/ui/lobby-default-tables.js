@@ -108,26 +108,25 @@ const defaultTables = [
         id: 5,
         name: '5. SINGLE PLAYER - NO SURRENDER',
         settings: {
-                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
+                   ...tableSettings,
                     gameMode: 'single-human',
                     gameDeviceMode: 'single-device',
                     gameVariant: 'no-surrender',
                     gameConnectMode: 'offline',
-                    computerPlayers: 1,
-                    rounds: 3,
                     computerPlayers: 5,
+                    rounds: 3,
                     wildCardCount: 2,
-                    winProbabilityMethod: 'tiered2' ,
-                    findAutoEnabled: 'yes' },
+                    winProbabilityMethod: 'tiered2',
+                    autoArrangeAllowed: 'no',
+                    findAutoEnabled: 'no' },
         icon: '🏓'
     },
 
     {
         id: 6,
-        name: '6. SINGLE PLAYER - NO SURRENDER',
+        name: '6. SINGLE PLAYER - KITTY',
         settings: {
-
-                   ...tableSettings,        // ← All defaults (including maxHumanPlayers: 6)
+                   ...tableSettings,
                     gameMode: 'single-human',
                     gameConnectMode: 'offline',
                     gameDeviceMode: 'single-device',
@@ -135,9 +134,10 @@ const defaultTables = [
                     computerPlayers: 1,
                     rounds: 3,
                     wildCardCount: 2,
-                    winProbabilityMethod: 'netEV' ,
+                    winProbabilityMethod: 'netEV',
+                    autoArrangeAllowed: 'no',
                     findAutoEnabled: 'no' },
-        icon: '☁️'
+        icon: '🏓'
     },
 
     {

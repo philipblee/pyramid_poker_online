@@ -135,10 +135,12 @@ function hideDecisionButtons() {
 
     // Show all game buttons
     if (submitHandBtn) submitHandBtn.style.display = 'inline-block';
-    if (autoArrangeBtn) autoArrangeBtn.style.display = 'inline-block';
+    if (autoArrangeBtn) autoArrangeBtn.style.display =
+        (gameConfig.config.autoArrangeAllowed === 'yes') ? 'inline-block' : 'none';
 
     // Add to the SHOW section:
-    if (detectAutoBtn) detectAutoBtn.style.display = 'inline-block';
+    if (detectAutoBtn) detectAutoBtn.style.display =
+        (gameConfig.config.findAutoEnabled === 'yes') ? 'inline-block' : 'none';
     if (playAutoBtn) playAutoBtn.style.display = 'inline-block';
 
 }
