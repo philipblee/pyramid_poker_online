@@ -140,7 +140,7 @@ const defaultTables = [
         icon: '🏓'
     },
 
-    {
+    {g
         id: 7,
         name: '7. MULTIPLAYER - NO SURRENDER',
         settings: {
