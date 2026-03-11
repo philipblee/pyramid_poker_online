@@ -204,6 +204,24 @@ const defaultTables = [
                     winProbabilityMethod: 'netEV' ,
                     findAutoEnabled: 'no' },
         icon: '☁️'
+    },
+
+    {
+        id: 11,
+        name: '11. MULTIPLAYER - NO SURRENDER - NO AIDS',
+        settings: {
+                   ...tableSettings,
+                    gameMode: 'multiple-humans',
+                    gameConnectMode: 'online',
+                    gameDeviceMode: 'multi-device',
+                    gameVariant: 'no-surrender',
+                    computerPlayers: 0,
+                    wildCardCount: 2,
+                    maxPlayers: 6,
+                    winProbabilityMethod: 'netEV',
+                    autoArrangeAllowed: 'no',
+                    findAutoEnabled: 'no' },
+        icon: '☁️'
     }
 
 ];

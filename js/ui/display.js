@@ -384,6 +384,21 @@ function updateButtonStates(game) {
             (gameConfig.config.findAutoEnabled === 'yes') ? 'inline-block' : 'none';
     }
 
+    const autoArrangeBtn = document.getElementById('autoArrange');
+    const bestAlgoSelect = document.getElementById('bestAlgoSelect');
+
+    console.log('🔍 display.js button visibility check running, autoArrangeAllowed:', gameConfig.config.autoArrangeAllowed);
+
+    if (autoArrangeBtn) {
+        autoArrangeBtn.style.display =
+            (gameConfig.config.autoArrangeAllowed === 'yes') ? 'inline-block' : 'none';
+    }
+    if (bestAlgoSelect) {
+        bestAlgoSelect.style.display =
+            (gameConfig.config.autoArrangeAllowed === 'yes') ? 'inline-block' : 'none';
+    }
+
+
     if (game.gameState === 'waiting') {
 //        addPlayerBtn.disabled = false;
 //        newGameBtn.disabled = game.playerManager.players.length < 2;
