@@ -281,13 +281,8 @@ function checkAllDecided() {
 }
 
 async function handleAllDecided() {
-    // Load decisions first
     await loadSurrenderDecisionsIntoMap();
-
-    // Then collect penalties
     await collectSurrenderPenalties();
-
-    // Then reveal cards
     revealKittyCards();
 
     // Write final decision count BEFORE transitioning
@@ -297,6 +292,19 @@ async function handleAllDecided() {
         await firebase.database()
             .ref(`tables/${window.game.currentTableId}/statusMessage`)
             .set(message);
+    }
+
+    // ✅ NEW: If everyone surrendered, skip arrangement phase and go straight to scoring
+    const allSurrendered = window.game.playerManager.players.every(p =>
+        window.game.surrenderDecisions.get(p.name) === 'surrender'
+    );
+
+    if (allSurrendered) {
+        console.log('🏳️ All players surrendered - skipping to scoring');
+        if (window.game.multiDeviceMode) {
+            setTableState(TABLE_STATES.ALL_SUBMITTED);
+        }
+        return;
     }
 
     // Then transition

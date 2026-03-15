@@ -174,10 +174,8 @@ async function handleTableStateChange(tableState) {
             break;
 
         case TABLE_STATES.SCORING:
-            if (!window.isOwner) {
-                console.log('Non-owner proceeding to scoring with Firebase data...');
-                await window.multiDeviceIntegration.proceedToScoring();
-            }
+            console.log('Proceeding to scoring...');
+            await window.multiDeviceIntegration.proceedToScoring();
             break;
 
         case TABLE_STATES.ROUND_COMPLETE:

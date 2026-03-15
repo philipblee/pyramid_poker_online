@@ -245,13 +245,12 @@ class MultiDeviceIntegration {
 
     // Proceed to scoring phase
     async proceedToScoring() {
-        // Skip if already processed this round
+
         if (this.lastScoringRound === window.game.currentRound) {
             console.log(`Already processed scoring for round ${window.game.currentRound}`);
             return;
         }
 
-//        console.log('🏆 Proceeding to scoring phase...');
         this.lastScoringRound = window.game.currentRound;
 
         await this.RetrieveAllArrangementsFromFirebase();
