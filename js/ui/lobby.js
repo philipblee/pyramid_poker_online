@@ -74,9 +74,9 @@ function populateLobby() {
         tableGrid.appendChild(tableCard);
     });
 
-    // Add "Create Table" option
-    const createCard = createCreateTableCard();
-    tableGrid.appendChild(createCard);
+//    // Add "Create Table" option
+//    const createCard = createCreateTableCard();
+//    tableGrid.appendChild(createCard);
 }
 
 // Create table card element
@@ -452,7 +452,7 @@ function onSettingsSaved(newSettings) {
     tableSettings = {
         gameMode: newSettings.gameMode || 'offline',
         aiPlayers: newSettings.aiPlayers || 4,
-        totalRounds: newSettings.totalRounds || 3,
+        totalRounds: newSettings.totalRounds || 5,
         wildCards: newSettings.wildCards || 2
     };
 
@@ -563,7 +563,7 @@ function createTableSettingsModal() {
 
             <div style="margin-bottom: 20px;">
                 <label style="color: #ffd700; display: block; margin-bottom: 8px;">Rounds (1-5):</label>
-                <input type="number" id="tableRounds" min="1" max="5" value="3"
+                <input type="number" id="tableRounds" min="1" max="10" value="5"
                        style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
             </div>
 

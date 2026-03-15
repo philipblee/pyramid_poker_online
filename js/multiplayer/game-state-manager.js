@@ -68,11 +68,16 @@ async function handleTableStateChange(tableState) {
             break;
 
         case TABLE_STATES.DEALING:
-            transitionToDealingPhase();  // Just UI prep, no state change
+            // ✅ NEW: Show decision buttons immediately for kitty variant
+            if (gameConfig.config.gameVariant === 'kitty' && typeof showDecisionButtons === 'function') {
+                showDecisionButtons();
+            }
+
+            transitionToDealingPhase();
 
             setTimeout(() => {
                 if (gameConfig.config.gameVariant === 'kitty') {
-                    setTableState(TABLE_STATES.DECIDE_PLAYING);  // ✅ Correct
+                    setTableState(TABLE_STATES.DECIDE_PLAYING);
                 } else {
                     transitionToPlayingPhase();
                 }
