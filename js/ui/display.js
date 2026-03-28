@@ -434,12 +434,14 @@ function updateButtonStates(game) {
 
     // Control FIND-AUTO visibility based on config
     if (findAutoBtn) {
-        console.log('🔍 FIND-AUTO check:', {
-            findAutoEnabled: gameConfig.config.findAutoEnabled,
-            willShow: gameConfig.config.findAutoEnabled === 'yes'
-        });
-        findAutoBtn.style.display =
-            (gameConfig.config.findAutoEnabled === 'yes') ? 'inline-block' : 'none';
+        const inDecisionPhase = gameConfig.config.gameVariant === 'kitty' &&
+            (game.tableState === 'decide_playing' ||
+             game.tableState === 'hands_dealt' ||
+             game.tableState === 'dealing');
+        if (!inDecisionPhase) {
+            findAutoBtn.style.display =
+                (gameConfig.config.findAutoEnabled === 'yes') ? 'inline-block' : 'none';
+        }
     }
 
     const bestGroup = document.getElementById('bestGroup');
