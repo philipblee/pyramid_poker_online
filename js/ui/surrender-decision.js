@@ -315,19 +315,17 @@ function hideGameAreaForSurrenderedPlayer() {
     if (reorderSuitBtn) reorderSuitBtn.style.display = 'none';
     if (autoArrangeBtn) autoArrangeBtn.style.display = 'none';
 
-    // Show prominent surrender message
-    const status = document.getElementById('status');
-    if (status) {
-        status.innerHTML = `
+    // Show surrender notice in a dedicated element, not the status div
+    const surrenderNotice = document.getElementById('surrenderNotice');
+    if (surrenderNotice) {
+        surrenderNotice.innerHTML = `
             <span style="color: #ff6b6b; font-size: 20px; font-weight: bold;">
                 🏳️ You SURRENDERED (-10 chips penalty paid)
             </span>
-            <br>
-            <span style="color: #ffd700; font-size: 16px;">
-                Waiting for other players to submit their hands...
-            </span>
         `;
+        surrenderNotice.style.display = 'block';
     }
+
 }
 
 async function collectSurrenderPenalties() {

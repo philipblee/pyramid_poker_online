@@ -109,26 +109,10 @@ async function handleTableStateChange(tableState) {
         case TABLE_STATES.PLAYING:
             console.log('🎬 Moving to playing phase - showing all cards');
 
-            // Hide decision buttons, show arrangement buttons
-            const autoBtn = document.getElementById('autoArrange');
-            const rankBtn = document.getElementById('sortByRank');
-            const suitBtn = document.getElementById('sortBySuit');
-            const submitHandBtn = document.getElementById('submitHand');
-            const detectAutoBtn = document.getElementById('detectAutomatics');
-            const playAutoBtn = document.getElementById('playAutomatic');
-
             const decisionGroup = document.getElementById('decisionGroup');
             if (decisionGroup) decisionGroup.style.display = 'none';
 
-            if (autoBtn) autoBtn.style.display = 'inline-block';
-            if (rankBtn) rankBtn.style.display = 'inline-block';
-            if (suitBtn) suitBtn.style.display = 'inline-block';
-            if (submitHandBtn) submitHandBtn.style.display = 'inline-block';
-            if (detectAutoBtn) detectAutoBtn.style.display = 'inline-block';
-            if (playAutoBtn) playAutoBtn.style.display = 'inline-block';
-
             if (window.game?.multiDeviceMode && window.game.currentTableId) {
-                // Load surrender decisions from Firebase
                 const surrenderSnapshot = await firebase.database()
                     .ref(`tables/${window.game.currentTableId}/surrenderDecisions`)
                     .once('value');
@@ -141,18 +125,32 @@ async function handleTableStateChange(tableState) {
                     console.log(`🔑 Loaded surrender decision: ${playerName} = ${decision}`);
                 });
 
-                // Check if LOCAL player surrendered
+                const debugLocalDecision = window.game.surrenderDecisions.get(window.uniquePlayerName);
+                console.log('🔍 PLAYING state - local decision:', debugLocalDecision, 'map size:', window.game.surrenderDecisions.size);
+
                 const localDecision = window.game.surrenderDecisions.get(window.uniquePlayerName);
 
                 if (localDecision === 'surrender') {
                     console.log(`🏳️ ${window.uniquePlayerName} surrendered - hiding cards`);
-                    hideGameAreaForSurrenderedPlayer(); 
+                    hideGameAreaForSurrenderedPlayer();
                 } else {
-                    console.log(`🎴 ${window.uniquePlayerName} playing - loading their hand`);
-                    // Find local player's index and set as current player
+                    // Only show game buttons for players who are playing
+                    const autoBtn = document.getElementById('autoArrange');
+                    const rankBtn = document.getElementById('sortByRank');
+                    const suitBtn = document.getElementById('sortBySuit');
+                    const submitHandBtn = document.getElementById('submitHand');
+                    const detectAutoBtn = document.getElementById('detectAutomatics');
+                    const playAutoBtn = document.getElementById('playAutomatic');
+
+                    if (autoBtn) autoBtn.style.display = 'inline-block';
+                    if (rankBtn) rankBtn.style.display = 'inline-block';
+                    if (suitBtn) suitBtn.style.display = 'inline-block';
+                    if (submitHandBtn) submitHandBtn.style.display = 'inline-block';
+                    if (detectAutoBtn) detectAutoBtn.style.display = 'inline-block';
+                    if (playAutoBtn) playAutoBtn.style.display = 'inline-block';
+
                     const playerNames = window.game.playerManager.getPlayerNames();
                     const localIndex = playerNames.indexOf(window.uniquePlayerName);
-
                     if (localIndex >= 0) {
                         window.game.playerManager.currentPlayerIndex = localIndex;
                         window.game.loadCurrentPlayerHand();
@@ -161,7 +159,21 @@ async function handleTableStateChange(tableState) {
                 updateDisplay(window.game);
 
             } else {
-                // Single-device mode
+                // Single-device mode - always show buttons
+                const autoBtn = document.getElementById('autoArrange');
+                const rankBtn = document.getElementById('sortByRank');
+                const suitBtn = document.getElementById('sortBySuit');
+                const submitHandBtn = document.getElementById('submitHand');
+                const detectAutoBtn = document.getElementById('detectAutomatics');
+                const playAutoBtn = document.getElementById('playAutomatic');
+
+                if (autoBtn) autoBtn.style.display = 'inline-block';
+                if (rankBtn) rankBtn.style.display = 'inline-block';
+                if (suitBtn) suitBtn.style.display = 'inline-block';
+                if (submitHandBtn) submitHandBtn.style.display = 'inline-block';
+                if (detectAutoBtn) detectAutoBtn.style.display = 'inline-block';
+                if (playAutoBtn) playAutoBtn.style.display = 'inline-block';
+
                 if (window.game) {
                     window.game.loadCurrentPlayerHand();
                     updateDisplay(window.game);
@@ -368,14 +380,6 @@ function listenForStatusUpdates(tableId) {
             const message = snapshot.val();
             if (message) {
                 console.log('📨 Status message received:', message);
-
-                // Don't overwrite if local player surrendered
-                const localDecision = window.game?.surrenderDecisions?.get(window.uniquePlayerName);
-                if (localDecision === 'surrender') {
-                    console.log('⏭️ Skipping status update - player surrendered');
-                    return;
-                }
-
                 const statusDiv = document.getElementById('status');
                 if (statusDiv) {
                     statusDiv.innerHTML = message;
