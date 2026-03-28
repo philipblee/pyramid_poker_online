@@ -813,7 +813,7 @@ class PyramidPoker {
         }
 
         // Check wheel straights (A-2-3-4-5-6 for 6-card, A-2-3-4-5 for 5-card, etc.)
-        if (targetLength <= 6) {
+        if (targetLength <= 8) {
             const wheelStraight = Analysis.generateWheelValues(targetLength);
             const wheelNeeded = wheelStraight.filter(v => !values.includes(v)).length;
             if (wheelNeeded <= wildCount) return true;

@@ -320,7 +320,7 @@ class HandDetector {
             }
 
             // Check wheel straight flush (A-2-3-4-5, A-2-3-4-5-6, etc.)
-            if (straightLength <= 6) { // Wheel can only go up to A-2-3-4-5-6
+            if (straightLength <= 8) { // Wheel can only go up to A-2-3-4-5-6-7-8
                 const wheelValues = Analysis.generateWheelValues(straightLength);
 
                 if (wheelValues.every(val => valueCounts[val] > 0)) {
