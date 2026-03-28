@@ -186,18 +186,20 @@
 
         <!-- Your existing game area - add style="display: none;" -->
         <div class="game-controls">
-            <button id="autoArrange" class="btn btn-secondary">BEST</button>
-            <select id="bestAlgoSelect" style="color: white; background: #3498db; border: none; padding: 4px; border-radius: 4px; cursor: pointer;"></select>
-            <button id="prevArrangement" class="btn btn-secondary" style="display:none">◀</button>
-            <span id="arrangementCounter" style="display:none; color:white; padding: 4px;">1/5</span>
-            <button id="nextArrangement" class="btn btn-secondary" style="display:none">▶</button>
+        <div id="bestGroup" style="display: inline-flex; align-items: stretch; gap: 0;">
+            <button id="autoArrange" class="btn btn-secondary" style="border-radius: 10px 0 0 10px;">BEST</button>
+            <select id="bestAlgoSelect" style="color: white; background: #3498db; border: none; padding: 4px; border-radius: 0 10px 10px 0; cursor: pointer;"></select>
+        </div>
+        <button id="prevArrangement" class="btn btn-secondary" style="display:none">◀</button>
+        <span id="arrangementCounter" style="display:none; color:white; padding: 4px;">1/5</span>
+        <button id="nextArrangement" class="btn btn-secondary" style="display:none">▶</button>
             <div id="sortGroup" style="display: inline-flex; align-items: stretch; gap: 0;">
-                <button id="sortReset" class="btn toggle-btn toggle-active">DEAL</button>
+                <button id="sortReset" class="btn toggle-btn toggle-active">RESET</button>
                 <button id="sortByRank" class="btn toggle-btn toggle-inactive">RANK</button>
                 <button id="sortBySuit" class="btn toggle-btn toggle-inactive">SUIT</button>
             </div>
             <div id="reorderGroup" style="display: none; display: inline-flex; align-items: stretch; gap: 0;">
-                <button id="reorderReset" class="btn toggle-btn toggle-active">DEAL</button>
+                <button id="reorderReset" class="btn toggle-btn toggle-active">RESET</button>
                 <button id="reorderByRank" class="btn toggle-btn toggle-inactive">RANK</button>
                 <button id="reorderBySuit" class="btn toggle-btn toggle-inactive">SUIT</button>
             </div>

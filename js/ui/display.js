@@ -441,20 +441,14 @@ function updateButtonStates(game) {
             (gameConfig.config.findAutoEnabled === 'yes') ? 'inline-block' : 'none';
     }
 
-    const autoArrangeBtn = document.getElementById('autoArrange');
-    const bestAlgoSelect = document.getElementById('bestAlgoSelect');
+    const bestGroup = document.getElementById('bestGroup');
 
     console.log('🔍 display.js button visibility check running, autoArrangeAllowed:', gameConfig.config.autoArrangeAllowed);
 
-    if (autoArrangeBtn) {
-        autoArrangeBtn.style.display =
-            (gameConfig.config.autoArrangeAllowed === 'yes') ? 'inline-block' : 'none';
+    if (bestGroup) {
+        bestGroup.style.display =
+            (gameConfig.config.autoArrangeAllowed === 'yes') ? 'inline-flex' : 'none';
     }
-    if (bestAlgoSelect) {
-        bestAlgoSelect.style.display =
-            (gameConfig.config.autoArrangeAllowed === 'yes') ? 'inline-block' : 'none';
-    }
-
 
     if (game.gameState === 'waiting') {
 //        addPlayerBtn.disabled = false;
@@ -482,6 +476,7 @@ function updateButtonStates(game) {
                               );
 
         autoBtn.disabled = false;
+        resetBtn.disabled = false;
         rankBtn.disabled = false;
         suitBtn.disabled = false;
 
