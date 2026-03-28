@@ -195,27 +195,30 @@ class PyramidPoker {
 
     // if player surrenders, skip his turn
     skipSurrenderedPlayer() {
-        const currentPlayer = this.playerManager.getCurrentPlayer();
+    const currentPlayer = this.playerManager.getCurrentPlayer();
 
-        // Mark as submitted (with empty hands)
-        this.submittedHands.set(currentPlayer.name, {
-            name: currentPlayer.name,
-            surrendered: true,
-            front: [],
-            middle: [],
-            back: []
-        });
+    // Mark as submitted (with empty hands)
+    this.submittedHands.set(currentPlayer.name, {
+        name: currentPlayer.name,
+        surrendered: true,
+        front: [],
+        middle: [],
+        back: []
+    });
 
-        // Move to next player
-        this.playerManager.advanceToNextPlayer();
+    // Move to next player
+    this.playerManager.nextPlayer();
 
-        // Check if all active players submitted
-        if (this.checkAllActivePlayersSubmitted()) {
-            this.handleAllPlayersSubmitted();
-        } else {
-            this.loadCurrentPlayerHand(); // Load next player
-        }
+    // Check if all players submitted
+    const totalPlayers = this.playerManager.players.length;
+    const submittedCount = this.submittedHands.size;
+
+    if (submittedCount >= totalPlayers) {
+        this.calculateScores();
+    } else {
+        this.loadCurrentPlayerHand();
     }
+}
 
     // load all current playerHand (added the gameVariant === 'kitty')
     loadCurrentPlayerHand() {

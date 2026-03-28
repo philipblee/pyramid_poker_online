@@ -303,6 +303,8 @@ async function handleAllDecided() {
         console.log('🏳️ All players surrendered - skipping to scoring');
         if (window.game.multiDeviceMode) {
             setTableState(TABLE_STATES.ALL_SUBMITTED);
+        } else {
+            window.game.calculateScores();
         }
         return;
     }
