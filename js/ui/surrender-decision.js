@@ -1,11 +1,11 @@
 // js/ui/surrender-decision.js - handles play/surrender decision UI
 
+let currentDecision = 'play'
+
 function initializeSurrenderDecision() {
     const toggleWrap = document.getElementById('decisionToggleWrap');
     const toggleBtn = document.getElementById('decisionToggle');
     const submitBtn = document.getElementById('submitDecision');
-
-    let currentDecision = 'play'; // Default to play
 
     function syncDecisionToggle() {
         if (!toggleBtn) return;
@@ -37,6 +37,9 @@ function initializeSurrenderDecision() {
 
 function showDecisionButtons() {
     console.log('🎯 showDecisionButtons CALLED');
+
+    currentDecision = 'play'; // Reset for new round
+
     const rankBtn = document.getElementById('sortByRank');
     const suitBtn = document.getElementById('sortBySuit');
 
@@ -147,6 +150,7 @@ function hideDecisionButtons() {
 }
 
 function declareDecision(decision) {
+    console.log('🔍 declareDecision called with:', decision);
 
     // Multi-device: Submit for THIS device's player, not current turn player
     const playerName = window.game.multiDeviceMode
