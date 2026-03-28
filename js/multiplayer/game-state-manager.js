@@ -133,6 +133,7 @@ async function handleTableStateChange(tableState) {
                 } else {
                     // Only show game buttons for players who are playing
                     const autoBtn = document.getElementById('autoArrange');
+                    const resetBtn = document.getElementById('sortReset');
                     const rankBtn = document.getElementById('sortByRank');
                     const suitBtn = document.getElementById('sortBySuit');
                     const submitHandBtn = document.getElementById('submitHand');
@@ -140,6 +141,7 @@ async function handleTableStateChange(tableState) {
                     const playAutoBtn = document.getElementById('playAutomatic');
 
                     if (autoBtn) autoBtn.style.display = 'inline-block';
+                    if (resetBtn) resetBtn.style.display = 'inline-block';
                     if (rankBtn) rankBtn.style.display = 'inline-block';
                     if (suitBtn) suitBtn.style.display = 'inline-block';
                     if (submitHandBtn) submitHandBtn.style.display = 'inline-block';
@@ -158,6 +160,7 @@ async function handleTableStateChange(tableState) {
             } else {
                 // Single-device mode - always show buttons
                 const autoBtn = document.getElementById('autoArrange');
+                const resetBtn = document.getElementById('sortReset');
                 const rankBtn = document.getElementById('sortByRank');
                 const suitBtn = document.getElementById('sortBySuit');
                 const submitHandBtn = document.getElementById('submitHand');
@@ -165,6 +168,7 @@ async function handleTableStateChange(tableState) {
                 const playAutoBtn = document.getElementById('playAutomatic');
 
                 if (autoBtn) autoBtn.style.display = 'inline-block';
+                if (resetBtn) resetBtn.style.display = 'inline-block';
                 if (rankBtn) rankBtn.style.display = 'inline-block';
                 if (suitBtn) suitBtn.style.display = 'inline-block';
                 if (submitHandBtn) submitHandBtn.style.display = 'inline-block';

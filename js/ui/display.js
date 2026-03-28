@@ -424,6 +424,7 @@ function updateButtonStates(game) {
     const newGameBtn = document.getElementById('newGame');
     const newRoundBtn = document.getElementById('newRound');
     const autoBtn = document.getElementById('autoArrange');
+    const resetBtn = document.getElementById('sortReset');
     const rankBtn = document.getElementById('sortByRank');
     const suitBtn = document.getElementById('sortBySuit');
     const submitBtn = document.getElementById('submitHand');

@@ -36,8 +36,29 @@ class PyramidPoker {
     initializeEventListeners() {
 
         document.getElementById('autoArrange').addEventListener('click', () => this.handleAutoArrangeToggle());
-        document.getElementById('sortByRank').addEventListener('click', () => resetAndSortByRank(this));
-        document.getElementById('sortBySuit').addEventListener('click', () => resetAndSortBySuit(this));
+
+        document.getElementById('sortReset').addEventListener('click', () => {
+            this.restoreToDealtState();
+            document.getElementById('sortReset').classList.replace('toggle-inactive', 'toggle-active');
+            document.getElementById('sortByRank').classList.replace('toggle-active', 'toggle-inactive');
+            document.getElementById('sortBySuit').classList.replace('toggle-active', 'toggle-inactive');
+        });
+
+        document.getElementById('sortByRank').addEventListener('click', () => {
+            resetAndSortByRank(this);
+            document.getElementById('sortByRank').classList.replace('toggle-inactive', 'toggle-active');
+            document.getElementById('sortReset').classList.replace('toggle-active', 'toggle-inactive');
+            document.getElementById('sortBySuit').classList.replace('toggle-active', 'toggle-inactive');
+        });
+
+        document.getElementById('sortBySuit').addEventListener('click', () => {
+            resetAndSortBySuit(this);
+            document.getElementById('sortBySuit').classList.replace('toggle-inactive', 'toggle-active');
+            document.getElementById('sortReset').classList.replace('toggle-active', 'toggle-inactive');
+            document.getElementById('sortByRank').classList.replace('toggle-active', 'toggle-inactive');
+        });
+
+
         document.getElementById('submitHand').addEventListener('click', () => this.submitCurrentHand());
         document.getElementById('prevArrangement').addEventListener('click', () => this.browseArrangement(-1));
         document.getElementById('nextArrangement').addEventListener('click', () => this.browseArrangement(1));
@@ -323,6 +344,7 @@ class PyramidPoker {
     saveButtonStates() {
         this.savedButtonStates = {
             autoArrange: document.getElementById('autoArrange').disabled,
+            sortReset: document.getElementById('sortReset').disabled,
             sortByRank: document.getElementById('sortByRank').disabled,
             sortBySuit: document.getElementById('sortBySuit').disabled,
             submitHand: document.getElementById('submitHand').disabled
@@ -333,6 +355,7 @@ class PyramidPoker {
         if (!this.savedButtonStates) return;
 
         document.getElementById('autoArrange').disabled = this.savedButtonStates.autoArrange;
+        document.getElementById('sortReset').disabled = this.savedButtonStates.sortReset;
         document.getElementById('sortByRank').disabled = this.savedButtonStates.sortByRank;
         document.getElementById('sortBySuit').disabled = this.savedButtonStates.sortBySuit;
         document.getElementById('submitHand').disabled = this.savedButtonStates.submitHand;
@@ -345,6 +368,7 @@ class PyramidPoker {
     disablePlayerButtons() {
         document.getElementById('submitHand').disabled = true;
         document.getElementById('autoArrange').disabled = true;
+        document.getElementById('sortReset').disabled = true;
         document.getElementById('sortByRank').disabled = true;   // Add missing buttons
         document.getElementById('sortBySuit').disabled = true;   // Add missing buttons
     }
@@ -905,6 +929,7 @@ class PyramidPoker {
         // Only disable card-arrangement buttons, not game-flow buttons
         const buttonsToDisable = [
             'autoArrange',
+            'sortReset',
             'sortByRank',
             'sortBySuit',
             'reorderRank',

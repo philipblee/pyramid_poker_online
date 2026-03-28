@@ -108,6 +108,14 @@ function reorderStagingBySuit(game) {
     playerData.cards = [...visibleCards, ...kittyCards];
 
     game.loadCurrentPlayerHand();
-    console.log('≡ƒöä Reordered first 13 cards by suit');
+    console.log('Reordered first 13 cards by suit');
 }
 
+function resetSortToggle() {
+    const sortReset = document.getElementById('sortReset');
+    const sortByRank = document.getElementById('sortByRank');
+    const sortBySuit = document.getElementById('sortBySuit');
+    if (sortReset) sortReset.classList.replace('toggle-inactive', 'toggle-active');
+    if (sortByRank) sortByRank.classList.replace('toggle-active', 'toggle-inactive');
+    if (sortBySuit) sortBySuit.classList.replace('toggle-active', 'toggle-inactive');
+}

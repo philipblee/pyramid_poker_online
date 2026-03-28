@@ -191,8 +191,11 @@
             <button id="prevArrangement" class="btn btn-secondary" style="display:none">◀</button>
             <span id="arrangementCounter" style="display:none; color:white; padding: 4px;">1/5</span>
             <button id="nextArrangement" class="btn btn-secondary" style="display:none">▶</button>
-            <button id="sortByRank" class="btn btn-secondary">Rank</button>
-            <button id="sortBySuit" class="btn btn-secondary">Suit</button>
+            <div id="sortGroup" style="display: inline-flex; align-items: stretch; gap: 0;">
+                <button id="sortReset" class="btn toggle-btn toggle-active">DEAL</button>
+                <button id="sortByRank" class="btn toggle-btn toggle-inactive">RANK</button>
+                <button id="sortBySuit" class="btn toggle-btn toggle-inactive">SUIT</button>
+            </div>
             <button id="reorderRank" class="btn btn-secondary" onclick="reorderStagingByRank(game)">Rank</button>
             <button id="reorderSuit" class="btn btn-secondary" onclick="reorderStagingBySuit(game)">Suit</button>
             <button id="submitHand" class="btn btn-primary" disabled>Submit</button>
