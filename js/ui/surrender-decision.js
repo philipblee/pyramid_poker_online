@@ -60,6 +60,8 @@ function showDecisionButtons() {
         decisionGroup.style.display = 'inline-flex';
         playBtn.classList.remove('toggle-inactive'); playBtn.classList.add('toggle-active');
         surrenderBtn.classList.remove('toggle-active'); surrenderBtn.classList.add('toggle-inactive');
+        playBtn.disabled = false;      // ← ADD
+        surrenderBtn.disabled = false; // ← ADD
         submitBtn.disabled = false;
     }
 

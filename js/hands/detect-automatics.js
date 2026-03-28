@@ -138,7 +138,7 @@
             }
 
         } else {
-            showAutomaticMessage('❌ No automatic possible with these cards');
+            showAutomaticMessage('❌ Automatic not found.  Algorithm cannot find all automatics');
 
             // Do not move any cards; just reset state/button
             window.currentAutomatic = null;
