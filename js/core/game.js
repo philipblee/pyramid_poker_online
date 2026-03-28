@@ -35,7 +35,7 @@ class PyramidPoker {
     // Initialze Event Listeners
     initializeEventListeners() {
 
-        document.getElementById('autoArrange').addEventListener('click', () => this.handleAutoArrangeToggle());
+        document.getElementById('autoArrange').addEventListener('click', () => this.handleAutoArrange());
 
         document.getElementById('sortReset').addEventListener('click', () => {
             this.restoreToDealtState();
@@ -168,51 +168,33 @@ class PyramidPoker {
         return playerName;
     }
 
-    handleAutoArrangeToggle() {
-        if (this.autoArrangeUsed) {
-            // Undo auto-arrange (instant, no spinner needed)
-            this.restoreToDealtState();
-            this.autoArrangeUsed = false;
-            document.getElementById('autoArrange').textContent = 'BEST';
-            console.log('Log from handleAutoArrange: 🔄 Undid auto-arrange');
-        } else {
-            showLoadingSpinner(2);
+    handleAutoArrange() {
+        showLoadingSpinner(2);
 
-            // Use setTimeout to allow UI to update before computation
-            setTimeout(() => {
-                try {
-//                    console.log('Log from handleAutoArrange: 🧠 Starting auto-arrange optimization...');
+        setTimeout(() => {
+            try {
+                this.autoArrangeManager.autoArrangeHand();
+                console.log('🔍 After autoArrangeHand - topArrangements:', window.topArrangements);
+                const total_arr = window.topArrangements?.length || 0;
+                console.log('🔍 total:', total_arr);
 
-                    // Your existing auto-arrange logic
-                    this.autoArrangeManager.autoArrangeHand();
-                    console.log('🔍 After autoArrangeHand - topArrangements:', window.topArrangements);
-                    const total_arr = window.topArrangements?.length || 0;
-                    console.log('🔍 total:', total_arr);
+                this.autoArrangeUsed = true;
 
-                    this.autoArrangeUsed = true;
-                    document.getElementById('autoArrange').textContent = 'Undo BEST';
-
-                    // Show arrangement browser
-                    const total = window.topArrangements?.length || 0;
-                    if (total > 1) {
-                        document.getElementById('prevArrangement').style.display = 'inline-block';
-                        document.getElementById('nextArrangement').style.display = 'inline-block';
-                        document.getElementById('arrangementCounter').style.display = 'inline-block';
-                        document.getElementById('arrangementCounter').textContent = `1/${total}`;
-                    }
-
-                    // Hide spinner when done
-                    hideLoadingSpinner();
-
-//                    console.log('Log from handleAutoArrange: ✅ Auto-arrange applied successfully');
-
-                } catch (error) {
-                    console.error('❌ Auto-arrange failed:', error);
-                    hideLoadingSpinner();
-                    alert('Auto-arrange failed. Please try manually.');
+                // Show arrangement browser
+                const total = window.topArrangements?.length || 0;
+                if (total > 1) {
+                    document.getElementById('prevArrangement').style.display = 'inline-block';
+                    document.getElementById('nextArrangement').style.display = 'inline-block';
+                    document.getElementById('arrangementCounter').style.display = 'inline-block';
+                    document.getElementById('arrangementCounter').textContent = `1/${total}`;
                 }
-            }, 100); // Small delay ensures spinner shows
-        }
+
+                hideLoadingSpinner();
+            } catch (error) {
+                console.error('❌ Auto-arrange error:', error);
+                hideLoadingSpinner();
+            }
+        }, 50);
     }
 
     restoreToDealtState() {
