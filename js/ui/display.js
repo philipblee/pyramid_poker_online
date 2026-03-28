@@ -421,6 +421,7 @@ function updateScoring(game) {
 
 // Update button states based on game state
 function updateButtonStates(game) {
+    console.log('🔍 gameState:', game.gameState, 'tableState:', game.tableState);
     const newGameBtn = document.getElementById('newGame');
     const newRoundBtn = document.getElementById('newRound');
     const autoBtn = document.getElementById('autoArrange');
@@ -446,9 +447,15 @@ function updateButtonStates(game) {
     console.log('🔍 display.js button visibility check running, autoArrangeAllowed:', gameConfig.config.autoArrangeAllowed);
 
     if (bestGroup) {
-        bestGroup.style.display =
-            (gameConfig.config.autoArrangeAllowed === 'yes') ? 'inline-flex' : 'none';
-    }
+        const inDecisionPhase = gameConfig.config.gameVariant === 'kitty' &&
+            (game.tableState === 'decide_playing' ||
+             game.tableState === 'hands_dealt' ||
+             game.tableState === 'dealing');
+        if (!inDecisionPhase) {
+            bestGroup.style.display =
+                (gameConfig.config.autoArrangeAllowed === 'yes') ? 'inline-flex' : 'none';
+        }
+}
 
     if (game.gameState === 'waiting') {
 //        addPlayerBtn.disabled = false;
@@ -461,6 +468,8 @@ function updateButtonStates(game) {
         if (automaticBtn) automaticBtn.disabled = true;
     } else if (game.gameState === 'playing') {
 
+        console.log('🔍 gameVariant:', gameConfig.config.gameVariant, 'tableState:', game.tableState);
+        console.log('🔍 tableState at display check:', game.tableState);
         // Don't change buttons during kitty variant decision phases
         if (gameConfig.config.gameVariant === 'kitty' &&
             (game.tableState === 'hands_dealt' ||

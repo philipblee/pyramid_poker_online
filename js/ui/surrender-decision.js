@@ -32,6 +32,13 @@ function showDecisionButtons() {
 
     currentDecision = 'play'; // Reset for new round
 
+    document.getElementById('prevArrangement').style.display = 'none';
+    document.getElementById('nextArrangement').style.display = 'none';
+    document.getElementById('arrangementCounter').style.display = 'none';
+
+    const sortGroup = document.getElementById('sortGroup');
+    if (sortGroup) sortGroup.style.display = 'none';
+
     const rankBtn = document.getElementById('sortByRank');
     const suitBtn = document.getElementById('sortBySuit');
     const detectAutoBtn = document.getElementById('detectAutomatics');
@@ -64,7 +71,6 @@ function showDecisionButtons() {
     }
 
 
-
     // Show decision group and reset to Play
     if (decisionGroup) {
         decisionGroup.style.display = 'inline-flex';
@@ -75,10 +81,17 @@ function showDecisionButtons() {
         submitBtn.disabled = false;
     }
 
+    const bestGroup = document.getElementById('bestGroup');
+    if (bestGroup) bestGroup.style.display = 'none';
+
     console.log('✅ Decision buttons set - PLAY/SURRENDER/DECLARE visible');
 }
 
 function hideDecisionButtons() {
+
+    const bestGroup = document.getElementById('bestGroup');
+    if (bestGroup) bestGroup.style.display = 'inline-flex';
+
     const detectAutoBtn = document.getElementById('detectAutomatics');
     const playAutoBtn = document.getElementById('playAutomatic');
     const rankBtn = document.getElementById('sortByRank');
@@ -95,6 +108,9 @@ function hideDecisionButtons() {
 
     // Hide reorder buttons
     if (reorderGroup) reorderGroup.style.display = 'none';
+
+    // hide 17 card sort buttons
+    if (sortGroup) sortGroup.style.display = 'inline-flex';
 
     // Show traditional game buttons
     if (rankBtn) rankBtn.style.display = 'inline-block';
@@ -316,6 +332,13 @@ function hideGameAreaForSurrenderedPlayer() {
 
     // Disable AND HIDE all game buttons
     window.game.disableAllGameButtons();
+
+    const bestGroup = document.getElementById('bestGroup');
+    if (bestGroup) bestGroup.style.display = 'none';
+
+    const sortGroup = document.getElementById('sortGroup');
+    if (sortGroup) sortGroup.style.display = 'none';
+
 
     // Also hide the 13-card reorder buttons specifically
     const reorderRankBtn = document.getElementById('reorderRank');
