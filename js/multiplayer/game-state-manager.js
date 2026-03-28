@@ -110,9 +110,6 @@ async function handleTableStateChange(tableState) {
             console.log('🎬 Moving to playing phase - showing all cards');
 
             // Hide decision buttons, show arrangement buttons
-            const playBtn = document.getElementById('playButton');
-            const surrenderBtn = document.getElementById('surrenderButton');
-            const submitDecisionBtn = document.getElementById('submitDecision');
             const autoBtn = document.getElementById('autoArrange');
             const rankBtn = document.getElementById('sortByRank');
             const suitBtn = document.getElementById('sortBySuit');
@@ -120,9 +117,8 @@ async function handleTableStateChange(tableState) {
             const detectAutoBtn = document.getElementById('detectAutomatics');
             const playAutoBtn = document.getElementById('playAutomatic');
 
-            if (playBtn) playBtn.style.display = 'none';
-            if (surrenderBtn) surrenderBtn.style.display = 'none';
-            if (submitDecisionBtn) submitDecisionBtn.style.display = 'none';
+            const decisionGroup = document.getElementById('decisionGroup');
+            if (decisionGroup) decisionGroup.style.display = 'none';
 
             if (autoBtn) autoBtn.style.display = 'inline-block';
             if (rankBtn) rankBtn.style.display = 'inline-block';
