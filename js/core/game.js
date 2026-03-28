@@ -58,6 +58,27 @@ class PyramidPoker {
             document.getElementById('sortByRank').classList.replace('toggle-active', 'toggle-inactive');
         });
 
+        document.getElementById('reorderReset').addEventListener('click', () => {
+            reorderStagingReset(this);
+            document.getElementById('reorderReset').classList.replace('toggle-inactive', 'toggle-active');
+            document.getElementById('reorderByRank').classList.replace('toggle-active', 'toggle-inactive');
+            document.getElementById('reorderBySuit').classList.replace('toggle-active', 'toggle-inactive');
+        });
+
+        document.getElementById('reorderByRank').addEventListener('click', () => {
+            reorderStagingByRank(this);
+            document.getElementById('reorderByRank').classList.replace('toggle-inactive', 'toggle-active');
+            document.getElementById('reorderReset').classList.replace('toggle-active', 'toggle-inactive');
+            document.getElementById('reorderBySuit').classList.replace('toggle-active', 'toggle-inactive');
+        });
+
+        document.getElementById('reorderBySuit').addEventListener('click', () => {
+            reorderStagingBySuit(this);
+            document.getElementById('reorderBySuit').classList.replace('toggle-inactive', 'toggle-active');
+            document.getElementById('reorderReset').classList.replace('toggle-active', 'toggle-inactive');
+            document.getElementById('reorderByRank').classList.replace('toggle-active', 'toggle-inactive');
+        });
+
 
         document.getElementById('submitHand').addEventListener('click', () => this.submitCurrentHand());
         document.getElementById('prevArrangement').addEventListener('click', () => this.browseArrangement(-1));
@@ -65,7 +86,7 @@ class PyramidPoker {
 
         // Best algo selector
         const BEST_ALGO_OPTIONS = ['netEV', 'tiered2', 'tiered', 'points',
-                                    'best-back', 'best-middle', 'best-front'];  // add new algos here
+                                   ];  // add new algos here
 
         const bestAlgoSelect = document.getElementById('bestAlgoSelect');
         if (bestAlgoSelect) {
@@ -932,8 +953,9 @@ class PyramidPoker {
             'sortReset',
             'sortByRank',
             'sortBySuit',
-            'reorderRank',
-            'reorderSuit',
+            'reorderReset',
+            'reorderByRank',
+            'reorderBySuit',
             'submitHand',
             'detectAutomatics',
             'playAutomatic'

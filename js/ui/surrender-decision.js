@@ -34,8 +34,9 @@ function showDecisionButtons() {
     const suitBtn = document.getElementById('sortBySuit');
     const detectAutoBtn = document.getElementById('detectAutomatics');
     const playAutoBtn = document.getElementById('playAutomatic');
-    const reorderRankBtn = document.getElementById('reorderRank');
-    const reorderSuitBtn = document.getElementById('reorderSuit');
+
+    const reorderGroup = document.getElementById('reorderGroup');
+
     const submitHandBtn = document.getElementById('submitHand');
     const autoArrangeBtn = document.getElementById('autoArrange');
     const decisionGroup = document.getElementById('decisionGroup');
@@ -51,9 +52,13 @@ function showDecisionButtons() {
     if (submitHandBtn) submitHandBtn.style.display = 'none';
     if (autoArrangeBtn) autoArrangeBtn.style.display = 'none';
 
-    // Show reorder buttons
-    if (reorderRankBtn) { reorderRankBtn.style.display = 'inline-block'; reorderRankBtn.disabled = false; }
-    if (reorderSuitBtn) { reorderSuitBtn.style.display = 'inline-block'; reorderSuitBtn.disabled = false; }
+    // Show reorder group
+    if (reorderGroup) {
+        reorderGroup.style.display = 'inline-flex';
+        resetReorderToggle();
+    }
+
+
 
     // Show decision group and reset to Play
     if (decisionGroup) {
@@ -73,8 +78,9 @@ function hideDecisionButtons() {
     const playAutoBtn = document.getElementById('playAutomatic');
     const rankBtn = document.getElementById('sortByRank');
     const suitBtn = document.getElementById('sortBySuit');
-    const reorderRankBtn = document.getElementById('reorderRank');
-    const reorderSuitBtn = document.getElementById('reorderSuit');
+
+    const reorderGroup = document.getElementById('reorderGroup');
+
     const submitHandBtn = document.getElementById('submitHand');
     const autoArrangeBtn = document.getElementById('autoArrange');
     const decisionGroup = document.getElementById('decisionGroup');
@@ -83,8 +89,7 @@ function hideDecisionButtons() {
     if (decisionGroup) decisionGroup.style.display = 'none';
 
     // Hide reorder buttons
-    if (reorderRankBtn) reorderRankBtn.style.display = 'none';
-    if (reorderSuitBtn) reorderSuitBtn.style.display = 'none';
+    if (reorderGroup) reorderGroup.style.display = 'none';
 
     // Show traditional game buttons
     if (rankBtn) rankBtn.style.display = 'inline-block';

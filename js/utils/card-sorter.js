@@ -119,3 +119,26 @@ function resetSortToggle() {
     if (sortByRank) sortByRank.classList.replace('toggle-active', 'toggle-inactive');
     if (sortBySuit) sortBySuit.classList.replace('toggle-active', 'toggle-inactive');
 }
+
+function reorderStagingReset(game) {
+    const currentPlayer = game.playerManager.getCurrentPlayer();
+    const playerData = game.playerHands.get(currentPlayer.name);
+
+    if (!playerData || !playerData.originalCards) return;
+
+    // Restore first 13 from original, keep current kitty (13-17)
+    const kittyCards = playerData.cards.slice(13);
+    playerData.cards = [...playerData.originalCards.slice(0, 13), ...kittyCards];
+
+    game.loadCurrentPlayerHand();
+    console.log('🔄 Restored first 13 cards to original deal order');
+}
+
+function resetReorderToggle() {
+    const reorderReset = document.getElementById('reorderReset');
+    const reorderByRank = document.getElementById('reorderByRank');
+    const reorderBySuit = document.getElementById('reorderBySuit');
+    if (reorderReset) reorderReset.classList.replace('toggle-inactive', 'toggle-active');
+    if (reorderByRank) reorderByRank.classList.replace('toggle-active', 'toggle-inactive');
+    if (reorderBySuit) reorderBySuit.classList.replace('toggle-active', 'toggle-inactive');
+}

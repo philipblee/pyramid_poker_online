@@ -176,6 +176,10 @@ body {
 #sortGroup button:nth-child(2) { border-radius: 0; }
 #sortGroup button:last-child  { border-radius: 0 10px 10px 0; }
 
+#reorderGroup button:first-child { border-radius: 10px 0 0 10px; }
+#reorderGroup button:nth-child(2) { border-radius: 0; }
+#reorderGroup button:last-child  { border-radius: 0 10px 10px 0; }
+
 .toggle-active {
     background: linear-gradient(45deg, #ffffff, #e0e0e0);
     color: #222;
