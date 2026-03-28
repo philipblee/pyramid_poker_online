@@ -125,9 +125,6 @@ async function handleTableStateChange(tableState) {
                     console.log(`🔑 Loaded surrender decision: ${playerName} = ${decision}`);
                 });
 
-                const debugLocalDecision = window.game.surrenderDecisions.get(window.uniquePlayerName);
-                console.log('🔍 PLAYING state - local decision:', debugLocalDecision, 'map size:', window.game.surrenderDecisions.size);
-
                 const localDecision = window.game.surrenderDecisions.get(window.uniquePlayerName);
 
                 if (localDecision === 'surrender') {
