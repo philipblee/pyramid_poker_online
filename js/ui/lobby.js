@@ -616,7 +616,7 @@ function createTableSettingsModal() {
             </div>
 
             <div style="margin-bottom: 20px;">
-                <label style="color: #ffd700; display: block; margin-bottom: 8px;">FIND-AUTO enabled:</label>
+                <label style="color: #ffd700; display: block; margin-bottom: 8px;">FIND AUTO enabled:</label>
                 <select id="findAutoEnabled" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
                     <option value="yes">Yes</option>
                     <option value="no">No</option>

@@ -173,7 +173,7 @@ class Tutorial {
 
                 <div class="tutorial-example">
                 <ul>
-                    <li><strong>BEST</strong> - Automatically arranges cards into best valid hands</li>
+                    <li><strong>FIND BEST</strong> - Automatically arranges cards into best valid hands</li>
                     <li><strong>RANK</strong> - Sorts staging area cards by rank (A-2)</li>
                     <li><strong>SUIT</strong> - Sorts staging area cards by suit ( ♠ ♥ ♦ ♣ )</li>
                     <li><strong>SUBMIT</strong> -   Disabled until there is a valid arrangement</li>

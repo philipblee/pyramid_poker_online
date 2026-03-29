@@ -94,16 +94,16 @@ class ConfigUI {
     }
 
     updateButtonText() {
-    const configButton = document.getElementById('gameConfig');
-    const config = window.gameConfig.getConfig();
+        const configButton = document.getElementById('gameConfig');
+        const config = window.gameConfig.getConfig();
 
-    if (configButton) {
-        // Update button to show mode and wild card count
-        const modeIcon = config.gameMode === 'singleplayer' ? '🤖' : '👥';
-        const wildCount = config.wildCardCount;
-        configButton.innerHTML = `⚙️ Config ${modeIcon}${wildCount > 0 ? ` (${wildCount}🃏)` : ''}`;
+        if (configButton) {
+            // Update button to show mode and wild card count
+            const modeIcon = config.gameMode === 'singleplayer' ? '🤖' : '👥';
+            const wildCount = config.wildCardCount;
+            configButton.innerHTML = `⚙️ Config ${modeIcon}${wildCount > 0 ? ` (${wildCount}🃏)` : ''}`;
+        }
     }
-}
 
     // Update the showTooltip method to show more info
     showTooltip() {

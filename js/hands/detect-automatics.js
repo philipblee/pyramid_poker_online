@@ -145,7 +145,7 @@
 
             const autoButton = document.getElementById('detectAutomatics');
             if (autoButton) {
-                autoButton.textContent = 'FIND-AUTO';
+                autoButton.textContent = 'FIND AUTO';
                 autoButton.title = '';
             }
 
@@ -186,7 +186,7 @@
     function resetAutomaticButton() {
         const autoButton = document.getElementById('detectAutomatics');
         if (autoButton) {
-            autoButton.textContent = 'FIND-AUTO';
+            autoButton.textContent = 'FIND AUTO';
             // DON'T set onclick - addEventListener already handles routing
             autoButton.title = '';
             autoButton.disabled = false;

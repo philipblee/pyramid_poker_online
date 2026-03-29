@@ -85,7 +85,7 @@ class PyramidPoker {
         document.getElementById('nextArrangement').addEventListener('click', () => this.browseArrangement(1));
 
         // Best algo selector
-        const BEST_ALGO_OPTIONS = ['netEV', 'tiered2', 'tiered', 'points',
+        const BEST_ALGO_OPTIONS = ['netEV', 'tiered2', 'points',
                                    ];  // add new algos here
 
         const bestAlgoSelect = document.getElementById('bestAlgoSelect');
