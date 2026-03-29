@@ -102,7 +102,6 @@ class PyramidPoker {
             const savedAlgo = localStorage.getItem('bestAlgo');
             if (savedAlgo) {
                 bestAlgoSelect.value = savedAlgo;
-                bestAlgoSelect.style.background = '#27ae60';  // green — user has previously chosen
                 gameConfig.config.winProbabilityMethod = savedAlgo;
             } else {
                 bestAlgoSelect.value = gameConfig.config.winProbabilityMethod;

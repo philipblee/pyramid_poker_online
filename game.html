@@ -186,29 +186,30 @@
 
         <!-- Your existing game area - add style="display: none;" -->
         <div class="game-controls">
-        <div id="bestGroup" style="display: inline-flex; align-items: stretch; gap: 0;">
-            <button id="autoArrange" class="btn btn-secondary" style="border-radius: 10px 0 0 10px;">FIND BEST</button>
-            <select id="bestAlgoSelect" style="color: white; background: #3498db; border: none; padding: 4px; border-radius: 0 10px 10px 0; cursor: pointer;"></select>
-        </div>
-        <button id="prevArrangement" class="btn btn-secondary" style="display:none">◀</button>
-        <span id="arrangementCounter" style="display:none; color:white; padding: 4px;">1/5</span>
-        <button id="nextArrangement" class="btn btn-secondary" style="display:none">▶</button>
             <div id="sortGroup" style="display: inline-flex; align-items: stretch; gap: 0;">
-                <button id="sortReset" class="btn toggle-btn toggle-active">RESET</button>
-                <button id="sortByRank" class="btn toggle-btn toggle-inactive">RANK</button>
-                <button id="sortBySuit" class="btn toggle-btn toggle-inactive">SUIT</button>
+                <button id="sortReset" class="btn toggle-btn toggle-active">NO SORT</button>
+                <button id="sortByRank" class="btn toggle-btn toggle-inactive">RANK SORT</button>
+                <button id="sortBySuit" class="btn toggle-btn toggle-inactive">SUIT SORT </button>
             </div>
             <div id="reorderGroup" style="display: none; display: inline-flex; align-items: stretch; gap: 0;">
-                <button id="reorderReset" class="btn toggle-btn toggle-active">RESET</button>
-                <button id="reorderByRank" class="btn toggle-btn toggle-inactive">RANK</button>
-                <button id="reorderBySuit" class="btn toggle-btn toggle-inactive">SUIT</button>
+                <button id="reorderReset" class="btn toggle-btn toggle-active">NO SORT</button>
+                <button id="reorderByRank" class="btn toggle-btn toggle-inactive">RANK SORT</button>
+                <button id="reorderBySuit" class="btn toggle-btn toggle-inactive">SUIT SORT</button>
             </div>
-            <button id="submitHand" class="btn btn-primary" disabled>PLAY HAND</button>
-            <button id="detectAutomatics" class="btn btn-primary">FIND-AUTO</button>
-            <button id="playAutomatic" class="btn btn-primary" onclick="game.playAutomatic()"disabled>PLAY AUTO</button>
+            <button id="detectAutomatics" class="btn" style="background: #3498db; color: white;">FIND AUTO</button>
+            <button id="playAutomatic" class="btn" style="background: #27ae60; color: white;" onclick="game.playAutomatic()" disabled>PLAY AUTO</button>
+            <div id="bestGroup" style="display: inline-flex; align-items: stretch; gap: 0;">
+                <button id="autoArrange" class="btn" style="border-radius: 10px 0 0 10px; background: #3498db; color: white;">FIND BEST</button>
+                <select id="bestAlgoSelect" style="color: white; background: #3498db; border: none; padding: 4px; border-radius: 0 10px 10px 0; cursor: pointer;"></select>
+            </div>
+            <button id="prevArrangement" class="btn btn-secondary" style="display:none">◀</button>
+            <span id="arrangementCounter" style="display:none; color:white; padding: 4px;">1/5</span>
+            <button id="nextArrangement" class="btn btn-secondary" style="display:none">▶</button>
+            <button id="submitHand" class="btn" style="background: #27ae60; color: white;" disabled>PLAY HAND</button>
+
             <div id="decisionGroup" style="display: none; display: inline-flex; align-items: stretch; gap: 0;">
                 <button id="playButton" class="btn toggle-btn toggle-active">PLAY</button>
-                <button id="surrenderButton" class="btn toggle-btn toggle-inactive">SURR.</button>
+                <button id="surrenderButton" class="btn toggle-btn toggle-inactive">FOLD</button>
                 <button id="submitDecision" class="btn btn-primary decision-declare">DECLARE</button>
             </div>
         </div>
