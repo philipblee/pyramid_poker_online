@@ -139,10 +139,13 @@ PyramidPoker.prototype.showTournamentSummary = function() {
         const canReturn = gameConfig.config.gameDeviceMode !== 'multi-device' || window.isOwner;
 
         if (canReturn) {
+            const isMultiDevice = gameConfig.config.gameDeviceMode === 'multi-device';
+            const buttonLabel = isMultiDevice ? 'Continue' : 'Return to Table';
+            const buttonAction = isMultiDevice ? 'showSessionModal()' : 'game.returnToLobbyAfterTournament()';
             html += `
-                <button onclick="game.returnToLobbyAfterTournament();"
+                <button onclick="${buttonAction};"
                         style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px;">
-                    Return to Table
+                    ${buttonLabel}
                 </button>
             `;
         } else {
