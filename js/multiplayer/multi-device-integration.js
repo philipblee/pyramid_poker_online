@@ -1037,7 +1037,8 @@ class MultiDeviceIntegration {
         if (!status) return;
 
         if (playerCount < 2) {
-            status.textContent = `Waiting for more players... (${playerCount}/6)`;
+            const maxPlayers = document.getElementById('maxPlayerCount')?.textContent || window.gameConfig?.config?.maxPlayers || 6;
+            status.textContent = `Waiting for more players... (${playerCount}/${maxPlayers})`;
         } else {
             status.textContent = `Ready to start! ${playerCount} players joined.`;
         }

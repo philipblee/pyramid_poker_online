@@ -243,6 +243,8 @@ async function joinTable(table) {
             });
     updateTableDisplay();
     showTableScreen();
+    const maxPlayerCountEl = document.getElementById('maxPlayerCount');
+    if (maxPlayerCountEl) maxPlayerCountEl.textContent = maxHumanPlayers;
 
     });
 
