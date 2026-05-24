@@ -21,6 +21,7 @@ const TABLE_STATES = {
     SCORING: 'scoring',
     ROUND_COMPLETE: 'round_complete',
     TOURNAMENT_COMPLETE: 'tournament_complete',
+    SESSION_ENDED: 'session_ended',        // NEW: owner ended session, all players leave
     NUM_HUMAN_PLAYERS: 'num_human_players'
 };
 

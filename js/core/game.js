@@ -19,6 +19,7 @@ class PyramidPoker {
         this.currentRound = 0;          // 0 = no game started, 1-3 = active rounds
         this.maxRounds = gameConfig.config.rounds;             // Tournament limit
         this.roundHistory = [];         // Store completed round data
+        this.tournamentNumber = 0;      // Increments each time initializeTournament() is called
         this.tournamentScores = new Map(); // Running totals across rounds
         this.initializeEventListeners();
         this.surrenderDecisions = new Map(); // playerName -> 'play' or 'surrender'

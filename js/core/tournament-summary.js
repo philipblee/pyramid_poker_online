@@ -36,6 +36,41 @@ PyramidPoker.prototype.showTournamentSummary = function() {
                 totalChipChange: entry[1]
             }));
 
+        // Save tournament scores to Firestore session (owner only)
+        if (window.isOwner && gameConfig.config.gameDeviceMode === 'multi-device') {
+            const sessionScores = {};
+            standings.forEach(s => {
+                sessionScores[s.playerName] = s.totalChipChange;
+            });
+
+            const tournamentEntry = {
+                scores: sessionScores,
+                completedAt: new Date().toISOString()
+            };
+
+            const sessionId = window.currentSessionId;
+            const db = firebase.firestore();
+
+            if (this.tournamentNumber === 1) {
+                // Create new session doc
+                db.collection('sessions').doc(sessionId).set({
+                    tableId: window.multiDeviceIntegration.tableId,
+                    tableName: gameConfig.config.tableName || '',
+                    ownerUid: firebase.auth().currentUser?.uid || '',
+                    players: standings.map(s => s.playerName),
+                    startedAt: new Date().toISOString(),
+                    ended: false,
+                    endedAt: null,
+                    tournaments: { '1': tournamentEntry }
+                });
+            } else {
+                // Append to existing session doc
+                db.collection('sessions').doc(sessionId).update({
+                    [`tournaments.${this.tournamentNumber}`]: tournamentEntry
+                });
+            }
+        }
+
         // Create tournament summary modal
         const modal = document.createElement('div');
         modal.style.cssText = `

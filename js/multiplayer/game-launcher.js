@@ -36,6 +36,12 @@ async function startSingleHumanGame() {
 function startMultiHumanCloudGame() {
 //    console.log('🚀 Starting multi-human cloud game for table:', currentTable.id);
 
+    window.currentSessionId = `${currentTable.id}_${Date.now()}`;
+
+    firebase.firestore().collection('tables').doc(currentTable.id.toString()).update({
+        currentSessionId: window.currentSessionId
+    });
+
     // Write to tableState to match your listener
     firebase.database().ref(`tables/${currentTable.id}`).update({
         tableState: TABLE_STATES.NEW_TOURNAMENT,  // Changed from DEALING

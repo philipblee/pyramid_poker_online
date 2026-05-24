@@ -75,6 +75,7 @@ PyramidPoker.prototype.startNewGame = async function() {
         this.currentRound = 1;
         this.roundHistory = [];
         this.tournamentScores.clear();
+        this.tournamentNumber++;
         console.log(`Round ${this.currentRound} of ${this.maxRounds}`);
 
         // Initialize tournament scores for all players
