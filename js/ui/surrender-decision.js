@@ -1,34 +1,38 @@
 // js/ui/surrender-decision.js - handles play/surrender decision UI
 
 function initializeSurrenderDecision() {
-    const playBtn = document.getElementById('playButton');
-    const surrenderBtn = document.getElementById('surrenderButton');
+    const toggleWrap = document.getElementById('decisionToggleWrap');
+    const toggleBtn = document.getElementById('decisionToggle');
     const submitBtn = document.getElementById('submitDecision');
 
     let currentDecision = 'play'; // Default to play
 
-    // Play button click
-    playBtn.addEventListener('click', () => {
-        currentDecision = 'play';
-        playBtn.classList.remove('btn-secondary');
-        playBtn.classList.add('btn-success'); // Green
-        surrenderBtn.classList.remove('btn-danger');
-        surrenderBtn.classList.add('btn-secondary'); // Gray
-    });
+    function syncDecisionToggle() {
+        if (!toggleBtn) return;
 
-    // Surrender button click
-    surrenderBtn.addEventListener('click', () => {
-        currentDecision = 'surrender';
-        surrenderBtn.classList.remove('btn-secondary');
-        surrenderBtn.classList.add('btn-danger'); // Red
-        playBtn.classList.remove('btn-success');
-        playBtn.classList.add('btn-secondary'); // Gray
+        toggleBtn.dataset.decision = currentDecision;
+        toggleBtn.classList.toggle('is-surrender', currentDecision === 'surrender');
+        toggleBtn.setAttribute('aria-pressed', currentDecision === 'surrender' ? 'true' : 'false');
+        toggleBtn.setAttribute('aria-label', currentDecision === 'play'
+            ? 'Decision set to play. Click to switch to surrender.'
+            : 'Decision set to surrender. Click to switch to play.');
+        toggleWrap?.classList.toggle('is-surrender', currentDecision === 'surrender');
+        toggleBtn.title = currentDecision === 'play'
+            ? 'Currently set to Play. Click to switch to Surrender.'
+            : 'Currently set to Surrender. Click to switch to Play.';
+    }
+
+    toggleBtn?.addEventListener('click', () => {
+        currentDecision = (toggleBtn.dataset.decision || currentDecision) === 'play' ? 'surrender' : 'play';
+        syncDecisionToggle();
     });
 
     // Submit decision
     submitBtn.addEventListener('click', () => {
-        declareDecision(currentDecision);
+        declareDecision(toggleBtn?.dataset.decision || currentDecision);
     });
+
+    syncDecisionToggle();
 }
 
 function showDecisionButtons() {
@@ -47,8 +51,8 @@ function showDecisionButtons() {
     const detectAutoBtn = document.getElementById('detectAutomatics');
     const playAutoBtn = document.getElementById('playAutomatic');
 
-    const playBtn = document.getElementById('playButton');
-    const surrenderBtn = document.getElementById('surrenderButton');
+    const toggleWrap = document.getElementById('decisionToggleWrap');
+    const toggleBtn = document.getElementById('decisionToggle');
     const submitBtn = document.getElementById('submitDecision');
     const reorderRankBtn = document.getElementById('reorderRank');
     const reorderSuitBtn = document.getElementById('reorderSuit');
@@ -72,23 +76,21 @@ function showDecisionButtons() {
         reorderSuitBtn.style.display = 'inline-block';
         reorderSuitBtn.disabled = false;
     }
-    if (playBtn) {
-        playBtn.style.display = 'inline-block';
-        playBtn.className = 'btn btn-success decision-btn';
-        playBtn.disabled = false;
+    if (toggleWrap) {
+        toggleWrap.style.display = 'inline-flex';
+        toggleWrap.classList.remove('is-surrender');
     }
-    if (surrenderBtn) {
-        surrenderBtn.style.display = 'inline-block';
-        surrenderBtn.className = 'btn btn-secondary decision-btn';
-        surrenderBtn.disabled = false;
+    if (toggleBtn) {
+        toggleBtn.dataset.decision = 'play';
+        toggleBtn.classList.remove('is-surrender');
+        toggleBtn.disabled = false;
+        toggleBtn.setAttribute('aria-pressed', 'false');
+        toggleBtn.title = 'Currently set to Play. Click to switch to Surrender.';
     }
     if (submitBtn) {
         submitBtn.style.display = 'inline-block';
         submitBtn.disabled = false;
     }
-
-    // Reset decision to 'play' for new round
-    if (playBtn) playBtn.click();
 
     // Hide Auto and Submit Hand
     if (submitHandBtn) submitHandBtn.style.display = 'none';
@@ -114,8 +116,8 @@ function hideDecisionButtons() {
     const playAutoBtn = document.getElementById('playAutomatic');
     const rankBtn = document.getElementById('sortByRank');
     const suitBtn = document.getElementById('sortBySuit');
-    const playBtn = document.getElementById('playButton');
-    const surrenderBtn = document.getElementById('surrenderButton');
+    const toggleWrap = document.getElementById('decisionToggleWrap');
+    const toggleBtn = document.getElementById('decisionToggle');
     const submitBtn = document.getElementById('submitDecision');
     const reorderRankBtn = document.getElementById('reorderRank');
     const reorderSuitBtn = document.getElementById('reorderSuit');
@@ -123,8 +125,7 @@ function hideDecisionButtons() {
     const autoArrangeBtn = document.getElementById('autoArrange');
 
     // Hide decision buttons (with null checks)
-    if (playBtn) playBtn.style.display = 'none';
-    if (surrenderBtn) surrenderBtn.style.display = 'none';
+    if (toggleWrap) toggleWrap.style.display = 'none';
     if (submitBtn) submitBtn.style.display = 'none';
     if (reorderRankBtn) reorderRankBtn.style.display = 'none';
     if (reorderSuitBtn) reorderSuitBtn.style.display = 'none';
@@ -213,8 +214,7 @@ function declareDecision(decision) {
     console.log(`✅ ${currentPlayer.name} chose: ${decision}`);
 
     // Disable buttons after submission
-    document.getElementById('playButton').disabled = true;
-    document.getElementById('surrenderButton').disabled = true;
+    document.getElementById('decisionToggle').disabled = true;
     document.getElementById('submitDecision').disabled = true;
 
     // Process AI decisions

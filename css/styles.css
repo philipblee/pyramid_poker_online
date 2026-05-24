@@ -145,6 +145,127 @@ body {
     box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
 }
 
+.btn-danger {
+    background: linear-gradient(45deg, #d64545, #ff6b6b);
+    color: white;
+    box-shadow: 0 4px 15px rgba(214, 69, 69, 0.35);
+}
+
+.btn-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(214, 69, 69, 0.45);
+}
+
+.decision-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 25px rgba(0, 0, 0, 0.18);
+}
+
+.decision-label {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.25s ease, opacity 0.25s ease;
+}
+
+.decision-label-play {
+    color: #f4f8ff;
+}
+
+.decision-label-surrender {
+    color: rgba(255, 255, 255, 0.58);
+}
+
+.decision-toggle.is-surrender .decision-label-play {
+    color: rgba(255, 255, 255, 0.58);
+}
+
+.decision-toggle.is-surrender .decision-label-surrender {
+    color: #ffd0d0;
+}
+
+.decision-switch {
+    position: relative;
+    width: 108px;
+    height: 56px;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    background: linear-gradient(180deg, rgba(242, 246, 255, 0.95), rgba(215, 226, 248, 0.9));
+    box-shadow: inset 0 3px 10px rgba(255, 255, 255, 0.7), inset 0 -6px 12px rgba(131, 149, 189, 0.18);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.decision-switch:hover {
+    transform: translateY(-1px);
+    box-shadow: inset 0 3px 10px rgba(255, 255, 255, 0.78), 0 10px 20px rgba(69, 106, 180, 0.18);
+}
+
+.decision-switch-track {
+    position: absolute;
+    inset: 0;
+    display: block;
+}
+
+.decision-switch-thumb {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #85c3ff 0%, #3760ff 45%, #1e37b8 100%);
+    box-shadow: 0 0 0 6px rgba(64, 104, 255, 0.12), 0 10px 22px rgba(44, 75, 196, 0.45);
+    transition: transform 0.28s ease, box-shadow 0.28s ease, background 0.28s ease;
+}
+
+.decision-switch.is-surrender .decision-switch-thumb {
+    transform: translateX(52px);
+    background: radial-gradient(circle at 35% 35%, #ffc0c0 0%, #ff6b6b 45%, #b83333 100%);
+    box-shadow: 0 0 0 6px rgba(255, 107, 107, 0.13), 0 10px 22px rgba(157, 35, 35, 0.38);
+}
+
+.decision-switch-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    line-height: 1;
+    transition: opacity 0.25s ease, color 0.25s ease;
+}
+
+.decision-switch-icon-play {
+    left: 18px;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.decision-switch-icon-surrender {
+    right: 16px;
+    color: rgba(73, 87, 132, 0.72);
+}
+
+.decision-switch.is-surrender .decision-switch-icon-play {
+    color: rgba(73, 87, 132, 0.45);
+}
+
+.decision-switch.is-surrender .decision-switch-icon-surrender {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.decision-switch:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+    transform: none;
+}
+
 .btn:disabled {
     background: #cccccc !important;
     color: #666666 !important;
