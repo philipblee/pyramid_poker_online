@@ -35,7 +35,6 @@
         }
 
         window.game.autoArrangeUsed = false;
-        document.getElementById('autoArrange').textContent = 'BEST';
         document.getElementById('prevArrangement').style.display = 'none';
         document.getElementById('nextArrangement').style.display = 'none';
         document.getElementById('arrangementCounter').style.display = 'none';
@@ -187,10 +186,16 @@
         const autoButton = document.getElementById('detectAutomatics');
         if (autoButton) {
             autoButton.textContent = 'FIND AUTO';
-            // DON'T set onclick - addEventListener already handles routing
             autoButton.title = '';
             autoButton.disabled = false;
         }
+
+        const playAutoBtn = document.getElementById('playAutomatic');
+        if (playAutoBtn) {
+            playAutoBtn.textContent = 'PLAY AUTO';
+            // Don't change disabled state - that's controlled by automatic detection
+        }
+
         window.currentAutomatic = null;
     }
 

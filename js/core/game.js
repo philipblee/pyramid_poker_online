@@ -1003,13 +1003,10 @@ class PyramidPoker {
         if (gameConfig.config.gameConnectMode === 'online') {
             await window.multiDeviceIntegration.storePlayerArrangementToFirebase(playerName, true);
 
-            // 🆕 ADD THIS LINE HERE TOO
-            this.disableAllGameButtons();
-
-            const autoBtn = document.getElementById('detectAutomatics');
-            if (autoBtn) {
-                autoBtn.disabled = true;
-                autoBtn.textContent = 'Submitted ✓';
+            const playAutoBtn = document.getElementById('playAutomatic');
+            if (playAutoBtn) {
+                playAutoBtn.disabled = true;
+                playAutoBtn.textContent = 'PLAY AUTO ✓';
             }
 
             if (await window.multiDeviceIntegration.isTableOwner()) {
@@ -1024,7 +1021,6 @@ class PyramidPoker {
 
         // Reset auto button for next turn
         this.autoArrangeUsed = false;
-        document.getElementById('autoArrange').textContent = 'BEST';
 
         const detectAutomaticsBtn = document.getElementById('detectAutomatics');
         if (detectAutomaticsBtn) {
@@ -1073,7 +1069,6 @@ class PyramidPoker {
 
         // Reset auto button for next turn (always happens after submit)
         this.autoArrangeUsed = false;
-        document.getElementById('autoArrange').textContent = 'BEST';
 
         const detectAutomaticsBtn = document.getElementById('detectAutomatics'); // CHANGED - added 's'
         if (detectAutomaticsBtn) {
