@@ -51,6 +51,8 @@ PyramidPoker.prototype.showTournamentSummary = function() {
             const sessionId = window.currentSessionId;
             const db = firebase.firestore();
 
+            console.log('💾 Firestore write attempt - tournamentNumber:', this.tournamentNumber, 'sessionId:', sessionId);
+
             if (this.tournamentNumber === 1) {
                 // Create new session doc
                 db.collection('sessions').doc(sessionId).set({
@@ -62,12 +64,15 @@ PyramidPoker.prototype.showTournamentSummary = function() {
                     ended: false,
                     endedAt: null,
                     tournaments: { '1': tournamentEntry }
-                });
+                })
+                    .then(() => console.log('✅ Session doc created'))
+                    .catch(err => console.error('❌ Session create failed:', err));
             } else {
                 // Append to existing session doc
                 db.collection('sessions').doc(sessionId).update({
                     [`tournaments.${this.tournamentNumber}`]: tournamentEntry
-                });
+                })
+                    .catch(err => console.error('❌ Session update failed:', err));
             }
         }
 
