@@ -163,6 +163,10 @@ PyramidPoker.prototype.startNewRound = async function() {
 
         hideDecisionButtons();
 
+        // Clear surrender notice from previous round
+        const surrenderNotice = document.getElementById('surrenderNotice');
+        if (surrenderNotice) surrenderNotice.style.display = 'none';
+
         // NEW: Collect antes
         await this.collectAntes();
 
@@ -181,12 +185,15 @@ PyramidPoker.prototype.startNewRound = async function() {
         if (this.automaticHands) {
             this.automaticHands.clear();
         }
-
-        // IN startNewRound() method, ADD this block after the card dealing loop:
+        window.topArrangements = [];
+        window.topArrangementIndex = 0;
 
         await this.dealCardsToAllPlayers();
         resetAutomaticButton();
         hideAutomaticMessage();
+        document.getElementById('prevArrangement').style.display = 'none';
+        document.getElementById('nextArrangement').style.display = 'none';
+        document.getElementById('arrangementCounter').style.display = 'none';
 
         // Only load hand immediately for owner/single-player AND not kitty variant
         // Multi-device kitty uses state machine, everything else loads immediately
