@@ -229,7 +229,7 @@ class MultiDeviceIntegration {
         const submitBtn = document.getElementById('submitHand');
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitted ✓';
+            submitBtn.textContent = 'PLAY HAND ✓';
             submitBtn.style.backgroundColor = '#28a745';
         }
     }
