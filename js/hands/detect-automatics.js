@@ -35,6 +35,7 @@
         }
 
         window.game.autoArrangeUsed = false;
+        document.getElementById('autoArrange').textContent = 'BEST';
         document.getElementById('prevArrangement').style.display = 'none';
         document.getElementById('nextArrangement').style.display = 'none';
         document.getElementById('arrangementCounter').style.display = 'none';

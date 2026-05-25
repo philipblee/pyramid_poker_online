@@ -994,6 +994,7 @@ class PyramidPoker {
 
         // Reset auto button for next turn
         this.autoArrangeUsed = false;
+        document.getElementById('autoArrange').textContent = 'BEST';
 
         const detectAutomaticsBtn = document.getElementById('detectAutomatics');
         if (detectAutomaticsBtn) {
@@ -1042,6 +1043,7 @@ class PyramidPoker {
 
         // Reset auto button for next turn (always happens after submit)
         this.autoArrangeUsed = false;
+        document.getElementById('autoArrange').textContent = 'BEST';
 
         const detectAutomaticsBtn = document.getElementById('detectAutomatics'); // CHANGED - added 's'
         if (detectAutomaticsBtn) {
