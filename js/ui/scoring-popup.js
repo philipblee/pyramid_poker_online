@@ -51,7 +51,7 @@ function showMiniCards(cards) {
 
 // Strip @gmail.com for compact display
 function getCompactName(playerName) {
-    return playerName.replace(/@gmail\.com$/, '');
+    return playerName.replace(/@[^@]+$/, '');
 }
 
 async function distributeChips() {
