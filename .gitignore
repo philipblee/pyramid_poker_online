@@ -3,3 +3,7 @@ notes.txt
 personal/
 .pdf
 .claude/
+node_modules/
+package-lock.json
+test-results/
+tests/
