@@ -535,10 +535,10 @@ function resetGameUI() {
         autoArrange.disabled = false;
     }
 
-    // Reset submit button to disabled "Submit"
+    // Reset submit button to disabled "PLAY HAND"
     const submitHand = document.getElementById('submitHand');
     if (submitHand) {
-        submitHand.textContent = 'Submit';
+        submitHand.textContent = 'PLAY HAND';
         submitHand.disabled = true;
     }
 
