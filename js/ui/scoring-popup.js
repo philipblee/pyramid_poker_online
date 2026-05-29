@@ -855,14 +855,23 @@ async function showPlayerHands(game, handsToDisplay, containerElement) {
             const sortedMiddle = sortCardsForDisplay(hand.middle, evaluateHand(hand.middle));
             const sortedFront = sortCardsForDisplay(hand.front, evaluateThreeCardHand(hand.front));
 
-            // Then use sorted versions
-            showMiniCards(sortedBack)
-            showMiniCards(sortedMiddle)
-            showMiniCards(sortedFront)
+            // Get all 17 original dealt cards from playerHands
+            const playerHandData = game.playerHands.get(player.name);
+            const allDealtCards = playerHandData?.originalCards || [...(hand.back || []), ...(hand.middle || []), ...(hand.front || [])];
+
+            const sortedAllSeventeen = [...allDealtCards].sort((a, b) => {
+                if (a.value !== b.value) return b.value - a.value;
+                const suitOrder = { '♠': 4, '♥': 3, '♦': 2, '♣': 1 };
+                return suitOrder[b.suit] - suitOrder[a.suit];
+            });
 
             playerDiv.innerHTML = `
                 <div class="player-hand-title">${player.name}</div>
                 <div class="hand-row">
+                    <div class="hand-label-popup">Full Hand (${sortedAllSeventeen.length}):</div>
+                    <div class="hand-cards">${showMiniCards(sortedAllSeventeen)}</div>
+                </div>
+                <div class="hand-row" style="border-top: 2px solid rgba(255,255,255,0.5); margin-top: 4px; padding-top: 4px;">
                     <div class="hand-label-popup">Back (${backCardCount}):</div>
                     <div class="hand-cards">${showMiniCards(sortedBack)}</div>
                     <div class="hand-strength-popup">${getHandName(evaluateHand(hand.back))} (${evaluateHand(hand.back).handStrength.join(', ')})</div>
