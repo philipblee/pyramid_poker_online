@@ -833,17 +833,24 @@ async function showPlayerHands(game, handsToDisplay, containerElement) {
         const surrendered = window.game.surrenderDecisions?.get(player.name) === 'surrender';
 
         if (surrendered) {
+            const playerHandData = game.playerHands?.get(player.name);
+            const dealtCards = playerHandData?.originalCards || [];
+
+            const suitOrder = { '♠': 4, '♥': 3, '♦': 2, '♣': 1 };
+            const sortedDealtCards = [...dealtCards].sort((a, b) => {
+                if (a.value !== b.value) return b.value - a.value;
+                return (suitOrder[b.suit] ?? 0) - (suitOrder[a.suit] ?? 0);
+            });
+
             playerDiv.innerHTML = `
                 <div class="player-hand-title">${player.name}</div>
-                <div class="hand-row" style="padding: 20px; text-align: center;">
-                    <div style="color: #ff6b6b; font-weight: bold; font-size: 1.1em;">
-                        Surrendered
-                    </div>
-                    <div style="color: #888; margin-top: 10px;">
-                        Paid 10 chip penalty
-                    </div>
+                <div class="hand-row">
+                    <div class="hand-label-popup">Full Hand (${sortedDealtCards.length}):</div>
+                    <div class="hand-cards">${showMiniCards(sortedDealtCards)}</div>
+                    <div class="hand-strength-popup" style="color: #ff6b6b;">Surrendered · -10 chips</div>
                 </div>
             `;
+
         } else {
             // Display normal hand
             const backCardCount = hand.back ? hand.back.length : 5;
