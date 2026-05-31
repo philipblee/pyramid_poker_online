@@ -2,8 +2,33 @@
 // Session modal — shows cross-tournament scores and owner controls
 
 async function showSessionModal() {
-    const sessionId = window.currentSessionId;
+    if (document.getElementById('sessionModal')) return;
+    if (window.isOwner) {
+        await setTableState(TABLE_STATES.SHOW_SESSION_MODAL);
+    }
     const db = firebase.firestore();
+    const tableId = window.game?.currentTableId?.toString();
+
+    let sessionId = window.currentSessionId;
+    if (!sessionId) {
+        console.log('🔍 sessionId missing, querying by tableId:', tableId);
+        try {
+            const tableIdNum = Number(tableId);
+            const querySnapshot = await db.collection('sessions')
+                .where('tableId', '==', tableIdNum)
+                .where('ended', '==', false)
+                .limit(1)
+                .get();
+            if (querySnapshot.empty) {
+                console.error('❌ No active session found for table:', tableId);
+                return;
+            }
+            sessionId = querySnapshot.docs[0].id;
+        } catch (err) {
+            console.error('❌ Session query failed:', err);
+            return;
+        }
+    }
 
     // Fetch session doc from Firestore
     let sessionData;

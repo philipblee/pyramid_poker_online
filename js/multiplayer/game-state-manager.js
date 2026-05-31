@@ -216,6 +216,10 @@ async function handleTableStateChange(tableState) {
             game.showTournamentSummary();
             break;
 
+        case TABLE_STATES.SHOW_SESSION_MODAL:
+            showSessionModal();
+            break;
+
         case TABLE_STATES.SESSION_ENDED:
             console.log('🔚 Session ended - returning all players to lobby');
             document.querySelectorAll('div[style*="position: fixed"]').forEach(modal => modal.remove());
