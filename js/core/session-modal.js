@@ -16,11 +16,11 @@ async function showSessionModal() {
             const tableIdNum = Number(tableId);
             const querySnapshot = await db.collection('sessions')
                 .where('tableId', '==', tableIdNum)
-                .where('ended', '==', false)
+                .orderBy('startedAt', 'desc')
                 .limit(1)
                 .get();
             if (querySnapshot.empty) {
-                console.error('❌ No active session found for table:', tableId);
+                console.error('❌ No session found for table:', tableId);
                 return;
             }
             sessionId = querySnapshot.docs[0].id;
