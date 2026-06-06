@@ -156,6 +156,19 @@ PyramidPoker.prototype.showTournamentSummary = function() {
             `;
         }
 
+        const arrowOnclick = window.isOwner
+            ? `showSessionModal();`
+            : `(async()=>{ try { const doc = await firebase.firestore().collection('tables').doc(String(window.multiDeviceIntegration.tableId)).get(); showSessionModal(doc.data()?.currentSessionId); } catch(e) { console.error('Session fetch failed:', e); } })();`;
+
+        html += `
+            <div style="text-align: right; margin-top: 8px;">
+                <button onclick="${arrowOnclick}"
+                        style="background: transparent; color: #4ecdc4; border: 1px solid #4ecdc4; padding: 8px 16px; border-radius: 8px; font-size: 16px; cursor: pointer;">
+                    →
+                </button>
+            </div>
+        `;
+
         content.innerHTML = html;
         modal.appendChild(content);
         document.body.appendChild(modal);

@@ -1,8 +1,8 @@
 // js/core/session-modal.js
 // Session modal — shows cross-tournament scores and owner controls
 
-async function showSessionModal() {
-    const sessionId = window.currentSessionId;
+async function showSessionModal(sessionId) {
+    sessionId = sessionId || window.currentSessionId;
     const db = firebase.firestore();
 
     // Fetch session doc from Firestore
@@ -101,8 +101,18 @@ async function showSessionModal() {
         tableHtml += `<p style="color:#ffd700; font-size:16px; margin-top:20px;">Waiting for owner...</p>`;
     }
 
+    tableHtml += `
+        <div style="text-align: left; margin-top: 8px;">
+            <button onclick="document.getElementById('sessionModal').remove(); window.game.showTournamentSummary();"
+                    style="background: transparent; color: #4ecdc4; border: 1px solid #4ecdc4; padding: 8px 16px; border-radius: 8px; font-size: 16px; cursor: pointer;">
+                ←
+            </button>
+        </div>
+    `;
+
     content.innerHTML = tableHtml;
     modal.appendChild(content);
+    clearAllModals();
     document.body.appendChild(modal);
 }
 
