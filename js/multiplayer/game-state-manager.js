@@ -113,6 +113,12 @@ async function handleTableStateChange(tableState) {
         case TABLE_STATES.PLAYING:
             console.log('🎬 Moving to playing phase - showing all cards');
 
+            window.topArrangements = [];
+            window.topArrangementIndex = 0;
+            document.getElementById('prevArrangement').style.display = 'none';
+            document.getElementById('nextArrangement').style.display = 'none';
+            document.getElementById('arrangementCounter').style.display = 'none';
+
             // Hide decision buttons, show arrangement buttons
             const decisionToggleWrap = document.getElementById('decisionToggleWrap');
             const submitDecisionBtn = document.getElementById('submitDecision');
