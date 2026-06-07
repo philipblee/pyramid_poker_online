@@ -31,6 +31,8 @@ async function showSessionModal(sessionId) {
         });
     });
 
+    window.sessionTotals = { ...playerTotals };
+
     // Build modal
     const modal = document.createElement('div');
     modal.id = 'sessionModal';

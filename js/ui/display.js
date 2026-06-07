@@ -237,7 +237,38 @@ function updatePlayerList(game) {
     const playerList = document.getElementById('playerList');
     playerList.innerHTML = '';
 
-    // 1. FIRST: Tournament standings (if tournament is active)
+    // 0. FIRST: Session totals (if session has started)
+    if (window.sessionTotals && Object.keys(window.sessionTotals).length > 0) {
+        const sessionSection = document.createElement('div');
+        sessionSection.className = 'session-totals';
+        sessionSection.innerHTML = `
+            <h4 style="color: #ffd700; margin: 0 0 10px 0; font-size: 14px;">📊 Session Totals</h4>
+        `;
+
+        const sorted = Object.entries(window.sessionTotals)
+            .sort((a, b) => b[1] - a[1]);
+
+        sorted.forEach(([playerName, total]) => {
+            const color = total < 0 ? '#ff6b6b' : '#4ecdc4';
+            const row = document.createElement('div');
+            row.style.cssText = `
+                display: flex; justify-content: space-between;
+                padding: 8px 12px; margin: 3px 0;
+                background: rgba(78, 205, 196, 0.1); border-radius: 6px;
+                border: 1px solid rgba(78, 205, 196, 0.3);
+                font-size: 14px; font-weight: bold;
+            `;
+            row.innerHTML = `
+                <span style="color: #ccc;">${getCompactName(playerName)}</span>
+                <span style="color: ${color};">${total > 0 ? '+' : ''}${total}</span>
+            `;
+            sessionSection.appendChild(row);
+        });
+
+        playerList.appendChild(sessionSection);
+    }
+
+    // 1. SECOND: Tournament standings (if tournament is active)
 
     if (game.currentRound > 0) {
         const standingsSection = document.createElement('div');

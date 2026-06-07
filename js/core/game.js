@@ -23,6 +23,7 @@ class PyramidPoker {
         this.tournamentScores = new Map(); // Running totals across rounds
         this.initializeEventListeners();
         this.surrenderDecisions = new Map(); // playerName -> 'play' or 'surrender'
+        window.sessionTotals = {};
         updateDisplay(this);
         createParticles();
     }
