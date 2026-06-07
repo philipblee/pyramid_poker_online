@@ -31,6 +31,7 @@ async function handleTableStateChange(tableState) {
 
         case TABLE_STATES.NEW_TOURNAMENT:
             console.log('🎮 Handling NEW_TOURNAMENT state...');
+            document.getElementById('sessionModal')?.remove();
             document.querySelectorAll('div[style*="position: fixed"]').forEach(modal => {
                 if (modal.textContent.includes('TOURNAMENT COMPLETE')) modal.remove();
             });
