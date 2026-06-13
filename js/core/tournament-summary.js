@@ -1,13 +1,8 @@
 // js/core/tournament-summary.js
 // Tournament summary display and post-tournament navigation
 
-PyramidPoker.prototype.showTournamentSummary = function() {
+PyramidPoker.prototype.showTournamentSummary = async function() {
         console.log('🏆 Showing tournament summary...');
-//        console.log('📊 roundHistory.length:', this.roundHistory.length);
-//        console.log('📊 Full roundHistory:', JSON.stringify(this.roundHistory, null, 2));
-//
-//        console.log('📊 TOURNAMENT SUMMARY DATA:');
-//        console.log('  - roundHistory.length:', this.roundHistory.length);
         this.roundHistory.forEach((round, idx) => {
             console.log(`  - Round ${idx + 1}: roundNumber=${round.roundNumber}, hasChipChanges=${!!round.chipChanges}`);
         });
@@ -36,48 +31,86 @@ PyramidPoker.prototype.showTournamentSummary = function() {
                 totalChipChange: entry[1]
             }));
 
-        // Save tournament scores to Firestore session (owner only)
-        if (window.isOwner && gameConfig.config.gameDeviceMode === 'multi-device') {
-            const sessionScores = {};
-            standings.forEach(s => {
-                sessionScores[s.playerName] = s.totalChipChange;
-            });
-
-            const tournamentEntry = {
-                scores: sessionScores,
-                completedAt: new Date().toISOString()
-            };
-
-            const sessionId = window.currentSessionId;
+        // Firestore write (owner) + session totals fetch (all players) — multi-device only
+        let playerTotals = null;
+        let sessionPlayers = null;
+        let sessionTournaments = null;
+        let sessionTournamentNumbers = null;
+        if (gameConfig.config.gameDeviceMode === 'multi-device') {
             const db = firebase.firestore();
 
-            console.log('💾 Firestore write attempt - tournamentNumber:', this.tournamentNumber, 'sessionId:', sessionId);
+            if (window.isOwner) {
+                const sessionScores = {};
+                standings.forEach(s => {
+                    sessionScores[s.playerName] = s.totalChipChange;
+                });
 
-            if (this.tournamentNumber === 1) {
-                // Create new session doc
-                db.collection('sessions').doc(sessionId).set({
-                    tableId: window.multiDeviceIntegration.tableId,
-                    tableName: gameConfig.config.tableName || '',
-                    ownerUid: firebase.auth().currentUser?.uid || '',
-                    players: standings.map(s => s.playerName),
-                    startedAt: new Date().toISOString(),
-                    ended: false,
-                    endedAt: null,
-                    tournaments: { '1': tournamentEntry }
-                })
-                    .then(() => console.log('✅ Session doc created'))
-                    .catch(err => console.error('❌ Session create failed:', err));
-            } else {
-                // Append to existing session doc
-                db.collection('sessions').doc(sessionId).update({
-                    [`tournaments.${this.tournamentNumber}`]: tournamentEntry
-                })
-                    .catch(err => console.error('❌ Session update failed:', err));
+                const tournamentEntry = {
+                    scores: sessionScores,
+                    completedAt: new Date().toISOString()
+                };
+
+                const sessionId = window.currentSessionId;
+
+                console.log('💾 Firestore write attempt - tournamentNumber:', this.tournamentNumber, 'sessionId:', sessionId);
+
+                try {
+                    if (this.tournamentNumber === 1) {
+                        await db.collection('sessions').doc(sessionId).set({
+                            tableId: window.multiDeviceIntegration.tableId,
+                            tableName: gameConfig.config.tableName || '',
+                            ownerUid: firebase.auth().currentUser?.uid || '',
+                            players: standings.map(s => s.playerName),
+                            startedAt: new Date().toISOString(),
+                            ended: false,
+                            endedAt: null,
+                            tournaments: { '1': tournamentEntry }
+                        });
+                        console.log('✅ Session doc created');
+                    } else {
+                        await db.collection('sessions').doc(sessionId).update({
+                            [`tournaments.${this.tournamentNumber}`]: tournamentEntry
+                        });
+                    }
+                } catch (err) {
+                    console.error('❌ Session write failed:', err);
+                }
+            }
+
+            // Fetch session doc and compute cross-tournament totals (all players)
+            try {
+                let fetchSessionId = window.currentSessionId;
+                if (!window.isOwner) {
+                    await new Promise(r => setTimeout(r, 1000)); // guard against owner write race
+                    const tableDoc = await db.collection('tables').doc(String(window.multiDeviceIntegration.tableId)).get();
+                    fetchSessionId = tableDoc.data()?.currentSessionId;
+                }
+                if (fetchSessionId) {
+                    const sessionDoc = await db.collection('sessions').doc(fetchSessionId).get();
+                    if (sessionDoc.exists) {
+                        const { players, tournaments } = sessionDoc.data();
+                        const tournamentNumbers = Object.keys(tournaments).map(Number).sort((a, b) => a - b);
+                        playerTotals = {};
+                        players.forEach(p => playerTotals[p] = 0);
+                        tournamentNumbers.forEach(n => {
+                            players.forEach(p => {
+                                playerTotals[p] += tournaments[n].scores[p] || 0;
+                            });
+                        });
+                        window.sessionTotals = { ...playerTotals };
+                        sessionPlayers = players;
+                        sessionTournaments = tournaments;
+                        sessionTournamentNumbers = tournamentNumbers;
+                    }
+                }
+            } catch (err) {
+                console.error('❌ Session fetch failed:', err);
             }
         }
 
         // Create tournament summary modal
         const modal = document.createElement('div');
+        modal.id = 'tournamentSummaryModal';
         modal.style.cssText = `
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.8); z-index: 1001;
@@ -116,7 +149,9 @@ PyramidPoker.prototype.showTournamentSummary = function() {
             `;
         });
 
-        html += `</div><div style="background: rgba(52, 73, 94, 0.5); padding: 20px; border-radius: 10px; margin-bottom: 24px;">
+        html += `</div>`;
+
+        html += `<div style="background: rgba(52, 73, 94, 0.5); padding: 20px; border-radius: 10px; margin-bottom: 24px;">
             <h3 style="color: #4ecdc4; margin-bottom: 15px;">Round-by-Round Breakdown</h3>
         `;
 
@@ -136,38 +171,60 @@ PyramidPoker.prototype.showTournamentSummary = function() {
 
         html += `</div>`;
 
-        const canReturn = gameConfig.config.gameDeviceMode !== 'multi-device' || window.isOwner;
-
-        if (canReturn) {
-            const isMultiDevice = gameConfig.config.gameDeviceMode === 'multi-device';
-            const buttonLabel = isMultiDevice ? 'Continue' : 'Return to Table';
-            const buttonAction = isMultiDevice ? 'showSessionModal()' : 'game.returnToLobbyAfterTournament()';
-            html += `
-                <button onclick="${buttonAction};"
-                        style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px;">
-                    ${buttonLabel}
-                </button>
-            `;
-        } else {
-            html += `
-                <p style="color: #ffd700; margin-top: 20px; font-size: 16px;">
-                    Waiting for table owner to continue...
-                </p>
-            `;
+        if (playerTotals !== null && sessionPlayers && sessionTournaments && sessionTournamentNumbers) {
+            html += `<div style="background: rgba(52, 73, 94, 0.5); padding: 20px; border-radius: 10px; margin-bottom: 24px;">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Session Totals</h3>
+                <table style="width:100%; border-collapse:collapse;"><thead><tr>
+                    <th style="padding:8px; color:#ffd700; border-bottom:2px solid #4ecdc4; text-align:left;">Tournament</th>`;
+            sessionPlayers.forEach(p => {
+                const displayName = p.includes('@') ? p.split('@')[0] : p;
+                html += `<th style="padding:8px; color:#ffd700; border-bottom:2px solid #4ecdc4;">${displayName}</th>`;
+            });
+            html += `</tr></thead><tbody>`;
+            sessionTournamentNumbers.forEach(n => {
+                html += `<tr><td style="padding:8px; color:#ffd700; text-align:left;">Tournament ${n}</td>`;
+                sessionPlayers.forEach(p => {
+                    const score = sessionTournaments[n].scores[p] || 0;
+                    const color = score > 0 ? '#4ecdc4' : score < 0 ? '#ff6b6b' : '#95a5a6';
+                    html += `<td style="padding:8px; color:${color};">${score > 0 ? '+' : ''}${score}</td>`;
+                });
+                html += `</tr>`;
+            });
+            html += `</tbody><tfoot><tr style="border-top:2px solid #ffd700;">
+                <td style="padding:8px; color:#ffd700; font-weight:bold; text-align:left;">TOTAL</td>`;
+            sessionPlayers.forEach(p => {
+                const total = playerTotals[p];
+                const color = total > 0 ? '#4ecdc4' : total < 0 ? '#ff6b6b' : '#95a5a6';
+                html += `<td style="padding:8px; color:${color}; font-weight:bold;">${total > 0 ? '+' : ''}${total}</td>`;
+            });
+            html += `</tr></tfoot></table></div>`;
         }
 
-        const arrowOnclick = window.isOwner
-            ? `showSessionModal();`
-            : `(async()=>{ try { const doc = await firebase.firestore().collection('tables').doc(String(window.multiDeviceIntegration.tableId)).get(); showSessionModal(doc.data()?.currentSessionId); } catch(e) { console.error('Session fetch failed:', e); } })();`;
-
-        html += `
-            <div style="text-align: right; margin-top: 8px;">
-                <button onclick="${arrowOnclick}"
-                        style="background: transparent; color: #4ecdc4; border: 1px solid #4ecdc4; padding: 8px 16px; border-radius: 8px; font-size: 16px; cursor: pointer;">
-                    →
+        if (gameConfig.config.gameDeviceMode === 'multi-device') {
+            if (window.isOwner) {
+                html += `
+                    <div style="display:flex; gap:16px; justify-content:center; margin-top:10px;">
+                        <button onclick="handleNextTournament();"
+                                style="background:#4ecdc4; color:white; border:none; padding:15px 30px; border-radius:8px; font-size:16px; font-weight:bold; cursor:pointer;">
+                            Next Tournament
+                        </button>
+                        <button onclick="handleEndSession();"
+                                style="background:#ff6b6b; color:white; border:none; padding:15px 30px; border-radius:8px; font-size:16px; font-weight:bold; cursor:pointer;">
+                            End Session
+                        </button>
+                    </div>
+                `;
+            } else {
+                html += `<p style="color:#ffd700; font-size:16px; margin-top:20px;">Waiting for owner...</p>`;
+            }
+        } else {
+            html += `
+                <button onclick="game.returnToLobbyAfterTournament();"
+                        style="background: #4ecdc4; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px;">
+                    Return to Table
                 </button>
-            </div>
-        `;
+            `;
+        }
 
         content.innerHTML = html;
         modal.appendChild(content);
@@ -206,3 +263,19 @@ PyramidPoker.prototype.returnToLobbyAfterTournament = function() {
         // Show table screen for everyone
         showTableScreen();
     };
+
+
+function handleNextTournament() {
+    document.getElementById('tournamentSummaryModal')?.remove();
+    setTableState(TABLE_STATES.NEW_TOURNAMENT);
+}
+
+async function handleEndSession() {
+    const db = firebase.firestore();
+    await db.collection('sessions').doc(window.currentSessionId).update({
+        ended: true,
+        endedAt: new Date().toISOString()
+    });
+    document.getElementById('tournamentSummaryModal')?.remove();
+    setTableState(TABLE_STATES.SESSION_ENDED);
+}
