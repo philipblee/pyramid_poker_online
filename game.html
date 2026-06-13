@@ -104,6 +104,10 @@
                 👤 <span id="currentUser">Loading...</span>
             </div>
 
+            <div style="margin-top: 10px;">
+                <button onclick="priorSessions()" style="background:#4ecdc4; color:white; border:none; padding:8px 18px; border-radius:8px; font-size:14px; font-weight:bold; cursor:pointer;">📋 Prior Sessions</button>
+            </div>
+
             <!-- DEBUG: Clear stuck tables -->
             <div style="margin-top: 10px; display: flex; gap: 10px;">
                 <button onclick="navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister())).then(() => location.reload())" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">
@@ -473,6 +477,7 @@
     <script src="js/core/game.js"></script>
     <script src="js/core/round-manager.js"></script>
     <script src="js/core/tournament-summary.js"></script>
+    <script src="js/core/prior-sessions.js"></script>
     <script src="js/utilities/analysis.js"></script>
     <script src="js/utilities/card-parser.js"></script>
 
