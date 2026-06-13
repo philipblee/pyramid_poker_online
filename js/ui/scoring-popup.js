@@ -834,15 +834,18 @@ async function showPlayerHands(game, handsToDisplay, containerElement) {
         const surrendered = window.game.surrenderDecisions?.get(player.name) === 'surrender';
 
         if (surrendered) {
+            const playerData = window.game.playerHands.get(player.name);
+            const originalCards = playerData?.originalCards || [];
+            const handCards = originalCards.slice(0, 13);
+            const kittyCards = originalCards.slice(13, 17);
+
             playerDiv.innerHTML = `
-                <div class="player-hand-title">${player.name}</div>
-                <div class="hand-row" style="padding: 20px; text-align: center;">
-                    <div style="color: #ff6b6b; font-weight: bold; font-size: 1.1em;">
-                        Surrendered
-                    </div>
-                    <div style="color: #888; margin-top: 10px;">
-                        Paid 10 chip penalty
-                    </div>
+                <div class="player-hand-title">${player.name} 🏳️ Surrendered</div>
+                <div class="hand-row" style="align-items: center; flex-wrap: wrap;">
+                    <div class="hand-label-popup">Cards:</div>
+                    <div class="hand-cards">${showMiniCards(handCards)}</div>
+                    <div style="width: 1px; background: rgba(255,255,255,0.25); height: 40px; margin: 0 8px; flex-shrink: 0;"></div>
+                    <div class="hand-cards" style="opacity: 0.45;">${showMiniCards(kittyCards)}</div>
                 </div>
             `;
         } else {
