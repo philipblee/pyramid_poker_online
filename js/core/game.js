@@ -964,7 +964,8 @@ class PyramidPoker {
         this.submittedHands.set(playerName, {
             back: [...playerData.back],
             middle: [...playerData.middle],
-            front: [...playerData.front]
+            front: [...playerData.front],
+            discards: [...(playerData?.cards || [])]
         });
         this.automaticHands.set(playerName, automatic);
 
@@ -1032,7 +1033,8 @@ class PyramidPoker {
         this.submittedHands.set(currentPlayer.name, {
             back: [...playerData.back],
             middle: [...playerData.middle],
-            front: [...playerData.front]
+            front: [...playerData.front],
+            discards: [...(playerData?.cards || [])]
         });
 
         // Clear any automatic flag for this player (they submitted normally)

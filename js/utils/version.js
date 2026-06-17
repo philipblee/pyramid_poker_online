@@ -3,7 +3,7 @@
 
 async function loadVersionInfo() {
     try {
-        const response = await fetch('./version.json');
+        const response = await fetch('./version.json?t=' + Date.now());
         const versionInfo = await response.json();
 
         // Update the existing version-tag element

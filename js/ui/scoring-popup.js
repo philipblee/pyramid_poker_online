@@ -864,24 +864,7 @@ async function showPlayerHands(game, handsToDisplay, containerElement) {
             showMiniCards(sortedMiddle)
             showMiniCards(sortedFront)
 
-            const playerData = window.game.playerHands.get(player.name);
-            const placedKeys = new Set([
-                ...(hand.back || []),
-                ...(hand.middle || []),
-                ...(hand.front || [])
-            ].map(c => c.wasWild ? '🃏wild' : `${c.rank}${c.suit}`));
-
-            const discards = (playerData?.originalCards || []).filter(c => {
-                if (c.isWild) return false; // handled separately below
-                return !placedKeys.has(`${c.rank}${c.suit}`);
-            });
-
-            const wildCountInOriginal = (playerData?.originalCards || []).filter(c => c.isWild).length;
-            const wildCountPlaced = [...(hand.back || []), ...(hand.middle || []), ...(hand.front || [])].filter(c => c.wasWild || c.isWild).length;
-            const wildDiscardCount = Math.max(0, wildCountInOriginal - wildCountPlaced);
-            const wildDiscards = Array(wildDiscardCount).fill({ isWild: true });
-
-            const allDiscards = [...discards, ...wildDiscards];
+            const allDiscards = hand.discards || [];
 
             playerDiv.innerHTML = `
                 <div class="player-hand-title">${player.name}</div>
