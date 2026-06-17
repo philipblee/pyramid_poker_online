@@ -387,13 +387,6 @@ function listenForStatusUpdates(tableId) {
             if (message) {
                 console.log('📨 Status message received:', message);
 
-                // Don't overwrite if local player surrendered
-                const localDecision = window.game?.surrenderDecisions?.get(window.uniquePlayerName);
-                if (localDecision === 'surrender') {
-                    console.log('⏭️ Skipping status update - player surrendered');
-                    return;
-                }
-
                 const statusDiv = document.getElementById('status');
                 if (statusDiv) {
                     statusDiv.innerHTML = message;
