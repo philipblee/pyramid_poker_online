@@ -866,11 +866,7 @@ async function showPlayerHands(game, handsToDisplay, containerElement) {
             const playerHandData = game.playerHands.get(player.name);
             const allDealtCards = playerHandData?.originalCards || [...(hand.back || []), ...(hand.middle || []), ...(hand.front || [])];
 
-            const sortedAllSeventeen = [...allDealtCards].sort((a, b) => {
-                if (a.value !== b.value) return b.value - a.value;
-                const suitOrder = { '♠': 4, '♥': 3, '♦': 2, '♣': 1 };
-                return suitOrder[b.suit] - suitOrder[a.suit];
-            });
+            const allDiscards = hand.discards || [];
 
             playerDiv.innerHTML = `
                 <div class="player-hand-title">${player.name}</div>

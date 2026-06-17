@@ -544,8 +544,8 @@ class MultiDeviceIntegration {
 
             Object.entries(dealtHands).forEach(([playerName, handData]) => {
                 window.game.playerHands.set(playerName, {
-                    cards: handData.cards,        // Direct from Firebase
-                    originalCards: handData.cards, // Same data
+                    cards: handData.cards,
+                    originalCards: handData.cards.map(card => ({...card})),
                     back: [],
                     middle: [],
                     front: []
@@ -625,6 +625,7 @@ class MultiDeviceIntegration {
                 back: playerHand.back,
                 middle: playerHand.middle,
                 front: playerHand.front,
+                discards: playerHand.discards || playerHand.cards || [],
                 playedAutomatic: isAutomatic ? 'yes' : 'no',
                 automaticType: isAutomatic ? window.game.automaticHands.get(playerName)?.type : null,
                 timestamp: Date.now()
