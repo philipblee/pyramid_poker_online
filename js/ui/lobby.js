@@ -292,6 +292,7 @@ async function joinTable(table) {
 
 
         window.isOwner = playerInfo.isOwner;
+        checkForOpenSession();
 
         // If owner, write initial settings to Firebase
         if (playerInfo.isOwner) {

@@ -1,35 +1,39 @@
 // js/core/tournament-summary.js
 // Tournament summary display and post-tournament navigation
 
-PyramidPoker.prototype.showTournamentSummary = async function() {
+PyramidPoker.prototype.showTournamentSummary = async function(skipRoundByRound = false) {
         console.log('🏆 Showing tournament summary...');
-        this.roundHistory.forEach((round, idx) => {
-            console.log(`  - Round ${idx + 1}: roundNumber=${round.roundNumber}, hasChipChanges=${!!round.chipChanges}`);
-        });
 
-        // Calculate cumulative chip changes from all completed rounds
-        const chipTotals = new Map();
-        this.playerManager.players.forEach(player => {
-            chipTotals.set(player.name, 0);
-        });
+        let standings = [];
+        if (!skipRoundByRound) {
+            this.roundHistory.forEach((round, idx) => {
+                console.log(`  - Round ${idx + 1}: roundNumber=${round.roundNumber}, hasChipChanges=${!!round.chipChanges}`);
+            });
 
-        this.roundHistory.forEach(roundData => {
-            if (roundData.chipChanges) {
-                roundData.chipChanges.forEach((chipChange, playerName) => {
-                    const current = chipTotals.get(playerName) || 0;
-                    chipTotals.set(playerName, current + chipChange);
-                });
-            }
-        });
+            // Calculate cumulative chip changes from all completed rounds
+            const chipTotals = new Map();
+            this.playerManager.players.forEach(player => {
+                chipTotals.set(player.name, 0);
+            });
 
-        // Create sorted tournament standings by chip changes
-        const standings = [...chipTotals.entries()]
-            .sort((a, b) => b[1] - a[1])
-            .map((entry, index) => ({
-                position: index + 1,
-                playerName: entry[0],
-                totalChipChange: entry[1]
-            }));
+            this.roundHistory.forEach(roundData => {
+                if (roundData.chipChanges) {
+                    roundData.chipChanges.forEach((chipChange, playerName) => {
+                        const current = chipTotals.get(playerName) || 0;
+                        chipTotals.set(playerName, current + chipChange);
+                    });
+                }
+            });
+
+            // Create sorted tournament standings by chip changes
+            standings = [...chipTotals.entries()]
+                .sort((a, b) => b[1] - a[1])
+                .map((entry, index) => ({
+                    position: index + 1,
+                    playerName: entry[0],
+                    totalChipChange: entry[1]
+                }));
+        }
 
         // Firestore write (owner) + session totals fetch (all players) — multi-device only
         let playerTotals = null;
@@ -39,7 +43,7 @@ PyramidPoker.prototype.showTournamentSummary = async function() {
         if (gameConfig.config.gameDeviceMode === 'multi-device') {
             const db = firebase.firestore();
 
-            if (window.isOwner) {
+            if (window.isOwner && !skipRoundByRound) {
                 const sessionScores = {};
                 standings.forEach(s => {
                     sessionScores[s.playerName] = s.totalChipChange;
@@ -114,49 +118,55 @@ PyramidPoker.prototype.showTournamentSummary = async function() {
         `;
 
         // Build HTML content
+        const titleText = skipRoundByRound ? '🔄 SESSION RESUME' : '🏆 TOURNAMENT COMPLETE! 🏆';
         let html = `
             <h1 style="color: #ffd700; margin-bottom: 24px; font-size: 20px;">
-                🏆 TOURNAMENT COMPLETE! 🏆
+                ${titleText}
             </h1>
+        `;
+
+        if (!skipRoundByRound) {
+            html += `
             <div style="background: rgba(255, 215, 0, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 30px;">
                 <h2 style="color: #4ecdc4; margin-bottom: 20px;">Final Standings</h2>
-        `;
-
-        standings.forEach(standing => {
-            const medal = standing.position === 1 ? '🥇' :
-                         standing.position === 2 ? '🥈' :
-                         standing.position === 3 ? '🥉' : '🏅';
-            const bgColor = standing.position === 1 ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255, 255, 255, 0.1)';
-            const color = standing.totalChipChange >= 0 ? '#4ecdc4' : '#ff6b6b';
-            html += `
-                <div style="background: ${bgColor}; padding: 15px; margin: 10px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 16px;">${medal} ${standing.position}. ${standing.playerName}</span>
-                    <span style="font-size: 14px; font-weight: bold; color: ${color};">${standing.totalChipChange > 0 ? '+' : ''}${standing.totalChipChange}</span>
-                </div>
             `;
-        });
 
-        html += `</div>`;
+            standings.forEach(standing => {
+                const medal = standing.position === 1 ? '🥇' :
+                             standing.position === 2 ? '🥈' :
+                             standing.position === 3 ? '🥉' : '🏅';
+                const bgColor = standing.position === 1 ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255, 255, 255, 0.1)';
+                const color = standing.totalChipChange >= 0 ? '#4ecdc4' : '#ff6b6b';
+                html += `
+                    <div style="background: ${bgColor}; padding: 15px; margin: 10px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 16px;">${medal} ${standing.position}. ${standing.playerName}</span>
+                        <span style="font-size: 14px; font-weight: bold; color: ${color};">${standing.totalChipChange > 0 ? '+' : ''}${standing.totalChipChange}</span>
+                    </div>
+                `;
+            });
 
-        html += `<div style="background: rgba(52, 73, 94, 0.5); padding: 20px; border-radius: 10px; margin-bottom: 24px;">
-            <h3 style="color: #4ecdc4; margin-bottom: 15px;">Round-by-Round Breakdown</h3>
-        `;
+            html += `</div>`;
 
-        for (let round = 1; round <= this.roundHistory.length; round++) {
-            const roundData = this.roundHistory[round - 1];
-            html += `<div style="margin-bottom: 15px;"><h4 style="color: #ffd700;">Round ${round}</h4>`;
+            html += `<div style="background: rgba(52, 73, 94, 0.5); padding: 20px; border-radius: 10px; margin-bottom: 24px;">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Round-by-Round Breakdown</h3>
+            `;
 
-            if (roundData.chipChanges) {
-                roundData.chipChanges.forEach((chipChange, playerName) => {
-                    const sign = chipChange > 0 ? '+' : '';
-                    const color = chipChange > 0 ? '#4ecdc4' : chipChange < 0 ? '#ff6b6b' : '#95a5a6';
-                    html += `<div style="color: ${color};">${playerName}: ${sign}${chipChange}</div>`;
-                });
+            for (let round = 1; round <= this.roundHistory.length; round++) {
+                const roundData = this.roundHistory[round - 1];
+                html += `<div style="margin-bottom: 15px;"><h4 style="color: #ffd700;">Round ${round}</h4>`;
+
+                if (roundData.chipChanges) {
+                    roundData.chipChanges.forEach((chipChange, playerName) => {
+                        const sign = chipChange > 0 ? '+' : '';
+                        const color = chipChange > 0 ? '#4ecdc4' : chipChange < 0 ? '#ff6b6b' : '#95a5a6';
+                        html += `<div style="color: ${color};">${playerName}: ${sign}${chipChange}</div>`;
+                    });
+                }
+                html += `</div>`;
             }
+
             html += `</div>`;
         }
-
-        html += `</div>`;
 
         if (playerTotals !== null && sessionPlayers && sessionTournaments && sessionTournamentNumbers) {
             html += `<div style="background: rgba(52, 73, 94, 0.5); padding: 20px; border-radius: 10px; margin-bottom: 24px;">

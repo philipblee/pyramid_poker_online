@@ -32,6 +32,7 @@ async function handleTableStateChange(tableState) {
         case TABLE_STATES.NEW_TOURNAMENT:
             console.log('🎮 Handling NEW_TOURNAMENT state...');
             document.getElementById('sessionModal')?.remove();
+            document.getElementById('tournamentSummaryModal')?.remove();
             document.querySelectorAll('div[style*="position: fixed"]').forEach(modal => {
                 if (modal.textContent.includes('TOURNAMENT COMPLETE')) modal.remove();
             });
@@ -230,6 +231,10 @@ async function handleTableStateChange(tableState) {
 
         case TABLE_STATES.TOURNAMENT_COMPLETE:
             game.showTournamentSummary();
+            break;
+
+        case TABLE_STATES.SESSION_RESUME:
+            game.showTournamentSummary(true);
             break;
 
         case TABLE_STATES.SESSION_ENDED:
