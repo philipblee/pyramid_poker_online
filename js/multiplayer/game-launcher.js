@@ -37,6 +37,7 @@ function startMultiHumanCloudGame() {
 //    console.log('🚀 Starting multi-human cloud game for table:', currentTable.id);
 
     window.currentSessionId = `${currentTable.id}_${Date.now()}`;
+    window.sessionDocCreated = false;
 
     firebase.firestore().collection('tables').doc(currentTable.id.toString()).update({
         currentSessionId: window.currentSessionId

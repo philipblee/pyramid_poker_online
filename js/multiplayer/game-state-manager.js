@@ -48,6 +48,26 @@ async function handleTableStateChange(tableState) {
 
             window.game.initializeTournament();
 
+            if (window.isOwner && !window.sessionDocCreated) {
+                window.sessionDocCreated = true;
+                const playerEmails = window.game.playerManager.players.map(p => p.name);
+                const sessionDoc = {
+                    tableId: window.multiDeviceIntegration.tableId,
+                    tableName: gameConfig.config.tableName || '',
+                    ownerUid: firebase.auth().currentUser?.uid || '',
+                    players: playerEmails,
+                    startedAt: new Date().toISOString(),
+                    ended: false,
+                    endedAt: null,
+                    tournaments: {}
+                };
+                console.log('💾 Creating session doc — sessionId:', window.currentSessionId, 'players:', playerEmails, 'tournamentNumber:', window.game.tournamentNumber);
+                firebase.firestore().collection('sessions').doc(window.currentSessionId)
+                    .set(sessionDoc)
+                    .then(() => console.log('✅ Session doc created:', window.currentSessionId))
+                    .catch(err => console.error('❌ Failed to create session doc:', err));
+            }
+
             // since it's a new tournament, call transition from lobby to dealing
             transitionFromLobbyToDealing();
 

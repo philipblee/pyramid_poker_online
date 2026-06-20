@@ -487,6 +487,34 @@ async function closeScoringPopup() {
         }
     }
 
+    if (window.isOwner && window.currentSessionId) {
+        const chipTotals = new Map();
+        window.game.playerManager.players.forEach(player => {
+            chipTotals.set(player.name, 0);
+        });
+        window.game.roundHistory.forEach(roundData => {
+            if (roundData.chipChanges) {
+                roundData.chipChanges.forEach((chipChange, playerName) => {
+                    const current = chipTotals.get(playerName) || 0;
+                    chipTotals.set(playerName, current + chipChange);
+                });
+            }
+        });
+
+        const tournamentKey = `tournaments.${window.game.tournamentNumber}`;
+        const scoresSnapshot = Object.fromEntries([...chipTotals]);
+        console.log('💾 [closeScoringPopup] Writing round progress —', tournamentKey, 'chip totals:', scoresSnapshot);
+
+        firebase.firestore().collection('sessions').doc(window.currentSessionId).update({
+            [tournamentKey]: {
+                scores: scoresSnapshot,
+                completedAt: null
+            }
+        }).then(() => {
+            console.log('✅ [closeScoringPopup] Write succeeded for', tournamentKey);
+        }).catch(err => console.error('❌ [closeScoringPopup] Failed to write round progress:', err));
+    }
+
     // NOW proceed with device-specific logic
     if (window.gameConfig.config.gameDeviceMode === 'single-device') {
         // Single-player: use fallback logic

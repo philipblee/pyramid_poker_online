@@ -1208,6 +1208,7 @@ class PyramidPoker {
                 const currentTotal = this.tournamentScores.get(playerName) || 0;
                 this.tournamentScores.set(playerName, currentTotal + roundScore);
             });
+
         }
 
 //        console.log('🔍 After round history update - this.maxRounds:', this.maxRounds);

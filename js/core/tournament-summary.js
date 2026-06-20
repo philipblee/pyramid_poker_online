@@ -55,23 +55,10 @@ PyramidPoker.prototype.showTournamentSummary = async function() {
                 console.log('💾 Firestore write attempt - tournamentNumber:', this.tournamentNumber, 'sessionId:', sessionId);
 
                 try {
-                    if (this.tournamentNumber === 1) {
-                        await db.collection('sessions').doc(sessionId).set({
-                            tableId: window.multiDeviceIntegration.tableId,
-                            tableName: gameConfig.config.tableName || '',
-                            ownerUid: firebase.auth().currentUser?.uid || '',
-                            players: standings.map(s => s.playerName),
-                            startedAt: new Date().toISOString(),
-                            ended: false,
-                            endedAt: null,
-                            tournaments: { '1': tournamentEntry }
-                        });
-                        console.log('✅ Session doc created');
-                    } else {
-                        await db.collection('sessions').doc(sessionId).update({
-                            [`tournaments.${this.tournamentNumber}`]: tournamentEntry
-                        });
-                    }
+                    await db.collection('sessions').doc(sessionId).update({
+                        [`tournaments.${this.tournamentNumber}`]: tournamentEntry
+                    });
+                    console.log('✅ Tournament entry saved');
                 } catch (err) {
                     console.error('❌ Session write failed:', err);
                 }
