@@ -1,7 +1,7 @@
 // js/utils/version.js
 // Version loading and display functionality
 
-const EXPECTED_VERSION = 'v8.1';
+const EXPECTED_VERSION = 'v8.2';
 
 function showUpdateBanner() {
     const banner = document.createElement('div');
