@@ -5,6 +5,7 @@ PyramidPoker.prototype.showTournamentSummary = async function(skipRoundByRound =
         console.log('🏆 Showing tournament summary...');
 
         let standings = [];
+        let payoutTransactions = [];
         if (!skipRoundByRound) {
             this.roundHistory.forEach((round, idx) => {
                 console.log(`  - Round ${idx + 1}: roundNumber=${round.roundNumber}, hasChipChanges=${!!round.chipChanges}`);
@@ -33,6 +34,8 @@ PyramidPoker.prototype.showTournamentSummary = async function(skipRoundByRound =
                     playerName: entry[0],
                     totalChipChange: entry[1]
                 }));
+
+            payoutTransactions = window.payoutCalculator(standings);
         }
 
         // Firestore write (owner) + session totals fetch (all players) — multi-device only
@@ -221,6 +224,27 @@ PyramidPoker.prototype.showTournamentSummary = async function(skipRoundByRound =
                     Return to Table
                 </button>
             `;
+        }
+
+        if (!skipRoundByRound) {
+            html += `
+    <div style="margin-top: 20px;">
+        <button id="showPayoutBtn" onclick="document.getElementById('payoutSection').style.display = document.getElementById('payoutSection').style.display === 'none' ? 'block' : 'none';"
+                style="background: #f39c12; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer;">
+            Show Payout
+        </button>
+        <div id="payoutSection" style="display: none; margin-top: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+`;
+
+            if (payoutTransactions.length === 0) {
+                html += `<p style="color: #95a5a6;">All settled — no payments needed.</p>`;
+            } else {
+                payoutTransactions.forEach(transaction => {
+                    html += `<div style="color: #ecf0f1; padding: 4px 0;">${transaction.from} pays ${transaction.to}: ${transaction.amount}</div>`;
+                });
+            }
+
+            html += `</div></div>`;
         }
 
         content.innerHTML = html;
