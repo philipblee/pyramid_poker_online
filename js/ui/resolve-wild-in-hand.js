@@ -137,9 +137,8 @@ function resolveFiveCardWild(wildCard, otherCards, rankCounts, suitCounts) {
     const flushSuit = Object.entries(suitCounts).find(([suit, count]) => count >= 4);
     if (flushSuit) {
         const suit = flushSuit[0];
-        const highestRank = [...otherCards].sort((a, b) => b.value - a.value)[0]?.rank || 'A';
-        console.log(`🃏 resolveWildInHand [5-card]: flush → ${highestRank}${suit}`);
-        assignWildCard(wildCard, highestRank, suit);
+        console.log(`🃏 resolveWildInHand [5-card]: flush → A${suit}`);
+        assignWildCard(wildCard, 'A', suit);
         return;
     }
 

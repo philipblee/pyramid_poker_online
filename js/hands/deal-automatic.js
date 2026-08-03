@@ -163,6 +163,31 @@ function dealAutomatic(type) {
             {id: '5♣_17',  rank: '5',  suit: '♣', value: 5,  isWild: false}
         ],
 
+        // THREE-FLUSH with ONE wild filling a plain (non-SF-adjacent) flush hand
+        // ♠ and ♥ are already complete 5-card flushes. ♦ has only 4 naturals
+        // (K,J,8,5 - no straight-flush gap, no trips) so the wild must fill it.
+        // Regression test for resolveWildInHand's flush branch: wild should
+        // resolve to A♦ (highest possible kicker), not duplicate K♦.
+        'three-flush-plain-wild': [
+            {id: 'A♠_1',  rank: 'A', suit: '♠', value: 14, isWild: false},
+            {id: 'K♠_2',  rank: 'K', suit: '♠', value: 13, isWild: false},
+            {id: 'Q♠_3',  rank: 'Q', suit: '♠', value: 12, isWild: false},
+            {id: '9♠_4',  rank: '9', suit: '♠', value: 9,  isWild: false},
+            {id: '7♠_5',  rank: '7', suit: '♠', value: 7,  isWild: false},
+            {id: 'A♥_6',  rank: 'A', suit: '♥', value: 14, isWild: false},
+            {id: 'K♥_7',  rank: 'K', suit: '♥', value: 13, isWild: false},
+            {id: 'Q♥_8',  rank: 'Q', suit: '♥', value: 12, isWild: false},
+            {id: '9♥_9',  rank: '9', suit: '♥', value: 9,  isWild: false},
+            {id: '7♥_10', rank: '7', suit: '♥', value: 7,  isWild: false},
+            {id: 'K♦_11', rank: 'K', suit: '♦', value: 13, isWild: false},
+            {id: 'J♦_12', rank: 'J', suit: '♦', value: 11, isWild: false},
+            {id: '8♦_13', rank: '8', suit: '♦', value: 8,  isWild: false},
+            {id: '5♦_14', rank: '5', suit: '♦', value: 5,  isWild: false},
+            {id: 'WILD_15', rank: '', suit: '',  value: 0,  isWild: true},
+            {id: '2♣_16', rank: '2', suit: '♣', value: 2,  isWild: false},
+            {id: '3♣_17', rank: '3', suit: '♣', value: 3,  isWild: false}
+        ],
+
         // THREE-STRAIGHT: Mixed suits, overlapping ranks
         'three-straight': [
             {id: 'A♠_1',  rank: 'A',  suit: '♠', value: 14, isWild: false},
