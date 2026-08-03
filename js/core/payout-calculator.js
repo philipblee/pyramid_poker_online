@@ -9,6 +9,17 @@ function payoutCalculator(standings) {
         .map(s => ({ playerName: s.playerName, balance: s.totalChipChange }))
         .filter(b => b.balance !== 0);
 
+    // Credits and debits must net to zero - a mismatch means chips were
+    // created or lost upstream (e.g. pot rounding, surrender penalties)
+    const totalCredits = balances.filter(b => b.balance > 0).reduce((sum, b) => sum + b.balance, 0);
+    const totalDebits = balances.filter(b => b.balance < 0).reduce((sum, b) => sum + b.balance, 0);
+    const diff = totalCredits + totalDebits;
+    const mismatch = diff !== 0 ? { totalCredits, totalDebits, diff } : null;
+
+    if (mismatch) {
+        console.warn(`⚠️ payoutCalculator: credits (${totalCredits}) and debits (${totalDebits}) do not net to zero (diff: ${diff})`, standings);
+    }
+
     // Sort deterministically: by balance desc, tie-break by playerName asc
     balances.sort((a, b) => b.balance - a.balance || a.playerName.localeCompare(b.playerName));
 
@@ -38,6 +49,7 @@ function payoutCalculator(standings) {
         if (debtor.balance === 0) debtorIndex++;
     }
 
+    payoutTransactions.mismatch = mismatch;
     return payoutTransactions;
 }
 

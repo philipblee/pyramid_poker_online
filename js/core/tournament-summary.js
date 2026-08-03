@@ -236,6 +236,14 @@ PyramidPoker.prototype.showTournamentSummary = async function(skipRoundByRound =
         <div id="payoutSection" style="display: none; margin-top: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
 `;
 
+            if (payoutTransactions.mismatch) {
+                const { totalCredits, totalDebits, diff } = payoutTransactions.mismatch;
+                html += `<p style="color: #ff6b6b; font-weight: bold;">
+                    ⚠️ Credits (${totalCredits}) and debits (${totalDebits}) do not net to zero (diff: ${diff}).
+                    Payout amounts below may not be fully accurate.
+                </p>`;
+            }
+
             if (payoutTransactions.length === 0) {
                 html += `<p style="color: #95a5a6;">All settled — no payments needed.</p>`;
             } else {
