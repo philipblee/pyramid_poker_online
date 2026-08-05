@@ -6,6 +6,7 @@ PyramidPoker.prototype.showTournamentSummary = async function(skipRoundByRound =
 
         let standings = [];
         let payoutTransactions = [];
+        let payoutMessage = null;
         if (!skipRoundByRound) {
             this.roundHistory.forEach((round, idx) => {
                 console.log(`  - Round ${idx + 1}: roundNumber=${round.roundNumber}, hasChipChanges=${!!round.chipChanges}`);
@@ -35,7 +36,6 @@ PyramidPoker.prototype.showTournamentSummary = async function(skipRoundByRound =
                     totalChipChange: entry[1]
                 }));
 
-            payoutTransactions = window.payoutCalculator(standings);
         }
 
         // Firestore write (owner) + session totals fetch (all players) — multi-device only
@@ -99,6 +99,31 @@ PyramidPoker.prototype.showTournamentSummary = async function(skipRoundByRound =
                 }
             } catch (err) {
                 console.error('❌ Session fetch failed:', err);
+            }
+        }
+
+        if (!skipRoundByRound) {
+            if (gameConfig.config.gameDeviceMode !== 'multi-device') {
+                payoutMessage = 'There is no payout for single user';
+            } else if (playerTotals === null) {
+                payoutMessage = 'I cannot perform payout calculations because of session fetch failure';
+            } else {
+                try {
+                    const sessionTotalsForPayout = sessionPlayers.map(playerName => ({
+                        playerName,
+                        totalChipChange: playerTotals[playerName]
+                    }));
+                    payoutTransactions = window.payoutCalculator(sessionTotalsForPayout);
+                    if (payoutTransactions.mismatch) {
+                        console.warn('⚠️ Payout mismatch, suppressing potentially erroneous payouts:', payoutTransactions.mismatch);
+                        payoutTransactions = [];
+                        payoutMessage = 'Payout calculation failed';
+                    }
+                } catch (err) {
+                    console.error('❌ Payout calculation failed:', err);
+                    payoutTransactions = [];
+                    payoutMessage = 'Payout calculation failed';
+                }
             }
         }
 
@@ -236,15 +261,9 @@ PyramidPoker.prototype.showTournamentSummary = async function(skipRoundByRound =
         <div id="payoutSection" style="display: none; margin-top: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
 `;
 
-            if (payoutTransactions.mismatch) {
-                const { totalCredits, totalDebits, diff } = payoutTransactions.mismatch;
-                html += `<p style="color: #ff6b6b; font-weight: bold;">
-                    ⚠️ Credits (${totalCredits}) and debits (${totalDebits}) do not net to zero (diff: ${diff}).
-                    Payout amounts below may not be fully accurate.
-                </p>`;
-            }
-
-            if (payoutTransactions.length === 0) {
+            if (payoutMessage) {
+                html += `<p style="color: #ff6b6b; font-weight: bold;">${payoutMessage}</p>`;
+            } else if (payoutTransactions.length === 0) {
                 html += `<p style="color: #95a5a6;">All settled — no payments needed.</p>`;
             } else {
                 payoutTransactions.forEach(transaction => {
